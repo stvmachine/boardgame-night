@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A board game collection sharing app that lets you enter multiple BoardGameGeek (BGG) usernames, fetches each user's game collection, and shows the merged/deduplicated view so you can discover which games are shared across your group — ideal for picking games for board game night. Built as a monorepo with Ruby on Rails (API-only) serving a GraphQL API consumed by a Vue.js frontend.
+A board game collection and night-organizing app for groups of friends. Users create friend groups, link their BoardGameGeek (BGG) usernames, and the app merges everyone's collections into a shared deduplicated view. From there, any member can spin up a boardgame night session — invite group members, get game suggestions drawn from the shared pool (filtered by who's coming and player count), and pick what to play. Built as a monorepo with Ruby on Rails 8 (API-only) serving a GraphQL API consumed by a Vue.js 3 frontend.
 
 ## Core Value
 
-Show which board games are shared across multiple BGG users' collections so a group can quickly pick games everyone can play tonight.
+Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
 
 ## Requirements
 
@@ -19,6 +19,9 @@ Show which board games are shared across multiple BGG users' collections so a gr
 - [ ] Fetch and merge multiple BGG users' collections into a single deduplicated view
 - [ ] Validate that entered BGG usernames exist before fetching
 - [ ] Search, filter (players, play time), sort, and group the merged collection
+- [ ] Create groups of friends to pool multiple BGG collections together
+- [ ] Create a boardgame night session and invite group members
+- [ ] Get game suggestions for a session based on attendees and player counts
 - [ ] Rails API exposes a GraphQL endpoint consumed by the Vue frontend
 - [ ] Rails communicates with BoardGameGeek's API using credentials from `.env.bggeek`
 - [ ] Hot/trending BGG games showcase on the landing page
@@ -30,7 +33,6 @@ Show which board games are shared across multiple BGG users' collections so a gr
 - Real-time chat — not core to collection sharing
 - OAuth login against BGG — BGG token read from env file is sufficient for v1
 - Mobile native app — web-first, responsive is enough
-- Game session tracking / scheduling / RSVP — deferred to a future milestone (the "boardgame-night" name is aspirational; v1 is the shared-list rewrite)
 
 ## Context
 
@@ -71,7 +73,7 @@ For this rewrite:
 | Rails owns BGG communication (not Vue) | Keeps BGG credentials server-side; centralizes rate limiting & caching | — Pending |
 | rbenv for Ruby version management | User requirement; modern Ruby toolchain | — Pending |
 | `.env.bggeek` for BGG credentials | Keeps secrets out of git; user-specified location | — Pending |
-| v1 = shared-list feature parity (no session tracking yet) | "boardgame-night" is the project name; v1 ships the rewrite, night-features are a future milestone | — Pending |
+| v1 = shared-list parity + boardgame night sessions | v1 rewrites bggeek-shared-list AND adds the night-session features (groups, invitations, suggested games) that the project name implies | — Pending |
 
 ## Evolution
 
@@ -91,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-30 after initialization*
+*Last updated: 2026-06-30 after scope expansion (boardgame night sessions moved into v1)*
