@@ -115,7 +115,57 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| (filled by roadmap creation) | | |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| BGG-01 | Phase 2 | Pending |
+| BGG-02 | Phase 2 | Pending |
+| BGG-03 | Phase 2 | Pending |
+| BGG-04 | Phase 2 | Pending |
+| BGG-05 | Phase 2 | Pending |
+| BGG-06 | Phase 2 | Pending |
+| BGG-07 | Phase 2 | Pending |
+| COLL-01 | Phase 3 | Pending |
+| COLL-02 | Phase 3 | Pending |
+| COLL-03 | Phase 3 | Pending |
+| COLL-04 | Phase 3 | Pending |
+| COLL-05 | Phase 3 | Pending |
+| COLL-06 | Phase 3 | Pending |
+| COLL-07 | Phase 3 | Pending |
+| COLL-08 | Phase 3 | Pending |
+| COLL-09 | Phase 3 | Pending |
+| COLL-10 | Phase 3 | Pending |
+| COLL-11 | Phase 3 | Pending |
+| COLL-12 | Phase 3 | Pending |
+| COLL-13 | Phase 3 | Pending |
+| COLL-14 | Phase 3 | Pending |
+| COLL-15 | Phase 3 | Pending |
+| COLL-16 | Phase 3 | Pending |
+| COLL-17 | Phase 3 | Pending |
+| COLL-18 | Phase 3 | Pending |
+| AUTH-01 | Phase 4 | Pending |
+| AUTH-02 | Phase 4 | Pending |
+| AUTH-03 | Phase 4 | Pending |
+| AUTH-04 | Phase 4 | Pending |
+| GROUP-01 | Phase 4 | Pending |
+| GROUP-02 | Phase 4 | Pending |
+| GROUP-03 | Phase 4 | Pending |
+| GROUP-04 | Phase 4 | Pending |
+| GROUP-05 | Phase 4 | Pending |
+| GROUP-06 | Phase 4 | Pending |
+| SESS-01 | Phase 4 | Pending |
+| SESS-02 | Phase 4 | Pending |
+| SESS-03 | Phase 4 | Pending |
+| SESS-04 | Phase 4 | Pending |
+| SESS-05 | Phase 4 | Pending |
+| SESS-06 | Phase 4 | Pending |
+| GQL-01 | Phase 1 | Pending |
+| GQL-02 | Phase 3 | Pending |
+| GQL-03 | Phase 4 | Pending |
+| GQL-04 | Phase 1 | Pending |
+| GQL-05 | Phase 3 | Pending |
 
 ---
 *Requirements defined: 2026-07-01*
