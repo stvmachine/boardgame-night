@@ -1,0 +1,57 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-06-30T12:08:16.233Z",
+  "context": "research",
+  "workflow": "gsd-new-project",
+  "workflow_step": 6,
+  "phase": null,
+  "phase_name": null,
+  "phase_dir": null,
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "in_progress",
+  "completed_steps": [
+    {"step": 1, "name": "Setup (git init, runtime detection, agent verification)", "status": "done"},
+    {"step": 2, "name": "Brownfield offer (skip mapping — multi-repo workspace)", "status": "done"},
+    {"step": 3, "name": "Deep questioning (product: collection manager + night organizer, shared groups, on-demand BGG sync, night sessions in v1)", "status": "done"},
+    {"step": 4, "name": "Write PROJECT.md (updated existing — expanded scope: night sessions in v1)", "status": "done", "commit": "a7779a2"},
+    {"step": 5, "name": "Workflow preferences (config.json already existed — yolo, coarse, parallel, adaptive, research/plan_check/verifier on)", "status": "done", "commit": "76b7510"},
+    {"step": 6, "name": "Research — 4 parallel researchers spawned", "status": "in_progress", "progress": "2 of 4 completed (files missing — #222), 1 partial on disk, 1 running"}
+  ],
+  "remaining_steps": [
+    {"step": 6, "name": "Research: reconcile 4 researcher outputs, spawn synthesizer to create SUMMARY.md", "status": "in_progress"},
+    {"step": 7, "name": "Define REQUIREMENTS.md", "status": "not_started"},
+    {"step": 8, "name": "Create ROADMAP.md (via gsd-roadmapper subagent)", "status": "not_started"},
+    {"step": 9, "name": "Create STATE.md", "status": "not_started"}
+  ],
+  "research_tasks": [
+    {"id": "gsd-1", "agent": "gsd-project-researcher", "session": "ses_0e7a973b1ffepMzE8DRNVviCj8", "objective": "Stack research → STACK.md", "status": "running", "file_on_disk": false},
+    {"id": "gsd-2", "agent": "gsd-project-researcher", "session": "ses_0e7a8f916ffemwpU3h6XNhV79B", "objective": "Features research → FEATURES.md", "status": "completed", "file_on_disk": false, "issue": "#222 — researcher reported completion but file not persisted to disk"},
+    {"id": "gsd-3", "agent": "gsd-project-researcher", "session": "ses_0e7a8a6caffe2Wbm0F2od5MXhL", "objective": "Architecture research → ARCHITECTURE.md", "status": "running", "file_on_disk": true, "file_lines": 637},
+    {"id": "gsd-4", "agent": "gsd-project-researcher", "session": "ses_0e7a84937ffeA0v9YWKOLU033P", "objective": "Pitfalls research → PITFALLS.md", "status": "completed", "file_on_disk": false, "issue": "#222 — researcher reported completion but file not persisted to disk"}
+  ],
+  "blockers": [],
+  "human_actions_pending": [],
+  "decisions": [
+    {"decision": "Monorepo: Rails 8 API-only + Vue 3 in one git repo", "rationale": "Simplifies deployment, keeps API + frontend in sync, no separate proxy service"},
+    {"decision": "GraphQL between Vue and Rails (graphql-ruby)", "rationale": "Matches existing proxy's contract; frontend already GraphQL-shaped"},
+    {"decision": "Rails owns BGG communication directly", "rationale": "Keeps BGG credentials server-side; centralizes rate limiting & caching; no separate Node proxy service"},
+    {"decision": "rbenv for Ruby version management", "rationale": "User requirement; modern Ruby toolchain"},
+    {"decision": ".env.bggeek for BGG credentials", "rationale": "Keeps secrets out of git; user-specified location"},
+    {"decision": "v1 scope: shared-list parity + boardgame night sessions", "rationale": "Rewrites bggeek-shared-list (collection merging, search, filter, sort, group, hot games, permalinks) AND adds night-organizing features (friend groups, sessions, invitations, game suggestions)"},
+    {"decision": "dry-validation for input validation", "rationale": "User requirement; replaces strong_params with typed contracts"},
+    {"decision": "Config: yolo mode, coarse granularity, parallel execution", "rationale": "Auto-approve flow; fewer broader phases; independent plans run simultaneously"},
+    {"decision": "Model profile: adaptive", "rationale": "Role-based cost optimization across subagents"},
+    {"decision": "Research, plan_check, verifier, source_grounding all enabled", "rationale": "Quality gates for this important project"}
+  ],
+  "uncommitted_files": [
+    ".planning/research/ARCHITECTURE.md (637 lines, untracked)"
+  ],
+  "async_jobs": [
+    {"type": "subagent", "job_id": "gsd-1", "session": "ses_0e7a973b1ffepMzE8DRNVviCj8", "backend": "gsd-project-researcher", "status": "running", "expected_artifacts": [".planning/research/STACK.md"], "note": "May have completed by resume time — check disk for STACK.md"},
+    {"type": "subagent", "job_id": "gsd-3", "session": "ses_0e7a8a6caffe2Wbm0F2od5MXhL", "backend": "gsd-project-researcher", "status": "running", "expected_artifacts": [".planning/research/ARCHITECTURE.md"], "note": "ARCHITECTURE.md already on disk (637 lines) — may grow or be finalized. Verify completeness on resume."}
+  ],
+  "next_action": "Check disk for STACK.md and ARCHITECTURE.md (may have completed). Handle #222: FEATURES.md and PITFALLS.md reported written but not on disk — either re-spawn gsd-project-researcher for Features and Pitfalls, or reconstruct from the research summaries captured in pause-work handoff. Then spawn gsd-research-synthesizer to create SUMMARY.md.",
+  "context_notes": "Midway through /gsd-new-project Step 6 (Research). Project is boardgame-night-rails-vue — Rails 8 API + Vue 3 monorepo for boardgame collection merging + night organizing with BGG integration. 4 parallel researchers were spawned. 2 completed (Features, Pitfalls) but their files didn't persist to disk (#222 false-refusal). 1 (Architecture) wrote 637 lines but task still running. 1 (Stack) still running. Once all 4 research files are on disk, spawn synthesizer, then continue to requirements → roadmap → state."
+}
