@@ -30,7 +30,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The app deploys as a single container via Kamal 2 and serves both the compiled SPA and `/graphql` from one origin (FOUND-03)
   4. BGG credentials load from `.env.bggeek` and are available server-side but never exposed to the frontend (FOUND-05)
   5. The GraphQL schema has max_depth/max_complexity limits set and introspection is disabled in production (FOUND-04)
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 01-01-PLAN.md — Rails backend + dotenvx + GraphQL schema/multiplex + dev orchestration (PlanTasks 01..03; Wave 1)
+- [ ] 01-02-PLAN.md — Vue + Apollo frontend + codegen + Playwright e2e proving bin/dev round-trips health end-to-end
+- [ ] 01-03-PLAN.md — Single Docker image (multi-stage Node build → Ruby runtime) + Kamal 2 deploy.yml placeholders + docker build . verification (Wave 3)
 **UI hint**: yes
 
 ### Phase 2: BGG Integration Layer + Persistence
@@ -81,7 +85,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Monorepo Shell | 0/TBD | Not started | - |
+| 1. Foundation & Monorepo Shell | 0/3 | Planning complete | - |
 | 2. BGG Integration Layer + Persistence | 0/TBD | Not started | - |
 | 3. GraphQL API + Collection Surface (v1 Parity) | 0/TBD | Not started | - |
 | 4. Auth + Friend Groups + Session Lifecycle | 0/TBD | Not started | - |
