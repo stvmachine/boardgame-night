@@ -1,0 +1,456 @@
+type Query {
+  # Thing queries
+  thing(id: ID!): Thing @cacheControl(maxAge: 3600) # Cache for 1 hour
+  things(ids: [ID!]!): [Thing!]! @cacheControl(maxAge: 3600) # Cache for 1 hour
+  search(query: String!, type: ThingType, exact: Boolean): [Thing!]! @cacheControl(maxAge: 1800) # Cache for 30 minutes
+  
+  # User queries
+  user(username: String!): User @cacheControl(maxAge: 3600) # Cache for 1 hour
+  userCollection(username: String!, subtype: CollectionSubtype): Collection @cacheControl(maxAge: 1800) # Cache for 30 minutes
+  
+  # Play queries
+  userPlays(username: String!, id: ID, mindate: String, maxdate: String, page: Int): PlayResult @cacheControl(maxAge: 300) # Cache for 5 minutes
+  
+  # Geeklist queries
+  geeklist(id: ID!): Geeklist @cacheControl(maxAge: 1800) # Cache for 30 minutes
+  geeklists(username: String, page: Int): [Geeklist!]! @cacheControl(maxAge: 1800) # Cache for 30 minutes
+  
+  # Hot items - cache for 24 hour since they change less frequently
+  hotItems(type: ThingType): [Thing!]! @cacheControl(maxAge: 864000)
+}
+
+type Thing {
+  id: ID!
+  type: ThingType!
+  name: String!
+  alternateNames: [String!]!
+  yearPublished: Int
+  minPlayers: Int
+  maxPlayers: Int
+  playingTime: Int
+  minPlayTime: Int
+  maxPlayTime: Int
+  minAge: Int
+  description: String
+  image: String
+  thumbnail: String
+  statistics: Statistics
+  polls: [Poll!]!
+  comments: [Comment!]!
+  versions: [Version!]!
+  expansions: [Expansion!]!
+  categories: [Category!]!
+  mechanics: [Mechanic!]!
+  families: [Family!]!
+  designers: [Designer!]!
+  artists: [Artist!]!
+  publishers: [Publisher!]!
+  ranks: [Rank!]!
+  average: Float
+  bayesAverage: Float
+  usersRated: Int
+  usersOwned: Int
+  usersWanting: Int
+  usersWishing: Int
+  numComments: Int
+  numWeights: Int
+  averageWeight: Float
+  # Expansion relationship fields
+  isExpansion: Boolean!
+  baseGame: Thing
+  expansionFor: [Thing!]!
+  # Link information for relationships
+  links: [Link!]!
+}
+
+type Statistics {
+  page: Int!
+  ratings: RatingStats!
+}
+
+type RatingStats {
+  usersRated: Int!
+  average: Float!
+  bayesAverage: Float!
+  ranks: [Rank!]!
+  stdDev: Float!
+  median: Float!
+  owned: Int!
+  trading: Int!
+  wanting: Int!
+  wishing: Int!
+  numComments: Int!
+  numWeights: Int!
+  averageWeight: Float!
+}
+
+type Rank {
+  type: String!
+  id: String!
+  name: String!
+  friendlyName: String!
+  value: String!
+  bayesAverage: String!
+}
+
+type Poll {
+  name: String!
+  title: String!
+  totalVotes: Int!
+  results: [PollResult!]!
+}
+
+type PollResult {
+  value: String!
+  numVotes: Int!
+  level: String
+  players: String
+}
+
+type Comment {
+  username: String!
+  rating: String!
+  value: String!
+}
+
+type Version {
+  type: String!
+  id: String!
+  name: String!
+  yearPublished: Int!
+  productCode: String
+  width: Float
+  length: Float
+  depth: Float
+  weight: Float
+  size: String
+  color: String
+  price: Float
+  currency: String
+  image: String
+  thumbnail: String
+  links: [Link!]!
+}
+
+type Expansion {
+  type: String!
+  id: String!
+  name: String!
+  yearPublished: Int
+  image: String
+  thumbnail: String
+}
+
+type Category {
+  type: String!
+  id: String!
+  value: String!
+}
+
+type Mechanic {
+  type: String!
+  id: String!
+  value: String!
+}
+
+type Family {
+  type: String!
+  id: String!
+  value: String!
+}
+
+type Designer {
+  type: String!
+  id: String!
+  value: String!
+}
+
+type Artist {
+  type: String!
+  id: String!
+  value: String!
+}
+
+type Publisher {
+  type: String!
+  id: String!
+  value: String!
+}
+
+type Link {
+  type: String!
+  id: String!
+  value: String!
+  # Enhanced link information
+  linkType: LinkType!
+  targetId: String!
+  targetName: String!
+  isExpansionLink: Boolean!
+}
+
+enum LinkType {
+  BOARDGAME_EXPANSION
+  BOARDGAME_BASE
+  BOARDGAME_ACCESSORY
+  BOARDGAME_CATEGORY
+  BOARDGAME_MECHANIC
+  BOARDGAME_DESIGNER
+  BOARDGAME_ARTIST
+  BOARDGAME_PUBLISHER
+  BOARDGAME_FAMILY
+  RPG_ITEM
+  RPG_PERIODICAL
+  VIDEOGAME
+  OTHER
+}
+
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  username: String!
+  dateRegistered: String!
+  supportYears: Int!
+  designerId: String
+  publisherId: String
+  address: Address
+  guilds: [Guild!]!
+  microbadges: [Microbadge!]!
+  top: [TopItem!]!
+}
+
+type Address {
+  city: String!
+  isoCountry: String!
+}
+
+type Guild {
+  id: ID!
+  name: String!
+  manager: User!
+  members: [GuildMember!]!
+}
+
+type GuildMember {
+  user: User!
+  joined: String!
+}
+
+type Microbadge {
+  id: ID!
+  name: String!
+  imageSrc: String!
+}
+
+type TopItem {
+  boardgame: BoardgameRank!
+}
+
+type BoardgameRank {
+  rank: Int!
+  id: ID!
+  type: String!
+  name: String!
+}
+
+type Collection {
+  totalItems: Int!
+  pubDate: String!
+  items: [CollectionItem!]!
+}
+
+type CollectionItem {
+  objectType: String!
+  objectId: ID!
+  subtype: String!
+  collId: String!
+  name: String!
+  yearPublished: Int!
+  image: String!
+  thumbnail: String!
+  status: Status!
+  numPlays: Int!
+  comment: String!
+  conditionText: String!
+  condition: String!
+  wantPartsList: String!
+  hasPartsList: String!
+  preordered: String!
+  lastModified: String!
+  stats: CollectionItemStats
+}
+
+type CollectionItemStats {
+  minPlayers: Int
+  maxPlayers: Int
+  minPlayTime: Int
+  maxPlayTime: Int
+  playingTime: Int
+  minAge: Int
+  average: Float
+  bayesAverage: Float
+  usersRated: Int
+  usersOwned: Int
+  usersWanting: Int
+  usersWishing: Int
+  numComments: Int
+  numWeights: Int
+  averageWeight: Float
+}
+
+type Status {
+  own: String!
+  prevOwned: String!
+  forTrade: String!
+  want: String!
+  wantToPlay: String!
+  wantToBuy: String!
+  wishlist: String!
+  preordered: String!
+  lastModified: String!
+}
+
+type PlayResult {
+  total: Int!
+  page: Int!
+  plays: [Play!]!
+}
+
+type Play {
+  id: ID!
+  date: String!
+  quantity: Int!
+  length: Int!
+  incomplete: Boolean!
+  nowInStats: Boolean!
+  location: String!
+  item: PlayItem!
+  players: [PlayPlayer!]!
+  comments: String!
+}
+
+type PlayItem {
+  name: String!
+  objectType: String!
+  objectId: ID!
+  subtypes: [Subtype!]!
+}
+
+type Subtype {
+  value: String!
+}
+
+type PlayPlayer {
+  username: String
+  name: String
+  userId: String
+  position: Int!
+  color: String
+  score: String
+  rating: String
+  new: Boolean
+  win: Boolean
+}
+
+type Geeklist {
+  id: ID!
+  title: String!
+  postDate: String!
+  postDateTimestamp: String!
+  lastReplyDate: String!
+  lastReplyDateTimestamp: String!
+  thumbs: Int!
+  numItems: Int!
+  username: String!
+  items: [GeeklistItem!]!
+}
+
+type GeeklistItem {
+  id: ID!
+  objectType: String!
+  objectId: ID!
+  objectName: String!
+  username: String!
+  postDate: String!
+  postDateTimestamp: String!
+  editDate: String!
+  editDateTimestamp: String!
+  thumbs: Int!
+  imageId: String!
+  body: String!
+  comments: [GeeklistComment!]!
+}
+
+type GeeklistComment {
+  username: String!
+  postDate: String!
+  postDateTimestamp: String!
+  editDate: String!
+  editDateTimestamp: String!
+  thumbs: Int!
+  body: String!
+}
+
+# Enums
+enum ThingType {
+  BOARDGAME
+  BOARDGAMEEXPANSION
+  RPGITEM
+  VIDEOGAME
+  BOARDGAMEACCESSORY
+}
+
+enum CollectionSubtype {
+  BOARDGAME
+  BOARDGAMEEXPANSION
+  RPGITEM
+  VIDEOGAME
+  BOARDGAMEACCESSORY
+}
+
+# Input types for better type safety
+input SearchInput {
+  query: String!
+  type: ThingType
+  exact: Boolean = false
+}
+
+input PlayFiltersInput {
+  id: ID
+  mindate: String
+  maxdate: String
+  page: Int = 1
+}
+
+input CollectionFiltersInput {
+  subtype: CollectionSubtype
+}
+
+# Union types for better type safety
+union SearchResult = Thing
+
+# Interface for common properties
+interface BGGEntity {
+  id: ID!
+  name: String!
+  type: String!
+}
+
+# Scalar types for better validation
+scalar Date
+scalar URL
+scalar Email
+scalar JSON
+
+# Custom directives for better API design
+directive @cache(ttl: Int) on FIELD_DEFINITION
+directive @rateLimit(limit: Int, window: String) on FIELD_DEFINITION
+directive @deprecated(reason: String) on FIELD_DEFINITION | ENUM_VALUE
+
+# Cache control directive for Apollo Server
+directive @cacheControl(maxAge: Int, scope: CacheControlScope) on FIELD_DEFINITION | OBJECT | INTERFACE
+
+enum CacheControlScope {
+  PUBLIC
+  PRIVATE
+}
