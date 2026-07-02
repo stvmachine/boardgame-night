@@ -1,2 +1,2 @@
-web: dotenvx run -f .env.bggeek -- bin/rails server
+web: dotenvx run -f .env.bggeek -fk .env.bggeek.keys -- bin/rails server
 vite: bin/vite dev

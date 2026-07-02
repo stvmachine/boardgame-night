@@ -29,6 +29,10 @@ node_modules/
 .env.keys
 .env.bggeek.keys
 
+# Ignore Rails master key and credentials.
+config/master.key
+config/credentials.yml.enc
+
 # Ignore DS_Store.
 .DS_Store
 
