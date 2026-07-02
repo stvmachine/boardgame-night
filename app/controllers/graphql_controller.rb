@@ -29,8 +29,12 @@ class GraphqlController < ApplicationController
       render json: result
     end
   rescue StandardError => e
-    raise e unless Rails.env.development?
-    handle_error_in_development(e)
+    logger.error "[GraphqlController] #{e.message}"
+    logger.error e.backtrace.first(10).join("\n")
+    render json: {
+      errors: [{ message: "Internal server error" }],
+      data: {}
+    }, status: 500
   end
 
   private
@@ -40,7 +44,7 @@ class GraphqlController < ApplicationController
     case variables_param
     when String
       if variables_param.present?
-        JSON.parse(variables_param) || {}
+        JSON.parse(variables_param, max_nesting: 100) || {}
       else
         {}
       end
