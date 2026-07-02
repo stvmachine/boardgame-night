@@ -11,11 +11,11 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 ### Foundation & Infrastructure
 
-- [ ] **FOUND-01**: Rails 8 API-only application initialized with GraphQL endpoint, dry-validation contracts, and Solid Queue/Cache configured
+- [x] **FOUND-01**: Rails 8 API-only application initialized with GraphQL endpoint, dry-validation contracts, and Solid Queue/Cache configured
 - [ ] **FOUND-02**: Vue 3 SPA served by Rails in production via Vite Ruby, with dev proxy configured (no CORS errors in development)
 - [ ] **FOUND-03**: Monorepo deploys as a single container via Kamal 2 (Vue build output served from Rails public/)
-- [ ] **FOUND-04**: GraphQL schema with max_depth and max_complexity limits set, introspection disabled in production
-- [ ] **FOUND-05**: BGG credentials loaded from .env.bggeek and used for all BGG API communication (server-side only, never exposed to frontend)
+- [x] **FOUND-04**: GraphQL schema with max_depth and max_complexity limits set, introspection disabled in production
+- [x] **FOUND-05**: BGG credentials loaded from .env.bggeek and used for all BGG API communication (server-side only, never exposed to frontend)
 
 ### BGG Integration
 
@@ -75,10 +75,10 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 ### GraphQL API
 
-- [ ] **GQL-01**: Rails exposes a GraphQL endpoint consumed by the Vue frontend (single source of truth for frontend data)
+- [x] **GQL-01**: Rails exposes a GraphQL endpoint consumed by the Vue frontend (single source of truth for frontend data)
 - [ ] **GQL-02**: GraphQL schema exposes queries for things, search, users, collections, hot items (matching the reference proxy's contract)
 - [ ] **GQL-03**: GraphQL mutations use dry-validation contracts for input validation (not strong_params)
-- [ ] **GQL-04**: GraphQL handles Apollo batched queries (Schema.multiplex for params[:_json] arrays)
+- [x] **GQL-04**: GraphQL handles Apollo batched queries (Schema.multiplex for params[:_json] arrays)
 - [ ] **GQL-05**: GraphQL type definitions are generated from Rails schema and committed (codegen contract between frontend and backend)
 
 ## v2 Requirements (Deferred — Add After Validation)
@@ -115,11 +115,11 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| FOUND-01 | Phase 1 | Pending |
+| FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Pending |
 | FOUND-03 | Phase 1 | Pending |
-| FOUND-04 | Phase 1 | Pending |
-| FOUND-05 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Complete |
+| FOUND-05 | Phase 1 | Complete |
 | BGG-01 | Phase 2 | Pending |
 | BGG-02 | Phase 2 | Pending |
 | BGG-03 | Phase 2 | Pending |
@@ -161,10 +161,10 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | SESS-04 | Phase 4 | Pending |
 | SESS-05 | Phase 4 | Pending |
 | SESS-06 | Phase 4 | Pending |
-| GQL-01 | Phase 1 | Pending |
+| GQL-01 | Phase 1 | Complete |
 | GQL-02 | Phase 3 | Pending |
 | GQL-03 | Phase 4 | Pending |
-| GQL-04 | Phase 1 | Pending |
+| GQL-04 | Phase 1 | Complete |
 | GQL-05 | Phase 3 | Pending |
 
 ---
