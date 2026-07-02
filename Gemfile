@@ -60,3 +60,5 @@ gem "rack-cors", "~> 3.0", group: :test
 gem "dotenv-rails", "~> 3.2", group: :test
 
 gem "bullet", "~> 8.1", group: :test
+
+gem "rspec-rails", "~> 8.0", group: :test
