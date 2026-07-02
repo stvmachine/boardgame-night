@@ -5,9 +5,11 @@
 export NVM_DIR="$HOME/.nvm"
 if [ -s "$NVM_DIR/nvm.sh" ]; then
   . "$NVM_DIR/nvm.sh"
-  nvm use 20.20.2 >/dev/null 2>&1
+  nvm use 20.20.2 || { echo "ERROR: nvm use 20.20.2 failed" >&2; exit 1; }
 fi
 
-eval "$(rbenv init -)"
+if command -v rbenv >/dev/null 2>&1; then
+  eval "$(rbenv init -)"
+fi
 
 exec foreman start -f Procfile.dev "$@"
