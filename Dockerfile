@@ -1,74 +1,75 @@
 # syntax=docker/dockerfile:1
 # check=error=true
 
-# This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t boardgame_night_rails_vue .
-# docker run -d -p 80:80 -e RAILS_MASTER_KEY=<value from config/master.key> --name boardgame_night_rails_vue boardgame_night_rails_vue
+# Multi-stage Dockerfile for boardgame-night-rails-vue
+# Stage 1: Node build — compile Vue 3 SPA via Vite
+# Stage 2: Ruby runtime — Rails 8.1.3 serves the compiled SPA + GraphQL API
+#
+# Production usage:
+#   docker build -t boardgame-night .
+#   docker run -d -p 3000:3000 \
+#     -e DOTENV_PRIVATE_KEY_BGGEEK=<key> \
+#     -e RAILS_MASTER_KEY=<key> \
+#     boardgame-night
+#
+# Kamal handles the env secret injection at deploy time (config/deploy.yml env.secret).
+# No kamal deploy or docker push in Phase 1 — verify locally: docker build .
 
-# For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
+# =============================================================================
+# Stage 1: Node 20 build stage — compile Vue SPA into public/vite/
+# =============================================================================
 
-# Make sure RUBY_VERSION matches the Ruby version in .ruby-version
-ARG RUBY_VERSION=3.4.9
-FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
+FROM node:20-slim AS build
 
-# Rails app lives here
-WORKDIR /rails
+WORKDIR /app
 
-# Install base packages
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
-    ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+# Install npm dependencies (cached via package*.json for layer reuse)
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
 
-# Set production environment variables and enable jemalloc for reduced memory usage and latency.
-ENV RAILS_ENV="production" \
-    BUNDLE_DEPLOYMENT="1" \
-    BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development" \
-    LD_PRELOAD="/usr/local/lib/libjemalloc.so"
-
-# Throw-away build stage to reduce size of final image
-FROM base AS build
-
-# Install packages needed to build gems
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libvips libyaml-dev pkg-config && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
-
-# Install application gems
-COPY vendor/* ./vendor/
-COPY Gemfile Gemfile.lock ./
-
-RUN bundle install && \
-    rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
-    # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
-    bundle exec bootsnap precompile -j 1 --gemfile
-
-# Copy application code
+# Copy application source code (filtered by .dockerignore — .env.bggeek IS included)
 COPY . .
 
-# Precompile bootsnap code for faster boot times.
-# -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
-RUN bundle exec bootsnap precompile -j 1 app/ lib/
+# Build the SPA — vite-plugin-ruby outputs to public/vite/ (per vite.json default)
+RUN npm run build
 
+# Copy compiled index.html to public/ for the SPA controller
+# Rails serves public/ as static files, and SpaController renders public/index.html
+RUN cp public/vite/index.html public/index.html
 
+# =============================================================================
+# Stage 2: Ruby 3.4 runtime stage — Rails 8.1 API-only server
+# =============================================================================
 
+FROM ruby:3.4.9-slim
 
-# Final stage for app image
-FROM base
+# Install system dependencies needed for Ruby gem native extensions and dotenvx
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+    build-essential curl git libjemalloc2 libreadline-dev libssl-dev \
+    libvips libyaml-dev nodejs npm pkg-config sqlite3 zlib1g-dev && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Run and own only the runtime files as a non-root user for security
-RUN groupadd --system --gid 1000 rails && \
-    useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
-USER 1000:1000
+# Install dotenvx for encrypted .env.bggeek decryption at runtime
+# The encrypted file .env.bggeek is committed; DOTENV_PRIVATE_KEY_BGGEEK is
+# injected via Kamal env.secret (not baked into the image)
+RUN npm install -g @dotenvx/dotenvx
 
-# Copy built artifacts: gems, application
-COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
-COPY --chown=rails:rails --from=build /rails /rails
+# Set production Rails environment
+ENV RAILS_ENV=production \
+    RAILS_LOG_TO_STDOUT=1
 
-# Entrypoint prepares the database.
-ENTRYPOINT ["/rails/bin/docker-entrypoint"]
+WORKDIR /app
 
-# Start server via Thruster by default, this can be overwritten at runtime
-EXPOSE 80
-CMD ["./bin/thrust", "./bin/rails", "server"]
+# Install Ruby gems (cached via Gemfile.lock for layer reuse)
+COPY Gemfile Gemfile.lock ./
+RUN bundle install --without development test
+
+# Copy entire app from build stage — includes compiled public/vite/ + public/index.html
+COPY --from=build /app /app
+
+EXPOSE 3000
+
+# Start Rails server via dotenvx for .env.bggeek decryption
+# DOTENV_PRIVATE_KEY_BGGEEK is injected at runtime via Kamal env.secret (not in this file)
+CMD ["dotenvx", "run", "-f", ".env.bggeek", "--", "bin/rails", "server", "-b", "0.0.0.0", "-p", "3000"]
