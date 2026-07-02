@@ -13,7 +13,7 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 - [x] **FOUND-01**: Rails 8 API-only application initialized with GraphQL endpoint, dry-validation contracts, and Solid Queue/Cache configured
 - [x] **FOUND-02**: Vue 3 SPA served by Rails in production via Vite Ruby, with dev proxy configured (no CORS errors in development)
-- [ ] **FOUND-03**: Monorepo deploys as a single container via Kamal 2 (Vue build output served from Rails public/)
+- [x] **FOUND-03**: Monorepo deploys as a single container via Kamal 2 (Vue build output served from Rails public/)
 - [x] **FOUND-04**: GraphQL schema with max_depth and max_complexity limits set, introspection disabled in production
 - [x] **FOUND-05**: BGG credentials loaded from .env.bggeek and used for all BGG API communication (server-side only, never exposed to frontend)
 
@@ -117,7 +117,7 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 |--------|-------|--------|
 | FOUND-01 | Phase 1 | Complete |
 | FOUND-02 | Phase 1 | Complete |
-| FOUND-03 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | ✅ Complete (01-03) |
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | BGG-01 | Phase 2 | Pending |

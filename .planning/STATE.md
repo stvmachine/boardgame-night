@@ -4,17 +4,17 @@ milestone: v1.0
 milestone_name: milestone
 current_phase: 1
 current_phase_name: Foundation & Monorepo Shell
-status: executing
+status: verifying
 stopped_at: Phase 1 context gathered
-last_updated: "2026-07-03T08:51:00.000Z"
+last_updated: "2026-07-02T23:17:13.278Z"
 last_activity: 2026-07-03
-last_activity_desc: Completed plan 02 (Vue frontend shell) — 2/3 plans done
+last_activity_desc: Completed plan 02 (Vue frontend shell)
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 67
+  completed_plans: 3
+  percent: 25
 ---
 
 # Project State
@@ -28,38 +28,39 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 
 ## Current Position
 
-Phase: 1 (Foundation & Monorepo Shell) — EXECUTING
-Plan: 3 of 3
-Status: Ready to execute
-Last activity: 2026-07-03 — Completed plan 02 (Vue frontend shell)
+Phase: 1 (Foundation & Monorepo Shell) — VERIFYING
+Plan: 3 of 3 (complete)
+Status: Phase complete — ready for verification
+Last activity: 2026-07-02 — Completed plan 03 (Docker + Kamal deploy)
 
-Progress: [██████░░░░] 67%
+Progress: [██████████] 100% (Phase 1 complete — 3/3 plans)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 2
-- Average duration: 57 min
-- Total execution time: 1h 53m
+- Total plans completed: 3
+- Average duration: 48 min
+- Total execution time: 2h 23m
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Foundation & Monorepo Shell | 2 | 1h 53m | 57 min |
+| 1. Foundation & Monorepo Shell | 3 | 2h 23m | 48 min |
 | 2. BGG Integration Layer + Persistence | 0 | — | — |
 | 3. GraphQL API + Collection Surface | 0 | — | — |
 | 4. Auth + Friend Groups + Session Lifecycle | 0 | — | — |
 
 **Recent Trend:**
 
-- Last 5 plans: 78 min (plan 02), 35 min (plan 01)
-- Trend: 78 min (frontend scaffold is heavier than backend scaffold)
+- Last 5 plans: 78 min (plan 02), 35 min (plan 01), 30 min (plan 03)
+- Trend: Docker/deploy scaffolding is fastest (30 min)
 
 *Updated after each plan completion*
 | Phase 01 P01 | 35min | 4 tasks | 22 files |
 | Phase 01 P02 | 78min | 3 tasks | 23 files |
+| Phase 01 P03 | 30min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,9 @@ Recent decisions affecting current work:
 - [Phase 1]: Rails port forced to 3000 via -p flag in Procfile.dev (Rails 8 defaults to 5000)
 - [Phase 1]: Apollo 3.x path maintained: 3.14.1 + @vue/apollo-composable 4.2.2 (Apollo 4 + composable v5 still beta/incompatible)
 - [Phase 1]: Playwright webServer uses bin/dev-e2e wrapper for nvm + rbenv init (default shell is fish; bash -c needs explicit init)
+- [Phase 01 P03]: Use `npm install --ignore-scripts --force` in Docker build stage instead of `npm ci` because fsevents is a non-optional dependency but only works on macOS; `--force` skips platform validation so the Linux Docker build succeeds
+- [Phase 01 P03]: Generate `public/index.html` from Vite build manifest via `bin/generate-index-html.mjs` — `vite-plugin-ruby` only outputs hashed assets + manifest, not an HTML entry file
+- [Phase 01 P03]: Use `sh -c 'test ! -e ...'` for file-absence checks in rake tasks to avoid zsh history expansion on `!` characters
 
 ### Pending Todos
 
@@ -104,6 +108,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-03T08:51:00.000Z
-Stopped at: Completed plan 02 — Vue frontend shell
-Resume file: .planning/phases/01-foundation-monorepo-shell/01-02-SUMMARY.md
+Last session: 2026-07-02T23:15:32Z
+Stopped at: Completed plan 03 — Docker + Kamal deploy scaffold
+Resume file: .planning/phases/01-foundation-monorepo-shell/01-03-SUMMARY.md
