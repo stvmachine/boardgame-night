@@ -32,8 +32,10 @@ if File.exist?(Rails.root.join(".env.bggeek"))
         parsed = JSON.parse(json_output)
         parsed.each { |key, value| ENV[key] ||= value }
       end
-    rescue StandardError
-      # dotenvx CLI may not be available (CI, minimal env)
+    rescue StandardError => e
+      Rails.logger.warn("[dotenv_bggeek] dotenvx decryption failed: #{e.message}")
+      # In development, surface the error so it's not missed
+      raise e if Rails.env.development?
     end
   end
 end
