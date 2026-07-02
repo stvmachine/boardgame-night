@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* UI-SPEC design tokens as @theme variables (Tailwind v4 CSS-first) */
+@theme {
+  --color-accent: #4f46e5;       /* indigo-600 — health badge, focus rings */
+  --color-destructive: #dc2626;  /* red-600 — error state */
+  /* Neutral palette uses Tailwind defaults (neutral-100 = #f5f5f4) */
+}

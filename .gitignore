@@ -47,3 +47,8 @@ config/credentials.yml.enc
 
 # Ignore Docker-related files.
 .dockerignore
+
+# Frontend test artifacts.
+test-results/
+playwright-report/
+.vitest-cache/
