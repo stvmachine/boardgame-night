@@ -4,7 +4,7 @@ const config: CodegenConfig = {
   schema: 'schema.graphql',
   documents: ['app/frontend/**/*.graphql'],
   generates: {
-    'app/frontend/generated/': {
+    'app/frontend/generated/operations.ts': {
       plugins: ['typescript', 'typescript-operations', 'typescript-vue-apollo']
     }
   }

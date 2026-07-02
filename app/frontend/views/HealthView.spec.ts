@@ -4,6 +4,8 @@ import { provideApolloClient } from '@vue/apollo-composable'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
 import { ApolloClient, InMemoryCache } from '@apollo/client/core'
+import { ref } from 'vue'
+import type { DeepMockProxy } from 'vitest'
 import HealthView from './HealthView.vue'
 
 // Mock the generated operations module so we control useHealthQuery
@@ -31,8 +33,7 @@ function mountHealthView() {
   provideApolloClient(client)
   return mount(HealthView, {
     global: {
-      plugins: [mockRouter, createPinia()],
-      provide: {}
+      plugins: [mockRouter]
     }
   })
 }
@@ -44,9 +45,9 @@ describe('HealthView', () => {
 
   it('renders loading state with connecting copy', () => {
     vi.mocked(useHealthQuery).mockReturnValue({
-      result: { value: undefined },
-      loading: { value: true },
-      error: { value: undefined }
+      result: ref(undefined),
+      loading: ref(true),
+      error: ref(undefined)
     } as any)
 
     const wrapper = mountHealthView()
@@ -55,9 +56,9 @@ describe('HealthView', () => {
 
   it('renders error state with server-unreachable copy', () => {
     vi.mocked(useHealthQuery).mockReturnValue({
-      result: { value: undefined },
-      loading: { value: false },
-      error: { value: new Error('Network error') }
+      result: ref(undefined),
+      loading: ref(false),
+      error: ref(new Error('Network error'))
     } as any)
 
     const wrapper = mountHealthView()
@@ -67,9 +68,9 @@ describe('HealthView', () => {
 
   it('renders success state with Server Health heading and health value', () => {
     vi.mocked(useHealthQuery).mockReturnValue({
-      result: { value: { health: 'ok' } },
-      loading: { value: false },
-      error: { value: undefined }
+      result: ref({ health: 'ok' }),
+      loading: ref(false),
+      error: ref(undefined)
     } as any)
 
     const wrapper = mountHealthView()

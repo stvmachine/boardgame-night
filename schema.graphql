@@ -1,0 +1,13 @@
+type Mutation {
+  """
+  An example field added by the generator
+  """
+  testField: String!
+}
+
+type Query {
+  """
+  Health check — proves the GraphQL endpoint is alive.
+  """
+  health: String!
+}
