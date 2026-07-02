@@ -123,6 +123,8 @@ GEM
       raabro (~> 1.4)
     globalid (1.4.0)
       activesupport (>= 6.1)
+    graphiql-rails (1.10.5)
+      railties
     graphql (2.6.3)
       base64
       fiber-storage
@@ -399,6 +401,7 @@ DEPENDENCIES
   bundler-audit
   debug
   dotenv-rails (~> 3.2)
+  graphiql-rails (~> 1.10)
   graphql (~> 2.6)
   image_processing (~> 1.2)
   kamal

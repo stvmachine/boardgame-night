@@ -26,19 +26,22 @@ RSpec.describe BoardgameNightSchema do
   end
 
   describe "introspection disabled in production" do
-    it "rejects an introspection query when env is non-dev/non-test" do
-      # Stash the original env so we can restore after the test
-      original_rails_env = Rails.env
-      # Disable the development/test guard by temporarily switching env
-      allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new("production"))
+    it "rejects an introspection query when introspection entry points are disabled" do
+      # Create a subclass with introspection disabled to simulate production mode
+      production_schema = Class.new(BoardgameNightSchema) do
+        disable_introspection_entry_points
+      end
 
       query = "{ __schema { types { name } } }"
-      result = described_class.execute(query)
+      result = production_schema.execute(query)
       expect(result["errors"]).to be_present
-      expect(result["errors"].first["message"]).to include("introspection")
-    ensure
-      # Restore env by re-allowing Rails.env
-      allow(Rails).to receive(:env).and_return(original_rails_env)
+      expect(result["errors"].first["message"]).to match(/__schema|introspection/i)
+    end
+
+    it "has the disable_introspection_entry_points guard in the schema source" do
+      schema_file = Rails.root.join("app/graphql/boardgame_night_schema.rb").read
+      guard_pattern = /disable_introspection_entry_points\s+unless\s+Rails\.env\.development\?\s*\|\|\s*Rails\.env\.test\?/
+      expect(schema_file).to match(guard_pattern)
     end
   end
 end

@@ -1,16 +1,17 @@
-# Be sure to restart your server when you modify this file.
+# frozen_string_literal: true
 
-# Avoid CORS issues when API is called from the frontend app.
-# Handle Cross-Origin Resource Sharing (CORS) in order to accept cross-origin Ajax requests.
+# Configure CORS for development only.
+# In production, the SPA is served same-origin by Rails from public/.
+# See: https://github.com/cyu/rack-cors
 
-# Read more: https://github.com/cyu/rack-cors
+if Rails.env.development?
+  Rails.application.config.middleware.insert_before 0, Rack::Cors do
+    allow do
+      origins "localhost:5173", "127.0.0.1:5173"
 
-# Rails.application.config.middleware.insert_before 0, Rack::Cors do
-#   allow do
-#     origins "example.com"
-#
-#     resource "*",
-#       headers: :any,
-#       methods: [:get, :post, :put, :patch, :delete, :options, :head]
-#   end
-# end
+      resource "/graphql",
+               headers: :any,
+               methods: [:post, :options]
+    end
+  end
+end
