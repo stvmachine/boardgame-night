@@ -97,7 +97,7 @@ namespace :docker do
 
       # Step 5: Verify .env.bggeek.keys is absent (T-3-01 hazard test)
       puts "\n[5/8] Checking .env.bggeek.keys is ABSENT..."
-      if system("docker run --rm #{image_id} ! test -e /app/.env.bggeek.keys 2>/dev/null")
+      if system("docker run --rm #{image_id} sh -c 'test ! -e /app/.env.bggeek.keys' 2>/dev/null")
         puts "  ✓ .env.bggeek.keys absent (private key not in image)"
       else
         failures << ".env.bggeek.keys FOUND in image — security breach (T-3-01)"
@@ -106,7 +106,7 @@ namespace :docker do
 
       # Step 6: Verify .env.keys is absent
       puts "\n[6/8] Checking .env.keys is ABSENT..."
-      if system("docker run --rm #{image_id} ! test -e /app/.env.keys 2>/dev/null")
+      if system("docker run --rm #{image_id} sh -c 'test ! -e /app/.env.keys' 2>/dev/null")
         puts "  ✓ .env.keys absent"
       else
         failures << ".env.keys FOUND in image — security breach"

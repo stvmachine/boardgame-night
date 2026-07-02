@@ -25,17 +25,17 @@ WORKDIR /app
 
 # Install npm dependencies (cached via package*.json for layer reuse)
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
+RUN npm install --ignore-scripts --force
 
 # Copy application source code (filtered by .dockerignore — .env.bggeek IS included)
 COPY . .
 
-# Build the SPA — vite-plugin-ruby outputs to public/vite/ (per vite.json default)
+# Build the SPA — vite-plugin-ruby outputs manifest + hashed assets to public/vite/
 RUN npm run build
 
-# Copy compiled index.html to public/ for the SPA controller
-# Rails serves public/ as static files, and SpaController renders public/index.html
-RUN cp public/vite/index.html public/index.html
+# Generate public/index.html from the Vite build manifest
+# SpaController renders this file; script reads hashed asset paths from manifest
+RUN node bin/generate-index-html.mjs
 
 # =============================================================================
 # Stage 2: Ruby 3.4 runtime stage — Rails 8.1 API-only server
