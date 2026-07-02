@@ -45,6 +45,9 @@ config/credentials.yml.enc
 # Ignore test coverage.
 /coverage
 
+# Ignore Vite build output (generated during Docker build, not committed).
+/public/vite
+
 # Ignore Docker-related files.
 .dockerignore
 
