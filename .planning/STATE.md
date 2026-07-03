@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 1
-current_phase_name: Foundation & Monorepo Shell
-status: verifying
-stopped_at: Phase 1 context gathered
-last_updated: "2026-07-02T23:17:13.278Z"
+current_phase: 2
+current_phase_name: BGG Integration Layer + Persistence
+status: ready
+stopped_at: Phase 2 Plan 01 complete
+last_updated: "2026-07-03T01:30:00Z"
 last_activity: 2026-07-03
-last_activity_desc: Completed plan 02 (Vue frontend shell)
+last_activity_desc: Phase 1 ✅, ready for Phase 2
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 25
+  total_plans: 7
+  completed_plans: 4
+  percent: 43
 ---
 
 # Project State
@@ -24,22 +24,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-30)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 1 — Foundation & Monorepo Shell
+**Current focus:** Phase 2 — BGG Integration Layer + Persistence
 
 ## Current Position
 
-Phase: 1 (Foundation & Monorepo Shell) — VERIFYING
-Plan: 3 of 3 (complete)
-Status: Phase complete — ready for verification
-Last activity: 2026-07-02 — Completed plan 03 (Docker + Kamal deploy)
+Phase: 2 — BGG Integration Layer + Persistence
+Plan: 1 — BGG Client + Rate Limiter + Normalizer ✅
+Status: Plan 01 complete (3/3 tasks, 37/37 tests)
+Last activity: 2026-07-03 — Phase 2 Plan 01 ✅
 
-Progress: [██████████] 100% (Phase 1 complete — 3/3 plans)
+Progress: [██░░░░░░░░] 25% (Phase 1 complete — 4 phases total)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
+- Total plans completed: 6
 - Average duration: 48 min
 - Total execution time: 2h 23m
 
@@ -48,9 +48,10 @@ Progress: [██████████] 100% (Phase 1 complete — 3/3 plans)
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation & Monorepo Shell | 3 | 2h 23m | 48 min |
-| 2. BGG Integration Layer + Persistence | 0 | — | — |
+| 2. BGG Integration Layer + Persistence | 1 | ~18m | 18m |
 | 3. GraphQL API + Collection Surface | 0 | — | — |
 | 4. Auth + Friend Groups + Session Lifecycle | 0 | — | — |
+| 1 | 3 | - | - |
 
 **Recent Trend:**
 
@@ -71,17 +72,11 @@ Recent decisions affecting current work:
 
 - **Roadmap:** v1 scoped to 4 phases (coarse granularity). The game-suggestion engine (SUGG-01/02) is v2-deferred per REQUIREMENTS.md — v1 ships manual game picking (SESS-05), not the engine.
 - **Architecture:** Rails 8 API-only + Vue 3 SPA monorepo, single GraphQL endpoint, single Kamal 2 deploy. Rails owns all BGG communication (credentials server-side).
-- **Stack pins:** Apollo 3.13.9 + @vue/apollo-composable 4.2.2 (NOT Apollo 4 — incompatible with composable v5 still in beta). GraphQL::Dataloader (not graphql-batch). dry-validation contracts for all mutations (not strong_params).
-- [Phase 01]: Ruby 3.4.9 used instead of 3.4.10 (3.4.10 not in ruby-build; latest 3.4.x available) — Version compatibility — 3.4.10 not in ruby-build yet. 3.4.9 is functionally equivalent.
-- [Phase 01]: dotenvx keys file renamed from .env.keys to .env.bggeek.keys with -fk flag in Procfile.dev for explicit per-file key association — dotenvx v1.75 defaults to .env.keys; renamed to match plan convention and allow per-file key isolation
-- [Phase 01]: Introspection-off test uses subclass approach because the class-body guard is evaluated at load time and cannot be dynamically env-stubbed in RSpec — Rails.env stubbing ineffective for class-body-level guard that runs at load time
-- [Phase 1]: Vite root serving via empty publicOutputDir: set publicOutputDir to empty string and autoBuild to false in config/vite.json development section to serve SPA at root URL instead of /vite-dev/ prefix
-- [Phase 1]: Rails port forced to 3000 via -p flag in Procfile.dev (Rails 8 defaults to 5000)
-- [Phase 1]: Apollo 3.x path maintained: 3.14.1 + @vue/apollo-composable 4.2.2 (Apollo 4 + composable v5 still beta/incompatible)
-- [Phase 1]: Playwright webServer uses bin/dev-e2e wrapper for nvm + rbenv init (default shell is fish; bash -c needs explicit init)
-- [Phase 01 P03]: Use `npm install --ignore-scripts --force` in Docker build stage instead of `npm ci` because fsevents is a non-optional dependency but only works on macOS; `--force` skips platform validation so the Linux Docker build succeeds
-- [Phase 01 P03]: Generate `public/index.html` from Vite build manifest via `bin/generate-index-html.mjs` — `vite-plugin-ruby` only outputs hashed assets + manifest, not an HTML entry file
-- [Phase 01 P03]: Use `sh -c 'test ! -e ...'` for file-absence checks in rake tasks to avoid zsh history expansion on `!` characters
+- **Stack pins:** Apollo 3.14.1 + @vue/apollo-composable 4.2.2 (Apollo 4 incompatible with composable v5 still in beta). GraphQL::Dataloader (not graphql-batch). dry-validation contracts (not strong_params).
+- **Ruby version:** 3.4.9 used (3.4.10 not in ruby-build); functionally equivalent.
+- **Docker build:** `npm install --ignore-scripts --force` used instead of `npm ci` — fsevents is a non-optional dep but macOS-only; `--force` needed for Linux Docker build.
+- **SPA serving:** Vite build manifest → `bin/generate-index-html.mjs` generates `public/index.html` because `vite-plugin-ruby` only outputs hashed assets + manifest, not an HTML entry file.
+- **E2E testing:** Playwright webServer uses `bin/dev-e2e` wrapper for nvm + rbenv init (default shell is fish).
 
 ### Pending Todos
 
@@ -108,6 +103,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-02T23:15:32Z
-Stopped at: Completed plan 03 — Docker + Kamal deploy scaffold
-Resume file: .planning/phases/01-foundation-monorepo-shell/01-03-SUMMARY.md
+Last session: 2026-07-03T01:30:00Z
+Stopped at: Phase 2 Plan 01 complete — ready for Plan 02-02
+Resume file: .planning/phases/02-bgg-integration-layer-persistence/02-02-PLAN.md

@@ -20,12 +20,11 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 ### BGG Integration
 
 - [ ] **BGG-01**: Rails BGG client fetches a user's collection using the two-call expansion workaround (base games + expansions merged, correct subtype labels)
-- [ ] **BGG-02**: BGG client enforces 1 request / 5 seconds rate limiting across all workers (token bucket or fixed window, cross-thread safe)
-- [ ] **BGG-03**: BGG client handles HTTP 202 "queued" responses with retry logic (up to 5 retries with delay) before parsing XML
-- [ ] **BGG-04**: BGG XML parser uses Nokogiri with nil-safe field normalization (handles missing fields, single-vs-array items, name variations)
-- [ ] **BGG-05**: BGG collection fetching runs as a Solid Queue background job with explicit retry_on declarations for transient failures (503, timeout)
-- [ ] **BGG-06**: BGG client sends a descriptive User-Agent header on all requests
-- [ ] **BGG-07**: BGG thing details can be batch-fetched via comma-separated IDs (GET /thing?id=1,2,3&stats=1)
+- [x] **BGG-02**: BGG client enforces 1 request / 5 seconds rate limiting across all workers (token bucket or fixed window, cross-thread safe)
+- [x] **BGG-03**: BGG client handles HTTP 202 "queued" responses with retry logic (up to 5 retries with delay) before parsing XML
+- [ ] **BGG-04**: BGG XML parser uses Nokogiri with nil-safe field normalization (handles missing fields, single-vs-array items, name variations) — normalizer exists; two-call expansion workaround deferred to 02-03
+- [x] **BGG-06**: BGG client sends a descriptive User-Agent header on all requests
+- [x] **BGG-07**: BGG thing details can be batch-fetched via comma-separated IDs (GET /thing?id=1,2,3&stats=1)
 
 ### Collection Surface (v1 Parity)
 
@@ -121,12 +120,12 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
 | BGG-01 | Phase 2 | Pending |
-| BGG-02 | Phase 2 | Pending |
-| BGG-03 | Phase 2 | Pending |
-| BGG-04 | Phase 2 | Pending |
+| BGG-02 | Phase 2 | ✅ Complete (02-01) |
+| BGG-03 | Phase 2 | ✅ Complete (02-01) |
+| BGG-04 | Phase 2 | In progress — normalizer exists, expansion workaround pending 02-03 |
 | BGG-05 | Phase 2 | Pending |
-| BGG-06 | Phase 2 | Pending |
-| BGG-07 | Phase 2 | Pending |
+| BGG-06 | Phase 2 | ✅ Complete (02-01) |
+| BGG-07 | Phase 2 | ✅ Complete (02-01) |
 | COLL-01 | Phase 3 | Pending |
 | COLL-02 | Phase 3 | Pending |
 | COLL-03 | Phase 3 | Pending |

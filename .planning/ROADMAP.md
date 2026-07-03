@@ -34,7 +34,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. BGG credentials load from `.env.bggeek` and are available server-side but never exposed to the frontend (FOUND-05)
   5. The GraphQL schema has max_depth/max_complexity limits set and introspection is disabled in production (FOUND-04)
 
-**Plans:** 3/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 
 - [x] 01-01-PLAN.md — Rails backend + dotenvx + GraphQL schema/multiplex + dev orchestration (PlanTasks 01..03; Wave 1)
@@ -51,13 +51,18 @@ Plans:
 **Requirements**: BGG-01, BGG-02, BGG-03, BGG-04, BGG-05, BGG-06, BGG-07
 **Success Criteria** (what must be TRUE):
 
-  1. Fetching a BGG user's collection returns the correct base games + expansions via the two-call workaround (e.g. 62 base + 13 expansions = 75 items), with nil-safe XML normalization handling missing fields and single-vs-array items (BGG-01, BGG-04)
-  2. BGG API calls are throttled to ≤1 request / 5 seconds across all workers, and HTTP 202 "queued" responses are retried automatically (≤5×) until data is ready instead of returning an empty collection (BGG-02, BGG-03)
-  3. Collection imports run as Solid Queue background jobs that declare explicit `retry_on`/`discard_on` for transient failures (503, timeout) and never silently die (BGG-05)
-  4. Persisted collections from N users can be merged into a single deduplicated view via a pure database query — no live BGG calls on the read path (BGG-04)
-  5. Thing details can be batch-fetched by comma-separated IDs, and every BGG request carries a descriptive User-Agent header (BGG-07, BGG-06)
+   1. Fetching a BGG user's collection returns the correct base games + expansions via the two-call workaround (e.g. 62 base + 13 expansions = 75 items), with nil-safe XML normalization handling missing fields and single-vs-array items (BGG-01, BGG-04)
+   2. BGG API calls are throttled to ≤1 request / 5 seconds across all workers, and HTTP 202 "queued" responses are retried automatically (≤5×) until data is ready instead of returning an empty collection (BGG-02, BGG-03)
+   3. Collection imports run as Solid Queue background jobs that declare explicit `retry_on`/`discard_on` for transient failures (503, timeout) and never silently die (BGG-05)
+   4. Persisted collections from N users can be merged into a single deduplicated view via a pure database query — no live BGG calls on the read path (BGG-04)
+   5. Thing details can be batch-fetched by comma-separated IDs, and every BGG request carries a descriptive User-Agent header (BGG-07, BGG-06)
 
-**Plans**: TBD
+**Plans:** 1/3 complete
+Plans:
+
+- [x] 02-01-PLAN.md — Foundation: Gems + Bgg::Client + Bgg::RateLimiter + Bgg::Normalizer + XML fixtures (Wave 1)
+- [ ] 02-02-PLAN.md — Persistence: DB schema (bgg_things + bgg_collections) + AR models + merge query + Bgg::CollectionPersister (Wave 2)
+- [ ] 02-03-PLAN.md — Jobs: Bgg::CollectionFetcher (expansion workaround) + Bgg::ImportCollectionJob (Solid Queue concurrency) (Wave 3)
 
 ### Phase 3: GraphQL API + Collection Surface (v1 Parity)
 
@@ -100,8 +105,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Monorepo Shell | 3/3 | ✅ Complete | 2026-07-02 |
-| 2. BGG Integration Layer + Persistence | 0/TBD | Not started | - |
+| 1. Foundation & Monorepo Shell | 3/3 | Complete    | 2026-07-02 |
+| 2. BGG Integration Layer + Persistence | 1/3 | In progress | - |
 | 3. GraphQL API + Collection Surface (v1 Parity) | 0/TBD | Not started | - |
 | 4. Auth + Friend Groups + Session Lifecycle | 0/TBD | Not started | - |
 
