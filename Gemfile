@@ -63,4 +63,11 @@ gem "bullet", "~> 8.1", group: [:development, :test]
 
 gem "rspec-rails", "~> 8.0", group: [:development, :test]
 
+gem "webmock", "~> 3.26", group: [:development, :test]
+
 gem "graphiql-rails", "~> 1.10", group: :development
+
+# BGG Integration: HTTP client + XML parsing + retry middleware
+gem "faraday", "~> 2.14"
+gem "faraday-retry", "~> 2.4"
+gem "nokogiri", "~> 1.19"
