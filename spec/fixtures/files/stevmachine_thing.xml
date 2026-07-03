@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+  <item type="boardgame" id="174430">
+    <thumbnail>https://cf.geekdo-images.com/something/pic2437871_t.jpg</thumbnail>
+    <image>https://cf.geekdo-images.com/something/pic2437871.jpg</image>
+    <name type="primary" sortindex="1" value="Gloomhaven" />
+    <name type="alternate" sortindex="2" value="Gloomhaven (2017)" />
+    <description>Gloomhaven is a game of Euro-style tactical combat in a persistent world of shifting motives. Players will take on the role of a wandering mercenary with their own special set of skills and their own reasons for traveling to this dark corner of the world. Players must work together out of necessity to clear out menacing dungeons and forgotten ruins. In the process, they will earn experience, level up, and gain new abilities for the scenarios to come.</description>
+    <yearpublished value="2017" />
+    <minplayers value="1" />
+    <maxplayers value="4" />
+    <playingtime value="90" />
+    <minplaytime value="60" />
+    <maxplaytime value="120" />
+    <minage value="12" />
+    <statistics page="1">
+      <ratings>
+        <usersrated value="30000" />
+        <average value="8.8" />
+        <bayesaverage value="8.4" />
+        <stddev value="1.5" />
+        <median value="9.0" />
+        <owned value="50000" />
+        <trading value="500" />
+        <wanting value="1000" />
+        <wishing value="2000" />
+        <numcomments value="3000" />
+        <numweights value="2000" />
+        <averageweight value="3.8" />
+      </ratings>
+    </statistics>
+    <poll name="suggested_numplayers" title="User Suggested Number of Players" totalvotes="2000">
+      <results numplayers="1">
+        <result value="Best" numvotes="100" />
+        <result value="Recommended" numvotes="200" />
+        <result value="Not Recommended" numvotes="50" />
+      </results>
+      <results numplayers="2">
+        <result value="Best" numvotes="500" />
+        <result value="Recommended" numvotes="300" />
+        <result value="Not Recommended" numvotes="20" />
+      </results>
+      <results numplayers="3">
+        <result value="Best" numvotes="600" />
+        <result value="Recommended" numvotes="200" />
+        <result value="Not Recommended" numvotes="10" />
+      </results>
+      <results numplayers="4">
+        <result value="Best" numvotes="400" />
+        <result value="Recommended" numvotes="100" />
+        <result value="Not Recommended" numvotes="5" />
+      </results>
+    </poll>
+  </item>
+</items>
