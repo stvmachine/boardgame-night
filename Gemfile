@@ -65,6 +65,8 @@ gem "rspec-rails", "~> 8.0", group: [:development, :test]
 
 gem "webmock", "~> 3.26", group: [:development, :test]
 
+gem "shoulda-matchers", "~> 6.4", group: [:development, :test]
+
 gem "graphiql-rails", "~> 1.10", group: :development
 
 # BGG Integration: HTTP client + XML parsing + retry middleware
