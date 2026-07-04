@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 2
-current_phase_name: BGG Integration Layer + Persistence
+current_phase: 3
+current_phase_name: GraphQL API + Collection Surface
 status: ready
-stopped_at: Phase 2 Plan 02 complete
-last_updated: "2026-07-03T01:45:00Z"
-last_activity: 2026-07-03
-last_activity_desc: Phase 1 ✅, ready for Phase 2
+stopped_at: Phase 2 complete
+last_updated: "2026-07-04T00:00:00Z"
+last_activity: 2026-07-04
+last_activity_desc: Phase 2 complete — ready for Phase 3
 progress:
   total_phases: 4
-  completed_phases: 1
-  total_plans: 7
-  completed_plans: 5
-  percent: 57
+  completed_phases: 2
+  total_plans: 8
+  completed_plans: 6
+  percent: 43
 ---
 
 # Project State
@@ -24,46 +24,48 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-30)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 2 — BGG Integration Layer + Persistence
+**Current focus:** Phase 3 — GraphQL API + Collection Surface (v1 Parity)
 
 ## Current Position
 
-Phase: 2 — BGG Integration Layer + Persistence
-Plan: 2 — Migrations, Models, CollectionPersister ✅
-Status: Plan 02 complete (3/3 tasks, 59/59 tests)
-Last activity: 2026-07-03 — Phase 2 Plan 02 ✅
+Phase: 2 — BGG Integration Layer + Persistence ✅
+Plan: 3 — CollectionFetcher + ImportCollectionJob ✅
+Status: Phase 2 complete (3/3 plans, 81/81 tests)
+Last activity: 2026-07-04 — Phase 2 Plan 03 complete ✅
 
-Progress: [███░░░░░░░] 29% (Phase 1 complete, Phase 2 Plan 02 complete — 4 phases total)
+Progress: [████░░░░░░░] 43% (Phase 1 ✅, Phase 2 ✅ — 4 phases total)
 
 ## Performance Metrics
 
 **Velocity:**
 
 - Total plans completed: 6
-- Average duration: 48 min
-- Total execution time: 2h 23m
+- Average duration: ~24 min (Phase 2 was faster than Phase 1)
+- Total execution time: ~3h 8m (Phase 1: 2h 23m + Phase 2: ~45m)
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation & Monorepo Shell | 3 | 2h 23m | 48 min |
-| 2. BGG Integration Layer + Persistence | 2 | ~30m | 15m |
+| 2. BGG Integration Layer + Persistence | 3 | ~45m | 15 min |
 | 3. GraphQL API + Collection Surface | 0 | — | — |
 | 4. Auth + Friend Groups + Session Lifecycle | 0 | — | — |
-| 1 | 3 | - | - |
 
 **Recent Trend:**
 
-- Last 5 plans: 78 min (plan 02), 35 min (plan 01), 30 min (plan 03)
-- Trend: Docker/deploy scaffolding is fastest (30 min)
+- Phase 2 velocity: ~15 min/plan (Client/RateLimiter/Normalizer: 18m, Models/Persister: 12m, CollectionFetcher/Job: ~15m)
+- Trend: BGG data layer plans were fast — well-scoped with clear dependencies
 
 *Updated after each plan completion*
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
 | Phase 01 P01 | 35min | 4 tasks | 22 files |
 | Phase 01 P02 | 78min | 3 tasks | 23 files |
 | Phase 01 P03 | 30min | 3 tasks | 5 files |
 | Phase 02 P01 | 18min | 3 tasks | 10 files |
 | Phase 02 P02 | 12min | 3 tasks | 12 files |
+| Phase 02 P03 | ~15min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -84,6 +86,10 @@ Recent decisions affecting current work:
 - **Normalizer key mapping:** Collection items use `:id` key (from `item["objectid"]`) — CollectionPersister must match this.
 - **Expansion filtering:** D-10 filtering happens at the BGG API level via `excludesubtype=boardgameexpansion` in CollectionFetcher (Plan 03), not in Normalizer or CollectionPersister.
 - **Model testing:** Uses shoulda-matchers for one-liner validation/association specs; direct model construction (no FactoryBot).
+- **CollectionFetcher merge strategy:** XML-level merge (Nokogiri) of two BGG calls — keeps Normalizer as the sole hash-creation path.
+- **ImportCollectionJob param pattern:** Takes username (String), not User object — validates existence on BGG inside the job; looks up local User by bgg_username before persisting.
+- **CollectionPersister interface:** `Bgg::CollectionPersister.new(user: user).persist_collection!(collection)` — takes keyword arg, not positional username.
+- **Full pipeline complete:** Client → RateLimiter → CollectionFetcher → Normalizer → CollectionPersister → DB — all backed by Solid Queue with concurrency control.
 
 ### Pending Todos
 
@@ -91,7 +97,6 @@ None yet.
 
 ### Blockers/Concerns
 
-- **Phase 2 (research-flagged HIGH):** BGG quirks (202 semantics, expansion-subtype bug, mixed-content XML arrays) + cross-worker rate-limit locking on SQLite need fixture-driven research during planning.
 - **Phase 4 (research-flagged MEDIUM):** The no-account-RSVP → provisional-profile → optional-upgrade attendee/invite data model needs design before execution.
 
 ## Deferred Items
@@ -110,6 +115,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-03T01:45:00Z
-Stopped at: Phase 2 Plan 02 complete — ready for Plan 02-03 (CollectionFetcher + ImportCollectionJob)
-Resume file: .planning/phases/02-bgg-integration-layer-persistence/02-03-PLAN.md
+Last session: 2026-07-04
+Stopped at: Phase 2 complete — ready for Phase 3 (GraphQL API + Collection Surface)
+Resume file: .planning/ROADMAP.md

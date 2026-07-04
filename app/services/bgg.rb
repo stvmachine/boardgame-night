@@ -10,4 +10,5 @@ module Bgg
   class NetworkError < Error; end
   class ParseError < Error; end
   class RateLimitError < Error; end
+  class InvalidUsernameError < Error; end
 end

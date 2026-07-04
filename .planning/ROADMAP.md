@@ -14,7 +14,7 @@ A Rails 8 API-only + Vue 3 SPA monorepo that rewrites `bggeek-shared-list` and c
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Monorepo Shell** - Rails 8 API + Vue 3 SPA skeleton, GraphQL contract, single Kamal 2 deploy
-- [ ] **Phase 2: BGG Integration Layer + Persistence** - BGG XML client, rate limiting, 202 retry, expansion workaround, persisted collections
+- [x] **Phase 2: BGG Integration Layer + Persistence** - BGG XML client, rate limiting, 202 retry, expansion workaround, persisted collections
 - [ ] **Phase 3: GraphQL API + Collection Surface (v1 Parity)** - Full collection UI: N-user merge, search/filter/sort/group, hot games, permalinks, responsive layout
 - [ ] **Phase 4: Auth + Friend Groups + Session Lifecycle** - Accounts, BGG username binding, friend groups, magic-link sessions, RSVP, manual game pick
 
@@ -57,12 +57,12 @@ Plans:
    4. Persisted collections from N users can be merged into a single deduplicated view via a pure database query — no live BGG calls on the read path (BGG-04)
    5. Thing details can be batch-fetched by comma-separated IDs, and every BGG request carries a descriptive User-Agent header (BGG-07, BGG-06)
 
-**Plans:** 1/3 complete
+**Plans:** 3/3 complete
 Plans:
 
 - [x] 02-01-PLAN.md — Foundation: Gems + Bgg::Client + Bgg::RateLimiter + Bgg::Normalizer + XML fixtures (Wave 1)
-- [ ] 02-02-PLAN.md — Persistence: DB schema (bgg_things + bgg_collections) + AR models + merge query + Bgg::CollectionPersister (Wave 2)
-- [ ] 02-03-PLAN.md — Jobs: Bgg::CollectionFetcher (expansion workaround) + Bgg::ImportCollectionJob (Solid Queue concurrency) (Wave 3)
+- [x] 02-02-PLAN.md — Persistence: DB schema (bgg_things + bgg_collections) + AR models + merge query + Bgg::CollectionPersister (Wave 2)
+- [x] 02-03-PLAN.md — Jobs: Bgg::CollectionFetcher (expansion workaround) + Bgg::ImportCollectionJob (Solid Queue concurrency) (Wave 3)
 
 ### Phase 3: GraphQL API + Collection Surface (v1 Parity)
 
@@ -106,7 +106,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation & Monorepo Shell | 3/3 | Complete    | 2026-07-02 |
-| 2. BGG Integration Layer + Persistence | 1/3 | In progress | - |
+| 2. BGG Integration Layer + Persistence | 3/3 | Complete    | 2026-07-04 |
 | 3. GraphQL API + Collection Surface (v1 Parity) | 0/TBD | Not started | - |
 | 4. Auth + Friend Groups + Session Lifecycle | 0/TBD | Not started | - |
 
