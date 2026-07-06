@@ -78,13 +78,17 @@ Plans:
   4. User can share a permalink URL for a set of usernames, select-all/deselect-all owners, collapse/expand sidebar sections, and manually refresh cached collections (15-min cooldown, stale-while-revalidate) (COLL-10, COLL-14, COLL-15, COLL-18)
   5. The GraphQL schema exposes the full v1 query contract (things, search, users, collections, hot items) with Dataloader batching (no N+1 BGG calls), and codegen produces typed frontend composables committed to the repo (GQL-02, GQL-05, COLL-17)
 
-**Plans**: 3 plans
+**Plans**: 7 plans
 
 Plans:
 
-- [ ] 03-01-PLAN.md — Merged collection read path: statistics migration, Dataloader-backed GraphQL query, minimal game-card grid
-- [ ] 03-02-PLAN.md — Import/sync API: Solid Cable subscriptions, dry-rails mutations, landing/hot items, search query, sidebar sync status, and ADRs
-- [ ] 03-03-PLAN.md — Collection browsing surface: search/filter/sort/group, permalink state, responsive sidebar/drawer layout
+- [ ] 03-01-PLAN.md — Backend foundation: statistics migration, BggThing/BggCollectionItem models, normalizer/persister, GraphQL types/loaders, UserType, UserSyncStatusType
+- [ ] 03-02-PLAN.md — GraphQL query wiring: mergedCollection, user, minimal CollectionView + GameCard/GameGrid, schema codegen
+- [ ] 03-03-PLAN.md — Import/sync API: Solid Cable, subscriptions, mutations, dry-rails contracts, Bgg::Client#hot, group/session mutations
+- [ ] 03-04-PLAN.md — Landing + discovery: hotItems, search, HomeView, UsernameForm, HotList, Sidebar, collectors Pinia store
+- [ ] 03-05-PLAN.md — Architecture Decision Records: ADR-003..007 and RESEARCH.md Open Questions resolved
+- [ ] 03-06-PLAN.md — Utilities + shell: Tailwind v4, AppShell/AppHeader/App.vue, filter composables, Fuse.js search wrapper
+- [ ] 03-07-PLAN.md — CollectionView polish: filters/sort/group-by, empty state, permalink preservation, Playwright e2e tests
 
 **UI hint**: yes
 
