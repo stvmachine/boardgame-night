@@ -78,7 +78,14 @@ Plans:
   4. User can share a permalink URL for a set of usernames, select-all/deselect-all owners, collapse/expand sidebar sections, and manually refresh cached collections (15-min cooldown, stale-while-revalidate) (COLL-10, COLL-14, COLL-15, COLL-18)
   5. The GraphQL schema exposes the full v1 query contract (things, search, users, collections, hot items) with Dataloader batching (no N+1 BGG calls), and codegen produces typed frontend composables committed to the repo (GQL-02, GQL-05, COLL-17)
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+
+- [ ] 03-01-PLAN.md — Merged collection read path: statistics migration, Dataloader-backed GraphQL query, minimal game-card grid
+- [ ] 03-02-PLAN.md — Import/sync API: Solid Cable subscriptions, dry-rails mutations, landing/hot items, sidebar sync status
+- [ ] 03-03-PLAN.md — Collection browsing surface: search/filter/sort/group, permalink state, responsive sidebar/drawer layout
+
 **UI hint**: yes
 
 ### Phase 4: Auth + Friend Groups + Session Lifecycle
