@@ -83,7 +83,7 @@ Plans:
 Plans:
 
 - [ ] 03-01-PLAN.md — Merged collection read path: statistics migration, Dataloader-backed GraphQL query, minimal game-card grid
-- [ ] 03-02-PLAN.md — Import/sync API: Solid Cable subscriptions, dry-rails mutations, landing/hot items, sidebar sync status
+- [ ] 03-02-PLAN.md — Import/sync API: Solid Cable subscriptions, dry-rails mutations, landing/hot items, search query, sidebar sync status, and ADRs
 - [ ] 03-03-PLAN.md — Collection browsing surface: search/filter/sort/group, permalink state, responsive sidebar/drawer layout
 
 **UI hint**: yes
