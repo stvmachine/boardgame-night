@@ -5,10 +5,10 @@ milestone_name: milestone
 current_phase: 3
 current_phase_name: GraphQL API + Collection Surface
 status: ready
-stopped_at: Phase 2 complete
-last_updated: "2026-07-04T00:00:00Z"
-last_activity: 2026-07-04
-last_activity_desc: Phase 2 complete — ready for Phase 3
+stopped_at: Phase 3 context gathered — ready for planning
+last_updated: "2026-07-06T00:00:00Z"
+last_activity: 2026-07-06
+last_activity_desc: Phase 3 discuss-phase complete — 21 decisions across 4 areas
 progress:
   total_phases: 4
   completed_phases: 2
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 
 ## Current Position
 
-Phase: 2 — BGG Integration Layer + Persistence ✅
-Plan: 3 — CollectionFetcher + ImportCollectionJob ✅
-Status: Phase 2 complete (3/3 plans, 81/81 tests)
-Last activity: 2026-07-04 — Phase 2 Plan 03 complete ✅
+Phase: 3 — GraphQL API + Collection Surface (v1 Parity)
+Plan: 0 — discuss-phase complete, ready for planning
+Status: Phase 3 context gathered (21 decisions, 4 areas, 5 ADRs flagged)
+Last activity: 2026-07-06 — Phase 3 discuss-phase complete
 
 Progress: [████░░░░░░░] 43% (Phase 1 ✅, Phase 2 ✅ — 4 phases total)
 
@@ -115,6 +115,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-04
-Stopped at: Phase 2 complete — ready for Phase 3 (GraphQL API + Collection Surface)
-Resume file: .planning/ROADMAP.md
+Last session: 2026-07-06
+Stopped at: Phase 3 discuss-phase complete — ready for plan-phase
+Resume file: .planning/phases/03-graphql-api-collection-surface-v1-parity/03-CONTEXT.md

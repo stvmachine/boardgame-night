@@ -1,0 +1,44 @@
+{
+  "phase": 3,
+  "phase_name": "GraphQL API + Collection Surface (v1 Parity)",
+  "started_at": "2026-07-06",
+  "areas_completed": ["GraphQL schema scope", "Collection import UX flow", "Permalink & URL state", "Layout & navigation"],
+  "areas_remaining": [],
+  "decisions": {
+    "GraphQL schema scope": {
+      "D-01": "v1-essential Thing type only — name, year, players, playtime, min_age, image, thumbnail, description, average, bayes_average, users_rated, average_weight, is_expansion, owners. Skip polls, comments, versions, expansions, categories, mechanics, designers, etc. Add in v2. [NEEDS ADR: ADR-003]",
+      "D-02": "mergedCollection(usernames: [String!]!): MergedCollection! — server-side merge via BggThing.merged_for_users scope. One DB query, deduped things with owner arrays.",
+      "D-03": "Individual columns on bgg_things for statistics: average, bayes_average, users_rated, average_weight, num_comments. Clean, queryable, indexable. Migration needed.",
+      "D-04": "Skip thing detail queries (thing(id), things(ids)). Game cards link to BGG (COLL-12). Smaller schema.",
+      "D-05": "Minimal User type: username + avatar only. Full profile is v2.",
+      "D-06": "Two mutations with dry-validation contracts: importCollection(username: String!): ImportResult and validateBggUsername(username: String!): ValidationResult. Start contract-first pattern in Phase 3, Phase 4 inherits. [NEEDS ADR: ADR-004]",
+      "D-07": "Dedicated HotItemType (id, name, thumbnail, rank, yearPublished) and SearchResultType (id, name, yearPublished) — only fields BGG actually returns for each endpoint. Accurate field availability.",
+      "D-08": "MergedCollection wrapper type: { items: [MergedThing!]!, syncStatuses: [UserSyncStatus!]! }. MergedThing = Thing fields + owners: [Owner!]!. UserSyncStatus = { username, status (READY|SYNCING|QUEUED|ERROR), lastSyncedAt, error }. Frontend gets games + per-user sync state in one query. [NEEDS ADR: ADR-005]"
+    },
+    "Collection import UX flow": {
+      "D-09": "Auto-import on submit: user enters usernames → inline validation → importCollection mutation fires automatically for each valid user → frontend subscribes to sync status → shows skeleton loaders with per-user status → full collection renders when ready. Stale cached data shown immediately (stale-while-revalidate). [NEEDS ADR: ADR-006]",
+      "D-10": "Per-user status cards in sidebar: colored badges (yellow Syncing, green Ready, red Failed) with game count. Game grid shows partial results from ready users while others sync. Per-user retry button on error.",
+      "D-11": "GraphQL subscriptions for real-time sync status (no polling). Solid Cable (DB-backed, no Redis) + graphql-ruby Subscriptions. SubscriptionType with collectionSynced(username: String!): SyncStatus!. ImportCollectionJob broadcasts status changes. Frontend uses useSubscription. [NEEDS ADR: ADR-007]",
+      "D-12": "Manual refresh: per-user 'Refresh' button with 15-min cooldown (disabled with countdown timer if too recent). Stale-while-revalidate: old data shown while refreshing.",
+      "D-13": "ADRs in docs/adr/ with MADR format (Context, Decision, Consequences, Alternatives). CONTEXT.md references them as canonical refs. Planner/executor creates them during execution. Meta-decision: most interesting decisions get ADRs."
+    },
+    "Permalink & URL state": {
+      "D-14": "Real-time history.replaceState — URL updates silently on every filter/search/sort/grouping/owner-toggle change. Address bar always reflects current state. No explicit Share button needed.",
+      "D-15": "Owner filter encoded in URL — &owners=alice,bob for toggled-on owners. Full fidelity replay of sender's view.",
+      "D-16": "Omit default/empty values from URL — only non-default values appear. Shorter, readable permalinks: /collection?usernames=alice,bob&players=4&sort=rating.",
+      "D-17": "No legacy /u/:usernames compat — only /collection?usernames= format. Clean break from v1."
+    },
+    "Layout & navigation": {
+      "D-18": "Three routes: / (landing/hero with username input), /collection (main merged view with permalink state), /hot (hot games). Search is a panel inside /collection, not a separate route.",
+      "D-19": "Sidebar + topbar layout. Left sidebar: user list with sync status badges, owner toggles, refresh buttons. Main content: game grid. Top bar: app name, nav links, username input. Sidebar collapses to drawer on mobile.",
+      "D-20": "md breakpoint (768px) — sidebar visible on md+ (≥768px), collapses to slide-out drawer with hamburger toggle on mobile (<768px). Standard Tailwind breakpoint.",
+      "D-21": "Auto-fill grid with minmax(180px, 1fr) — cards size to fit, ~4-6 columns on desktop, 2 on mobile. Dense, efficient. Matches reference app pattern."
+    }
+  },
+  "deferred_ideas": [
+    "HTTP QUERY method (draft-ietf-httpbis-safe-method-w-body) — no browser support, can't use for permalinks, Apollo doesn't support it, URI length not a constraint. Revisit if adopted.",
+    "Server-side search (Postgres pg_trgm/FTS) — Fuse.js client-side breaks >300 games. Fine for v1. Move to v2.",
+    "Thing detail pages — game cards link to BGG instead. v2 if in-app pages wanted.",
+    "Legacy /u/:usernames permalink compat — clean break from v1. No users to migrate."
+  ]
+}
