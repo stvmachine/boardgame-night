@@ -82,13 +82,13 @@ Plans:
 
 Plans:
 
-- [ ] 03-01-PLAN.md — Backend foundation: statistics migration, BggThing/BggCollectionItem models, normalizer/persister, GraphQL types/loaders, UserType, UserSyncStatusType
+- [ ] 03-01-PLAN.md — Backend foundation: statistics migration, BggThing/BggCollectionItem models, normalizer/persister, GraphQL types/loaders, UserType, UserSyncStatusType, SyncStatusEnum
 - [ ] 03-02-PLAN.md — GraphQL query wiring: mergedCollection, user, minimal CollectionView + GameCard/GameGrid, schema codegen
-- [ ] 03-03-PLAN.md — Import/sync API: Solid Cable, subscriptions, mutations, dry-rails contracts, Bgg::Client#hot, group/session mutations
-- [ ] 03-04-PLAN.md — Landing + discovery: hotItems, search, HomeView, UsernameForm, HotList, Sidebar, collectors Pinia store
+- [ ] 03-03-PLAN.md — Import/sync API: Solid Cable, collectionSynced subscription, ImportCollection mutation, Bgg::Client#hot
+- [ ] 03-04-PLAN.md — Landing + discovery: hotItems, search, validateBggUsername, HomeView, UsernameForm, HotList
 - [ ] 03-05-PLAN.md — Architecture Decision Records: ADR-003..007 and RESEARCH.md Open Questions resolved
-- [ ] 03-06-PLAN.md — Utilities + shell: Tailwind v4, AppShell/AppHeader/App.vue, filter composables, Fuse.js search wrapper
-- [ ] 03-07-PLAN.md — CollectionView polish: filters/sort/group-by, empty state, permalink preservation, Playwright e2e tests
+- [ ] 03-06-PLAN.md — Utilities + shell: Tailwind v4 CSS-first, AppShell/AppHeader/MobileDrawer, Sidebar, filter composables, Fuse.js wrapper
+- [ ] 03-07-PLAN.md — CollectionView polish: filters/sort/group-by, owner select/deselect, usePermalink, e2e tests
 
 **UI hint**: yes
 
