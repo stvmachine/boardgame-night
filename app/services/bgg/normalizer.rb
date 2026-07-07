@@ -41,6 +41,7 @@ module Bgg
     end
 
     def normalize_collection_item(item)
+      rating = item.at_css("stats > rating")
       {
         id: item["objectid"].to_i,
         name: item.at_css("name")&.text,
@@ -55,7 +56,14 @@ module Bgg
           min_playtime: item.at_css("stats")&.attr("minplaytime")&.to_i,
           max_playtime: item.at_css("stats")&.attr("maxplaytime")&.to_i,
           num_owned: item.at_css("stats")&.attr("numowned")&.to_i,
-          rating: item.at_css("stats > rating")&.attr("value")&.to_f
+          rating: item.at_css("stats > rating")&.attr("value")&.to_f,
+          users_rated: rating&.at_css("usersrated")&.attr("value")&.to_i,
+          average: rating&.at_css("average")&.attr("value")&.to_f,
+          bayes_average: rating&.at_css("bayesaverage")&.attr("value")&.to_f,
+          average_weight: rating&.at_css("averageweight")&.attr("value")&.to_f,
+          num_comments: rating&.at_css("numcomments")&.attr("value")&.to_i,
+          stddev: rating&.at_css("stddev")&.attr("value")&.to_f,
+          median: rating&.at_css("median")&.attr("value")&.to_f
         }
       }
     end

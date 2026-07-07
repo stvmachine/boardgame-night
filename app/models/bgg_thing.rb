@@ -12,4 +12,10 @@ class BggThing < ApplicationRecord
       .where(bgg_collections: { user_id: user_ids })
       .distinct
   }
+
+  scope :merged_for_bgg_usernames, ->(bgg_usernames) {
+    joins(:bgg_collections, :users)
+      .where(users: { bgg_username: bgg_usernames })
+      .distinct
+  }
 end

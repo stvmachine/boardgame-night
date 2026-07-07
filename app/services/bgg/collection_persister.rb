@@ -54,7 +54,12 @@ module Bgg
         max_playtime: item[:stats]&.[](:max_playtime),
         image: item[:image],
         thumbnail: item[:thumbnail],
-        description: item[:description]
+        description: item[:description],
+        average: item[:stats]&.[](:average),
+        bayes_average: item[:stats]&.[](:bayes_average),
+        users_rated: item[:stats]&.[](:users_rated),
+        average_weight: item[:stats]&.[](:average_weight),
+        num_comments: item[:stats]&.[](:num_comments)
       )
       thing.save! if thing.changed?
       thing

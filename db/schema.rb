@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_03_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_07_000002) do
   create_table "bgg_collections", force: :cascade do |t|
     t.integer "bgg_thing_id", null: false
     t.datetime "created_at", null: false
@@ -23,6 +23,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_000002) do
   end
 
   create_table "bgg_things", force: :cascade do |t|
+    t.decimal "average", precision: 10, scale: 6
+    t.decimal "average_weight", precision: 10, scale: 6
+    t.decimal "bayes_average", precision: 10, scale: 6
     t.datetime "created_at", null: false
     t.text "description"
     t.string "image"
@@ -32,22 +35,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_000002) do
     t.integer "min_players"
     t.integer "min_playtime"
     t.string "name", null: false
+    t.integer "num_comments"
     t.integer "objectid", null: false
     t.integer "playing_time"
     t.string "thumbnail"
     t.datetime "updated_at", null: false
+    t.integer "users_rated"
     t.integer "year_published"
     t.index ["name"], name: "index_bgg_things_on_name"
     t.index ["objectid"], name: "index_bgg_things_on_objectid", unique: true
   end
 
   create_table "users", force: :cascade do |t|
+    t.string "bgg_avatar_url"
     t.string "bgg_username"
     t.datetime "created_at", null: false
     t.string "email"
     t.string "password_digest"
     t.datetime "updated_at", null: false
     t.string "username", null: false
+    t.index ["bgg_username"], name: "index_users_on_bgg_username"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["username"], name: "index_users_on_username", unique: true
   end
