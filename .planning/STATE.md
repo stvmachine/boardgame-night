@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 03
-current_phase_name: graphql-api-collection-surface-v1-parity
-status: executing
-stopped_at: Completed 03-04-PLAN.md
-last_updated: "2026-07-07T09:01:39.120Z"
+status: completed
+stopped_at: Completed 03-07-PLAN.md
+last_updated: "2026-07-07T21:51:18.923Z"
 last_activity: 2026-07-07
-last_activity_desc: Phase 03 execution started
+last_activity_desc: Phase 03 marked complete
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 13
-  completed_plans: 12
-  percent: 50
+  completed_plans: 13
+  percent: 75
+current_phase_name: graphql-api-collection-surface-v1-parity
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 
 ## Current Position
 
-Phase: 03 (graphql-api-collection-surface-v1-parity) — EXECUTING
+Phase: 03 — COMPLETE
 Plan: 7 of 7
-Status: Ready to execute
-Last activity: 2026-07-07 — Phase 03 execution started
+Status: Phase 03 complete
+Last activity: 2026-07-07 — Phase 03 marked complete
 
 Progress: [██████░░░░] 62% (Phase 1 ✅, Phase 2 ✅ — 4 phases total)
 
@@ -72,6 +72,7 @@ Progress: [██████░░░░] 62% (Phase 1 ✅, Phase 2 ✅ — 4 p
 | Phase 03-graphql-api-collection-surface-v1-parity P06 | 27min | 3 tasks | 14 files |
 | Phase 03-graphql-api-collection-surface-v1-parity P03 | 30min | 2 tasks | 29 files |
 | Phase 03 P03-04 | 29min | 2 tasks | 23 files |
+| Phase 03-graphql-api-collection-surface-v1-parity P07 | 130 | 3 tasks | 23 files |
 
 ## Accumulated Context
 
@@ -114,6 +115,10 @@ Recent decisions affecting current work:
 - [Phase ?]: Added graphql:schema:dump Rake task because the project did not expose one
 - [Phase ?]: Split discovery types into separate files per Zeitwerk convention — A single discovery_types.rb defining Types::HotItemType etc. violates Rails Zeitwerk; separate files match class names and avoid NameError on boot.
 - [Phase ?]: Implemented format-only username validation; BGG existence check deferred — The plan scoped validateBggUsername to format validation. BGG existence check will be added when the import flow needs to reject non-existent usernames before queueing Solid Queue jobs.
+- [Phase 03-graphql-api-collection-surface-v1-parity]: Created a dedicated Pinia filter store so filter and selected-owner state can be shared between Sidebar and CollectionView without prop drilling.
+- [Phase 03-graphql-api-collection-surface-v1-parity]: Made the collectors store the canonical owner of the usernames list and route query sync; removed the Sidebar's duplicate URL watcher.
+- [Phase 03-graphql-api-collection-surface-v1-parity]: Implemented usePermalink with URLSearchParams and history.replaceState to preserve filters, sort, group, and owner selection across reloads without router navigation loops.
+- [Phase 03-graphql-api-collection-surface-v1-parity]: Used a Rails rake task + Playwright globalSetup for e2e fixtures so tests do not depend on live BGG or credentials.
 
 ### Pending Todos
 
@@ -139,6 +144,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-07T09:01:39.113Z
-Stopped at: Completed 03-04-PLAN.md
+Last session: 2026-07-07T21:51:18.916Z
+Stopped at: Completed 03-07-PLAN.md
 Resume file: None
