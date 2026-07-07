@@ -689,15 +689,15 @@ export function decodePermalink(params: URLSearchParams): { usernames: string[];
 
 1. **RESOLVED: Does `User` need a `bgg_avatar_url` column for `UserType.avatar`?**
     - What we know: `UserType` per D-05 has `avatar`. BGG `/user` endpoint returns an avatar URL.
-    - Resolution: Plan 03-01 Task 1 adds `bgg_avatar_url` to `users` via migration; Plan 03-02 Task 2 persists it during `validateBggUsername` / import job.
+    - Resolution: Plan 03-01 Task 1 adds `bgg_avatar_url` to `users` via migration; Plan 03-02 Task 2 persists it during `validateBggUsername` / import job. See ADR-005 (async import pipeline) and ADR-006 (Apollo normalized cache for user data).
 
 2. **RESOLVED: What is the exact shape of statistics fields returned by `Bgg::Normalizer`?**
     - What we know: `CollectionPersister` currently assigns from `item[:stats]`. D-03 lists `average`, `bayes_average`, `users_rated`, `average_weight`, `num_comments`.
-    - Resolution: Plan 03-01 Task 1 inspects `app/services/bgg/normalizer.rb`, maps the collection XML rating-block keys `:users_rated`, `:average`, `:bayes_average`, `:average_weight`, and `:num_comments` under `item[:stats]`, and updates the persister accordingly.
+    - Resolution: Plan 03-01 Task 1 inspects `app/services/bgg/normalizer.rb`, maps the collection XML rating-block keys `:users_rated`, `:average`, `:bayes_average`, `:average_weight`, and `:num_comments` under `item[:stats]`, and updates the persister accordingly. See ADR-005 (async import pipeline).
 
 3. **RESOLVED: Should `validateBggUsername` cache/persist the BGG user record?**
     - What we know: The mutation validates inline. For repeated validation, a cache would reduce BGG calls.
-    - Resolution: Plan 03-02 Task 2 calls `Bgg::Client#user` live with BGG HTTP-level caching (30 min TTL implied by `Faraday`/`Rails.cache`); no DB persistence of the validation lookup is needed for v1 because the avatar column is persisted only during the import job.
+    - Resolution: Plan 03-02 Task 2 calls `Bgg::Client#user` live with BGG HTTP-level caching (30 min TTL implied by `Faraday`/`Rails.cache`); no DB persistence of the validation lookup is needed for v1 because the avatar column is persisted only during the import job. See ADR-007 (dry-rails validation contracts).
 
 ## Environment Availability
 
