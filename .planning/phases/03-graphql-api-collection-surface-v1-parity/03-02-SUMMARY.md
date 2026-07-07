@@ -126,7 +126,7 @@ Each task was committed atomically:
 2. **Task 1 (GREEN):** Implement `mergedCollection` and `user` queries — `3e5f35c` (feat)
 3. **Task 2:** Minimal CollectionView, GameCard, GameGrid, and codegen — `04509fd` (feat)
 
-**Plan metadata:** `0ac82fd` (docs: complete plan)
+**Plan metadata:** `09c5aca` (docs: complete plan)
 
 ## Files Created/Modified
 
