@@ -5,16 +5,16 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: graphql-api-collection-surface-v1-parity
 status: executing
-stopped_at: Completed 03-05-PLAN.md
-last_updated: "2026-07-07T04:54:01.006Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-07-07T05:15:47.725Z"
 last_activity: 2026-07-07
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 13
-  completed_plans: 8
-  percent: 62
+  completed_plans: 9
+  percent: 50
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 ## Current Position
 
 Phase: 03 (graphql-api-collection-surface-v1-parity) — EXECUTING
-Plan: 3 of 7
+Plan: 4 of 7
 Status: Ready to execute
 Last activity: 2026-07-07 — Phase 03 execution started
 
@@ -68,6 +68,7 @@ Progress: [██████░░░░] 62% (Phase 1 ✅, Phase 2 ✅ — 4 p
 | Phase 02 P03 | ~15min | 2 tasks | 5 files |
 | Phase 03 P01 | 16min | 2 tasks | 15 files |
 | Phase 03 P05 | 3 min | 2 tasks | 8 files |
+| Phase 03 P02 | 10min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -98,6 +99,9 @@ Recent decisions affecting current work:
 - [Phase 03]: Captured Phase 3 architecture decisions in ADR-003 through ADR-007 — These ADRs document GraphQL Dataloader, Solid trifecta, async BGG import, Apollo cache, and dry-rails contracts
 - [Phase 03]: Extended ADR README to index ADR-001 through ADR-007 for full project traceability — Indexing all ADRs in one README makes past decisions discoverable for future maintenance
 - [Phase 03]: Marked Phase 3 RESEARCH.md Open Questions as RESOLVED with ADR references — Each open question now points to the ADR that provides the architectural rationale for its resolution
+- [Phase ?]: Return UserSyncStatus structs with status READY for all requested usernames on the read path; subscriptions will be added in Plan 03-03.
+- [Phase ?]: Use a direct Ruby Struct (SyncStatus) for the UserSyncStatus resolver payload because sync status is currently transient.
+- [Phase ?]: GameCard renders owner avatars inline as deterministic colored initials rather than importing the not-yet-existing MemberAvatar component (Plan 03-06).
 
 ### Pending Todos
 
@@ -123,6 +127,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-07T04:52:56.274Z
-Stopped at: Completed 03-05-PLAN.md
+Last session: 2026-07-07T05:15:47.718Z
+Stopped at: Completed 03-02-PLAN.md
 Resume file: None

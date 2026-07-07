@@ -78,7 +78,7 @@ Plans:
   4. User can share a permalink URL for a set of usernames, select-all/deselect-all owners, collapse/expand sidebar sections, and manually refresh cached collections (15-min cooldown, stale-while-revalidate) (COLL-10, COLL-14, COLL-15, COLL-18)
   5. The GraphQL schema exposes the full v1 query contract (things, search, users, collections, hot items) with Dataloader batching (no N+1 BGG calls), and codegen produces typed frontend composables committed to the repo (GQL-02, GQL-05, COLL-17)
 
-**Plans**: 2/7 plans executed
+**Plans**: 3/7 plans executed
 
 Plans:
 **Wave 1**
@@ -88,7 +88,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 03-02-PLAN.md — GraphQL query wiring: mergedCollection, user, minimal CollectionView + GameCard/GameGrid, schema codegen
+- [x] 03-02-PLAN.md — GraphQL query wiring: mergedCollection, user, minimal CollectionView + GameCard/GameGrid, schema codegen
 - [ ] 03-06-PLAN.md — Utilities + shell: Tailwind v4 CSS-first, AppShell/AppHeader/MobileDrawer, Sidebar, filter composables, Fuse.js wrapper
 
 **Wave 3** *(blocked on Wave 2 completion)*
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Monorepo Shell | 3/3 | Complete    | 2026-07-02 |
 | 2. BGG Integration Layer + Persistence | 3/3 | Complete    | 2026-07-04 |
-| 3. GraphQL API + Collection Surface (v1 Parity) | 2/7 | In Progress|  |
+| 3. GraphQL API + Collection Surface (v1 Parity) | 3/7 | In Progress|  |
 | 4. Auth + Friend Groups + Session Lifecycle | 0/TBD | Not started | - |
 
 ---

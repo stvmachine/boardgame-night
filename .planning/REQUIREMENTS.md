@@ -39,8 +39,8 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 - [x] **COLL-09**: User sees member color avatars (deterministic per-username color) as owner badges on game cards
 - [ ] **COLL-10**: User can share a permalink URL for a set of usernames (URL state sync, copy-to-clipboard)
 - [ ] **COLL-11**: User sees hot/trending BGG games on the landing page (top 30 thumbnails via hotItems)
-- [ ] **COLL-12**: User sees a game card with thumbnail, name (2-line ellipsis), rating badge, players icon, time icon, complexity badge, and owner avatars (click → BGG boardgame page)
-- [ ] **COLL-13**: User sees loading, empty, and error states (skeleton loaders, "No collectors selected", "No games found", invalid-user banner, per-user error isolation)
+- [x] **COLL-12**: User sees a game card with thumbnail, name (2-line ellipsis), rating badge, players icon, time icon, complexity badge, and owner avatars (click → BGG boardgame page)
+- [x] **COLL-13**: User sees loading, empty, and error states (skeleton loaders, "No collectors selected", "No games found", invalid-user banner, per-user error isolation)
 - [ ] **COLL-14**: User can collapse/expand filter, search, and collector sections in the sidebar (with active filter badge and Clear Filters)
 - [ ] **COLL-15**: User can select-all / deselect-all members to control which owners' games show
 - [ ] **COLL-16**: Layout is responsive (desktop fixed sidebar + mobile full-screen drawer, grid 1→5 cols by breakpoint)
@@ -78,7 +78,7 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 - [x] **GQL-02**: GraphQL schema exposes queries for things, search, users, collections, hot items (matching the reference proxy's contract)
 - [ ] **GQL-03**: GraphQL mutations use dry-validation contracts for input validation (not strong_params)
 - [x] **GQL-04**: GraphQL handles Apollo batched queries (Schema.multiplex for params[:_json] arrays)
-- [ ] **GQL-05**: GraphQL type definitions are generated from Rails schema and committed (codegen contract between frontend and backend)
+- [x] **GQL-05**: GraphQL type definitions are generated from Rails schema and committed (codegen contract between frontend and backend)
 
 ## v2 Requirements (Deferred — Add After Validation)
 
@@ -137,8 +137,8 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | COLL-09 | Phase 3 | Complete |
 | COLL-10 | Phase 3 | Pending |
 | COLL-11 | Phase 3 | Pending |
-| COLL-12 | Phase 3 | Pending |
-| COLL-13 | Phase 3 | Pending |
+| COLL-12 | Phase 3 | Complete |
+| COLL-13 | Phase 3 | Complete |
 | COLL-14 | Phase 3 | Pending |
 | COLL-15 | Phase 3 | Pending |
 | COLL-16 | Phase 3 | Pending |
@@ -164,7 +164,7 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | GQL-02 | Phase 3 | Complete |
 | GQL-03 | Phase 4 | Pending |
 | GQL-04 | Phase 1 | Complete |
-| GQL-05 | Phase 3 | Pending |
+| GQL-05 | Phase 3 | Complete |
 
 ---
 *Requirements defined: 2026-07-01*
