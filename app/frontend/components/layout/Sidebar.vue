@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { useCollectorsStore } from '@/stores/collectors'
+import { useFilterStore } from '@/stores/filters'
 import MemberAvatar from '@/components/common/MemberAvatar.vue'
+import CollectorsSection from '@/components/layout/CollectorsSection.vue'
 
 const store = useCollectorsStore()
+const filterStore = useFilterStore()
+const { selectedOwners } = storeToRefs(filterStore)
 const route = useRoute()
 const router = useRouter()
 
@@ -37,10 +42,18 @@ function add() {
 function remove(username: string) {
   store.remove(username)
 }
+
+function selectAllOwners() {
+  filterStore.selectAllOwners(store.usernames)
+}
+
+function deselectAllOwners() {
+  filterStore.deselectAllOwners()
+}
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="space-y-6">
     <div class="space-y-1">
       <label for="sidebar-username" class="text-sm font-medium text-neutral-700">
         Add collector
@@ -63,6 +76,14 @@ function remove(username: string) {
         </button>
       </div>
     </div>
+
+    <CollectorsSection
+      :usernames="store.usernames"
+      :selected="selectedOwners"
+      @toggle="filterStore.toggleOwner"
+      @select-all="selectAllOwners"
+      @deselect-all="deselectAllOwners"
+    />
 
     <div v-if="store.usernames.length === 0" class="text-sm text-neutral-500">
       No collectors selected.

@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 import { useMergedCollectionQuery } from '../generated/operations'
 import { useCollectionFilters } from '../composables/useCollectionFilters'
+import { useFilterStore } from '../stores/filters'
+import { sortGames } from '../utils/sorting'
+import { groupGames } from '../utils/grouping'
 import GameGrid from '../components/collection/GameGrid.vue'
+import CollectionFilters from '../components/collection/CollectionFilters.vue'
+import SortControl from '../components/collection/SortControl.vue'
+import GroupByToggle from '../components/collection/GroupByToggle.vue'
+import EmptyState from '../components/collection/EmptyState.vue'
 
 const route = useRoute()
+const filterStore = useFilterStore()
+const { query, playerCount, timeBucket, complexityBucket, ratingMin, selectedOwners, sort, groupBy } = storeToRefs(filterStore)
 
 const usernames = computed(() => {
   const raw = route.query.usernames
@@ -20,35 +30,60 @@ const { result, loading } = useMergedCollectionQuery(
 
 const allGames = computed(() => result.value?.mergedCollection.items ?? [])
 
-const {
+const { filteredGames } = useCollectionFilters(allGames, {
   query,
   playerCount,
-  filteredGames,
-} = useCollectionFilters(allGames)
+  timeBucket,
+  complexityBucket,
+  ratingMin,
+  selectedOwners
+})
+
+const sortedGames = computed(() => sortGames(filteredGames.value, filterStore.sort))
+const groupedGames = computed(() => groupGames(sortedGames.value, filterStore.groupBy))
+
+const hasActiveFilters = computed(() => {
+  return query.value.trim() !== '' ||
+    playerCount.value != null ||
+    timeBucket.value != null ||
+    complexityBucket.value != null ||
+    ratingMin.value != null
+})
 </script>
 
 <template>
   <div class="p-4 md:p-6 space-y-4">
-    <div class="flex flex-col sm:flex-row gap-4">
-      <input
-        v-model="query"
-        type="text"
-        placeholder="Search games..."
-        class="flex-1 rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    <div class="flex flex-col lg:flex-row gap-4 lg:items-start">
+      <CollectionFilters
+        v-model:query="query"
+        v-model:player-count="playerCount"
+        v-model:time-bucket="timeBucket"
+        v-model:complexity-bucket="complexityBucket"
+        v-model:rating-min="ratingMin"
+        class="flex-1"
       />
-      <select
-        v-model="playerCount"
-        class="rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      >
-        <option :value="null">Any players</option>
-        <option v-for="n in 10" :key="n" :value="n">{{ n }} players</option>
-      </select>
+      <div class="flex flex-row gap-4">
+        <SortControl v-model="sort" />
+        <GroupByToggle v-model="groupBy" />
+      </div>
     </div>
 
-    <div v-if="usernames.length === 0" class="text-center py-16">
-      <h2 class="text-xl font-semibold text-neutral-800">No collectors selected</h2>
-      <p class="text-neutral-600 mt-2">Enter one or more BoardGameGeek usernames to merge collections.</p>
-    </div>
-    <GameGrid v-else :games="filteredGames" :loading="loading" />
+    <EmptyState
+      v-if="usernames.length === 0"
+      heading="No collectors selected"
+      body="Enter one or more BoardGameGeek usernames to merge collections."
+    />
+    <EmptyState
+      v-else-if="filteredGames.length === 0 && !loading"
+      heading="No games found"
+      body="Try clearing filters or selecting more collectors."
+      :show-clear="hasActiveFilters"
+      @clear="filterStore.clearFilters"
+    />
+    <GameGrid
+      v-else
+      :groups="groupedGames"
+      :loading="loading"
+    />
   </div>
 </template>
