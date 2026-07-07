@@ -3,11 +3,16 @@ import { createFuseIndex, searchFuse } from '@/utils/fuseSearch'
 import { playerCountFilter, playtimeFilter } from '@/utils/filters'
 import type { MergedThing } from '@/generated/operations'
 
-function makeGame(overrides: Partial<MergedThing> = {}): MergedThing {
+interface TestGame extends MergedThing {
+  originalname?: string
+}
+
+function makeGame(overrides: Partial<TestGame> = {}): TestGame {
   return {
     __typename: 'MergedThing',
     id: '1',
     name: 'Test Game',
+    originalname: 'Test Game',
     yearPublished: 2020,
     minPlayers: 2,
     maxPlayers: 4,
@@ -18,7 +23,7 @@ function makeGame(overrides: Partial<MergedThing> = {}): MergedThing {
     isExpansion: false,
     owners: [{ __typename: 'Owner', bggUsername: 'alice', avatar: null }],
     ...overrides
-  } as MergedThing
+  } as TestGame
 }
 
 describe('fuseSearch', () => {
