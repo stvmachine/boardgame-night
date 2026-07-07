@@ -4,6 +4,20 @@ class BoardgameNightSchema < GraphQL::Schema
   mutation(Types::MutationType)
   query(Types::QueryType)
 
+  # Types defined in this phase are not yet wired into Query/Mutation; expose them
+  # as orphan types so they are loaded into the schema and available to codegen.
+  orphan_types(
+    Types::ThingType,
+    Types::MergedThingType,
+    Types::MergedCollectionType,
+    Types::OwnerType,
+    Types::UserType,
+    Types::UserSyncStatusType
+  )
+
+  # SyncStatusEnum is reachable via UserSyncStatusType and does not need to be
+  # listed as an orphan type.
+
   # For batch-loading (see https://graphql-ruby.org/dataloader/overview.html)
   use GraphQL::Dataloader
 
