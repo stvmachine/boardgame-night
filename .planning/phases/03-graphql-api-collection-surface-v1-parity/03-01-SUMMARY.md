@@ -144,7 +144,7 @@ Each task followed the TDD RED/GREEN cycle:
 3. **Task 2 (RED):** Add failing tests for collection GraphQL types and loaders — `0263f20`
 4. **Task 2 (GREEN):** Add GraphQL collection surface types and Dataloader loaders — `225089a`
 
-**Plan metadata:** `TBD` (docs: complete plan)
+**Plan metadata:** `14d1ddb` (docs: complete plan), `bc6ae4a` (docs: append self-check)
 
 ## Files Created/Modified
 
