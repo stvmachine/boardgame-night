@@ -1,0 +1,33 @@
+query MergedCollection($usernames: [String!]!) {
+  mergedCollection(usernames: $usernames) {
+    items {
+      id
+      name
+      yearPublished
+      minPlayers
+      maxPlayers
+      minPlaytime
+      maxPlaytime
+      minAge
+      image
+      thumbnail
+      description
+      average
+      bayesAverage
+      usersRated
+      averageWeight
+      isExpansion
+      owners {
+        bggUsername
+        avatar
+      }
+    }
+    syncStatuses {
+      username
+      status
+      lastSyncedAt
+      error
+      gameCount
+    }
+  }
+}

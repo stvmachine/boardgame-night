@@ -1,3 +1,33 @@
+"""
+An ISO 8601-encoded datetime
+"""
+scalar ISO8601DateTime @specifiedBy(url: "https://tools.ietf.org/html/rfc3339")
+
+type MergedCollection {
+  items: [MergedThing!]!
+  syncStatuses: [UserSyncStatus!]!
+}
+
+type MergedThing {
+  average: Float
+  averageWeight: Float
+  bayesAverage: Float
+  description: String
+  id: ID!
+  image: String
+  isExpansion: Boolean!
+  maxPlayers: Int
+  maxPlaytime: Int
+  minAge: Int
+  minPlayers: Int
+  minPlaytime: Int
+  name: String!
+  owners: [Owner!]!
+  thumbnail: String
+  usersRated: Int
+  yearPublished: Int
+}
+
 type Mutation {
   """
   An example field added by the generator
@@ -5,9 +35,69 @@ type Mutation {
   testField: String!
 }
 
+type Owner {
+  avatar: String
+  bggUsername: String!
+}
+
 type Query {
   """
   Health check — proves the GraphQL endpoint is alive.
   """
   health: String!
+
+  """
+  Merge and deduplicate the BGG collections for the given usernames.
+  """
+  mergedCollection(
+    """
+    BGG usernames whose collections should be merged.
+    """
+    usernames: [String!]!
+  ): MergedCollection!
+
+  """
+  Look up a local user by their BGG username.
+  """
+  user(
+    """
+    BGG username to look up.
+    """
+    username: String!
+  ): User
+}
+
+enum SyncStatus {
+  """
+  Import failed
+  """
+  ERROR
+
+  """
+  Import is queued and waiting to start
+  """
+  QUEUED
+
+  """
+  Import completed successfully
+  """
+  READY
+
+  """
+  Import is in progress
+  """
+  SYNCING
+}
+
+type User {
+  avatar: String
+  username: String!
+}
+
+type UserSyncStatus {
+  error: String
+  gameCount: Int
+  lastSyncedAt: ISO8601DateTime
+  status: SyncStatus!
+  username: String!
 }

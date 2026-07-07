@@ -68,7 +68,7 @@ RSpec.describe "mergedCollection query" do
 end
 
 RSpec.describe "user query" do
-  let(:alice) { User.create!(username: "alice", bgg_username: "bggalice", password: "password") }
+  let!(:alice) { User.create!(username: "alice", bgg_username: "bggalice", password: "password") }
 
   it "looks up a user by bgg_username" do
     query = <<~GRAPHQL
