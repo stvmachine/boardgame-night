@@ -187,3 +187,11 @@ None - no external service configuration required.
 ---
 *Phase: 03-graphql-api-collection-surface-v1-parity*
 *Completed: 2026-07-07*
+
+## Self-Check: PASSED
+
+- [x] SUMMARY.md exists at `.planning/phases/03-graphql-api-collection-surface-v1-parity/03-01-SUMMARY.md`
+- [x] Task commits found: `789aa3b`, `8fdec2a`, `0263f20`, `225089a`
+- [x] Summary commit found: `ed5a883`
+- [x] Final metadata commit found: `14d1ddb` (plus amended self-check)
+- [x] All 79 backend specs pass
