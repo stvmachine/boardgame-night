@@ -31,21 +31,21 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 - [ ] **COLL-01**: User can validate a BGG username exists before fetching its collection (inline valid/invalid state)
 - [x] **COLL-02**: User can merge N BGG users' collections into a single deduplicated view (dedup by BGG objectId, owner list per game) — fixes v1's hardcoded 2-user limit
 - [ ] **COLL-03**: User can fuzzy-search the merged collection by game name (Fuse.js, multi-key, debounced)
-- [ ] **COLL-04**: User can filter the merged collection by number of players (range check: min ≤ n ≤ max)
+- [x] **COLL-04**: User can filter the merged collection by number of players (range check: min ≤ n ≤ max)
 - [ ] **COLL-05**: User can filter the merged collection by playing time (bucketed: ≤30, 30–60, 60–120, 120–180, 180–240, 240+ min)
 - [ ] **COLL-06**: User can filter the merged collection by complexity/weight (Light ≤2, Medium 2–3, Medium-Heavy 3–4, Heavy ≥4) — new vs v1
 - [ ] **COLL-07**: User can sort the merged collection by name (asc/desc), rating (asc/desc), year (asc/desc), and complexity (asc/desc)
 - [ ] **COLL-08**: User can group the merged collection by player count, by rating, by best-player-count, or by none (collapsible groups with expand/collapse all)
 - [x] **COLL-09**: User sees member color avatars (deterministic per-username color) as owner badges on game cards
 - [ ] **COLL-10**: User can share a permalink URL for a set of usernames (URL state sync, copy-to-clipboard)
-- [ ] **COLL-11**: User sees hot/trending BGG games on the landing page (top 30 thumbnails via hotItems)
+- [x] **COLL-11**: User sees hot/trending BGG games on the landing page (top 30 thumbnails via hotItems)
 - [x] **COLL-12**: User sees a game card with thumbnail, name (2-line ellipsis), rating badge, players icon, time icon, complexity badge, and owner avatars (click → BGG boardgame page)
 - [x] **COLL-13**: User sees loading, empty, and error states (skeleton loaders, "No collectors selected", "No games found", invalid-user banner, per-user error isolation)
 - [ ] **COLL-14**: User can collapse/expand filter, search, and collector sections in the sidebar (with active filter badge and Clear Filters)
 - [x] **COLL-15**: User can select-all / deselect-all members to control which owners' games show
 - [x] **COLL-16**: Layout is responsive (desktop fixed sidebar + mobile full-screen drawer, grid 1→5 cols by breakpoint)
 - [x] **COLL-17**: GraphQL collection queries use Dataloader to batch expansion/base-game lookups (no N+1 BGG API calls)
-- [ ] **COLL-18**: BGG collection data is cached (Solid Cache) with stale-while-revalidate pattern; user can trigger a manual refresh (15-min cooldown)
+- [x] **COLL-18**: BGG collection data is cached (Solid Cache) with stale-while-revalidate pattern; user can trigger a manual refresh (15-min cooldown)
 
 ### Authentication & User Accounts
 
@@ -129,21 +129,21 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | COLL-01 | Phase 3 | Pending |
 | COLL-02 | Phase 3 | Complete |
 | COLL-03 | Phase 3 | Pending |
-| COLL-04 | Phase 3 | Pending |
+| COLL-04 | Phase 3 | Complete |
 | COLL-05 | Phase 3 | Pending |
 | COLL-06 | Phase 3 | Pending |
 | COLL-07 | Phase 3 | Pending |
 | COLL-08 | Phase 3 | Pending |
 | COLL-09 | Phase 3 | Complete |
 | COLL-10 | Phase 3 | Pending |
-| COLL-11 | Phase 3 | Pending |
+| COLL-11 | Phase 3 | Complete |
 | COLL-12 | Phase 3 | Complete |
 | COLL-13 | Phase 3 | Complete |
 | COLL-14 | Phase 3 | Pending |
 | COLL-15 | Phase 3 | Complete |
 | COLL-16 | Phase 3 | Complete |
 | COLL-17 | Phase 3 | Complete |
-| COLL-18 | Phase 3 | Pending |
+| COLL-18 | Phase 3 | Complete |
 | AUTH-01 | Phase 4 | Pending |
 | AUTH-02 | Phase 4 | Pending |
 | AUTH-03 | Phase 4 | Pending |

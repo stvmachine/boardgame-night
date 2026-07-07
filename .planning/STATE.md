@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: graphql-api-collection-surface-v1-parity
 status: executing
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-07-07T05:41:11.632Z"
+stopped_at: Completed 03-03-PLAN.md
+last_updated: "2026-07-07T06:25:06.673Z"
 last_activity: 2026-07-07
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 13
-  completed_plans: 10
+  completed_plans: 11
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 ## Current Position
 
 Phase: 03 (graphql-api-collection-surface-v1-parity) — EXECUTING
-Plan: 5 of 7
+Plan: 6 of 7
 Status: Ready to execute
 Last activity: 2026-07-07 — Phase 03 execution started
 
@@ -70,6 +70,7 @@ Progress: [██████░░░░] 62% (Phase 1 ✅, Phase 2 ✅ — 4 p
 | Phase 03 P05 | 3 min | 2 tasks | 8 files |
 | Phase 03 P02 | 10min | 2 tasks | 12 files |
 | Phase 03-graphql-api-collection-surface-v1-parity P06 | 27min | 3 tasks | 14 files |
+| Phase 03-graphql-api-collection-surface-v1-parity P03 | 30min | 2 tasks | 29 files |
 
 ## Accumulated Context
 
@@ -105,6 +106,11 @@ Recent decisions affecting current work:
 - [Phase ?]: GameCard renders owner avatars inline as deterministic colored initials rather than importing the not-yet-existing MemberAvatar component (Plan 03-06).
 - [Phase ?]: Created the minimal ui Pinia store in Task 1 because AppHeader requires sidebarOpen; Task 3 only extended it with theme. — AppHeader needs a sidebar toggle as part of the mobile shell, so the ui store was created earlier than the plan scheduled.
 - [Phase ?]: Used Fuse keys ['name', 'originalname'] with threshold 0.3 because the generated MergedThing type does not include a nested name.text field. — The planned keys ['name', 'name.text', 'originalname'] assumed a nested name object; the generated MergedThing exposes name as a string, so keys were adjusted to match the available data shape.
+- [Phase ?]: Used Bgg::ServiceError instead of Bgg::Errors::ServiceError to match existing codebase convention
+- [Phase ?]: Switched Mutations::BaseMutation from GraphQL::Schema::RelayClassicMutation to GraphQL::Schema::Mutation for direct username argument
+- [Phase ?]: Used Dry::Validation::Contract for ApplicationContract because Dry::Rails::Contract is not a provided constant
+- [Phase ?]: Added cable/cache/queue database roles in test environment to support Solid Cable tests
+- [Phase ?]: Added graphql:schema:dump Rake task because the project did not expose one
 
 ### Pending Todos
 
@@ -130,6 +136,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-07T05:39:56.260Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-07-07T06:25:06.665Z
+Stopped at: Completed 03-03-PLAN.md
 Resume file: None
