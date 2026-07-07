@@ -11,7 +11,9 @@ import MobileDrawer from './MobileDrawer.vue'
         <a href="/" class="text-lg font-semibold text-indigo-600">BoardGame Night</a>
       </div>
       <nav class="hidden md:flex items-center gap-4 text-sm font-medium text-neutral-600">
+        <a href="/" class="hover:text-indigo-600">Home</a>
         <a href="/collection" class="hover:text-indigo-600">Collection</a>
+        <a href="/hot" class="hover:text-indigo-600">Hot</a>
       </nav>
     </header>
     <div class="flex flex-1 pt-14 md:pt-16">

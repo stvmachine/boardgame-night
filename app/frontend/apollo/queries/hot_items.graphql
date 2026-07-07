@@ -1,0 +1,9 @@
+query HotItems {
+  hotItems {
+    id
+    rank
+    name
+    yearPublished
+    thumbnail
+  }
+}

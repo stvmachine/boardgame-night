@@ -1,0 +1,10 @@
+mutation ValidateBggUsername($username: String!) {
+  validateBggUsername(username: $username) {
+    validationResult {
+      valid
+      username
+      exists
+      avatar
+    }
+  }
+}
