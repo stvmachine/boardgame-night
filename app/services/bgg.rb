@@ -7,6 +7,7 @@ module Bgg
   class ResourceNotFound < Error; end
   class ClientError < Error; end
   class ServerError < Error; end
+  class ServiceError < Error; end
   class NetworkError < Error; end
   class ParseError < Error; end
   class RateLimitError < Error; end

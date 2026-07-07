@@ -18,6 +18,9 @@ class BoardgameNightSchema < GraphQL::Schema
   # SyncStatusEnum is reachable via UserSyncStatusType and does not need to be
   # listed as an orphan type.
 
+  # For real-time subscriptions via Solid Cable (Action Cable adapter)
+  use GraphQL::Subscriptions::ActionCableSubscriptions
+
   # For batch-loading (see https://graphql-ruby.org/dataloader/overview.html)
   use GraphQL::Dataloader
 

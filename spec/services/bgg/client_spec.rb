@@ -70,6 +70,19 @@ RSpec.describe Bgg::Client, :bgg do
     XML
   end
 
+  let(:hot_xml) do
+    <<~XML
+      <?xml version="1.0" encoding="utf-8"?>
+      <items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+        <item id="174430" rank="1">
+          <thumbnail>https://cf.geekdo-images.com/something/pic2437871_t.jpg</thumbnail>
+          <name value="Gloomhaven" />
+          <yearpublished value="2017" />
+        </item>
+      </items>
+    XML
+  end
+
   let(:user_xml) do
     <<~XML
       <?xml version="1.0" encoding="utf-8"?>
@@ -170,6 +183,37 @@ RSpec.describe Bgg::Client, :bgg do
 
       result = client.user("stevmachine")
       expect(result).to be_a(Nokogiri::XML::Document)
+    end
+  end
+
+  describe "#user" do
+    it "looks up a user by username" do
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/user/)
+        .with(query: hash_including(name: "stevmachine"))
+        .to_return(status: 200, body: user_xml, headers: { "Content-Type" => "text/xml" })
+
+      result = client.user("stevmachine")
+      expect(result).to be_a(Nokogiri::XML::Document)
+    end
+  end
+
+  describe "#hot" do
+    it "fetches the BGG hotness list for board games" do
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/hot/)
+        .with(query: hash_including(type: "boardgame"))
+        .to_return(status: 200, body: hot_xml, headers: { "Content-Type" => "text/xml" })
+
+      result = client.hot
+      expect(result).to be_a(Nokogiri::XML::Document)
+      expect(result.at_css("item")["id"]).to eq("174430")
+    end
+
+    it "raises Bgg::ServerError on persistent 503" do
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/hot/)
+        .with(query: hash_including(type: "boardgame"))
+        .to_return(status: 503, body: "")
+
+      expect { client.hot }.to raise_error(Bgg::ServerError)
     end
   end
 
