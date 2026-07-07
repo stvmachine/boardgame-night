@@ -2,117 +2,19 @@
 type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 /** Internal type. DO NOT USE DIRECTLY. */
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+import type * as Types from './types';
+
 import gql from 'graphql-tag';
 import * as VueApolloComposable from '@vue/apollo-composable';
 import * as VueCompositionApi from '@vue/composition-api';
-export type Maybe<T> = T | null;
-export type InputMaybe<T> = Maybe<T>;
+export * from './types';
 export type ReactiveFunction<TParam> = () => TParam;
-/** All built-in and custom scalars, mapped to their actual values */
-export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
-  /** An ISO 8601-encoded datetime */
-  ISO8601DateTime: { input: unknown; output: unknown; }
-};
-
-export type MergedCollection = {
-  __typename?: 'MergedCollection';
-  items: Array<MergedThing>;
-  syncStatuses: Array<UserSyncStatus>;
-};
-
-export type MergedThing = {
-  __typename?: 'MergedThing';
-  average?: Maybe<Scalars['Float']['output']>;
-  averageWeight?: Maybe<Scalars['Float']['output']>;
-  bayesAverage?: Maybe<Scalars['Float']['output']>;
-  description?: Maybe<Scalars['String']['output']>;
-  id: Scalars['ID']['output'];
-  image?: Maybe<Scalars['String']['output']>;
-  isExpansion: Scalars['Boolean']['output'];
-  maxPlayers?: Maybe<Scalars['Int']['output']>;
-  maxPlaytime?: Maybe<Scalars['Int']['output']>;
-  minAge?: Maybe<Scalars['Int']['output']>;
-  minPlayers?: Maybe<Scalars['Int']['output']>;
-  minPlaytime?: Maybe<Scalars['Int']['output']>;
-  name: Scalars['String']['output'];
-  owners: Array<Owner>;
-  thumbnail?: Maybe<Scalars['String']['output']>;
-  usersRated?: Maybe<Scalars['Int']['output']>;
-  yearPublished?: Maybe<Scalars['Int']['output']>;
-};
-
-export type Mutation = {
-  __typename?: 'Mutation';
-  /** An example field added by the generator */
-  testField: Scalars['String']['output'];
-};
-
-export type Owner = {
-  __typename?: 'Owner';
-  avatar?: Maybe<Scalars['String']['output']>;
-  bggUsername: Scalars['String']['output'];
-};
-
-export type Query = {
-  __typename?: 'Query';
-  /** Health check — proves the GraphQL endpoint is alive. */
-  health: Scalars['String']['output'];
-  /** Merge and deduplicate the BGG collections for the given usernames. */
-  mergedCollection: MergedCollection;
-  /** Look up a local user by their BGG username. */
-  user?: Maybe<User>;
-};
+export type ImportCollectionMutationVariables = Exact<{
+  username: string;
+}>;
 
 
-export type QueryMergedCollectionArgs = {
-  usernames: Array<Scalars['String']['input']>;
-};
-
-
-export type QueryUserArgs = {
-  username: Scalars['String']['input'];
-};
-
-export enum SyncStatus {
-  /** Import failed */
-  Error = 'ERROR',
-  /** Import is queued and waiting to start */
-  Queued = 'QUEUED',
-  /** Import completed successfully */
-  Ready = 'READY',
-  /** Import is in progress */
-  Syncing = 'SYNCING'
-}
-
-export type User = {
-  __typename?: 'User';
-  avatar?: Maybe<Scalars['String']['output']>;
-  username: Scalars['String']['output'];
-};
-
-export type UserSyncStatus = {
-  __typename?: 'UserSyncStatus';
-  error?: Maybe<Scalars['String']['output']>;
-  gameCount?: Maybe<Scalars['Int']['output']>;
-  lastSyncedAt?: Maybe<Scalars['ISO8601DateTime']['output']>;
-  status: SyncStatus;
-  username: Scalars['String']['output'];
-};
-
-export type SyncStatus =
-  /** Import failed */
-  | 'ERROR'
-  /** Import is queued and waiting to start */
-  | 'QUEUED'
-  /** Import completed successfully */
-  | 'READY'
-  /** Import is in progress */
-  | 'SYNCING';
+export type ImportCollectionMutation = { importCollection: { user: { id: string, username: string, syncStatus: { username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null } } } | null };
 
 export type HealthQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -124,7 +26,7 @@ export type MergedCollectionQueryVariables = Exact<{
 }>;
 
 
-export type MergedCollectionQuery = { mergedCollection: { items: Array<{ id: string, name: string, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, minAge: number | null, image: string | null, thumbnail: string | null, description: string | null, average: number | null, bayesAverage: number | null, usersRated: number | null, averageWeight: number | null, isExpansion: boolean, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null }> } };
+export type MergedCollectionQuery = { mergedCollection: { items: Array<{ id: string, name: string, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, minAge: number | null, image: string | null, thumbnail: string | null, description: string | null, average: number | null, bayesAverage: number | null, usersRated: number | null, averageWeight: number | null, isExpansion: boolean, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null }> } };
 
 export type UserQueryVariables = Exact<{
   username: string;
@@ -133,7 +35,53 @@ export type UserQueryVariables = Exact<{
 
 export type UserQuery = { user: { username: string, avatar: string | null } | null };
 
+export type CollectionSyncedSubscriptionVariables = Exact<{
+  username: string;
+}>;
 
+
+export type CollectionSyncedSubscription = { collectionSynced: { username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null } };
+
+
+export const ImportCollectionDocument = gql`
+    mutation ImportCollection($username: String!) {
+  importCollection(username: $username) {
+    user {
+      id
+      username
+      syncStatus {
+        username
+        status
+        lastSyncedAt
+        error
+        gameCount
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useImportCollectionMutation__
+ *
+ * To run a mutation, you first call `useImportCollectionMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useImportCollectionMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useImportCollectionMutation({
+ *   variables: {
+ *     username: // value for 'username'
+ *   },
+ * });
+ */
+export function useImportCollectionMutation(options: VueApolloComposable.UseMutationOptions<ImportCollectionMutation, ImportCollectionMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<ImportCollectionMutation, ImportCollectionMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<ImportCollectionMutation, ImportCollectionMutationVariables>(ImportCollectionDocument, options);
+}
+export type ImportCollectionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<ImportCollectionMutation, ImportCollectionMutationVariables>;
 export const HealthDocument = gql`
     query Health {
   health
@@ -248,3 +196,34 @@ export function useUserLazyQuery(variables?: UserQueryVariables | VueComposition
   return VueApolloComposable.useLazyQuery<UserQuery, UserQueryVariables>(UserDocument, variables, options);
 }
 export type UserQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<UserQuery, UserQueryVariables>;
+export const CollectionSyncedDocument = gql`
+    subscription CollectionSynced($username: String!) {
+  collectionSynced(username: $username) {
+    username
+    status
+    lastSyncedAt
+    error
+    gameCount
+  }
+}
+    `;
+
+/**
+ * __useCollectionSyncedSubscription__
+ *
+ * To run a query within a Vue component, call `useCollectionSyncedSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useCollectionSyncedSubscription` returns an object from Apollo Client that contains result, loading and error properties
+ * you can use to render your UI.
+ *
+ * @param variables that will be passed into the subscription
+ * @param options that will be passed into the subscription, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/subscription.html#options;
+ *
+ * @example
+ * const { result, loading, error } = useCollectionSyncedSubscription({
+ *   username: // value for 'username'
+ * });
+ */
+export function useCollectionSyncedSubscription(variables: CollectionSyncedSubscriptionVariables | VueCompositionApi.Ref<CollectionSyncedSubscriptionVariables> | ReactiveFunction<CollectionSyncedSubscriptionVariables>, options: VueApolloComposable.UseSubscriptionOptions<CollectionSyncedSubscription, CollectionSyncedSubscriptionVariables> | VueCompositionApi.Ref<VueApolloComposable.UseSubscriptionOptions<CollectionSyncedSubscription, CollectionSyncedSubscriptionVariables>> | ReactiveFunction<VueApolloComposable.UseSubscriptionOptions<CollectionSyncedSubscription, CollectionSyncedSubscriptionVariables>> = {}) {
+  return VueApolloComposable.useSubscription<CollectionSyncedSubscription, CollectionSyncedSubscriptionVariables>(CollectionSyncedDocument, variables, options);
+}
+export type CollectionSyncedSubscriptionCompositionFunctionResult = VueApolloComposable.UseSubscriptionReturn<CollectionSyncedSubscription, CollectionSyncedSubscriptionVariables>;

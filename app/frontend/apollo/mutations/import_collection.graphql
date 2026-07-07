@@ -1,0 +1,15 @@
+mutation ImportCollection($username: String!) {
+  importCollection(username: $username) {
+    user {
+      id
+      username
+      syncStatus {
+        username
+        status
+        lastSyncedAt
+        error
+        gameCount
+      }
+    }
+  }
+}

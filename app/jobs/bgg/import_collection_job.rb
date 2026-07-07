@@ -40,25 +40,50 @@ class Bgg::ImportCollectionJob < ApplicationJob
   # All steps happen inside the concurrency lock. The rate limiter
   # inside Bgg::Client prevents exceeding BGG's 1-req/5s limit.
   def perform(username)
-    # Step 1: Validate user exists on BGG
+    broadcast(username, "QUEUED")
+    broadcast(username, "SYNCING")
+
     validate_user!(username)
 
-    # Step 2: Fetch collection (two-call workaround with fallback)
+    # Fetch collection (two-call workaround with fallback)
     collection = Bgg::CollectionFetcher.new.fetch(username)
 
-    # Step 3: Persist to database via existing CollectionPersister
-    user = User.find_by(bgg_username: username)
-    if user
-      result = Bgg::CollectionPersister.new(user: user).persist_collection!(collection)
-      Rails.logger.info("[Bgg::ImportCollectionJob] Successfully imported #{result[:added]} games, " \
-                        "#{result[:updated]} updated for '#{username}'")
-    else
-      Rails.logger.warn("[Bgg::ImportCollectionJob] Collection fetched for '#{username}' " \
-                        "but no local user record found — skipping persist")
+    # Persist to database via existing CollectionPersister
+    user = User.find_or_create_by!(bgg_username: username) do |u|
+      u.username = username
+      u.password = SecureRandom.hex(16)
     end
+
+    result = Bgg::CollectionPersister.new(user: user).persist_collection!(collection)
+    Rails.logger.info("[Bgg::ImportCollectionJob] Successfully imported #{result[:added]} games, " \
+                      "#{result[:updated]} updated for '#{username}'")
+
+    broadcast(username, "READY", game_count: result[:added] + result[:updated])
+  rescue Bgg::InvalidUsernameError, Faraday::ResourceNotFound => e
+    broadcast(username, "ERROR", error: e.message)
+    raise e # let discard_on handle it
+  rescue => e
+    broadcast(username, "ERROR", error: e.message)
+    raise e # retry logic applies
   end
 
   private
+
+  def broadcast(username, status, error: nil, game_count: nil)
+    payload = {
+      username: username,
+      status: status,
+      last_synced_at: status == "READY" ? Time.current : nil,
+      error: error,
+      game_count: game_count
+    }
+
+    BoardgameNightSchema.subscriptions.trigger(
+      :collection_synced,
+      { username: username },
+      payload
+    )
+  end
 
   def validate_user!(username)
     client = Bgg::Client.new

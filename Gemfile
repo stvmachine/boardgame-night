@@ -75,3 +75,6 @@ gem "graphiql-rails", "~> 1.10", group: :development
 gem "faraday", "~> 2.14"
 gem "faraday-retry", "~> 2.4"
 gem "nokogiri", "~> 1.19"
+
+# GraphQL mutation input validation contracts
+gem "dry-rails", "~> 0.7"

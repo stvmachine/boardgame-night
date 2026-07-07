@@ -3,6 +3,7 @@
 class BoardgameNightSchema < GraphQL::Schema
   mutation(Types::MutationType)
   query(Types::QueryType)
+  subscription(Types::SubscriptionType)
 
   # Types defined in this phase are not yet wired into Query/Mutation; expose them
   # as orphan types so they are loaded into the schema and available to codegen.
