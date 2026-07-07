@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 03
 current_phase_name: graphql-api-collection-surface-v1-parity
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-07-07T04:41:53.869Z"
+stopped_at: Completed 03-05-PLAN.md
+last_updated: "2026-07-07T04:52:56.281Z"
 last_activity: 2026-07-07
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 13
-  completed_plans: 7
+  completed_plans: 8
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 ## Current Position
 
 Phase: 03 (graphql-api-collection-surface-v1-parity) — EXECUTING
-Plan: 2 of 7
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-07-07 — Phase 03 execution started
 
@@ -67,6 +67,7 @@ Progress: [████░░░░░░░] 43% (Phase 1 ✅, Phase 2 ✅ — 
 | Phase 02 P02 | 12min | 3 tasks | 12 files |
 | Phase 02 P03 | ~15min | 2 tasks | 5 files |
 | Phase 03 P01 | 16min | 2 tasks | 15 files |
+| Phase 03 P05 | 3 min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase 03]: Shared ThingFields module for ThingType and MergedThingType — Keeps the v1-essential field list in one place and avoids drift between ThingType and MergedThingType.
 - [Phase 03]: OwnerType delegates to BggCollection.user — Matches the planned OwnersLoader pattern that batches BggCollection records; no extra N+1 because user is eager-loaded.
 - [Phase 03]: SyncStatusEnum GraphQL name is SyncStatus — Matches the planned GraphQL contract (SyncStatus enum) while keeping the Ruby class name SyncStatusEnum.
+- [Phase 03]: Captured Phase 3 architecture decisions in ADR-003 through ADR-007 — These ADRs document GraphQL Dataloader, Solid trifecta, async BGG import, Apollo cache, and dry-rails contracts
+- [Phase 03]: Extended ADR README to index ADR-001 through ADR-007 for full project traceability — Indexing all ADRs in one README makes past decisions discoverable for future maintenance
+- [Phase 03]: Marked Phase 3 RESEARCH.md Open Questions as RESOLVED with ADR references — Each open question now points to the ADR that provides the architectural rationale for its resolution
 
 ### Pending Todos
 
@@ -119,6 +123,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-07T04:41:53.863Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-07-07T04:52:56.274Z
+Stopped at: Completed 03-05-PLAN.md
 Resume file: None
