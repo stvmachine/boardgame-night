@@ -42,8 +42,8 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 - [x] **COLL-12**: User sees a game card with thumbnail, name (2-line ellipsis), rating badge, players icon, time icon, complexity badge, and owner avatars (click → BGG boardgame page)
 - [x] **COLL-13**: User sees loading, empty, and error states (skeleton loaders, "No collectors selected", "No games found", invalid-user banner, per-user error isolation)
 - [ ] **COLL-14**: User can collapse/expand filter, search, and collector sections in the sidebar (with active filter badge and Clear Filters)
-- [ ] **COLL-15**: User can select-all / deselect-all members to control which owners' games show
-- [ ] **COLL-16**: Layout is responsive (desktop fixed sidebar + mobile full-screen drawer, grid 1→5 cols by breakpoint)
+- [x] **COLL-15**: User can select-all / deselect-all members to control which owners' games show
+- [x] **COLL-16**: Layout is responsive (desktop fixed sidebar + mobile full-screen drawer, grid 1→5 cols by breakpoint)
 - [x] **COLL-17**: GraphQL collection queries use Dataloader to batch expansion/base-game lookups (no N+1 BGG API calls)
 - [ ] **COLL-18**: BGG collection data is cached (Solid Cache) with stale-while-revalidate pattern; user can trigger a manual refresh (15-min cooldown)
 
@@ -140,8 +140,8 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | COLL-12 | Phase 3 | Complete |
 | COLL-13 | Phase 3 | Complete |
 | COLL-14 | Phase 3 | Pending |
-| COLL-15 | Phase 3 | Pending |
-| COLL-16 | Phase 3 | Pending |
+| COLL-15 | Phase 3 | Complete |
+| COLL-16 | Phase 3 | Complete |
 | COLL-17 | Phase 3 | Complete |
 | COLL-18 | Phase 3 | Pending |
 | AUTH-01 | Phase 4 | Pending |
