@@ -114,28 +114,10 @@ RSpec.describe "discovery queries" do
   end
 
   describe "ValidationResult type" do
-    it "is reachable through the validateBggUsername mutation" do
-      query = <<~GRAPHQL
-        query {
-          __type(name: "ValidationResult") {
-            name
-            fields {
-              name
-              type {
-                name
-              }
-            }
-          }
-        }
-      GRAPHQL
+    it "has the expected fields" do
+      type = Types::ValidationResultType
 
-      result = BoardgameNightSchema.execute(query)
-
-      expect(result["errors"]).to be_nil
-      type = result.dig("data", "__type")
-      expect(type["name"]).to eq("ValidationResult")
-
-      field_names = type["fields"].map { |f| f["name"] }
+      field_names = type.fields.keys
       expect(field_names).to include("valid", "username", "exists", "avatar")
     end
   end

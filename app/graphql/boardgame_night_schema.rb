@@ -13,7 +13,10 @@ class BoardgameNightSchema < GraphQL::Schema
     Types::MergedCollectionType,
     Types::OwnerType,
     Types::UserType,
-    Types::UserSyncStatusType
+    Types::UserSyncStatusType,
+    Types::HotItemType,
+    Types::SearchResultType,
+    Types::ValidationResultType
   )
 
   # SyncStatusEnum is reachable via UserSyncStatusType and does not need to be

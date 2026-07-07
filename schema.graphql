@@ -9,6 +9,33 @@ type CollectionSyncedPayload {
   username: String!
 }
 
+type HotItem {
+  """
+  BGG thing ID for this hot item.
+  """
+  id: ID!
+
+  """
+  Primary name of the game.
+  """
+  name: String!
+
+  """
+  Rank on the BGG hotness list.
+  """
+  rank: Int!
+
+  """
+  Thumbnail image URL.
+  """
+  thumbnail: String
+
+  """
+  Year the game was published.
+  """
+  yearPublished: Int
+}
+
 """
 An ISO 8601-encoded datetime
 """
@@ -73,6 +100,11 @@ type Query {
   health: String!
 
   """
+  The current BoardGameGeek hotness list.
+  """
+  hotItems: [HotItem!]!
+
+  """
   Merge and deduplicate the BGG collections for the given usernames.
   """
   mergedCollection(
@@ -83,6 +115,16 @@ type Query {
   ): MergedCollection!
 
   """
+  Search BoardGameGeek for games matching the query.
+  """
+  search(
+    """
+    Search term.
+    """
+    query: String!
+  ): [SearchResult!]!
+
+  """
   Look up a local user by their BGG username.
   """
   user(
@@ -91,6 +133,23 @@ type Query {
     """
     username: String!
   ): User
+}
+
+type SearchResult {
+  """
+  BGG thing ID for the search result.
+  """
+  id: ID!
+
+  """
+  Name of the game.
+  """
+  name: String!
+
+  """
+  Year the game was published.
+  """
+  yearPublished: Int
 }
 
 type Subscription {
