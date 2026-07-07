@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRoute, useRouter } from 'vue-router'
 import { useCollectorsStore } from '@/stores/collectors'
 import { useFilterStore } from '@/stores/filters'
 import MemberAvatar from '@/components/common/MemberAvatar.vue'
@@ -10,26 +9,8 @@ import CollectorsSection from '@/components/layout/CollectorsSection.vue'
 const store = useCollectorsStore()
 const filterStore = useFilterStore()
 const { selectedOwners } = storeToRefs(filterStore)
-const route = useRoute()
-const router = useRouter()
 
 const newUsername = ref('')
-
-store.syncWithRoute(route.query.usernames as string | string[] | null | undefined)
-
-watch(
-  () => store.usernames,
-  (usernames) => {
-    const query = { ...route.query }
-    if (usernames.length) {
-      query.usernames = usernames.join(',')
-    } else {
-      delete query.usernames
-    }
-    router.replace({ query })
-  },
-  { deep: true }
-)
 
 function add() {
   const value = newUsername.value.trim()

@@ -6,8 +6,10 @@ import {
   useValidateBggUsernameMutation,
   useSearchLazyQuery
 } from '../../generated/operations'
+import { useCollectorsStore } from '@/stores/collectors'
 
 const router = useRouter()
+const store = useCollectorsStore()
 
 const usernameInput = ref('')
 const searchInput = ref('')
@@ -62,6 +64,7 @@ function removeUsername(username: string) {
 
 function showCollection() {
   if (usernames.value.length === 0) return
+  store.set(usernames.value)
   router.push({ path: '/collection', query: { usernames: usernames.value.join(',') } })
 }
 

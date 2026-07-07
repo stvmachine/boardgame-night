@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRoute } from 'vue-router'
 import { useMergedCollectionQuery } from '../generated/operations'
 import { useCollectionFilters } from '../composables/useCollectionFilters'
 import { useFilterStore } from '../stores/filters'
+import { useCollectorsStore } from '../stores/collectors'
+import { usePermalink } from '../composables/usePermalink'
 import { sortGames } from '../utils/sorting'
 import { groupGames } from '../utils/grouping'
 import GameGrid from '../components/collection/GameGrid.vue'
@@ -13,15 +14,12 @@ import SortControl from '../components/collection/SortControl.vue'
 import GroupByToggle from '../components/collection/GroupByToggle.vue'
 import EmptyState from '../components/collection/EmptyState.vue'
 
-const route = useRoute()
+const collectorsStore = useCollectorsStore()
 const filterStore = useFilterStore()
 const { query, playerCount, timeBucket, complexityBucket, ratingMin, selectedOwners, sort, groupBy } = storeToRefs(filterStore)
+const { usernames } = storeToRefs(collectorsStore)
 
-const usernames = computed(() => {
-  const raw = route.query.usernames
-  const str = Array.isArray(raw) ? raw[0] : raw
-  return String(str ?? '').split(',').map(s => s.trim()).filter(Boolean)
-})
+usePermalink()
 
 const { result, loading } = useMergedCollectionQuery(
   computed(() => ({ usernames: usernames.value })),
