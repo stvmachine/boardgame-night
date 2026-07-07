@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 3
-current_phase_name: GraphQL API + Collection Surface
-status: ready
-stopped_at: Phase 3 context gathered — ready for planning
-last_updated: "2026-07-06T00:00:00Z"
-last_activity: 2026-07-06
-last_activity_desc: Phase 3 discuss-phase complete — 21 decisions across 4 areas
+current_phase: 03
+current_phase_name: graphql-api-collection-surface-v1-parity
+status: executing
+stopped_at: Completed 03-01-PLAN.md
+last_updated: "2026-07-07T04:41:53.869Z"
+last_activity: 2026-07-07
+last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 8
-  completed_plans: 6
-  percent: 43
+  total_plans: 13
+  completed_plans: 7
+  percent: 50
 ---
 
 # Project State
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-30)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 3 — GraphQL API + Collection Surface (v1 Parity)
+**Current focus:** Phase 03 — graphql-api-collection-surface-v1-parity
 
 ## Current Position
 
-Phase: 3 — GraphQL API + Collection Surface (v1 Parity)
-Plan: 0 — discuss-phase complete, ready for planning
-Status: Phase 3 context gathered (21 decisions, 4 areas, 5 ADRs flagged)
-Last activity: 2026-07-06 — Phase 3 discuss-phase complete
+Phase: 03 (graphql-api-collection-surface-v1-parity) — EXECUTING
+Plan: 2 of 7
+Status: Ready to execute
+Last activity: 2026-07-07 — Phase 03 execution started
 
 Progress: [████░░░░░░░] 43% (Phase 1 ✅, Phase 2 ✅ — 4 phases total)
 
@@ -66,6 +66,7 @@ Progress: [████░░░░░░░] 43% (Phase 1 ✅, Phase 2 ✅ — 
 | Phase 02 P01 | 18min | 3 tasks | 10 files |
 | Phase 02 P02 | 12min | 3 tasks | 12 files |
 | Phase 02 P03 | ~15min | 2 tasks | 5 files |
+| Phase 03 P01 | 16min | 2 tasks | 15 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - **ImportCollectionJob param pattern:** Takes username (String), not User object — validates existence on BGG inside the job; looks up local User by bgg_username before persisting.
 - **CollectionPersister interface:** `Bgg::CollectionPersister.new(user: user).persist_collection!(collection)` — takes keyword arg, not positional username.
 - **Full pipeline complete:** Client → RateLimiter → CollectionFetcher → Normalizer → CollectionPersister → DB — all backed by Solid Queue with concurrency control.
+- [Phase 03]: Shared ThingFields module for ThingType and MergedThingType — Keeps the v1-essential field list in one place and avoids drift between ThingType and MergedThingType.
+- [Phase 03]: OwnerType delegates to BggCollection.user — Matches the planned OwnersLoader pattern that batches BggCollection records; no extra N+1 because user is eager-loaded.
+- [Phase 03]: SyncStatusEnum GraphQL name is SyncStatus — Matches the planned GraphQL contract (SyncStatus enum) while keeping the Ruby class name SyncStatusEnum.
 
 ### Pending Todos
 
@@ -115,6 +119,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-06
-Stopped at: Phase 3 discuss-phase complete — ready for plan-phase
-Resume file: .planning/phases/03-graphql-api-collection-surface-v1-parity/03-CONTEXT.md
+Last session: 2026-07-07T04:41:53.863Z
+Stopped at: Completed 03-01-PLAN.md
+Resume file: None
