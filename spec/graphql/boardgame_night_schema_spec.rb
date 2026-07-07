@@ -25,6 +25,25 @@ RSpec.describe BoardgameNightSchema do
     end
   end
 
+  describe "collection surface types" do
+    it "loads the required types" do
+      expect(described_class.types.keys).to include(
+        "Thing",
+        "MergedThing",
+        "MergedCollection",
+        "Owner",
+        "User",
+        "UserSyncStatus",
+        "SyncStatus"
+      )
+    end
+
+    it "exposes SyncStatus enum values" do
+      enum = described_class.types["SyncStatus"]
+      expect(enum.values.keys).to include("QUEUED", "SYNCING", "READY", "ERROR")
+    end
+  end
+
   describe "introspection disabled in production" do
     it "rejects an introspection query when introspection entry points are disabled" do
       # Create a subclass with introspection disabled to simulate production mode
