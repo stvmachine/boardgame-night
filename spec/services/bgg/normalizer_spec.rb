@@ -31,6 +31,15 @@ RSpec.describe Bgg::Normalizer do
         expect(gloomhaven[:stats][:rating]).to eq(8.8)
       end
 
+      it "exposes BGG community statistics under stats" do
+        gloomhaven = result.first
+        expect(gloomhaven[:stats][:users_rated]).to eq(30_000)
+        expect(gloomhaven[:stats][:average]).to eq(8.8)
+        expect(gloomhaven[:stats][:bayes_average]).to eq(8.4)
+        expect(gloomhaven[:stats][:average_weight]).to eq(3.8)
+        expect(gloomhaven[:stats][:num_comments]).to be_nil
+      end
+
       it "includes expansions with correct subtype" do
         expansion = result.last
         expect(expansion[:subtype]).to eq("boardgameexpansion")

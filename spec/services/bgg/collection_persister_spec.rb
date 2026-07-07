@@ -39,6 +39,16 @@ RSpec.describe Bgg::CollectionPersister, type: :service do
       expect(user.bgg_things.find_by(objectid: 174430).name).to eq("Gloomhaven")
     end
 
+    it "persists BGG community statistics on things" do
+      collection = Bgg::Normalizer.normalize_collection(Nokogiri::XML(collection_xml))
+      subject.persist_collection!(collection)
+      gloomhaven = BggThing.find_by(objectid: 174430)
+      expect(gloomhaven.average).to eq(8.8)
+      expect(gloomhaven.bayes_average).to eq(8.4)
+      expect(gloomhaven.users_rated).to eq(30_000)
+      expect(gloomhaven.average_weight).to eq(3.8)
+    end
+
     it "handles empty collections" do
       empty_doc = Nokogiri::XML("<items></items>")
       collection = Bgg::Normalizer.normalize_collection(empty_doc)

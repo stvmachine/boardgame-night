@@ -43,4 +43,33 @@ RSpec.describe BggThing, type: :model do
       expect(BggThing.merged_for_users([])).to be_empty
     end
   end
+
+  describe ".merged_for_bgg_usernames" do
+    let(:user1) { User.create!(username: "alice", bgg_username: "bggalice", password: "password") }
+    let(:user2) { User.create!(username: "bob", bgg_username: "bggbob", password: "password") }
+    let(:thing1) { BggThing.create!(objectid: 1, name: "Game A") }
+    let(:thing2) { BggThing.create!(objectid: 2, name: "Game B") }
+
+    before do
+      BggCollection.create!(user: user1, bgg_thing: thing1)
+      BggCollection.create!(user: user2, bgg_thing: thing1)
+      BggCollection.create!(user: user1, bgg_thing: thing2)
+    end
+
+    it "returns deduplicated things for the given BGG usernames" do
+      result = BggThing.merged_for_bgg_usernames(["bggalice", "bggbob"])
+      expect(result).to include(thing1, thing2)
+      expect(result.size).to eq(2)
+    end
+
+    it "returns only things owned by the specified BGG usernames" do
+      result = BggThing.merged_for_bgg_usernames(["bggbob"])
+      expect(result).to include(thing1)
+      expect(result).not_to include(thing2)
+    end
+
+    it "returns empty when usernames is empty" do
+      expect(BggThing.merged_for_bgg_usernames([])).to be_empty
+    end
+  end
 end
