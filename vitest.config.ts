@@ -11,6 +11,6 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    include: ['app/frontend/**/*.spec.ts', 'tests/vitest/**/*.spec.ts']
+    include: ['app/frontend/**/*.spec.ts', 'spec/frontend/**/*.spec.ts', 'tests/vitest/**/*.spec.ts']
   }
 })
