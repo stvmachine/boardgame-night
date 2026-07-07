@@ -22,7 +22,7 @@ const { usernames } = storeToRefs(collectorsStore)
 usePermalink()
 
 const { result, loading } = useMergedCollectionQuery(
-  computed(() => ({ usernames: usernames.value })),
+  () => ({ usernames: collectorsStore.usernames }),
   () => ({ fetchPolicy: 'cache-and-network' })
 )
 

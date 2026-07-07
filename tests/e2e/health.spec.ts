@@ -28,8 +28,8 @@ test('health query round-trips Rails ↔ Vue end-to-end', async ({ page }) => {
     }
   })
 
-  // Navigate to the SPA (baseURL is http://localhost:5173 from playwright.config)
-  await page.goto('/')
+  // Navigate to the health check route (baseURL is http://localhost:5173 from playwright.config)
+  await page.goto('/health')
 
   // Wait for the success state to render (proves Apollo query completed)
   await expect(page.getByText('Server Health')).toBeVisible({ timeout: 10_000 })

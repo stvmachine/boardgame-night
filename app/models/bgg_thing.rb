@@ -18,4 +18,11 @@ class BggThing < ApplicationRecord
       .where(users: { bgg_username: bgg_usernames })
       .distinct
   }
+
+  # BGG does not expose a dedicated expansion flag in the XML API; expansions are
+  # returned as separate objects. The schema requires a non-null boolean, so we
+  # default to false until the importer has a reason to mark a thing as expansion.
+  def is_expansion
+    false
+  end
 end

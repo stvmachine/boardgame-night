@@ -59,6 +59,7 @@ function statusFor(username: string, statuses: UserSyncStatus[]): string {
           :id="`owner-${username}`"
           type="checkbox"
           :checked="selected.has(username)"
+          :aria-label="username"
           class="h-4 w-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
           @change="emit('toggle', username)"
         />
