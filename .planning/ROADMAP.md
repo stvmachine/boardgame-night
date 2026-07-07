@@ -78,7 +78,7 @@ Plans:
   4. User can share a permalink URL for a set of usernames, select-all/deselect-all owners, collapse/expand sidebar sections, and manually refresh cached collections (15-min cooldown, stale-while-revalidate) (COLL-10, COLL-14, COLL-15, COLL-18)
   5. The GraphQL schema exposes the full v1 query contract (things, search, users, collections, hot items) with Dataloader batching (no N+1 BGG calls), and codegen produces typed frontend composables committed to the repo (GQL-02, GQL-05, COLL-17)
 
-**Plans**: 7/7 plans complete
+**Plans**: 7/10 plans complete (3 gap-closure plans added)
 
 Plans:
 **Wave 1**
@@ -99,6 +99,15 @@ Plans:
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [x] 03-07-PLAN.md — CollectionView polish: filters/sort/group-by, owner select/deselect, usePermalink, e2e tests
+
+**Wave 5** *(gap closure — blocked on Wave 4 completion)*
+
+- [ ] 03-08-PLAN.md — Collapsible game groups + grouping sort fix + e2e stability (COLL-08)
+- [ ] 03-09-PLAN.md — Move filters to sidebar + collapsible sidebar sections (COLL-14)
+
+**Wave 6** *(gap closure — blocked on Wave 5 completion)*
+
+- [ ] 03-10-PLAN.md — Manual refresh + 15-min cooldown + stale-while-revalidate (COLL-18)
 
 **UI hint**: yes
 
