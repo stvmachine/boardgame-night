@@ -132,7 +132,7 @@ Each task was committed atomically:
 1. **Task 1: ADR-003 and ADR-004 (GraphQL Dataloader, Solid trifecta)** - `edd5ace` (docs)
 2. **Task 2: ADR-005, ADR-006, and ADR-007 (import pipeline, Apollo cache, contracts)** - `af849b6` (docs)
 
-**Plan metadata:** `to-be-committed` (docs: complete plan)
+**Plan metadata:** `fe0f1e8` (docs: complete plan), `72728fc` (docs: sync STATE.md progress bar)
 
 ## Files Created/Modified
 
@@ -175,7 +175,7 @@ None - no external service configuration required.
 - All five ADR files (003-007) exist and use the MADR template.
 - `docs/adr/README.md` lists all seven ADRs (001-007).
 - `03-RESEARCH.md` Open Questions section is marked RESOLVED with ADR references.
-- Both task commits are present in git history.
+- Both task commits and the final metadata commits are present in git history.
 
 ---
 *Phase: 03-graphql-api-collection-surface-v1-parity*
