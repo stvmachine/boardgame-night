@@ -1,0 +1,7 @@
+query Search($query: String!) {
+  search(query: $query) {
+    id
+    name
+    yearPublished
+  }
+}

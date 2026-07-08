@@ -1,0 +1,9 @@
+subscription CollectionSynced($username: String!) {
+  collectionSynced(username: $username) {
+    username
+    status
+    lastSyncedAt
+    error
+    gameCount
+  }
+}

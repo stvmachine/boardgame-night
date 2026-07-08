@@ -1,0 +1,6 @@
+query User($username: String!) {
+  user(username: $username) {
+    username
+    avatar
+  }
+}

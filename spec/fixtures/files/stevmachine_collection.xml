@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items totalitems="3" termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+  <item objecttype="thing" objectid="174430" subtype="boardgame" collid="1001">
+    <name objectid="174430" sortindex="1">Gloomhaven</name>
+    <yearpublished value="2017" />
+    <image>https://cf.geekdo-images.com/something/pic2437871.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/something/pic2437871_t.jpg</thumbnail>
+    <stats minplayers="1" maxplayers="4" minplaytime="60" maxplaytime="120" playingtime="90" numowned="50000">
+      <rating value="8.8">
+        <usersrated value="30000" />
+        <average value="8.8" />
+        <bayesaverage value="8.4" />
+        <stddev value="1.5" />
+        <median value="9.0" />
+        <averageweight value="3.8" />
+        <ranks>
+          <rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="1" bayesaverage="8.4" />
+        </ranks>
+      </rating>
+    </stats>
+    <status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2020-01-01" />
+    <numplays>50</numplays>
+  </item>
+  <item objecttype="thing" objectid="9209" subtype="boardgame" collid="1002">
+    <name objectid="9209" sortindex="1">Ticket to Ride</name>
+    <yearpublished value="2004" />
+    <image>https://cf.geekdo-images.com/something/pic38668.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/something/pic38668_t.jpg</thumbnail>
+    <stats minplayers="2" maxplayers="5" minplaytime="30" maxplaytime="60" playingtime="45" numowned="80000">
+      <rating value="7.4">
+        <usersrated value="60000" />
+        <average value="7.4" />
+        <bayesaverage value="7.2" />
+        <stddev value="1.3" />
+        <median value="7.5" />
+        <averageweight value="1.8" />
+        <ranks>
+          <rank type="subtype" id="1" name="boardgame" friendlyname="Board Game Rank" value="182" bayesaverage="7.2" />
+        </ranks>
+      </rating>
+    </stats>
+    <status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2020-01-01" />
+    <numplays>25</numplays>
+  </item>
+  <item objecttype="thing" objectid="260300" subtype="boardgameexpansion" collid="1003">
+    <name objectid="260300" sortindex="1">Gloomhaven: Forgotten Circles</name>
+    <yearpublished value="2019" />
+    <image>https://cf.geekdo-images.com/something/pic4567890.jpg</image>
+    <thumbnail>https://cf.geekdo-images.com/something/pic4567890_t.jpg</thumbnail>
+    <stats minplayers="1" maxplayers="4" minplaytime="60" maxplaytime="120" playingtime="90" numowned="15000">
+      <rating value="8.0">
+        <usersrated value="5000" />
+        <average value="8.0" />
+        <bayesaverage value="7.8" />
+        <stddev value="1.2" />
+        <median value="8.0" />
+        <averageweight value="3.5" />
+        <ranks>
+          <rank type="subtype" id="1" name="boardgameexpansion" friendlyname="Expansion Rank" value="15" bayesaverage="7.8" />
+        </ranks>
+      </rating>
+    </stats>
+    <status own="1" prevowned="0" fortrade="0" want="0" wanttoplay="0" wanttobuy="0" wishlist="0" preordered="0" lastmodified="2020-01-01" />
+    <numplays>10</numplays>
+  </item>
+</items>

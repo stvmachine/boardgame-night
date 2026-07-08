@@ -1,0 +1,2 @@
+web: dotenvx run -f .env.bggeek -fk .env.bggeek.keys -- bin/rails server -p 3000
+vite: bin/vite dev

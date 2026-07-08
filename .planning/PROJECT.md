@@ -12,7 +12,7 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Rails API exposes a GraphQL endpoint consumed by the Vue frontend — Phase 1
 
 ### Active
 
@@ -22,7 +22,6 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 - [ ] Create groups of friends to pool multiple BGG collections together
 - [ ] Create a boardgame night session and invite group members
 - [ ] Get game suggestions for a session based on attendees and player counts
-- [ ] Rails API exposes a GraphQL endpoint consumed by the Vue frontend
 - [ ] Rails communicates with BoardGameGeek's API using credentials from `.env.bggeek`
 - [ ] Hot/trending BGG games showcase on the landing page
 - [ ] Shareable permalink URLs for a set of usernames
@@ -67,13 +66,14 @@ For this rewrite:
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Monorepo: Rails + Vue in one repo | Simplifies deployment and keeps API + frontend in sync | — Pending |
-| Rails in API-only mode (`--api`) | Vue owns the UI; Rails is purely the data/GraphQL layer | — Pending |
-| GraphQL (not REST) between Vue and Rails | Matches the existing proxy's contract; frontend already GraphQL-shaped | — Pending |
-| Rails owns BGG communication (not Vue) | Keeps BGG credentials server-side; centralizes rate limiting & caching | — Pending |
-| rbenv for Ruby version management | User requirement; modern Ruby toolchain | — Pending |
-| `.env.bggeek` for BGG credentials | Keeps secrets out of git; user-specified location | — Pending |
-| v1 = shared-list parity + boardgame night sessions | v1 rewrites bggeek-shared-list AND adds the night-session features (groups, invitations, suggested games) that the project name implies | — Pending |
+| Monorepo: Rails + Vue in one repo | Simplifies deployment and keeps API + frontend in sync | ✅ Phase 1 — Single Kamal 2 container serves SPA + /graphql from same origin |
+| Rails in API-only mode (`--api`) | Vue owns the UI; Rails is purely the data/GraphQL layer | ✅ Phase 1 — Rails 8.1.3 scaffolded with `--api`, SPA served via catch-all route |
+| GraphQL (not REST) between Vue and Rails | Matches existing proxy contract; frontend already GraphQL-shaped | ✅ Phase 1 — BoardgameNightSchema with health query, Apollo multiplex support, max_depth/max_complexity |
+| Rails owns BGG communication (not Vue) | Keeps BGG credentials server-side; centralizes rate limiting & caching | ✅ Phase 1 — dotenvx-encrypted .env.bggeek loaded server-side, never exposed to frontend |
+| rbenv for Ruby version management | User requirement; modern Ruby toolchain | ✅ Phase 1 — .ruby-version at 3.4.9, rbenv shims prioritized in PATH |
+| `.env.bggeek` for BGG credentials | Keeps secrets out of git; user-specified location | ✅ Phase 1 — dotenvx-encrypted, .env.bggeek.keys gitignored, decrypted via DOTENV_PRIVATE_KEY_BGGEEK at runtime |
+| v1 = shared-list parity + boardgame night sessions | v1 rewrites bggeek-shared-list AND adds the night-session features that the project name implies | — In progress |
+| Vue 3.5 SPA with Apollo 3.13 + @vue/apollo-composable 4.2.2 | Apollo 4 + composable v5 still in beta (incompatible) | ✅ Phase 1 — Apollo BatchHttpLink, vue-router, Pinia, Tailwind v4, HealthView E2E verified via Playwright |
 
 ## Evolution
 
@@ -93,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-30 after scope expansion (boardgame night sessions moved into v1)*
+*Last updated: 2026-07-03 after Phase 1 (Foundation & Monorepo Shell)*
