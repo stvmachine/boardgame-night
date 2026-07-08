@@ -23,7 +23,7 @@ module Types
       SyncStatus.new(
         username: object.bgg_username,
         status: status,
-        last_synced_at: status == "READY" ? Time.current : nil,
+        last_synced_at: object.last_synced_at,
         error: nil,
         game_count: object.bgg_collections.count
       )

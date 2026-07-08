@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_07_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_08_000001) do
   create_table "bgg_collections", force: :cascade do |t|
     t.integer "bgg_thing_id", null: false
     t.datetime "created_at", null: false
@@ -51,6 +51,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_000002) do
     t.string "bgg_username"
     t.datetime "created_at", null: false
     t.string "email"
+    t.datetime "last_synced_at"
     t.string "password_digest"
     t.datetime "updated_at", null: false
     t.string "username", null: false

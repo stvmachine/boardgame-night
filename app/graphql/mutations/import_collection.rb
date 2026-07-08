@@ -17,6 +17,13 @@ module Mutations
       user.password = SecureRandom.hex(16) if user.new_record?
       user.save!
 
+      if user.last_synced_at.present? && 15.minutes.ago < user.last_synced_at
+        remaining_seconds = (user.last_synced_at + 15.minutes - Time.current).to_i
+        raise GraphQL::ExecutionError,
+              "Collection for '#{bgg_username}' was synced recently. " \
+              "Cooldown active: #{remaining_seconds} seconds remaining."
+      end
+
       Bgg::ImportCollectionJob.perform_later(bgg_username)
       context[:sync_status_for_username] = bgg_username
 

@@ -68,7 +68,7 @@ module Types
       SyncStatus.new(
         username: username,
         status: "READY",
-        last_synced_at: Time.current,
+        last_synced_at: user&.last_synced_at,
         error: nil,
         game_count: user&.bgg_collections&.count
       )

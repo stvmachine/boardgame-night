@@ -20,16 +20,16 @@ class Bgg::ImportCollectionJob < ApplicationJob
   limits_concurrency to: 1, key: "bgg_api", duration: 5.minutes
 
   # D-12: Transient failures — retry with polynomial backoff
-  # Faraday::TimeoutError covers both open_timeout and read_timeout
-  retry_on Faraday::TimeoutError, wait: :polynomially_longer, attempts: 5
-  # Faraday::ServerError covers 5xx responses (BGG maintenance, overload)
-  retry_on Faraday::ServerError, wait: :polynomially_longer, attempts: 5
+  # Bgg::NetworkError covers both open_timeout and read_timeout
+  retry_on Bgg::NetworkError, wait: :polynomially_longer, attempts: 5
+  # Bgg::ServerError covers 5xx responses (BGG maintenance, overload)
+  retry_on Bgg::ServerError, wait: :polynomially_longer, attempts: 5
   # Bgg::CollectionNotReadyError: BGG kept returning 202 after 5 retries
   retry_on Bgg::CollectionNotReadyError, wait: 30.seconds, attempts: 3
 
   # D-12: Permanent failures — discard immediately (no retry)
-  # Faraday::ResourceNotFound = BGG returned 404 (invalid endpoint)
-  discard_on Faraday::ResourceNotFound
+  # Bgg::ResourceNotFound = BGG returned 404 (invalid endpoint)
+  discard_on Bgg::ResourceNotFound
   # InvalidUsernameError = BGG confirmed user doesn't exist
   discard_on Bgg::InvalidUsernameError
   # Deserialization error = job payload corrupted
@@ -58,8 +58,10 @@ class Bgg::ImportCollectionJob < ApplicationJob
     Rails.logger.info("[Bgg::ImportCollectionJob] Successfully imported #{result[:added]} games, " \
                       "#{result[:updated]} updated for '#{username}'")
 
+    user.update!(last_synced_at: Time.current)
+
     broadcast(username, "READY", game_count: result[:added] + result[:updated])
-  rescue Bgg::InvalidUsernameError, Faraday::ResourceNotFound => e
+  rescue Bgg::InvalidUsernameError, Bgg::ResourceNotFound => e
     broadcast(username, "ERROR", error: e.message)
     raise e # let discard_on handle it
   rescue => e
