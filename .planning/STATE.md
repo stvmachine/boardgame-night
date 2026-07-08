@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 03
+current_phase_name: graphql-api-collection-surface-v1-parity
 status: executing
 stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-07-07T23:57:02.112Z"
+last_updated: "2026-07-08T00:12:37.942Z"
 last_activity: 2026-07-07
-last_activity_desc: Phase 03 marked complete
+last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 4
-  completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
-  percent: 75
-current_phase_name: graphql-api-collection-surface-v1-parity
+  completed_phases: 2
+  total_plans: 17
+  completed_plans: 14
+  percent: 50
 ---
 
 # Project State
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 
 ## Current Position
 
-Phase: 03 — COMPLETE
-Plan: 7 of 7
+Phase: 03 (graphql-api-collection-surface-v1-parity) — EXECUTING
+Plan: 2 of 11
 Status: Ready to execute
-Last activity: 2026-07-07 — Phase 03 marked complete
+Last activity: 2026-07-07 — Phase 03 execution started
 
 Progress: [██████░░░░] 62% (Phase 1 ✅, Phase 2 ✅ — 4 phases total)
 
@@ -73,6 +73,7 @@ Progress: [██████░░░░] 62% (Phase 1 ✅, Phase 2 ✅ — 4 p
 | Phase 03-graphql-api-collection-surface-v1-parity P03 | 30min | 2 tasks | 29 files |
 | Phase 03 P03-04 | 29min | 2 tasks | 23 files |
 | Phase 03-graphql-api-collection-surface-v1-parity P07 | 130 | 3 tasks | 23 files |
+| Phase 03-graphql-api-collection-surface-v1-parity P08 | 7 min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -119,6 +120,8 @@ Recent decisions affecting current work:
 - [Phase 03-graphql-api-collection-surface-v1-parity]: Made the collectors store the canonical owner of the usernames list and route query sync; removed the Sidebar's duplicate URL watcher.
 - [Phase 03-graphql-api-collection-surface-v1-parity]: Implemented usePermalink with URLSearchParams and history.replaceState to preserve filters, sort, group, and owner selection across reloads without router navigation loops.
 - [Phase 03-graphql-api-collection-surface-v1-parity]: Used a Rails rake task + Playwright globalSetup for e2e fixtures so tests do not depend on live BGG or credentials.
+- [Phase ?]: CollapsibleGroup uses initiallyOpen + watcher to allow both local toggles and parent batch control — Keeps the UI-SPEC prop contract while making expand-all/collapse-all functional
+- [Phase ?]: Inline SVG chevron used instead of installing lucide-vue-next — Avoids adding a new dependency not required by the plan
 
 ### Pending Todos
 
@@ -144,6 +147,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-07T21:51:18.916Z
+Last session: 2026-07-08T00:12:37.935Z
 Stopped at: Completed 03-07-PLAN.md
 Resume file: None
