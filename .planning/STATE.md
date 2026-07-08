@@ -6,14 +6,14 @@ current_phase: 03
 current_phase_name: graphql-api-collection-surface-v1-parity
 status: executing
 stopped_at: Completed 03-07-PLAN.md
-last_updated: "2026-07-08T00:12:37.942Z"
+last_updated: "2026-07-08T00:25:51.632Z"
 last_activity: 2026-07-07
 last_activity_desc: Phase 03 execution started
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 17
-  completed_plans: 14
+  completed_plans: 15
   percent: 50
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 ## Current Position
 
 Phase: 03 (graphql-api-collection-surface-v1-parity) — EXECUTING
-Plan: 2 of 11
+Plan: 3 of 11
 Status: Ready to execute
 Last activity: 2026-07-07 — Phase 03 execution started
 
@@ -74,6 +74,7 @@ Progress: [██████░░░░] 62% (Phase 1 ✅, Phase 2 ✅ — 4 p
 | Phase 03 P03-04 | 29min | 2 tasks | 23 files |
 | Phase 03-graphql-api-collection-surface-v1-parity P07 | 130 | 3 tasks | 23 files |
 | Phase 03-graphql-api-collection-surface-v1-parity P08 | 7 min | 2 tasks | 7 files |
+| Phase 03-graphql-api-collection-surface-v1-parity P09 | 8min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,8 @@ Recent decisions affecting current work:
 - [Phase 03-graphql-api-collection-surface-v1-parity]: Used a Rails rake task + Playwright globalSetup for e2e fixtures so tests do not depend on live BGG or credentials.
 - [Phase ?]: CollapsibleGroup uses initiallyOpen + watcher to allow both local toggles and parent batch control — Keeps the UI-SPEC prop contract while making expand-all/collapse-all functional
 - [Phase ?]: Inline SVG chevron used instead of installing lucide-vue-next — Avoids adding a new dependency not required by the plan
+- [Phase 03-graphql-api-collection-surface-v1-parity]: Included the existing collector remove list inside the Collectors collapsible section so removal functionality is preserved and the entire collector area is toggled together. — The plan did not explicitly address the pre-existing remove list; keeping it inside the collapsible section preserves the remove action while matching the UI-SPEC sidebar layout.
+- [Phase 03-graphql-api-collection-surface-v1-parity]: Bound CollapsibleSection open state directly to uiStore refs and updated them from the emitted toggle event, keeping the component fully controlled without extra model plumbing. — The plan required toggle actions on the ui store; direct assignment from the toggle event avoids double-toggle issues and keeps the component controlled.
 
 ### Pending Todos
 
@@ -147,6 +150,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-08T00:12:37.935Z
+Last session: 2026-07-08T00:25:17.359Z
 Stopped at: Completed 03-07-PLAN.md
 Resume file: None
