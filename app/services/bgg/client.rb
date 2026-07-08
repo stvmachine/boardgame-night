@@ -97,6 +97,7 @@ module Bgg
       Faraday.new(url: BASE_URL, request: { timeout: 10, open_timeout: 5 }) do |f|
         f.request :retry, max: 3, backoff_factor: 2, retry_statuses: [429, 502, 503]
         f.headers["User-Agent"] = USER_AGENT
+        f.headers["Authorization"] = "Bearer #{ENV["BGG_TOKEN"]}" if ENV["BGG_TOKEN"].present?
         f.response :raise_error
         f.adapter :net_http
       end
