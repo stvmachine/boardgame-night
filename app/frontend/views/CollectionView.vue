@@ -9,7 +9,6 @@ import { usePermalink } from '../composables/usePermalink'
 import { sortGames } from '../utils/sorting'
 import { groupGames } from '../utils/grouping'
 import GameGrid from '../components/collection/GameGrid.vue'
-import CollectionFilters from '../components/collection/CollectionFilters.vue'
 import SortControl from '../components/collection/SortControl.vue'
 import GroupByToggle from '../components/collection/GroupByToggle.vue'
 import EmptyState from '../components/collection/EmptyState.vue'
@@ -51,19 +50,9 @@ const hasActiveFilters = computed(() => {
 
 <template>
   <div class="p-4 md:p-6 space-y-4">
-    <div class="flex flex-col lg:flex-row gap-4 lg:items-start">
-      <CollectionFilters
-        v-model:query="query"
-        v-model:player-count="playerCount"
-        v-model:time-bucket="timeBucket"
-        v-model:complexity-bucket="complexityBucket"
-        v-model:rating-min="ratingMin"
-        class="flex-1"
-      />
-      <div class="flex flex-row gap-4">
-        <SortControl v-model="sort" />
-        <GroupByToggle v-model="groupBy" />
-      </div>
+    <div class="flex flex-row gap-4 items-start">
+      <SortControl v-model="sort" />
+      <GroupByToggle v-model="groupBy" />
     </div>
 
     <EmptyState
