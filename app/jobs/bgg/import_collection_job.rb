@@ -85,6 +85,8 @@ class Bgg::ImportCollectionJob < ApplicationJob
       { username: username },
       payload
     )
+  rescue => e
+    Rails.logger.warn("[Bgg::ImportCollectionJob] Failed to broadcast sync status: #{e.message}")
   end
 
   def validate_user!(username)
