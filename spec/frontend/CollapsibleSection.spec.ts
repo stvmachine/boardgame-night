@@ -11,16 +11,16 @@ describe('CollapsibleSection', () => {
 
     expect(wrapper.text()).toContain('Filters')
     expect(wrapper.find('button').attributes('aria-expanded')).toBe('true')
-    expect(wrapper.find('[data-testid="body"]').isVisible()).toBe(true)
+    expect(wrapper.find('.collapsible-body').attributes('style') || '').not.toContain('display: none')
 
     await wrapper.find('button').trigger('click')
 
     expect(wrapper.find('button').attributes('aria-expanded')).toBe('false')
-    expect(wrapper.find('[data-testid="body"]').isVisible()).toBe(false)
+    expect(wrapper.find('.collapsible-body').attributes('style') || '').toContain('display: none')
 
     await wrapper.find('button').trigger('click')
 
-    expect(wrapper.find('[data-testid="body"]').isVisible()).toBe(true)
+    expect(wrapper.find('.collapsible-body').attributes('style') || '').not.toContain('display: none')
   })
 
   it('emits toggle event with the new open state', async () => {
@@ -41,7 +41,7 @@ describe('CollapsibleSection', () => {
     })
 
     expect(wrapper.find('button').attributes('aria-expanded')).toBe('false')
-    expect(wrapper.find('[data-testid="body"]').isVisible()).toBe(false)
+    expect(wrapper.find('.collapsible-body').attributes('style') || '').toContain('display: none')
   })
 
   it('renders content provided in the badge slot', () => {

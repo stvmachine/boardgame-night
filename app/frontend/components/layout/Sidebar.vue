@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useCollectorsStore } from '@/stores/collectors'
 import { useFilterStore } from '@/stores/filters'
+import { useUiStore } from '@/stores/ui'
+import CollapsibleSection from '@/components/common/CollapsibleSection.vue'
 import MemberAvatar from '@/components/common/MemberAvatar.vue'
 import CollectorsSection from '@/components/layout/CollectorsSection.vue'
+import CollectionFilters from '@/components/collection/CollectionFilters.vue'
 
 const store = useCollectorsStore()
 const filterStore = useFilterStore()
+const uiStore = useUiStore()
 const { selectedOwners } = storeToRefs(filterStore)
+const { filtersOpen, collectorsOpen } = storeToRefs(uiStore)
 
 const newUsername = ref('')
 
@@ -31,6 +36,16 @@ function selectAllOwners() {
 function deselectAllOwners() {
   filterStore.deselectAllOwners()
 }
+
+const activeFilterCount = computed(() => {
+  let count = 0
+  if (filterStore.query.trim() !== '') count++
+  if (filterStore.playerCount != null) count++
+  if (filterStore.timeBucket != null) count++
+  if (filterStore.complexityBucket != null) count++
+  if (filterStore.ratingMin != null) count++
+  return count
+})
 </script>
 
 <template>
@@ -58,36 +73,73 @@ function deselectAllOwners() {
       </div>
     </div>
 
-    <CollectorsSection
-      :usernames="store.usernames"
-      :selected="selectedOwners"
-      @toggle="filterStore.toggleOwner"
-      @select-all="selectAllOwners"
-      @deselect-all="deselectAllOwners"
-    />
-
-    <div v-if="store.usernames.length === 0" class="text-sm text-neutral-500">
-      No collectors selected.
-    </div>
-
-    <ul v-else class="space-y-2">
-      <li
-        v-for="username in store.usernames"
-        :key="username"
-        class="flex items-center justify-between rounded-md border border-neutral-200 bg-white p-2"
-      >
-        <div class="flex items-center gap-2">
-          <MemberAvatar :username="username" size="sm" />
-          <span class="text-sm font-medium text-neutral-800">{{ username }}</span>
-        </div>
-        <button
-          type="button"
-          class="text-sm text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1"
-          @click="remove(username)"
+    <CollapsibleSection
+      title="Filters"
+      :default-open="filtersOpen"
+      @toggle="uiStore.filtersOpen = $event"
+    >
+      <template #badge>
+        <span
+          v-if="activeFilterCount > 0"
+          data-testid="active-filter-badge"
+          class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800"
         >
-          Remove
-        </button>
-      </li>
-    </ul>
+          {{ activeFilterCount }}
+        </span>
+      </template>
+      <CollectionFilters
+        v-model:query="filterStore.query"
+        v-model:player-count="filterStore.playerCount"
+        v-model:time-bucket="filterStore.timeBucket"
+        v-model:complexity-bucket="filterStore.complexityBucket"
+        v-model:rating-min="filterStore.ratingMin"
+      />
+      <button
+        v-if="activeFilterCount > 0"
+        type="button"
+        data-testid="clear-filters"
+        class="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 py-0.5"
+        @click="filterStore.clearFilters"
+      >
+        Clear filters
+      </button>
+    </CollapsibleSection>
+
+    <CollapsibleSection
+      title="Collectors"
+      :default-open="collectorsOpen"
+      @toggle="uiStore.collectorsOpen = $event"
+    >
+      <CollectorsSection
+        :usernames="store.usernames"
+        :selected="selectedOwners"
+        @toggle="filterStore.toggleOwner"
+        @select-all="selectAllOwners"
+        @deselect-all="deselectAllOwners"
+      />
+
+      <div v-if="store.usernames.length === 0" class="mt-3 text-sm text-neutral-500">
+        No collectors selected.
+      </div>
+      <ul v-else class="mt-3 space-y-2">
+        <li
+          v-for="username in store.usernames"
+          :key="username"
+          class="flex items-center justify-between rounded-md border border-neutral-200 bg-white p-2"
+        >
+          <div class="flex items-center gap-2">
+            <MemberAvatar :username="username" size="sm" />
+            <span class="text-sm font-medium text-neutral-800">{{ username }}</span>
+          </div>
+          <button
+            type="button"
+            class="text-sm text-red-600 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 rounded px-2 py-1"
+            @click="remove(username)"
+          >
+            Remove
+          </button>
+        </li>
+      </ul>
+    </CollapsibleSection>
   </div>
 </template>

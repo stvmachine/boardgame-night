@@ -25,24 +25,21 @@ function statusFor(username: string, statuses: UserSyncStatus[]): string {
 
 <template>
   <div class="space-y-3">
-    <div class="flex items-center justify-between">
-      <h3 class="text-sm font-semibold text-neutral-800">Collectors</h3>
-      <div class="flex gap-2">
-        <button
-          type="button"
-          class="text-xs text-indigo-600 hover:text-indigo-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 py-0.5"
-          @click="emit('select-all')"
-        >
-          Select All
-        </button>
-        <button
-          type="button"
-          class="text-xs text-neutral-600 hover:text-neutral-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 py-0.5"
-          @click="emit('deselect-all')"
-        >
-          Deselect All
-        </button>
-      </div>
+    <div class="flex items-center justify-end gap-2">
+      <button
+        type="button"
+        class="text-xs text-indigo-600 hover:text-indigo-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 py-0.5"
+        @click="emit('select-all')"
+      >
+        Select All
+      </button>
+      <button
+        type="button"
+        class="text-xs text-neutral-600 hover:text-neutral-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 py-0.5"
+        @click="emit('deselect-all')"
+      >
+        Deselect All
+      </button>
     </div>
 
     <div v-if="usernames.length === 0" class="text-sm text-neutral-500">
