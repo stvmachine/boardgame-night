@@ -39,6 +39,46 @@ RSpec.describe "importCollection mutation" do
     }.to have_enqueued_job(Bgg::ImportCollectionJob).with("stevmachine")
   end
 
+  it "rejects a re-import within the 15-minute cooldown window" do
+    User.create!(
+      username: "stevmachine",
+      bgg_username: "stevmachine",
+      password: "password",
+      last_synced_at: 5.minutes.ago
+    )
+
+    result = BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+
+    expect(result["errors"]).to be_present
+    expect(result["errors"].first["message"]).to match(/cooldown/i)
+    expect(result["errors"].first["message"]).to match(/\d+ seconds remaining/)
+  end
+
+  it "allows import when the last sync was more than 15 minutes ago" do
+    User.create!(
+      username: "stevmachine",
+      bgg_username: "stevmachine",
+      password: "password",
+      last_synced_at: 20.minutes.ago
+    )
+
+    expect {
+      BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+    }.to have_enqueued_job(Bgg::ImportCollectionJob).with("stevmachine")
+  end
+
+  it "allows import when the user has never been synced" do
+    User.create!(
+      username: "stevmachine",
+      bgg_username: "stevmachine",
+      password: "password"
+    )
+
+    expect {
+      BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+    }.to have_enqueued_job(Bgg::ImportCollectionJob).with("stevmachine")
+  end
+
   it "returns the user with sync status QUEUED" do
     result = BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
 

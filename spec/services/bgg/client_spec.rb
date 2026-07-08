@@ -101,6 +101,37 @@ RSpec.describe Bgg::Client, :bgg do
   end
 
   describe "#collection" do
+    it "caches the collection response and returns the cached doc on the next call" do
+      different_xml = collection_xml.sub("Gloomhaven", "Different Game")
+
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/collection/)
+        .with(query: hash_including(username: "stevmachine"))
+        .to_return(
+          { status: 200, body: collection_xml, headers: { "Content-Type" => "text/xml" } },
+          { status: 200, body: different_xml, headers: { "Content-Type" => "text/xml" } }
+        )
+
+      first_result = client.collection("stevmachine")
+      second_result = client.collection("stevmachine")
+
+      expect(first_result).to be_a(Nokogiri::XML::Document)
+      expect(second_result).to be_a(Nokogiri::XML::Document)
+      expect(second_result.at_css("name").text).to eq("Gloomhaven")
+    end
+
+    it "returns stale cache when the network request fails" do
+      cache.write("bgg:collection:stevmachine", collection_xml)
+
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/collection/)
+        .with(query: hash_including(username: "stevmachine"))
+        .to_return(status: 503, body: "")
+
+      result = client.collection("stevmachine")
+
+      expect(result).to be_a(Nokogiri::XML::Document)
+      expect(result.at_css("name").text).to eq("Gloomhaven")
+    end
+
     it "returns a Nokogiri::XML::Document on success" do
       stub_request(:get, /boardgamegeek.com\/xmlapi2\/collection/)
         .with(query: hash_including(username: "stevmachine"))
