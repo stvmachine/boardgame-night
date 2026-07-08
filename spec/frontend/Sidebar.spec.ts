@@ -1,9 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
 import Sidebar from '@/components/layout/Sidebar.vue'
+import CollapsibleSection from '@/components/common/CollapsibleSection.vue'
+import CollectionFilters from '@/components/collection/CollectionFilters.vue'
 import { useCollectorsStore } from '@/stores/collectors'
+import { useFilterStore } from '@/stores/filters'
 
 function createTestRouter() {
   return createRouter({
@@ -57,5 +61,53 @@ describe('Sidebar', () => {
     await wrapper.find('button.text-red-600').trigger('click')
 
     expect(store.usernames).not.toContain('alice')
+  })
+
+  it('renders Filters and Collectors collapsible sections', async () => {
+    const wrapper = await mountSidebar()
+    const sections = wrapper.findAllComponents(CollapsibleSection)
+
+    expect(sections).toHaveLength(2)
+    const titles = sections.map((section) => section.props('title'))
+    expect(titles).toContain('Filters')
+    expect(titles).toContain('Collectors')
+  })
+
+  it('renders CollectionFilters inside the Filters section', async () => {
+    const wrapper = await mountSidebar()
+    expect(wrapper.findComponent(CollectionFilters).exists()).toBe(true)
+  })
+
+  it('shows an active-filter badge on the Filters header when filters are active', async () => {
+    const wrapper = await mountSidebar()
+    const filterStore = useFilterStore()
+    filterStore.query = 'catan'
+    await nextTick()
+
+    const badge = wrapper.find('[data-testid="active-filter-badge"]')
+    expect(badge.exists()).toBe(true)
+    expect(badge.text()).toBe('1')
+  })
+
+  it('shows a Clear filters action when filters are active', async () => {
+    const wrapper = await mountSidebar()
+    const filterStore = useFilterStore()
+    filterStore.query = 'catan'
+    await nextTick()
+
+    expect(wrapper.find('[data-testid="clear-filters"]').exists()).toBe(true)
+  })
+
+  it('clears filters when Clear filters is clicked', async () => {
+    const wrapper = await mountSidebar()
+    const filterStore = useFilterStore()
+    filterStore.query = 'catan'
+    filterStore.playerCount = 4
+    await nextTick()
+
+    await wrapper.find('[data-testid="clear-filters"]').trigger('click')
+
+    expect(filterStore.query).toBe('')
+    expect(filterStore.playerCount).toBeNull()
   })
 })
