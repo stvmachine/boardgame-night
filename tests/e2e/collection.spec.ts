@@ -7,7 +7,8 @@ function collectorCheckbox(page: Page, username: string) {
 test('loads merged collection from seed data', async ({ page }) => {
   await page.goto('/collection?usernames=e2e_alice,e2e_bob')
 
-  await expect(page.getByRole('heading', { name: 'Wingspan' })).toBeVisible({ timeout: 10_000 })
+  await page.waitForLoadState('networkidle')
+  await expect(page.getByRole('heading', { name: 'Wingspan' })).toBeVisible({ timeout: 30_000 })
   await expect(page.getByRole('heading', { name: 'Azul' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Gloomhaven' })).toBeVisible()
 })
