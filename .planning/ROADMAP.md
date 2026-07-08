@@ -78,11 +78,11 @@ Plans:
   4. User can share a permalink URL for a set of usernames, select-all/deselect-all owners, collapse/expand sidebar sections, and manually refresh cached collections (15-min cooldown, stale-while-revalidate) (COLL-10, COLL-14, COLL-15, COLL-18)
   5. The GraphQL schema exposes the full v1 query contract (things, search, users, collections, hot items) with Dataloader batching (no N+1 BGG calls), and codegen produces typed frontend composables committed to the repo (GQL-02, GQL-05, COLL-17)
 
-**Plans**: 10/11 plans executed
+**Plans**: 11/11 plans complete
 
 Plans:
 
-- [ ] 03-11-PLAN.md
+- [x] 03-11-PLAN.md
 
 **Wave 1**
 
@@ -140,7 +140,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation & Monorepo Shell | 3/3 | Complete    | 2026-07-02 |
 | 2. BGG Integration Layer + Persistence | 3/3 | Complete    | 2026-07-04 |
-| 3. GraphQL API + Collection Surface (v1 Parity) | 10/11 | In Progress|  |
+| 3. GraphQL API + Collection Surface (v1 Parity) | 11/11 | Complete   | 2026-07-08 |
 | 4. Auth + Friend Groups + Session Lifecycle | 0/TBD | Not started | - |
 
 ---

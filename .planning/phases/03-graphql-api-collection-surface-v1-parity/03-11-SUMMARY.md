@@ -166,3 +166,11 @@ None - no external service configuration required.
 ---
 *Phase: 03-graphql-api-collection-surface-v1-parity*
 *Completed: 2026-07-08*
+
+## Self-Check: PASSED
+
+- All created files exist on disk.
+- All task commits and the docs commit are in git history.
+- `npm run test` passes (75 frontend tests).
+- `npx vue-tsc --noEmit` reports no new errors from this plan's files.
+- `npm run codegen` regenerated operations without drift.
