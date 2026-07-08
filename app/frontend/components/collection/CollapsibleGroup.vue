@@ -13,9 +13,13 @@ const emit = defineEmits<{
   toggle: []
 }>()
 
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 const isOpen = ref(props.initiallyOpen)
+
+watch(() => props.initiallyOpen, (newValue) => {
+  isOpen.value = newValue
+})
 
 function onToggle() {
   isOpen.value = !isOpen.value
