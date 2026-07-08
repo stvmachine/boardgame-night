@@ -88,9 +88,8 @@ function playerSort(name: string): number {
   return match ? parseInt(match[1], 10) : 0
 }
 
-function ratingSort(name: string): number {
+export function ratingSort(name: string): number {
   const order = ['9.0+', '8.0–8.9', '7.0–7.9', '6.0–6.9', 'Below 6.0', 'Unrated']
-  const indexA = order.indexOf(name)
-  const indexB = order.indexOf(name)
-  return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB)
+  const index = order.indexOf(name)
+  return index === -1 ? 999 : index
 }

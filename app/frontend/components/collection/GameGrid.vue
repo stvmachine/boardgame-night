@@ -2,18 +2,24 @@
 import { computed } from 'vue'
 import type { MergedThing } from '@/generated/operations'
 import type { GameGroup } from '@/utils/grouping'
+import { useCollapsedGroups } from '@/composables/useCollapsedGroups'
 import GameCard from './GameCard.vue'
 import ResultsSkeleton from './ResultsSkeleton.vue'
+import CollapsibleGroup from './CollapsibleGroup.vue'
+
+import type { GroupOption } from '@/utils/grouping'
 
 interface Props {
   games?: MergedThing[]
   groups?: GameGroup[]
+  groupBy?: GroupOption
   loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   games: () => [],
   groups: () => [],
+  groupBy: 'none',
   loading: false
 })
 
@@ -24,6 +30,13 @@ const ungroupedGames = computed(() => {
   }
   return []
 })
+
+const isGrouped = computed(() => {
+  return props.groups && props.groups.length > 0 && props.groups[0].name !== 'All Games'
+})
+
+const groupNames = computed(() => props.groups.map(g => g.name))
+const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(groupNames.value)
 </script>
 
 <template>
@@ -34,12 +47,32 @@ const ungroupedGames = computed(() => {
       </div>
     </template>
 
-    <template v-else-if="groups && groups.length > 0 && groups[0].name !== 'All Games'">
-      <section v-for="group in groups" :key="group.name" class="space-y-2">
-        <h3 class="text-lg font-semibold text-neutral-800">
-          {{ group.name }}
-          <span class="ml-2 text-sm font-normal text-neutral-500">({{ group.games.length }})</span>
-        </h3>
+    <template v-else-if="isGrouped">
+      <div class="flex gap-2">
+        <button
+          type="button"
+          class="px-3 py-1.5 text-sm font-medium text-indigo-700 bg-indigo-50 rounded hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          @click="expandAll(groupNames)"
+        >
+          Expand All
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1.5 text-sm font-medium text-neutral-700 bg-neutral-100 rounded hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          @click="collapseAll(groupNames)"
+        >
+          Collapse All
+        </button>
+      </div>
+
+      <CollapsibleGroup
+        v-for="group in groups"
+        :key="group.name"
+        :group-name="group.name"
+        :count="group.games.length"
+        :initially-open="!isCollapsed(group.name)"
+        @toggle="toggle(group.name)"
+      >
         <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
           <GameCard
             v-for="game in group.games"
@@ -57,7 +90,7 @@ const ungroupedGames = computed(() => {
             :owners="game.owners"
           />
         </div>
-      </section>
+      </CollapsibleGroup>
     </template>
 
     <template v-else>

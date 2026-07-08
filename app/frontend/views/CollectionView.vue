@@ -81,6 +81,7 @@ const hasActiveFilters = computed(() => {
     <GameGrid
       v-else
       :groups="groupedGames"
+      :group-by="groupBy"
       :loading="loading"
     />
   </div>
