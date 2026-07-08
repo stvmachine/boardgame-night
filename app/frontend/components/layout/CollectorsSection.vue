@@ -1,25 +1,39 @@
 <script setup lang="ts">
 import MemberAvatar from '@/components/common/MemberAvatar.vue'
+import RefreshButton from '@/components/sidebar/RefreshButton.vue'
 import type { UserSyncStatus } from '@/generated/operations'
 
 interface Props {
   usernames: string[]
   selected: Set<string>
   syncStatuses?: UserSyncStatus[]
+  cooldownFor?: (username: string) => number
+  isRefreshing?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
-  syncStatuses: () => []
+const props = withDefaults(defineProps<Props>(), {
+  syncStatuses: () => [],
+  cooldownFor: () => 0,
+  isRefreshing: false
 })
 
 const emit = defineEmits<{
   (e: 'toggle', username: string): void
   (e: 'select-all'): void
   (e: 'deselect-all'): void
+  (e: 'refresh', username: string): void
 }>()
 
 function statusFor(username: string, statuses: UserSyncStatus[]): string {
   return statuses.find(s => s.username === username)?.status ?? 'READY'
+}
+
+function isSyncing(username: string): boolean {
+  return statusFor(username, props.syncStatuses) === 'SYNCING'
+}
+
+function isDisabled(username: string): boolean {
+  return isSyncing(username) || props.cooldownFor(username) > 0
 }
 </script>
 
@@ -64,12 +78,20 @@ function statusFor(username: string, statuses: UserSyncStatus[]): string {
           <MemberAvatar :username="username" size="sm" />
           <span class="text-sm font-medium text-neutral-800">{{ username }}</span>
         </label>
-        <span
-          v-if="statusFor(username, syncStatuses) === 'SYNCING'"
-          class="text-xs font-medium text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded"
-        >
-          Syncing
-        </span>
+        <div class="flex items-center gap-2">
+          <span
+            v-if="statusFor(username, syncStatuses) === 'SYNCING'"
+            class="text-xs font-medium text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded"
+          >
+            Syncing
+          </span>
+          <RefreshButton
+            :username="username"
+            :disabled="isDisabled(username)"
+            :cooldown-seconds="cooldownFor(username)"
+            @refresh="emit('refresh', username)"
+          />
+        </div>
       </li>
     </ul>
   </div>

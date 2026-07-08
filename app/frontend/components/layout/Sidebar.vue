@@ -1,19 +1,38 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useCollectorsStore } from '@/stores/collectors'
 import { useFilterStore } from '@/stores/filters'
 import { useUiStore } from '@/stores/ui'
+import { useMergedCollectionQuery } from '@/generated/operations'
 import CollapsibleSection from '@/components/common/CollapsibleSection.vue'
 import MemberAvatar from '@/components/common/MemberAvatar.vue'
 import CollectorsSection from '@/components/layout/CollectorsSection.vue'
 import CollectionFilters from '@/components/collection/CollectionFilters.vue'
+import { useRefreshCollection } from '@/composables/useRefreshCollection'
 
 const store = useCollectorsStore()
 const filterStore = useFilterStore()
 const uiStore = useUiStore()
 const { selectedOwners } = storeToRefs(filterStore)
 const { filtersOpen, collectorsOpen } = storeToRefs(uiStore)
+
+const { refresh, isRefreshing, cooldownFor, initFromSyncStatuses } = useRefreshCollection()
+
+const { result } = useMergedCollectionQuery(
+  () => ({ usernames: store.usernames }),
+  () => ({ fetchPolicy: 'cache-first' })
+)
+
+watch(
+  () => result.value?.mergedCollection.syncStatuses,
+  (syncStatuses) => {
+    if (syncStatuses) {
+      initFromSyncStatuses(syncStatuses)
+    }
+  },
+  { immediate: true }
+)
 
 const newUsername = ref('')
 
@@ -35,6 +54,10 @@ function selectAllOwners() {
 
 function deselectAllOwners() {
   filterStore.deselectAllOwners()
+}
+
+function handleRefresh(username: string) {
+  refresh(username)
 }
 
 const activeFilterCount = computed(() => {
@@ -113,9 +136,13 @@ const activeFilterCount = computed(() => {
       <CollectorsSection
         :usernames="store.usernames"
         :selected="selectedOwners"
+        :sync-statuses="result?.mergedCollection.syncStatuses"
+        :cooldown-for="cooldownFor"
+        :is-refreshing="isRefreshing"
         @toggle="filterStore.toggleOwner"
         @select-all="selectAllOwners"
         @deselect-all="deselectAllOwners"
+        @refresh="handleRefresh"
       />
 
       <div v-if="store.usernames.length === 0" class="mt-3 text-sm text-neutral-500">

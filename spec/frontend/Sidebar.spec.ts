@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
+import { provideApolloClient } from '@vue/apollo-composable'
+import { ApolloClient, InMemoryCache } from '@apollo/client/core'
 import Sidebar from '@/components/layout/Sidebar.vue'
 import CollapsibleSection from '@/components/common/CollapsibleSection.vue'
 import CollectionFilters from '@/components/collection/CollectionFilters.vue'
@@ -19,10 +21,19 @@ function createTestRouter() {
   })
 }
 
+function createMockClient() {
+  return new ApolloClient({
+    link: { request: vi.fn() } as any,
+    cache: new InMemoryCache()
+  })
+}
+
 async function mountSidebar(routeQuery = {}) {
   const router = createTestRouter()
   await router.push({ path: '/collection', query: routeQuery })
   await router.isReady()
+
+  provideApolloClient(createMockClient())
 
   return mount(Sidebar, {
     global: {
