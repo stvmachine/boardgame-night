@@ -128,7 +128,14 @@ Plans:
   4. Group owner/admin can create a boardgame night session, send magic-link invitations, and see RSVP attendee count/status; invitees can RSVP (Going / Not Going) via magic link without creating an account (SESS-01, SESS-02, SESS-03, SESS-04)
   5. Session owner can manually pick a game from the group's merged collection, the session transitions through its lifecycle states (draft → scheduled → rsvp_open → picking → completed), and every mutation is validated via dry-validation contracts (SESS-05, SESS-06, GQL-03)
 
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+
+- [ ] 04-01-PLAN.md — Auth foundation: Rails 8 Bearer token auth, signUp/signIn/signOut/bindBggUsername mutations + contracts, Apollo auth link, Vue auth forms, protected routes (Wave 1)
+- [ ] 04-02-PLAN.md — Friend groups: Group/GroupMembership/InviteToken models, createGroup/inviteToGroup/acceptGroupInvite mutations, dynamic group collection view, magic-link email invites, member management (Wave 2)
+- [ ] 04-03-PLAN.md — Sessions & RSVPs: NightSession/Attendance models, 4-state lifecycle, createNightSession/scheduleSession/rsvp/upgradeToAccount mutations, provisional users for no-account RSVP, RSVP dashboard (Wave 3)
+- [ ] 04-04-PLAN.md — Game picking & lifecycle: startPicking/pickGame/cancelSession/reopenSession mutations, GamePicker (filtered by attendee count), SessionSummary, e2e lifecycle test (Wave 4)
+
 **UI hint**: yes
 
 ## Progress
@@ -141,7 +148,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation & Monorepo Shell | 3/3 | Complete    | 2026-07-02 |
 | 2. BGG Integration Layer + Persistence | 3/3 | Complete    | 2026-07-04 |
 | 3. GraphQL API + Collection Surface (v1 Parity) | 11/11 | Complete   | 2026-07-08 |
-| 4. Auth + Friend Groups + Session Lifecycle | 0/TBD | Not started | - |
+| 4. Auth + Friend Groups + Session Lifecycle | 0/4 | Not started | - |
 
 ---
 
