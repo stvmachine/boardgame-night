@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class InviteToken < ApplicationRecord
+  attr_accessor :raw_token
+
   belongs_to :group
   belongs_to :inviter, class_name: "User"
   belongs_to :accepted_by, class_name: "User", optional: true
@@ -22,5 +24,9 @@ class InviteToken < ApplicationRecord
 
   def expired?
     expires_at < Time.current
+  end
+
+  def token
+    raw_token
   end
 end

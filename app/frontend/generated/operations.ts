@@ -9,6 +9,13 @@ import * as VueApolloComposable from '@vue/apollo-composable';
 import * as VueCompositionApi from '@vue/composition-api';
 export * from './types';
 export type ReactiveFunction<TParam> = () => TParam;
+export type AcceptGroupInviteMutationVariables = Exact<{
+  token: string;
+}>;
+
+
+export type AcceptGroupInviteMutation = { acceptGroupInvite: { group: { id: string, name: string, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }> } } | null };
+
 export type BindBggUsernameMutationVariables = Exact<{
   username: string;
 }>;
@@ -30,6 +37,23 @@ export type ImportCollectionMutationVariables = Exact<{
 
 
 export type ImportCollectionMutation = { importCollection: { user: { id: string, username: string, syncStatus: { username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null } } } | null };
+
+export type InviteToGroupMutationVariables = Exact<{
+  groupId: string | number;
+  email: string;
+  role?: string | null | undefined;
+}>;
+
+
+export type InviteToGroupMutation = { inviteToGroup: { inviteToken: { id: string, token: string, status: string, email: string, role: Types.GroupRole | null, expiresAt: unknown, group: { id: string, name: string } } } | null };
+
+export type RemoveGroupMemberMutationVariables = Exact<{
+  groupId: string | number;
+  userId: string | number;
+}>;
+
+
+export type RemoveGroupMemberMutation = { removeGroupMember: { success: boolean } | null };
 
 export type SignInMutationVariables = Exact<{
   email: string;
@@ -53,6 +77,15 @@ export type SignUpMutationVariables = Exact<{
 
 export type SignUpMutation = { signUp: { token: string, user: { id: string, username: string, email: string | null, displayName: string, isProvisional: boolean } } | null };
 
+export type UpdateGroupMemberRoleMutationVariables = Exact<{
+  groupId: string | number;
+  userId: string | number;
+  role: string;
+}>;
+
+
+export type UpdateGroupMemberRoleMutation = { updateGroupMemberRole: { membership: { id: string, role: Types.GroupRole, user: { id: string, username: string, displayName: string } } } | null };
+
 export type ValidateBggUsernameMutationVariables = Exact<{
   username: string;
 }>;
@@ -70,7 +103,7 @@ export type GroupQueryVariables = Exact<{
 }>;
 
 
-export type GroupQuery = { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }>, collection: { items: Array<{ id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, gameCount: number | null }> } } | null };
+export type GroupQuery = { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }>, memberships: Array<{ id: string, role: Types.GroupRole, user: { id: string, username: string, displayName: string } }>, collection: { items: Array<{ id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, gameCount: number | null }> } } | null };
 
 export type HealthQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -116,6 +149,50 @@ export type CollectionSyncedSubscriptionVariables = Exact<{
 export type CollectionSyncedSubscription = { collectionSynced: { username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null } };
 
 
+export const AcceptGroupInviteDocument = gql`
+    mutation AcceptGroupInvite($token: String!) {
+  acceptGroupInvite(token: $token) {
+    group {
+      id
+      name
+      inviteCode
+      myRole
+      owner {
+        id
+        username
+        displayName
+      }
+      members {
+        id
+        username
+        displayName
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useAcceptGroupInviteMutation__
+ *
+ * To run a mutation, you first call `useAcceptGroupInviteMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useAcceptGroupInviteMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useAcceptGroupInviteMutation({
+ *   variables: {
+ *     token: // value for 'token'
+ *   },
+ * });
+ */
+export function useAcceptGroupInviteMutation(options: VueApolloComposable.UseMutationOptions<AcceptGroupInviteMutation, AcceptGroupInviteMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<AcceptGroupInviteMutation, AcceptGroupInviteMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<AcceptGroupInviteMutation, AcceptGroupInviteMutationVariables>(AcceptGroupInviteDocument, options);
+}
+export type AcceptGroupInviteMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<AcceptGroupInviteMutation, AcceptGroupInviteMutationVariables>;
 export const BindBggUsernameDocument = gql`
     mutation BindBggUsername($username: String!) {
   bindBggUsername(username: $username) {
@@ -235,6 +312,78 @@ export function useImportCollectionMutation(options: VueApolloComposable.UseMuta
   return VueApolloComposable.useMutation<ImportCollectionMutation, ImportCollectionMutationVariables>(ImportCollectionDocument, options);
 }
 export type ImportCollectionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<ImportCollectionMutation, ImportCollectionMutationVariables>;
+export const InviteToGroupDocument = gql`
+    mutation InviteToGroup($groupId: ID!, $email: String!, $role: String) {
+  inviteToGroup(groupId: $groupId, email: $email, role: $role) {
+    inviteToken {
+      id
+      token
+      status
+      email
+      role
+      expiresAt
+      group {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useInviteToGroupMutation__
+ *
+ * To run a mutation, you first call `useInviteToGroupMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useInviteToGroupMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useInviteToGroupMutation({
+ *   variables: {
+ *     groupId: // value for 'groupId'
+ *     email: // value for 'email'
+ *     role: // value for 'role'
+ *   },
+ * });
+ */
+export function useInviteToGroupMutation(options: VueApolloComposable.UseMutationOptions<InviteToGroupMutation, InviteToGroupMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<InviteToGroupMutation, InviteToGroupMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<InviteToGroupMutation, InviteToGroupMutationVariables>(InviteToGroupDocument, options);
+}
+export type InviteToGroupMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<InviteToGroupMutation, InviteToGroupMutationVariables>;
+export const RemoveGroupMemberDocument = gql`
+    mutation RemoveGroupMember($groupId: ID!, $userId: ID!) {
+  removeGroupMember(groupId: $groupId, userId: $userId) {
+    success
+  }
+}
+    `;
+
+/**
+ * __useRemoveGroupMemberMutation__
+ *
+ * To run a mutation, you first call `useRemoveGroupMemberMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveGroupMemberMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useRemoveGroupMemberMutation({
+ *   variables: {
+ *     groupId: // value for 'groupId'
+ *     userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useRemoveGroupMemberMutation(options: VueApolloComposable.UseMutationOptions<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>(RemoveGroupMemberDocument, options);
+}
+export type RemoveGroupMemberMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>;
 export const SignInDocument = gql`
     mutation SignIn($email: String!, $password: String!) {
   signIn(email: $email, password: $password) {
@@ -334,6 +483,45 @@ export function useSignUpMutation(options: VueApolloComposable.UseMutationOption
   return VueApolloComposable.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, options);
 }
 export type SignUpMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<SignUpMutation, SignUpMutationVariables>;
+export const UpdateGroupMemberRoleDocument = gql`
+    mutation UpdateGroupMemberRole($groupId: ID!, $userId: ID!, $role: String!) {
+  updateGroupMemberRole(groupId: $groupId, userId: $userId, role: $role) {
+    membership {
+      id
+      role
+      user {
+        id
+        username
+        displayName
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useUpdateGroupMemberRoleMutation__
+ *
+ * To run a mutation, you first call `useUpdateGroupMemberRoleMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGroupMemberRoleMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useUpdateGroupMemberRoleMutation({
+ *   variables: {
+ *     groupId: // value for 'groupId'
+ *     userId: // value for 'userId'
+ *     role: // value for 'role'
+ *   },
+ * });
+ */
+export function useUpdateGroupMemberRoleMutation(options: VueApolloComposable.UseMutationOptions<UpdateGroupMemberRoleMutation, UpdateGroupMemberRoleMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<UpdateGroupMemberRoleMutation, UpdateGroupMemberRoleMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<UpdateGroupMemberRoleMutation, UpdateGroupMemberRoleMutationVariables>(UpdateGroupMemberRoleDocument, options);
+}
+export type UpdateGroupMemberRoleMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<UpdateGroupMemberRoleMutation, UpdateGroupMemberRoleMutationVariables>;
 export const ValidateBggUsernameDocument = gql`
     mutation ValidateBggUsername($username: String!) {
   validateBggUsername(username: $username) {
@@ -417,6 +605,15 @@ export const GroupDocument = gql`
       id
       username
       displayName
+    }
+    memberships {
+      id
+      role
+      user {
+        id
+        username
+        displayName
+      }
     }
     collection {
       items {

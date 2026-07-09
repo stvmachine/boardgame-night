@@ -15,6 +15,15 @@ query Group($token: String!) {
       username
       displayName
     }
+    memberships {
+      id
+      role
+      user {
+        id
+        username
+        displayName
+      }
+    }
     collection {
       items {
         id

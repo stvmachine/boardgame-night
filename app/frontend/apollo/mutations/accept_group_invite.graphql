@@ -1,0 +1,20 @@
+mutation AcceptGroupInvite($token: String!) {
+  acceptGroupInvite(token: $token) {
+    group {
+      id
+      name
+      inviteCode
+      myRole
+      owner {
+        id
+        username
+        displayName
+      }
+      members {
+        id
+        username
+        displayName
+      }
+    }
+  }
+}

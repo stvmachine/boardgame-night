@@ -8,8 +8,13 @@ module Types
     field :invite_code, String, null: true
     field :owner, Types::UserType, null: false
     field :members, [Types::UserType], null: false
+    field :memberships, [Types::GroupMembershipType], null: false
     field :collection, Types::MergedCollectionType, null: false
     field :my_role, Types::GroupRoleEnum, null: true
+
+    def memberships
+      object.group_memberships.includes(:user).to_a
+    end
 
     def collection
       {

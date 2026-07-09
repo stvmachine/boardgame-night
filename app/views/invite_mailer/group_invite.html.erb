@@ -1,0 +1,22 @@
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1>You've been invited to join <%= @group.name %></h1>
+
+  <p>
+    You've been invited to join the board game group
+    <strong><%= @group.name %></strong> on Boardgame Night.
+  </p>
+
+  <p>
+    <a
+      href="<%= root_url %>invite/<%= @raw_token %>"
+      style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 6px;"
+    >
+      Join group
+    </a>
+  </p>
+
+  <p style="color: #666666; font-size: 14px;">
+    If the button doesn't work, copy and paste this link into your browser:
+    <%= root_url %>invite/<%= @raw_token %>
+  </p>
+</div>

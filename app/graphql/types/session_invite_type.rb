@@ -9,5 +9,9 @@ module Types
     field :role, Types::GroupRoleEnum, null: true
     field :expires_at, GraphQL::Types::ISO8601DateTime, null: false
     field :group, Types::GroupType, null: false
+
+    def role
+      object.role&.upcase
+    end
   end
 end

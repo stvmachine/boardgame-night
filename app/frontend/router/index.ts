@@ -50,6 +50,11 @@ const router = createRouter({
       path: '/g/:token',
       name: 'group',
       component: () => import('../views/GroupView.vue')
+    },
+    {
+      path: '/invite/:token',
+      name: 'invite',
+      component: () => import('../views/InviteView.vue')
     }
   ]
 })

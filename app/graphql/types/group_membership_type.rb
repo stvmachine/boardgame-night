@@ -6,5 +6,9 @@ module Types
     field :user, Types::UserType, null: false
     field :group, Types::GroupType, null: false
     field :role, Types::GroupRoleEnum, null: false
+
+    def role
+      object.role.upcase
+    end
   end
 end
