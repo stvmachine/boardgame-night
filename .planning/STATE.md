@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 04
-status: planned
+status: executing
 stopped_at: Phase 04 plans verified, ready for execution
-last_updated: "2026-07-09T14:30:00.000Z"
+last_updated: "2026-07-09T07:09:50.478Z"
 last_activity: 2026-07-09
-last_activity_desc: Phase 04 plans created and verified
+last_activity_desc: Phase null execution started
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 21
-  completed_plans: 17
+  completed_plans: 18
   percent: 75
+current_phase: 04
 current_phase_name: auth-friend-groups-session-lifecycle
 ---
 
@@ -24,14 +24,14 @@ current_phase_name: auth-friend-groups-session-lifecycle
 See: .planning/PROJECT.md (updated 2026-06-30)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 04 — auth-friend-groups-session-lifecycle
+**Current focus:** Phase null
 
 ## Current Position
 
-Phase: 04 — PLANNED (4 plans, verified)
-Plan: 0 of 4
-Status: Ready for execution
-Last activity: 2026-07-09 — Phase 04 plans created and verified
+Phase: null — EXECUTING
+Plan: 1 of ?
+Status: Executing Phase null
+Last activity: 2026-07-09 — Phase null execution started
 
 Progress: [██████████░░] 75% (Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Phase 4 planned — 4 phases total)
 
@@ -77,6 +77,7 @@ Progress: [██████████░░] 75% (Phase 1 ✅, Phase 2 ✅, 
 | Phase 03-graphql-api-collection-surface-v1-parity P09 | 8min | 2 tasks | 7 files |
 | Phase 03-graphql-api-collection-surface-v1-parity P10 | 18min | 1 tasks | 10 files |
 | Phase 03-graphql-api-collection-surface-v1-parity P11 | 13min | 2 tasks | 6 files |
+| Phase 04 P01 | 25min | 2 tasks | 49 files |
 
 ## Accumulated Context
 
@@ -129,6 +130,9 @@ Recent decisions affecting current work:
 - [Phase 03-graphql-api-collection-surface-v1-parity]: Bound CollapsibleSection open state directly to uiStore refs and updated them from the emitted toggle event, keeping the component fully controlled without extra model plumbing. — The plan required toggle actions on the ui store; direct assignment from the toggle event avoids double-toggle issues and keeps the component controlled.
 - [Phase ?]: Cache raw XML strings in Rails.cache for BGG collection responses because Nokogiri::XML::Document is not Marshal-serializable. — The plan assumed Nokogiri::XML::Document is Marshal-serializable, but Rails.cache raised TypeError. Storing the raw XML string keeps the cache backend-agnostic and avoids depending on Nokogiri internals.
 - [Phase ?]: Update QueryType#sync_status_for to read user.last_synced_at so mergedCollection sync statuses return the persisted timestamp. — The plan only specified UserType#sync_status, but mergedCollection uses QueryType#sync_status_for. Returning Time.current there would have continued the WR-03 bug from 03-REVIEW.md.
+- [Phase ?]: Memory-only Pinia token (never localStorage) prevents XSS token theft
+- [Phase ?]: DB-backed Session with CSPRNG token (not JWT) enables server-side revocation
+- [Phase ?]: rack-attack 5/min per IP rate limiting for auth endpoints prevents brute-force
 
 ### Pending Todos
 
@@ -154,6 +158,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-09T14:30:00.000Z
+Last session: 2026-07-09T07:08:11.955Z
 Stopped at: Phase 04 plans verified, ready for execution
 Resume file: .planning/phases/04-auth-friend-groups-session-lifecycle/04-01-PLAN.md

@@ -49,10 +49,10 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 ### Authentication & User Accounts
 
-- [ ] **AUTH-01**: User can create an account with email and password
-- [ ] **AUTH-02**: User can log in and stay logged in across sessions
-- [ ] **AUTH-03**: User can log out from any page
-- [ ] **AUTH-04**: User can bind one BGG username to their account (validated against BGG user() query before accepting)
+- [x] **AUTH-01**: User can create an account with email and password
+- [x] **AUTH-02**: User can log in and stay logged in across sessions
+- [x] **AUTH-03**: User can log out from any page
+- [x] **AUTH-04**: User can bind one BGG username to their account (validated against BGG user() query before accepting)
 
 ### Friend Groups
 
@@ -76,7 +76,7 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 - [x] **GQL-01**: Rails exposes a GraphQL endpoint consumed by the Vue frontend (single source of truth for frontend data)
 - [x] **GQL-02**: GraphQL schema exposes queries for things, search, users, collections, hot items (matching the reference proxy's contract)
-- [ ] **GQL-03**: GraphQL mutations use dry-validation contracts for input validation (not strong_params)
+- [x] **GQL-03**: GraphQL mutations use dry-validation contracts for input validation (not strong_params)
 - [x] **GQL-04**: GraphQL handles Apollo batched queries (Schema.multiplex for params[:_json] arrays)
 - [x] **GQL-05**: GraphQL type definitions are generated from Rails schema and committed (codegen contract between frontend and backend)
 
@@ -144,10 +144,10 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | COLL-16 | Phase 3 | Complete |
 | COLL-17 | Phase 3 | Complete |
 | COLL-18 | Phase 3 | Complete |
-| AUTH-01 | Phase 4 | Pending |
-| AUTH-02 | Phase 4 | Pending |
-| AUTH-03 | Phase 4 | Pending |
-| AUTH-04 | Phase 4 | Pending |
+| AUTH-01 | Phase 4 | Complete |
+| AUTH-02 | Phase 4 | Complete |
+| AUTH-03 | Phase 4 | Complete |
+| AUTH-04 | Phase 4 | Complete |
 | GROUP-01 | Phase 4 | Pending |
 | GROUP-02 | Phase 4 | Pending |
 | GROUP-03 | Phase 4 | Pending |
@@ -162,7 +162,7 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | SESS-06 | Phase 4 | Pending |
 | GQL-01 | Phase 1 | Complete |
 | GQL-02 | Phase 3 | Complete |
-| GQL-03 | Phase 4 | Pending |
+| GQL-03 | Phase 4 | Complete |
 | GQL-04 | Phase 1 | Complete |
 | GQL-05 | Phase 3 | Complete |
 
