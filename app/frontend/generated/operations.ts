@@ -57,7 +57,7 @@ export type InviteToGroupMutationVariables = Exact<{
 }>;
 
 
-export type InviteToGroupMutation = { inviteToGroup: { inviteToken: { id: string, token: string, status: string, email: string, role: Types.GroupRole | null, expiresAt: unknown, group: { id: string, name: string } } } | null };
+export type InviteToGroupMutation = { inviteToGroup: { inviteToken: { id: string, token: string | null, status: string, email: string, role: Types.GroupRole | null, expiresAt: unknown, group: { id: string, name: string } } } | null };
 
 export type RemoveGroupMemberMutationVariables = Exact<{
   groupId: string | number;
@@ -66,6 +66,15 @@ export type RemoveGroupMemberMutationVariables = Exact<{
 
 
 export type RemoveGroupMemberMutation = { removeGroupMember: { success: boolean } | null };
+
+export type RsvpMutationVariables = Exact<{
+  token: string;
+  response: string;
+  nickname?: string | null | undefined;
+}>;
+
+
+export type RsvpMutation = { rsvp: { attendance: { id: string, response: string, respondedAt: unknown, user: { id: string, username: string, displayName: string, isProvisional: boolean } }, session: { id: string, title: string, state: Types.SessionState, scheduledAt: unknown, location: string | null, attendeeCount: number, host: { id: string, username: string, displayName: string } } } | null };
 
 export type ScheduleSessionMutationVariables = Exact<{
   sessionId: string | number;
@@ -107,6 +116,15 @@ export type UpdateGroupMemberRoleMutationVariables = Exact<{
 
 
 export type UpdateGroupMemberRoleMutation = { updateGroupMemberRole: { membership: { id: string, role: Types.GroupRole, user: { id: string, username: string, displayName: string } } } | null };
+
+export type UpgradeToAccountMutationVariables = Exact<{
+  email: string;
+  password: string;
+  bggUsername?: string | null | undefined;
+}>;
+
+
+export type UpgradeToAccountMutation = { upgradeToAccount: { token: string, user: { id: string, username: string, email: string | null, isProvisional: boolean } } | null };
 
 export type ValidateBggUsernameMutationVariables = Exact<{
   username: string;
@@ -162,6 +180,13 @@ export type SearchQueryVariables = Exact<{
 
 
 export type SearchQuery = { search: Array<{ id: string, name: string, yearPublished: number | null }> };
+
+export type SessionInviteQueryVariables = Exact<{
+  token: string;
+}>;
+
+
+export type SessionInviteQuery = { sessionInvite: { id: string, status: string, email: string, expiresAt: unknown, session: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, username: string, displayName: string }, group: { id: string, name: string } } | null, group: { id: string, name: string } } | null };
 
 export type UserQueryVariables = Exact<{
   username: string;
@@ -471,6 +496,60 @@ export function useRemoveGroupMemberMutation(options: VueApolloComposable.UseMut
   return VueApolloComposable.useMutation<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>(RemoveGroupMemberDocument, options);
 }
 export type RemoveGroupMemberMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>;
+export const RsvpDocument = gql`
+    mutation Rsvp($token: String!, $response: String!, $nickname: String) {
+  rsvp(token: $token, response: $response, nickname: $nickname) {
+    attendance {
+      id
+      response
+      respondedAt
+      user {
+        id
+        username
+        displayName
+        isProvisional
+      }
+    }
+    session {
+      id
+      title
+      state
+      scheduledAt
+      location
+      attendeeCount
+      host {
+        id
+        username
+        displayName
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useRsvpMutation__
+ *
+ * To run a mutation, you first call `useRsvpMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useRsvpMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useRsvpMutation({
+ *   variables: {
+ *     token: // value for 'token'
+ *     response: // value for 'response'
+ *     nickname: // value for 'nickname'
+ *   },
+ * });
+ */
+export function useRsvpMutation(options: VueApolloComposable.UseMutationOptions<RsvpMutation, RsvpMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<RsvpMutation, RsvpMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<RsvpMutation, RsvpMutationVariables>(RsvpDocument, options);
+}
+export type RsvpMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<RsvpMutation, RsvpMutationVariables>;
 export const ScheduleSessionDocument = gql`
     mutation ScheduleSession($sessionId: ID!, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int) {
   scheduleSession(
@@ -665,6 +744,43 @@ export function useUpdateGroupMemberRoleMutation(options: VueApolloComposable.Us
   return VueApolloComposable.useMutation<UpdateGroupMemberRoleMutation, UpdateGroupMemberRoleMutationVariables>(UpdateGroupMemberRoleDocument, options);
 }
 export type UpdateGroupMemberRoleMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<UpdateGroupMemberRoleMutation, UpdateGroupMemberRoleMutationVariables>;
+export const UpgradeToAccountDocument = gql`
+    mutation UpgradeToAccount($email: String!, $password: String!, $bggUsername: String) {
+  upgradeToAccount(email: $email, password: $password, bggUsername: $bggUsername) {
+    token
+    user {
+      id
+      username
+      email
+      isProvisional
+    }
+  }
+}
+    `;
+
+/**
+ * __useUpgradeToAccountMutation__
+ *
+ * To run a mutation, you first call `useUpgradeToAccountMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useUpgradeToAccountMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useUpgradeToAccountMutation({
+ *   variables: {
+ *     email: // value for 'email'
+ *     password: // value for 'password'
+ *     bggUsername: // value for 'bggUsername'
+ *   },
+ * });
+ */
+export function useUpgradeToAccountMutation(options: VueApolloComposable.UseMutationOptions<UpgradeToAccountMutation, UpgradeToAccountMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<UpgradeToAccountMutation, UpgradeToAccountMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<UpgradeToAccountMutation, UpgradeToAccountMutationVariables>(UpgradeToAccountDocument, options);
+}
+export type UpgradeToAccountMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<UpgradeToAccountMutation, UpgradeToAccountMutationVariables>;
 export const ValidateBggUsernameDocument = gql`
     mutation ValidateBggUsername($username: String!) {
   validateBggUsername(username: $username) {
@@ -1062,6 +1178,62 @@ export function useSearchLazyQuery(variables?: SearchQueryVariables | VueComposi
   return VueApolloComposable.useLazyQuery<SearchQuery, SearchQueryVariables>(SearchDocument, variables, options);
 }
 export type SearchQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<SearchQuery, SearchQueryVariables>;
+export const SessionInviteDocument = gql`
+    query SessionInvite($token: String!) {
+  sessionInvite(token: $token) {
+    id
+    status
+    email
+    expiresAt
+    session {
+      id
+      title
+      description
+      state
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        username
+        displayName
+      }
+      group {
+        id
+        name
+      }
+    }
+    group {
+      id
+      name
+    }
+  }
+}
+    `;
+
+/**
+ * __useSessionInviteQuery__
+ *
+ * To run a query within a Vue component, call `useSessionInviteQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSessionInviteQuery` returns an object from Apollo Client that contains result, loading and error properties
+ * you can use to render your UI.
+ *
+ * @param variables that will be passed into the query
+ * @param options that will be passed into the query, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/query.html#options;
+ *
+ * @example
+ * const { result, loading, error } = useSessionInviteQuery({
+ *   token: // value for 'token'
+ * });
+ */
+export function useSessionInviteQuery(variables: SessionInviteQueryVariables | VueCompositionApi.Ref<SessionInviteQueryVariables> | ReactiveFunction<SessionInviteQueryVariables>, options: VueApolloComposable.UseQueryOptions<SessionInviteQuery, SessionInviteQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<SessionInviteQuery, SessionInviteQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<SessionInviteQuery, SessionInviteQueryVariables>> = {}) {
+  return VueApolloComposable.useQuery<SessionInviteQuery, SessionInviteQueryVariables>(SessionInviteDocument, variables, options);
+}
+export function useSessionInviteLazyQuery(variables?: SessionInviteQueryVariables | VueCompositionApi.Ref<SessionInviteQueryVariables> | ReactiveFunction<SessionInviteQueryVariables>, options: VueApolloComposable.UseQueryOptions<SessionInviteQuery, SessionInviteQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<SessionInviteQuery, SessionInviteQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<SessionInviteQuery, SessionInviteQueryVariables>> = {}) {
+  return VueApolloComposable.useLazyQuery<SessionInviteQuery, SessionInviteQueryVariables>(SessionInviteDocument, variables, options);
+}
+export type SessionInviteQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<SessionInviteQuery, SessionInviteQueryVariables>;
 export const UserDocument = gql`
     query User($username: String!) {
   user(username: $username) {

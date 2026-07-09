@@ -33,6 +33,10 @@ module Types
       argument :id, ID, required: true, description: "Session id."
     end
 
+    field :session_invite, Types::SessionInviteType, null: true, description: "Look up a session invite by its magic-link token." do
+      argument :token, String, required: true, description: "Magic-link token from the invitation email."
+    end
+
     def health
       "ok"
     end
@@ -63,6 +67,17 @@ module Types
 
     def night_session(id:)
       NightSession.find_by(id: id)
+    end
+
+    def session_invite(token:)
+      return nil if token.blank?
+
+      digest = Digest::SHA256.hexdigest(token)
+      invite = InviteToken.find_by(token_digest: digest)
+      return nil unless invite&.night_session_id.present?
+      return nil if invite.expired?
+
+      invite
     end
 
     def hot_items

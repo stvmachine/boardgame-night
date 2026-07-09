@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_000007) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_000008) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -135,6 +135,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000007) do
     t.string "email"
     t.string "invite_token"
     t.datetime "last_synced_at"
+    t.string "nickname"
     t.string "password_digest"
     t.boolean "provisional", default: false, null: false
     t.datetime "updated_at", null: false

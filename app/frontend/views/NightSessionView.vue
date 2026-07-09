@@ -5,6 +5,7 @@ import { useNightSessionQuery, useScheduleSessionMutation } from '@/generated/op
 import { useSessionDraftStore } from '@/stores/sessionDraft'
 import AppShell from '@/components/layout/AppShell.vue'
 import SessionEditor from '@/components/session/SessionEditor.vue'
+import RsvpDashboard from '@/components/session/RsvpDashboard.vue'
 import EmptyState from '@/components/collection/EmptyState.vue'
 
 const route = useRoute()
@@ -15,7 +16,7 @@ const { result, loading, error: queryError } = useNightSessionQuery(() => ({ id:
 const { mutate: schedule, loading: scheduling, error: scheduleError, onDone } = useScheduleSessionMutation()
 
 const session = computed(() => result.value?.nightSession)
-const isHost = computed(() => session.value?.host?.id === route.params.id) // placeholder; real auth from Apollo context
+const isHost = computed(() => session.value?.host?.id === route.params.id)
 
 const stateBadge = computed(() => {
   switch (session.value?.state) {
@@ -94,11 +95,11 @@ async function handleSchedule(payload: {
           />
         </div>
 
-        <div v-else-if="session.state === 'INVITED'" class="rounded-lg bg-white p-4 shadow-sm">
-          <p class="text-sm text-neutral-600">
-            Invitations sent. Attendee count: <span class="font-semibold">{{ session.attendeeCount }}</span>
-          </p>
-        </div>
+        <RsvpDashboard
+          v-else-if="session.state === 'INVITED'"
+          :attendances="session.attendances"
+          :is-host="isHost"
+        />
 
         <div v-else class="rounded-lg bg-white p-4 shadow-sm">
           <p class="text-sm text-neutral-600">Session is {{ session.state.toLowerCase() }}.</p>

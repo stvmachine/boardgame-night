@@ -15,6 +15,7 @@ class User < ApplicationRecord
   validates :invite_token, uniqueness: true, allow_nil: true
 
   def display_name
+    return nickname if nickname.present?
     return "Guest" if provisional?
 
     email.presence || "Guest"

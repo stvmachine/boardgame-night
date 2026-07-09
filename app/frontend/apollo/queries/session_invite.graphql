@@ -1,0 +1,31 @@
+query SessionInvite($token: String!) {
+  sessionInvite(token: $token) {
+    id
+    status
+    email
+    expiresAt
+    session {
+      id
+      title
+      description
+      state
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        username
+        displayName
+      }
+      group {
+        id
+        name
+      }
+    }
+    group {
+      id
+      name
+    }
+  }
+}
