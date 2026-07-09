@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class GraphqlController < ApplicationController
+  include Authentication
+
   # If accessing from outside this domain, nullify the session
   # This allows for outside API access while preventing CSRF attacks,
   # but you'll have to authenticate your user separately
@@ -14,7 +16,10 @@ class GraphqlController < ApplicationController
           query: param[:query],
           operation_name: param[:operationName],
           variables: ensure_hash(param[:variables]),
-          context: {}
+          context: {
+            current_user: Current.user,
+            current_session: Current.session
+          }
         }
       end
       result = BoardgameNightSchema.multiplex(queries)
@@ -24,8 +29,9 @@ class GraphqlController < ApplicationController
       variables = ensure_hash(params[:variables])
       query = params[:query]
       operation_name = params[:operationName]
-      context = {}
-      result = BoardgameNightSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
+      result = BoardgameNightSchema.execute(query, variables: variables,
+        context: { current_user: Current.user, current_session: Current.session },
+        operation_name: operation_name)
       render json: result
     end
   rescue StandardError => e

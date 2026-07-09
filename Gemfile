@@ -76,5 +76,7 @@ gem "faraday", "~> 2.14"
 gem "faraday-retry", "~> 2.4"
 gem "nokogiri", "~> 1.19"
 
-# GraphQL mutation input validation contracts
 gem "dry-rails", "~> 0.7"
+
+# Rate limiting for auth endpoints (T-04-01)
+gem "rack-attack", "~> 6.6"

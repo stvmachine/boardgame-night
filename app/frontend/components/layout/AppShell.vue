@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import AppHeader from './AppHeader.vue'
 import MobileDrawer from './MobileDrawer.vue'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
+
+const authStore = useAuthStore()
+const router = useRouter()
+
+async function handleLogout() {
+  // Use a real Apollo mutation via the composable
+  const { useAuth } = await import('@/composables/useAuth')
+  await useAuth().signOut()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -10,10 +22,19 @@ import MobileDrawer from './MobileDrawer.vue'
         <AppHeader />
         <a href="/" class="text-lg font-semibold text-indigo-600">BoardGame Night</a>
       </div>
-      <nav class="hidden md:flex items-center gap-4 text-sm font-medium text-neutral-600">
+      <nav v-if="authStore.isAuthenticated" class="hidden md:flex items-center gap-4 text-sm font-medium text-neutral-600">
         <a href="/" class="hover:text-indigo-600">Home</a>
         <a href="/collection" class="hover:text-indigo-600">Collection</a>
         <a href="/hot" class="hover:text-indigo-600">Hot</a>
+        <a href="/account" class="hover:text-indigo-600">Account</a>
+        <button type="button" class="text-neutral-600 hover:text-red-600" @click="handleLogout">Log out</button>
+      </nav>
+      <nav v-else class="hidden md:flex items-center gap-4 text-sm font-medium text-neutral-600">
+        <a href="/" class="hover:text-indigo-600">Home</a>
+        <a href="/collection" class="hover:text-indigo-600">Collection</a>
+        <a href="/hot" class="hover:text-indigo-600">Hot</a>
+        <a href="/login" class="hover:text-indigo-600">Log in</a>
+        <a href="/signup" class="hover:text-indigo-600">Sign up</a>
       </nav>
     </header>
     <div class="flex flex-1 pt-14 md:pt-16">

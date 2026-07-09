@@ -5,8 +5,8 @@ require "rails_helper"
 RSpec.describe "bindBggUsername mutation" do
   let(:mutation) do
     <<~GRAPHQL
-      mutation BindBggUsername($input: BindBggUsernameInput!) {
-        bindBggUsername(input: $input) {
+      mutation BindBggUsername($username: String!) {
+        bindBggUsername(username: $username) {
           user {
             id
             username
@@ -17,8 +17,10 @@ RSpec.describe "bindBggUsername mutation" do
     GRAPHQL
   end
 
-  let(:user) { User.create!(username: "carol", email: "carol@example.com", password: "password123") }
-  let(:valid_vars) { { input: { username: "stevmachine" } } }
+  let!(:user) { User.create!(username: "carol", email: "carol@example.com", password: "password123") }
+  let!(:session) { Session.create!(user: user, expires_at: 30.days.from_now) }
+  let(:context) { { current_user: user, current_session: session } }
+  let(:valid_vars) { { username: "stevmachine" } }
 
   before do
     # Stub Bgg::Client#user to return a Nokogiri node indicating the user exists
@@ -30,8 +32,7 @@ RSpec.describe "bindBggUsername mutation" do
 
   it "binds a valid BGG username to the user" do
     expect {
-      result = BoardgameNightSchema.execute(mutation, variables: valid_vars,
-        context: { current_user: user, current_session: double("session") })
+      result = BoardgameNightSchema.execute(mutation, variables: valid_vars, context: context)
       expect(result["errors"]).to be_nil
       expect(result.dig("data", "bindBggUsername", "user", "bggUsername")).to eq("stevmachine")
     }.to change { user.reload.bgg_username }.from(nil).to("stevmachine")
@@ -50,15 +51,15 @@ RSpec.describe "bindBggUsername mutation" do
     allow(bgg_client).to receive(:user).with("nobodybgg").and_return(xml)
     allow(Bgg::Client).to receive(:new).and_return(bgg_client)
 
-    result = BoardgameNightSchema.execute(mutation, variables: { input: { username: "nobodybgg" } },
-      context: { current_user: user, current_session: double("session") })
+    result = BoardgameNightSchema.execute(mutation, variables: { username: "nobodybgg" },
+      context: context)
     expect(result["errors"]).to be_present
     expect(result["errors"].first["message"]).to match(/bgg user not found/i)
   end
 
   it "returns an error for an invalid username format" do
-    result = BoardgameNightSchema.execute(mutation, variables: { input: { username: "invalid name!" } },
-      context: { current_user: user, current_session: double("session") })
+    result = BoardgameNightSchema.execute(mutation, variables: { username: "invalid name!" },
+      context: context)
     expect(result["errors"]).to be_present
   end
 end

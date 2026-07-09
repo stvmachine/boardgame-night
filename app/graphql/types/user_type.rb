@@ -4,11 +4,27 @@ module Types
   class UserType < Types::BaseObject
     field :id, ID, null: false
     field :username, String, null: false
+    field :email, String, null: true
+    field :bgg_username, String, null: true
     field :avatar, String, null: true
+    field :is_provisional, Boolean, null: false
+    field :display_name, String, null: false
     field :sync_status, Types::UserSyncStatusType, null: false
 
     def avatar
       object.bgg_avatar_url
+    end
+
+    def is_provisional
+      object.provisional?
+    end
+
+    def display_name
+      object.display_name
+    end
+
+    def email
+      object.provisional? ? nil : object.email
     end
 
     def sync_status

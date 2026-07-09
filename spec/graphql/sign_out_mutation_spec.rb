@@ -13,8 +13,8 @@ RSpec.describe "signOut mutation" do
     GRAPHQL
   end
 
-  let(:user) { User.create!(username: "bob", email: "bob@example.com", password: "password123") }
-  let(:session) { Session.create!(user: user, expires_at: 30.days.from_now) }
+  let!(:user) { User.create!(username: "bob", email: "bob@example.com", password: "password123") }
+  let!(:session) { Session.create!(user: user, expires_at: 30.days.from_now) }
 
   it "destroys the current session" do
     expect {

@@ -1,0 +1,10 @@
+mutation BindBggUsername($username: String!) {
+  bindBggUsername(username: $username) {
+    user {
+      id
+      username
+      bggUsername
+      displayName
+    }
+  }
+}

@@ -21,6 +21,8 @@ module Types
       argument :query, String, required: true, description: "Search term."
     end
 
+    field :current_user, Types::UserType, null: true, description: "The currently authenticated user, or null."
+
     def health
       "ok"
     end
@@ -35,6 +37,10 @@ module Types
 
     def user(username:)
       User.find_by(bgg_username: username)
+    end
+
+    def current_user
+      context[:current_user]
     end
 
     def hot_items

@@ -9,6 +9,13 @@ import * as VueApolloComposable from '@vue/apollo-composable';
 import * as VueCompositionApi from '@vue/composition-api';
 export * from './types';
 export type ReactiveFunction<TParam> = () => TParam;
+export type BindBggUsernameMutationVariables = Exact<{
+  username: string;
+}>;
+
+
+export type BindBggUsernameMutation = { bindBggUsername: { user: { id: string, username: string, bggUsername: string | null, displayName: string } } | null };
+
 export type ImportCollectionMutationVariables = Exact<{
   username: string;
 }>;
@@ -16,12 +23,39 @@ export type ImportCollectionMutationVariables = Exact<{
 
 export type ImportCollectionMutation = { importCollection: { user: { id: string, username: string, syncStatus: { username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null } } } | null };
 
+export type SignInMutationVariables = Exact<{
+  email: string;
+  password: string;
+}>;
+
+
+export type SignInMutation = { signIn: { token: string, user: { id: string, username: string, email: string | null, displayName: string } } | null };
+
+export type SignOutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SignOutMutation = { signOut: { success: boolean } | null };
+
+export type SignUpMutationVariables = Exact<{
+  email: string;
+  password: string;
+  username: string;
+}>;
+
+
+export type SignUpMutation = { signUp: { token: string, user: { id: string, username: string, email: string | null, displayName: string, isProvisional: boolean } } | null };
+
 export type ValidateBggUsernameMutationVariables = Exact<{
   username: string;
 }>;
 
 
 export type ValidateBggUsernameMutation = { validateBggUsername: { validationResult: { valid: boolean, username: string, exists: boolean, avatar: string | null } } | null };
+
+export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type CurrentUserQuery = { currentUser: { id: string, username: string, email: string | null, bggUsername: string | null, displayName: string, isProvisional: boolean } | null };
 
 export type HealthQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -62,6 +96,40 @@ export type CollectionSyncedSubscriptionVariables = Exact<{
 export type CollectionSyncedSubscription = { collectionSynced: { username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null } };
 
 
+export const BindBggUsernameDocument = gql`
+    mutation BindBggUsername($username: String!) {
+  bindBggUsername(username: $username) {
+    user {
+      id
+      username
+      bggUsername
+      displayName
+    }
+  }
+}
+    `;
+
+/**
+ * __useBindBggUsernameMutation__
+ *
+ * To run a mutation, you first call `useBindBggUsernameMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useBindBggUsernameMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useBindBggUsernameMutation({
+ *   variables: {
+ *     username: // value for 'username'
+ *   },
+ * });
+ */
+export function useBindBggUsernameMutation(options: VueApolloComposable.UseMutationOptions<BindBggUsernameMutation, BindBggUsernameMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<BindBggUsernameMutation, BindBggUsernameMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<BindBggUsernameMutation, BindBggUsernameMutationVariables>(BindBggUsernameDocument, options);
+}
+export type BindBggUsernameMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<BindBggUsernameMutation, BindBggUsernameMutationVariables>;
 export const ImportCollectionDocument = gql`
     mutation ImportCollection($username: String!) {
   importCollection(username: $username) {
@@ -101,6 +169,105 @@ export function useImportCollectionMutation(options: VueApolloComposable.UseMuta
   return VueApolloComposable.useMutation<ImportCollectionMutation, ImportCollectionMutationVariables>(ImportCollectionDocument, options);
 }
 export type ImportCollectionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<ImportCollectionMutation, ImportCollectionMutationVariables>;
+export const SignInDocument = gql`
+    mutation SignIn($email: String!, $password: String!) {
+  signIn(email: $email, password: $password) {
+    token
+    user {
+      id
+      username
+      email
+      displayName
+    }
+  }
+}
+    `;
+
+/**
+ * __useSignInMutation__
+ *
+ * To run a mutation, you first call `useSignInMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useSignInMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useSignInMutation({
+ *   variables: {
+ *     email: // value for 'email'
+ *     password: // value for 'password'
+ *   },
+ * });
+ */
+export function useSignInMutation(options: VueApolloComposable.UseMutationOptions<SignInMutation, SignInMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<SignInMutation, SignInMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<SignInMutation, SignInMutationVariables>(SignInDocument, options);
+}
+export type SignInMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<SignInMutation, SignInMutationVariables>;
+export const SignOutDocument = gql`
+    mutation SignOut {
+  signOut {
+    success
+  }
+}
+    `;
+
+/**
+ * __useSignOutMutation__
+ *
+ * To run a mutation, you first call `useSignOutMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useSignOutMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useSignOutMutation();
+ */
+export function useSignOutMutation(options: VueApolloComposable.UseMutationOptions<SignOutMutation, SignOutMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<SignOutMutation, SignOutMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<SignOutMutation, SignOutMutationVariables>(SignOutDocument, options);
+}
+export type SignOutMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<SignOutMutation, SignOutMutationVariables>;
+export const SignUpDocument = gql`
+    mutation SignUp($email: String!, $password: String!, $username: String!) {
+  signUp(email: $email, password: $password, username: $username) {
+    token
+    user {
+      id
+      username
+      email
+      displayName
+      isProvisional
+    }
+  }
+}
+    `;
+
+/**
+ * __useSignUpMutation__
+ *
+ * To run a mutation, you first call `useSignUpMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useSignUpMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useSignUpMutation({
+ *   variables: {
+ *     email: // value for 'email'
+ *     password: // value for 'password'
+ *     username: // value for 'username'
+ *   },
+ * });
+ */
+export function useSignUpMutation(options: VueApolloComposable.UseMutationOptions<SignUpMutation, SignUpMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<SignUpMutation, SignUpMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, options);
+}
+export type SignUpMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<SignUpMutation, SignUpMutationVariables>;
 export const ValidateBggUsernameDocument = gql`
     mutation ValidateBggUsername($username: String!) {
   validateBggUsername(username: $username) {
@@ -135,6 +302,38 @@ export function useValidateBggUsernameMutation(options: VueApolloComposable.UseM
   return VueApolloComposable.useMutation<ValidateBggUsernameMutation, ValidateBggUsernameMutationVariables>(ValidateBggUsernameDocument, options);
 }
 export type ValidateBggUsernameMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<ValidateBggUsernameMutation, ValidateBggUsernameMutationVariables>;
+export const CurrentUserDocument = gql`
+    query CurrentUser {
+  currentUser {
+    id
+    username
+    email
+    bggUsername
+    displayName
+    isProvisional
+  }
+}
+    `;
+
+/**
+ * __useCurrentUserQuery__
+ *
+ * To run a query within a Vue component, call `useCurrentUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCurrentUserQuery` returns an object from Apollo Client that contains result, loading and error properties
+ * you can use to render your UI.
+ *
+ * @param options that will be passed into the query, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/query.html#options;
+ *
+ * @example
+ * const { result, loading, error } = useCurrentUserQuery();
+ */
+export function useCurrentUserQuery(options: VueApolloComposable.UseQueryOptions<CurrentUserQuery, CurrentUserQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<CurrentUserQuery, CurrentUserQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<CurrentUserQuery, CurrentUserQueryVariables>> = {}) {
+  return VueApolloComposable.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, {}, options);
+}
+export function useCurrentUserLazyQuery(options: VueApolloComposable.UseQueryOptions<CurrentUserQuery, CurrentUserQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<CurrentUserQuery, CurrentUserQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<CurrentUserQuery, CurrentUserQueryVariables>> = {}) {
+  return VueApolloComposable.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, {}, options);
+}
+export type CurrentUserQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<CurrentUserQuery, CurrentUserQueryVariables>;
 export const HealthDocument = gql`
     query Health {
   health

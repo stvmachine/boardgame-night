@@ -5,8 +5,8 @@ require "rails_helper"
 RSpec.describe "signUp mutation" do
   let(:mutation) do
     <<~GRAPHQL
-      mutation SignUp($input: SignUpInput!) {
-        signUp(input: $input) {
+      mutation SignUp($email: String!, $password: String!, $username: String!) {
+        signUp(email: $email, password: $password, username: $username) {
           token
           user {
             id
@@ -21,7 +21,7 @@ RSpec.describe "signUp mutation" do
   end
 
   let(:valid_variables) do
-    { input: { email: "newuser@example.com", password: "securepass", username: "newuser" } }
+    { email: "newuser@example.com", password: "securepass", username: "newuser" }
   end
 
   it "creates a non-provisional user and a session, returns a token" do
@@ -57,7 +57,7 @@ RSpec.describe "signUp mutation" do
 
   it "returns an error for a short password" do
     result = BoardgameNightSchema.execute(mutation, variables: {
-      input: { email: "short@example.com", password: "short", username: "shortuser" }
+      email: "short@example.com", password: "short", username: "shortuser"
     })
     expect(result["errors"]).to be_present
   end

@@ -1,7 +1,9 @@
 import { ApolloClient, InMemoryCache, split } from '@apollo/client/core'
 import { BatchHttpLink } from '@apollo/client/link/batch-http'
+import { setContext } from '@apollo/client/link/context'
 import { createConsumer } from '@rails/actioncable'
 import ActionCableLink from 'graphql-ruby-client/subscriptions/ActionCableLink'
+import { useAuthStore } from '@/stores/auth'
 
 const batchLink = new BatchHttpLink({
   uri: '/graphql',
@@ -17,7 +19,17 @@ const isSubscription = ({ query }: { query: any }) =>
     (def: any) => def.kind === 'OperationDefinition' && def.operation === 'subscription'
   )
 
-const link = split(isSubscription, actionCableLink, batchLink)
+const authLink = setContext((_, { headers }) => {
+  const token = useAuthStore().token
+  return {
+    headers: {
+      ...headers,
+      Authorization: token ? `Bearer ${token}` : '',
+    },
+  }
+})
+
+const link = split(isSubscription, actionCableLink, authLink.concat(batchLink))
 
 export const apolloClient = new ApolloClient({
   link,                 // HTTP batched queries / Action Cable subscriptions
