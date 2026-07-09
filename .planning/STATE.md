@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed Phase 04 Plan 03 (sessions & RSVPs)
-last_updated: "2026-07-09T18:50:00.000Z"
+stopped_at: Completed Phase 04 Plan 04 (Game Picking & Lifecycle)
+last_updated: "2026-07-09T20:02:32.000+10:00"
 last_activity: 2026-07-09
-last_activity_desc: Completed Phase 04 Plan 03
+last_activity_desc: Completed Phase 04 Plan 04
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 21
-  completed_plans: 20
-  percent: 95
+  completed_plans: 21
+  percent: 100
 current_phase: 04
 current_phase_name: auth-friend-groups-session-lifecycle
 ---
@@ -28,12 +28,12 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 
 ## Current Position
 
-Phase: 04-auth-friend-groups-session-lifecycle — EXECUTING
-Plan: 03 complete, ready for Plan 04
-Status: Completed Plan 03 (sessions & RSVPs)
-Last activity: 2026-07-09 — Completed Phase 04 Plan 03
+Phase: 04-auth-friend-groups-session-lifecycle — COMPLETE
+Plan: 04 complete, Phase 04 complete
+Status: Completed Plan 04 (Game Picking & Lifecycle)
+Last activity: 2026-07-09 — Completed Phase 04 Plan 04
 
-Progress: [██████████░] 95% (Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Phase 4 executing — 4 phases total)
+Progress: [███████████] 100% (Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Phase 4 ✅ — 4 phases total, milestone v1.0 complete)
 
 
 ## Performance Metrics
@@ -81,6 +81,7 @@ Progress: [██████████░] 95% (Phase 1 ✅, Phase 2 ✅, Pha
 | Phase 04 P01 | 25min | 2 tasks | 49 files |
 | Phase 04 P02 | 37min | 2 tasks | 64 files |
 | Phase 04 P03 | 34min | 2 tasks | 40 files |
+| Phase 04 P04 | 90min | 2 tasks | 27 files |
 
 ## Accumulated Context
 
@@ -145,6 +146,9 @@ Recent decisions affecting current work:
 - [Phase 04-03]: SessionInviteType.token is nullable because the raw token is only available at creation time, never on query
 - [Phase 04-03]: Time.parse(...).to_datetime in schedule/create mutations lets dry-validation :date_time accept ISO8601 input
 - [Phase 04-03]: Group owner allowed to create sessions even without an explicit group_memberships row
+- [Phase 04-04]: Persist auth token in sessionStorage (not memory) so E2E reloads and real multi-page flows keep the host authenticated.
+- [Phase 04-04]: Keep out-of-range games selectable in GamePicker with a warning badge, matching D-13 non-blocking guidance.
+- [Phase 04-04]: Store previous_state on NightSession cancellation so reopenSession restores the exact prior lifecycle state rather than defaulting to draft.
 
 ### Pending Todos
 

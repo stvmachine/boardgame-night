@@ -69,8 +69,8 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 - [x] **SESS-02**: Session owner can send magic-link invitations to group members
 - [x] **SESS-03**: Invitee can RSVP via magic link without creating an account (Going / Not Going — binary for v1)
 - [x] **SESS-04**: Session owner sees RSVP attendee count and status
-- [ ] **SESS-05**: Session owner can manually pick a game from the group's merged collection (host selects, no suggestion engine or voting yet)
-- [x] **SESS-06**: Session transitions through states: draft → scheduled → rsvp_open → picking → completed (draft → invited implemented; picking → completed in 04-04)
+- [x] **SESS-05**: Session owner can manually pick a game from the group's merged collection (host selects, no suggestion engine or voting yet)
+- [x] **SESS-06**: Session transitions through states: draft → scheduled → rsvp_open → picking → completed (all transitions implemented in 04-03 and 04-04)
 
 ### GraphQL API
 
@@ -158,8 +158,8 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | SESS-02 | Phase 4 | ✅ Complete (04-03) |
 | SESS-03 | Phase 4 | ✅ Complete (04-03) |
 | SESS-04 | Phase 4 | ✅ Complete (04-03) |
-| SESS-05 | Phase 4 | Pending (04-04) |
-| SESS-06 | Phase 4 | ✅ Partial — draft→invited in 04-03; picking→completed in 04-04 |
+| SESS-05 | Phase 4 | Complete (04-04) |
+| SESS-06 | Phase 4 | Complete (04-03, 04-04) |
 | GQL-01 | Phase 1 | Complete |
 | GQL-02 | Phase 3 | Complete |
 | GQL-03 | Phase 4 | Complete |
