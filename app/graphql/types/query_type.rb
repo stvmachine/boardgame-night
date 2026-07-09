@@ -29,6 +29,10 @@ module Types
       argument :token, String, required: true, description: "Invite code or group id."
     end
 
+    field :night_session, Types::NightSessionType, null: true, description: "Look up a night session by id." do
+      argument :id, ID, required: true, description: "Session id."
+    end
+
     def health
       "ok"
     end
@@ -55,6 +59,10 @@ module Types
 
     def group(token:)
       Group.find_by(invite_code: token) || context[:current_user]&.groups&.find_by(id: token)
+    end
+
+    def night_session(id:)
+      NightSession.find_by(id: id)
     end
 
     def hot_items

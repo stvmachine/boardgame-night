@@ -55,6 +55,11 @@ const router = createRouter({
       path: '/invite/:token',
       name: 'invite',
       component: () => import('../views/InviteView.vue')
+    },
+    {
+      path: '/s/:id',
+      name: 'session',
+      component: () => import('../views/NightSessionView.vue')
     }
   ]
 })

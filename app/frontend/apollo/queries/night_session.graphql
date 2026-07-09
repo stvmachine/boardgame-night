@@ -1,0 +1,42 @@
+query NightSession($id: ID!) {
+  nightSession(id: $id) {
+    id
+    title
+    description
+    state
+    scheduledAt
+    location
+    capacity
+    attendeeCount
+    host {
+      id
+      username
+      displayName
+    }
+    group {
+      id
+      name
+      myRole
+      members {
+        id
+        username
+        displayName
+      }
+    }
+    attendances {
+      id
+      response
+      respondedAt
+      user {
+        id
+        username
+        displayName
+      }
+    }
+    pickedGame {
+      id
+      name
+      thumbnail
+    }
+  }
+}

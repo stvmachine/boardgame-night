@@ -1,0 +1,22 @@
+mutation CreateNightSession($title: String!, $description: String, $groupId: ID!, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int) {
+  createNightSession(title: $title, description: $description, groupId: $groupId, scheduledAt: $scheduledAt, location: $location, capacity: $capacity) {
+    session {
+      id
+      title
+      description
+      state
+      scheduledAt
+      location
+      capacity
+      host {
+        id
+        username
+        displayName
+      }
+      group {
+        id
+        name
+      }
+    }
+  }
+}

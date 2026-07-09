@@ -13,5 +13,7 @@ module Types
     field :accept_group_invite, mutation: Mutations::AcceptGroupInvite, description: "Accept a group invitation using a magic-link token."
     field :remove_group_member, mutation: Mutations::RemoveGroupMember, description: "Remove a member from a group."
     field :update_group_member_role, mutation: Mutations::UpdateGroupMemberRole, description: "Change a member's role between admin and member."
+    field :create_night_session, mutation: Mutations::CreateNightSession, description: "Create a new night session in draft state."
+    field :schedule_session, mutation: Mutations::ScheduleSession, description: "Schedule a draft session and send invitations."
   end
 end

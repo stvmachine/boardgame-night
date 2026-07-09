@@ -1,0 +1,29 @@
+<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+  <h1>You're invited to a board game night!</h1>
+
+  <p>
+    You've been invited to <strong>"<%= @session.title %>"</strong> hosted by <%= @session.host.display_name %>.
+  </p>
+
+  <% if @session.scheduled_at.present? %>
+    <p><strong>When:</strong> <%= @session.scheduled_at.strftime("%A, %B %d, %Y at %I:%M %p") %></p>
+  <% end %>
+
+  <% if @session.location.present? %>
+    <p><strong>Where:</strong> <%= @session.location %></p>
+  <% end %>
+
+  <p>
+    <a
+      href="<%= root_url %>invite/<%= @raw_token %>"
+      style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 6px;"
+    >
+      RSVP
+    </a>
+  </p>
+
+  <p style="color: #666666; font-size: 14px;">
+    If the button doesn't work, copy and paste this link into your browser:
+    <%= root_url %>invite/<%= @raw_token %>
+  </p>
+</div>

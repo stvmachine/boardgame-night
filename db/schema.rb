@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_000005) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_000007) do
+  create_table "attendances", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "night_session_id", null: false
+    t.datetime "responded_at"
+    t.string "response", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["night_session_id", "user_id"], name: "index_attendances_on_night_session_id_and_user_id", unique: true
+    t.index ["night_session_id"], name: "index_attendances_on_night_session_id"
+    t.index ["user_id"], name: "index_attendances_on_user_id"
+  end
+
   create_table "bgg_collections", force: :cascade do |t|
     t.integer "bgg_thing_id", null: false
     t.datetime "created_at", null: false
@@ -88,6 +100,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000005) do
     t.index ["token_digest"], name: "index_invite_tokens_on_token_digest", unique: true
   end
 
+  create_table "night_sessions", force: :cascade do |t|
+    t.integer "capacity"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "group_id", null: false
+    t.integer "host_id", null: false
+    t.string "location"
+    t.integer "picked_game_id"
+    t.datetime "scheduled_at"
+    t.string "state", default: "draft", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["group_id"], name: "index_night_sessions_on_group_id"
+    t.index ["host_id"], name: "index_night_sessions_on_host_id"
+    t.index ["picked_game_id"], name: "index_night_sessions_on_picked_game_id"
+    t.index ["state"], name: "index_night_sessions_on_state"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
@@ -115,6 +145,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000005) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  add_foreign_key "attendances", "night_sessions"
+  add_foreign_key "attendances", "users"
   add_foreign_key "bgg_collections", "bgg_things"
   add_foreign_key "bgg_collections", "users"
   add_foreign_key "group_memberships", "groups"
@@ -123,5 +155,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000005) do
   add_foreign_key "invite_tokens", "groups"
   add_foreign_key "invite_tokens", "users", column: "accepted_by_id"
   add_foreign_key "invite_tokens", "users", column: "inviter_id"
+  add_foreign_key "night_sessions", "bgg_things", column: "picked_game_id"
+  add_foreign_key "night_sessions", "groups"
+  add_foreign_key "night_sessions", "users", column: "host_id"
   add_foreign_key "sessions", "users"
 end

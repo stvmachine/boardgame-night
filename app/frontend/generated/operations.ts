@@ -31,6 +31,18 @@ export type CreateGroupMutationVariables = Exact<{
 
 export type CreateGroupMutation = { createGroup: { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }> } } | null };
 
+export type CreateNightSessionMutationVariables = Exact<{
+  title: string;
+  description?: string | null | undefined;
+  groupId: string | number;
+  scheduledAt?: unknown;
+  location?: string | null | undefined;
+  capacity?: number | null | undefined;
+}>;
+
+
+export type CreateNightSessionMutation = { createNightSession: { session: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, host: { id: string, username: string, displayName: string }, group: { id: string, name: string } } } | null };
+
 export type ImportCollectionMutationVariables = Exact<{
   username: string;
 }>;
@@ -54,6 +66,16 @@ export type RemoveGroupMemberMutationVariables = Exact<{
 
 
 export type RemoveGroupMemberMutation = { removeGroupMember: { success: boolean } | null };
+
+export type ScheduleSessionMutationVariables = Exact<{
+  sessionId: string | number;
+  scheduledAt?: unknown;
+  location?: string | null | undefined;
+  capacity?: number | null | undefined;
+}>;
+
+
+export type ScheduleSessionMutation = { scheduleSession: { invitesSent: number, session: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, username: string, displayName: string }, group: { id: string, name: string } } } | null };
 
 export type SignInMutationVariables = Exact<{
   email: string;
@@ -126,6 +148,13 @@ export type MyGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type MyGroupsQuery = { myGroups: Array<{ id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }> }> };
+
+export type NightSessionQueryVariables = Exact<{
+  id: string | number;
+}>;
+
+
+export type NightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, username: string, displayName: string }, group: { id: string, name: string, myRole: Types.GroupRole | null, members: Array<{ id: string, username: string, displayName: string }> }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, username: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null } | null } | null };
 
 export type SearchQueryVariables = Exact<{
   query: string;
@@ -273,6 +302,64 @@ export function useCreateGroupMutation(options: VueApolloComposable.UseMutationO
   return VueApolloComposable.useMutation<CreateGroupMutation, CreateGroupMutationVariables>(CreateGroupDocument, options);
 }
 export type CreateGroupMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<CreateGroupMutation, CreateGroupMutationVariables>;
+export const CreateNightSessionDocument = gql`
+    mutation CreateNightSession($title: String!, $description: String, $groupId: ID!, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int) {
+  createNightSession(
+    title: $title
+    description: $description
+    groupId: $groupId
+    scheduledAt: $scheduledAt
+    location: $location
+    capacity: $capacity
+  ) {
+    session {
+      id
+      title
+      description
+      state
+      scheduledAt
+      location
+      capacity
+      host {
+        id
+        username
+        displayName
+      }
+      group {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useCreateNightSessionMutation__
+ *
+ * To run a mutation, you first call `useCreateNightSessionMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useCreateNightSessionMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useCreateNightSessionMutation({
+ *   variables: {
+ *     title: // value for 'title'
+ *     description: // value for 'description'
+ *     groupId: // value for 'groupId'
+ *     scheduledAt: // value for 'scheduledAt'
+ *     location: // value for 'location'
+ *     capacity: // value for 'capacity'
+ *   },
+ * });
+ */
+export function useCreateNightSessionMutation(options: VueApolloComposable.UseMutationOptions<CreateNightSessionMutation, CreateNightSessionMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<CreateNightSessionMutation, CreateNightSessionMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<CreateNightSessionMutation, CreateNightSessionMutationVariables>(CreateNightSessionDocument, options);
+}
+export type CreateNightSessionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<CreateNightSessionMutation, CreateNightSessionMutationVariables>;
 export const ImportCollectionDocument = gql`
     mutation ImportCollection($username: String!) {
   importCollection(username: $username) {
@@ -384,6 +471,62 @@ export function useRemoveGroupMemberMutation(options: VueApolloComposable.UseMut
   return VueApolloComposable.useMutation<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>(RemoveGroupMemberDocument, options);
 }
 export type RemoveGroupMemberMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>;
+export const ScheduleSessionDocument = gql`
+    mutation ScheduleSession($sessionId: ID!, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int) {
+  scheduleSession(
+    sessionId: $sessionId
+    scheduledAt: $scheduledAt
+    location: $location
+    capacity: $capacity
+  ) {
+    session {
+      id
+      title
+      description
+      state
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        username
+        displayName
+      }
+      group {
+        id
+        name
+      }
+    }
+    invitesSent
+  }
+}
+    `;
+
+/**
+ * __useScheduleSessionMutation__
+ *
+ * To run a mutation, you first call `useScheduleSessionMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useScheduleSessionMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useScheduleSessionMutation({
+ *   variables: {
+ *     sessionId: // value for 'sessionId'
+ *     scheduledAt: // value for 'scheduledAt'
+ *     location: // value for 'location'
+ *     capacity: // value for 'capacity'
+ *   },
+ * });
+ */
+export function useScheduleSessionMutation(options: VueApolloComposable.UseMutationOptions<ScheduleSessionMutation, ScheduleSessionMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<ScheduleSessionMutation, ScheduleSessionMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<ScheduleSessionMutation, ScheduleSessionMutationVariables>(ScheduleSessionDocument, options);
+}
+export type ScheduleSessionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<ScheduleSessionMutation, ScheduleSessionMutationVariables>;
 export const SignInDocument = gql`
     mutation SignIn($email: String!, $password: String!) {
   signIn(email: $email, password: $password) {
@@ -820,6 +963,73 @@ export function useMyGroupsLazyQuery(options: VueApolloComposable.UseQueryOption
   return VueApolloComposable.useLazyQuery<MyGroupsQuery, MyGroupsQueryVariables>(MyGroupsDocument, {}, options);
 }
 export type MyGroupsQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<MyGroupsQuery, MyGroupsQueryVariables>;
+export const NightSessionDocument = gql`
+    query NightSession($id: ID!) {
+  nightSession(id: $id) {
+    id
+    title
+    description
+    state
+    scheduledAt
+    location
+    capacity
+    attendeeCount
+    host {
+      id
+      username
+      displayName
+    }
+    group {
+      id
+      name
+      myRole
+      members {
+        id
+        username
+        displayName
+      }
+    }
+    attendances {
+      id
+      response
+      respondedAt
+      user {
+        id
+        username
+        displayName
+      }
+    }
+    pickedGame {
+      id
+      name
+      thumbnail
+    }
+  }
+}
+    `;
+
+/**
+ * __useNightSessionQuery__
+ *
+ * To run a query within a Vue component, call `useNightSessionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNightSessionQuery` returns an object from Apollo Client that contains result, loading and error properties
+ * you can use to render your UI.
+ *
+ * @param variables that will be passed into the query
+ * @param options that will be passed into the query, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/query.html#options;
+ *
+ * @example
+ * const { result, loading, error } = useNightSessionQuery({
+ *   id: // value for 'id'
+ * });
+ */
+export function useNightSessionQuery(variables: NightSessionQueryVariables | VueCompositionApi.Ref<NightSessionQueryVariables> | ReactiveFunction<NightSessionQueryVariables>, options: VueApolloComposable.UseQueryOptions<NightSessionQuery, NightSessionQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<NightSessionQuery, NightSessionQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<NightSessionQuery, NightSessionQueryVariables>> = {}) {
+  return VueApolloComposable.useQuery<NightSessionQuery, NightSessionQueryVariables>(NightSessionDocument, variables, options);
+}
+export function useNightSessionLazyQuery(variables?: NightSessionQueryVariables | VueCompositionApi.Ref<NightSessionQueryVariables> | ReactiveFunction<NightSessionQueryVariables>, options: VueApolloComposable.UseQueryOptions<NightSessionQuery, NightSessionQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<NightSessionQuery, NightSessionQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<NightSessionQuery, NightSessionQueryVariables>> = {}) {
+  return VueApolloComposable.useLazyQuery<NightSessionQuery, NightSessionQueryVariables>(NightSessionDocument, variables, options);
+}
+export type NightSessionQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<NightSessionQuery, NightSessionQueryVariables>;
 export const SearchDocument = gql`
     query Search($query: String!) {
   search(query: $query) {
