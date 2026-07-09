@@ -23,6 +23,12 @@ module Types
 
     field :current_user, Types::UserType, null: true, description: "The currently authenticated user, or null."
 
+    field :my_groups, [Types::GroupType], null: false, description: "All groups the current user belongs to."
+
+    field :group, Types::GroupType, null: true, description: "Look up a group by its invite code, or by id if the current user is a member." do
+      argument :token, String, required: true, description: "Invite code or group id."
+    end
+
     def health
       "ok"
     end
@@ -41,6 +47,14 @@ module Types
 
     def current_user
       context[:current_user]
+    end
+
+    def my_groups
+      context[:current_user]&.groups || []
+    end
+
+    def group(token:)
+      Group.find_by(invite_code: token) || context[:current_user]&.groups&.find_by(id: token)
     end
 
     def hot_items

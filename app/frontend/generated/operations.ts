@@ -16,6 +16,14 @@ export type BindBggUsernameMutationVariables = Exact<{
 
 export type BindBggUsernameMutation = { bindBggUsername: { user: { id: string, username: string, bggUsername: string | null, displayName: string } } | null };
 
+export type CreateGroupMutationVariables = Exact<{
+  name: string;
+  description?: string | null | undefined;
+}>;
+
+
+export type CreateGroupMutation = { createGroup: { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }> } } | null };
+
 export type ImportCollectionMutationVariables = Exact<{
   username: string;
 }>;
@@ -57,6 +65,13 @@ export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type CurrentUserQuery = { currentUser: { id: string, username: string, email: string | null, bggUsername: string | null, displayName: string, isProvisional: boolean } | null };
 
+export type GroupQueryVariables = Exact<{
+  token: string;
+}>;
+
+
+export type GroupQuery = { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }>, collection: { items: Array<{ id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, gameCount: number | null }> } } | null };
+
 export type HealthQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -73,6 +88,11 @@ export type MergedCollectionQueryVariables = Exact<{
 
 
 export type MergedCollectionQuery = { mergedCollection: { items: Array<{ id: string, name: string, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, minAge: number | null, image: string | null, thumbnail: string | null, description: string | null, average: number | null, bayesAverage: number | null, usersRated: number | null, averageWeight: number | null, isExpansion: boolean, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null }> } };
+
+export type MyGroupsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MyGroupsQuery = { myGroups: Array<{ id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }> }> };
 
 export type SearchQueryVariables = Exact<{
   query: string;
@@ -130,6 +150,52 @@ export function useBindBggUsernameMutation(options: VueApolloComposable.UseMutat
   return VueApolloComposable.useMutation<BindBggUsernameMutation, BindBggUsernameMutationVariables>(BindBggUsernameDocument, options);
 }
 export type BindBggUsernameMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<BindBggUsernameMutation, BindBggUsernameMutationVariables>;
+export const CreateGroupDocument = gql`
+    mutation CreateGroup($name: String!, $description: String) {
+  createGroup(name: $name, description: $description) {
+    group {
+      id
+      name
+      description
+      inviteCode
+      myRole
+      owner {
+        id
+        username
+        displayName
+      }
+      members {
+        id
+        username
+        displayName
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useCreateGroupMutation__
+ *
+ * To run a mutation, you first call `useCreateGroupMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useCreateGroupMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useCreateGroupMutation({
+ *   variables: {
+ *     name: // value for 'name'
+ *     description: // value for 'description'
+ *   },
+ * });
+ */
+export function useCreateGroupMutation(options: VueApolloComposable.UseMutationOptions<CreateGroupMutation, CreateGroupMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<CreateGroupMutation, CreateGroupMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<CreateGroupMutation, CreateGroupMutationVariables>(CreateGroupDocument, options);
+}
+export type CreateGroupMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<CreateGroupMutation, CreateGroupMutationVariables>;
 export const ImportCollectionDocument = gql`
     mutation ImportCollection($username: String!) {
   importCollection(username: $username) {
@@ -334,6 +400,74 @@ export function useCurrentUserLazyQuery(options: VueApolloComposable.UseQueryOpt
   return VueApolloComposable.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, {}, options);
 }
 export type CurrentUserQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<CurrentUserQuery, CurrentUserQueryVariables>;
+export const GroupDocument = gql`
+    query Group($token: String!) {
+  group(token: $token) {
+    id
+    name
+    description
+    inviteCode
+    myRole
+    owner {
+      id
+      username
+      displayName
+    }
+    members {
+      id
+      username
+      displayName
+    }
+    collection {
+      items {
+        id
+        name
+        thumbnail
+        yearPublished
+        minPlayers
+        maxPlayers
+        minPlaytime
+        maxPlaytime
+        average
+        averageWeight
+        owners {
+          bggUsername
+          avatar
+        }
+      }
+      syncStatuses {
+        username
+        status
+        lastSyncedAt
+        gameCount
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGroupQuery__
+ *
+ * To run a query within a Vue component, call `useGroupQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGroupQuery` returns an object from Apollo Client that contains result, loading and error properties
+ * you can use to render your UI.
+ *
+ * @param variables that will be passed into the query
+ * @param options that will be passed into the query, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/query.html#options;
+ *
+ * @example
+ * const { result, loading, error } = useGroupQuery({
+ *   token: // value for 'token'
+ * });
+ */
+export function useGroupQuery(variables: GroupQueryVariables | VueCompositionApi.Ref<GroupQueryVariables> | ReactiveFunction<GroupQueryVariables>, options: VueApolloComposable.UseQueryOptions<GroupQuery, GroupQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<GroupQuery, GroupQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<GroupQuery, GroupQueryVariables>> = {}) {
+  return VueApolloComposable.useQuery<GroupQuery, GroupQueryVariables>(GroupDocument, variables, options);
+}
+export function useGroupLazyQuery(variables?: GroupQueryVariables | VueCompositionApi.Ref<GroupQueryVariables> | ReactiveFunction<GroupQueryVariables>, options: VueApolloComposable.UseQueryOptions<GroupQuery, GroupQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<GroupQuery, GroupQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<GroupQuery, GroupQueryVariables>> = {}) {
+  return VueApolloComposable.useLazyQuery<GroupQuery, GroupQueryVariables>(GroupDocument, variables, options);
+}
+export type GroupQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<GroupQuery, GroupQueryVariables>;
 export const HealthDocument = gql`
     query Health {
   health
@@ -448,6 +582,47 @@ export function useMergedCollectionLazyQuery(variables?: MergedCollectionQueryVa
   return VueApolloComposable.useLazyQuery<MergedCollectionQuery, MergedCollectionQueryVariables>(MergedCollectionDocument, variables, options);
 }
 export type MergedCollectionQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<MergedCollectionQuery, MergedCollectionQueryVariables>;
+export const MyGroupsDocument = gql`
+    query MyGroups {
+  myGroups {
+    id
+    name
+    description
+    inviteCode
+    myRole
+    owner {
+      id
+      username
+      displayName
+    }
+    members {
+      id
+      username
+      displayName
+    }
+  }
+}
+    `;
+
+/**
+ * __useMyGroupsQuery__
+ *
+ * To run a query within a Vue component, call `useMyGroupsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMyGroupsQuery` returns an object from Apollo Client that contains result, loading and error properties
+ * you can use to render your UI.
+ *
+ * @param options that will be passed into the query, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/query.html#options;
+ *
+ * @example
+ * const { result, loading, error } = useMyGroupsQuery();
+ */
+export function useMyGroupsQuery(options: VueApolloComposable.UseQueryOptions<MyGroupsQuery, MyGroupsQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<MyGroupsQuery, MyGroupsQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<MyGroupsQuery, MyGroupsQueryVariables>> = {}) {
+  return VueApolloComposable.useQuery<MyGroupsQuery, MyGroupsQueryVariables>(MyGroupsDocument, {}, options);
+}
+export function useMyGroupsLazyQuery(options: VueApolloComposable.UseQueryOptions<MyGroupsQuery, MyGroupsQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<MyGroupsQuery, MyGroupsQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<MyGroupsQuery, MyGroupsQueryVariables>> = {}) {
+  return VueApolloComposable.useLazyQuery<MyGroupsQuery, MyGroupsQueryVariables>(MyGroupsDocument, {}, options);
+}
+export type MyGroupsQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<MyGroupsQuery, MyGroupsQueryVariables>;
 export const SearchDocument = gql`
     query Search($query: String!) {
   search(query: $query) {

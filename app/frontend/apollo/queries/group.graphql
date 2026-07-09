@@ -1,0 +1,43 @@
+query Group($token: String!) {
+  group(token: $token) {
+    id
+    name
+    description
+    inviteCode
+    myRole
+    owner {
+      id
+      username
+      displayName
+    }
+    members {
+      id
+      username
+      displayName
+    }
+    collection {
+      items {
+        id
+        name
+        thumbnail
+        yearPublished
+        minPlayers
+        maxPlayers
+        minPlaytime
+        maxPlaytime
+        average
+        averageWeight
+        owners {
+          bggUsername
+          avatar
+        }
+      }
+      syncStatuses {
+        username
+        status
+        lastSyncedAt
+        gameCount
+      }
+    }
+  }
+}

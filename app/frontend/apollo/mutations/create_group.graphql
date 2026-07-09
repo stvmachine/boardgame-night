@@ -1,0 +1,21 @@
+mutation CreateGroup($name: String!, $description: String) {
+  createGroup(name: $name, description: $description) {
+    group {
+      id
+      name
+      description
+      inviteCode
+      myRole
+      owner {
+        id
+        username
+        displayName
+      }
+      members {
+        id
+        username
+        displayName
+      }
+    }
+  }
+}

@@ -8,5 +8,6 @@ module Types
     field :sign_in, mutation: Mutations::SignIn, description: "Authenticate with email and password and return a bearer token."
     field :sign_out, mutation: Mutations::SignOut, description: "Destroy the current session and log out."
     field :bind_bgg_username, mutation: Mutations::BindBggUsername, description: "Bind a validated BGG username to the current user."
+    field :create_group, mutation: Mutations::CreateGroup, description: "Create a new friend group and become the owner."
   end
 end

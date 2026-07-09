@@ -6,7 +6,7 @@ module Types
     field :avatar, String, null: true
 
     def bgg_username
-      object.user.bgg_username
+      object.user.bgg_username || object.user.username
     end
 
     def avatar
