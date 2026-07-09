@@ -15,6 +15,8 @@ module Types
     field :update_group_member_role, mutation: Mutations::UpdateGroupMemberRole, description: "Change a member's role between admin and member."
     field :create_night_session, mutation: Mutations::CreateNightSession, description: "Create a new night session in draft state."
     field :schedule_session, mutation: Mutations::ScheduleSession, description: "Schedule a draft session and send invitations."
+    field :start_picking, mutation: Mutations::StartPicking, description: "Transition an invited session to the picking state."
+    field :pick_game, mutation: Mutations::PickGame, description: "Pick a game from the group's collection and complete the session."
     field :rsvp, mutation: Mutations::Rsvp, description: "RSVP to a session via a magic-link invite token."
     field :upgrade_to_account, mutation: Mutations::UpgradeToAccount, description: "Convert a provisional user to a full account."
   end
