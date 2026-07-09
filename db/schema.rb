@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_000004) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_000005) do
   create_table "bgg_collections", force: :cascade do |t|
     t.integer "bgg_thing_id", null: false
     t.datetime "created_at", null: false
@@ -68,6 +68,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000004) do
     t.index ["owner_id"], name: "index_groups_on_owner_id"
   end
 
+  create_table "invite_tokens", force: :cascade do |t|
+    t.datetime "accepted_at"
+    t.integer "accepted_by_id"
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "expires_at", null: false
+    t.integer "group_id", null: false
+    t.integer "inviter_id", null: false
+    t.integer "night_session_id"
+    t.string "role", default: "member"
+    t.string "status", default: "pending", null: false
+    t.string "token_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["accepted_by_id"], name: "index_invite_tokens_on_accepted_by_id"
+    t.index ["group_id"], name: "index_invite_tokens_on_group_id"
+    t.index ["inviter_id"], name: "index_invite_tokens_on_inviter_id"
+    t.index ["night_session_id"], name: "index_invite_tokens_on_night_session_id"
+    t.index ["token_digest"], name: "index_invite_tokens_on_token_digest", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
@@ -100,5 +120,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000004) do
   add_foreign_key "group_memberships", "groups"
   add_foreign_key "group_memberships", "users"
   add_foreign_key "groups", "users", column: "owner_id"
+  add_foreign_key "invite_tokens", "groups"
+  add_foreign_key "invite_tokens", "users", column: "accepted_by_id"
+  add_foreign_key "invite_tokens", "users", column: "inviter_id"
   add_foreign_key "sessions", "users"
 end
