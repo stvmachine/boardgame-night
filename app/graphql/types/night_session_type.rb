@@ -14,6 +14,7 @@ module Types
     field :attendances, [Types::AttendanceType], null: false
     field :picked_game, Types::MergedThingType, null: true
     field :attendee_count, Int, null: false
+    field :previous_state, Types::SessionStateEnum, null: true
 
     def attendances
       object.attendances.includes(:user).to_a

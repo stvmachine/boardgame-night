@@ -40,7 +40,7 @@ RSpec.describe "cancelSession mutation" do
       expect(result["errors"]).to be_nil
       data = result.dig("data", "cancelSession", "session")
       expect(data["state"]).to eq("CANCELLED")
-      expect(data["previousState"]).to eq(state)
+      expect(data["previousState"]).to eq(state.upcase)
       expect(session.reload.state).to eq("cancelled")
       expect(session.previous_state).to eq(state)
     end

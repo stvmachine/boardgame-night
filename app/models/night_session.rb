@@ -9,7 +9,7 @@ class NightSession < ApplicationRecord
   has_many :invite_tokens, dependent: :destroy
 
   validates :title, presence: true
-  validates :state, presence: true, inclusion: { in: %w[draft invited picking completed] }
+  validates :state, presence: true, inclusion: { in: %w[draft invited picking completed cancelled] }
   validates :group, presence: true
   validates :host, presence: true
 
@@ -23,5 +23,13 @@ class NightSession < ApplicationRecord
 
   def can_complete?
     state == "picking"
+  end
+
+  def can_cancel?
+    %w[draft invited picking].include?(state)
+  end
+
+  def can_reopen?
+    state == "cancelled"
   end
 end

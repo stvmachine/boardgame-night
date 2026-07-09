@@ -17,6 +17,8 @@ module Types
     field :schedule_session, mutation: Mutations::ScheduleSession, description: "Schedule a draft session and send invitations."
     field :start_picking, mutation: Mutations::StartPicking, description: "Transition an invited session to the picking state."
     field :pick_game, mutation: Mutations::PickGame, description: "Pick a game from the group's collection and complete the session."
+    field :cancel_session, mutation: Mutations::CancelSession, description: "Cancel an active session."
+    field :reopen_session, mutation: Mutations::ReopenSession, description: "Reopen a cancelled session to its previous state."
     field :rsvp, mutation: Mutations::Rsvp, description: "RSVP to a session via a magic-link invite token."
     field :upgrade_to_account, mutation: Mutations::UpgradeToAccount, description: "Convert a provisional user to a full account."
   end

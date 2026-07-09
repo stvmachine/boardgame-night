@@ -8,5 +8,6 @@ module Types
     value "INVITED", "Invitations sent, RSVPs open", value: "invited"
     value "PICKING", "Host is picking a game", value: "picking"
     value "COMPLETED", "Game picked and session finalized", value: "completed"
+    value "CANCELLED", "Session was cancelled and can be reopened", value: "cancelled"
   end
 end
