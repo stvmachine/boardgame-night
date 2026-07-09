@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useNightSessionQuery, useScheduleSessionMutation } from '@/generated/operations'
+import { useNightSessionQuery, useScheduleSessionMutation, useCurrentUserQuery } from '@/generated/operations'
 import { useSessionDraftStore } from '@/stores/sessionDraft'
 import AppShell from '@/components/layout/AppShell.vue'
 import SessionEditor from '@/components/session/SessionEditor.vue'
@@ -13,10 +13,12 @@ const draft = useSessionDraftStore()
 
 const sessionId = computed(() => String(route.params.id))
 const { result, loading, error: queryError } = useNightSessionQuery(() => ({ id: sessionId.value }))
+const { result: currentUserResult } = useCurrentUserQuery()
 const { mutate: schedule, loading: scheduling, error: scheduleError, onDone } = useScheduleSessionMutation()
 
 const session = computed(() => result.value?.nightSession)
-const isHost = computed(() => session.value?.host?.id === route.params.id)
+const currentUser = computed(() => currentUserResult.value?.currentUser)
+const isHost = computed(() => session.value?.host?.id === currentUser.value?.id)
 
 const stateBadge = computed(() => {
   switch (session.value?.state) {

@@ -2,9 +2,9 @@ query CurrentUser {
   currentUser {
     id
     username
-    email
-    bggUsername
     displayName
+    email
     isProvisional
+    bggUsername
   }
 }

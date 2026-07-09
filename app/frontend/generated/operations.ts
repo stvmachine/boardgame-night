@@ -136,7 +136,7 @@ export type ValidateBggUsernameMutation = { validateBggUsername: { validationRes
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CurrentUserQuery = { currentUser: { id: string, username: string, email: string | null, bggUsername: string | null, displayName: string, isProvisional: boolean } | null };
+export type CurrentUserQuery = { currentUser: { id: string, username: string, displayName: string, email: string | null, isProvisional: boolean, bggUsername: string | null } | null };
 
 export type GroupQueryVariables = Exact<{
   token: string;
@@ -820,10 +820,10 @@ export const CurrentUserDocument = gql`
   currentUser {
     id
     username
-    email
-    bggUsername
     displayName
+    email
     isProvisional
+    bggUsername
   }
 }
     `;
