@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 04 plans verified, ready for execution
-last_updated: "2026-07-09T07:09:50.478Z"
+stopped_at: Completed Phase 04 Plan 02 (friend groups & invitations)
+last_updated: "2026-07-09T08:05:06.000Z"
 last_activity: 2026-07-09
-last_activity_desc: Phase null execution started
+last_activity_desc: Completed Phase 04 Plan 02
 progress:
   total_phases: 4
   completed_phases: 3
   total_plans: 21
-  completed_plans: 18
-  percent: 75
+  completed_plans: 19
+  percent: 90
 current_phase: 04
 current_phase_name: auth-friend-groups-session-lifecycle
 ---
@@ -24,16 +24,17 @@ current_phase_name: auth-friend-groups-session-lifecycle
 See: .planning/PROJECT.md (updated 2026-06-30)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase null
+**Current focus:** Phase 04 — Auth + Friend Groups + Session Lifecycle
 
 ## Current Position
 
-Phase: null — EXECUTING
-Plan: 1 of ?
-Status: Executing Phase null
-Last activity: 2026-07-09 — Phase null execution started
+Phase: 04-auth-friend-groups-session-lifecycle — EXECUTING
+Plan: 02 complete, ready for Plan 03
+Status: Completed Plan 02 (friend groups & invitations)
+Last activity: 2026-07-09 — Completed Phase 04 Plan 02
 
-Progress: [██████████░░] 75% (Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Phase 4 planned — 4 phases total)
+Progress: [█████████░] 90% (Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Phase 4 executing — 4 phases total)
+
 
 ## Performance Metrics
 
@@ -78,6 +79,7 @@ Progress: [██████████░░] 75% (Phase 1 ✅, Phase 2 ✅, 
 | Phase 03-graphql-api-collection-surface-v1-parity P10 | 18min | 1 tasks | 10 files |
 | Phase 03-graphql-api-collection-surface-v1-parity P11 | 13min | 2 tasks | 6 files |
 | Phase 04 P01 | 25min | 2 tasks | 49 files |
+| Phase 04 P02 | 37min | 2 tasks | 64 files |
 
 ## Accumulated Context
 
@@ -133,6 +135,10 @@ Recent decisions affecting current work:
 - [Phase ?]: Memory-only Pinia token (never localStorage) prevents XSS token theft
 - [Phase ?]: DB-backed Session with CSPRNG token (not JWT) enables server-side revocation
 - [Phase ?]: rack-attack 5/min per IP rate limiting for auth endpoints prevents brute-force
+- [Phase 04-02]: Custom 12-character invite_code generator because Rails 8 has_secure_token requires a minimum of 24 characters
+- [Phase 04-02]: Added GroupType.memberships field so the Vue MemberList can display and manage per-member roles
+- [Phase 04-02]: Kept night_session_id on invite_tokens without a foreign key constraint because NightSession is implemented in Plan 04-03
+- [Phase 04-02]: OwnerType and GroupType sync status fall back to username when a member has no BGG username bound
 
 ### Pending Todos
 
@@ -140,7 +146,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- **Phase 4 (research-flagged MEDIUM):** The no-account-RSVP → provisional-profile → optional-upgrade attendee/invite data model needs design before execution.
+None. Provisional user accounts and group membership guards are implemented.
 
 ## Deferred Items
 
@@ -158,6 +164,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-09T07:08:11.955Z
-Stopped at: Phase 04 plans verified, ready for execution
-Resume file: .planning/phases/04-auth-friend-groups-session-lifecycle/04-01-PLAN.md
+Last session: 2026-07-09T08:05:06.000Z
+Stopped at: Completed Phase 04 Plan 02 (friend groups & invitations)
+Resume file: .planning/phases/04-auth-friend-groups-session-lifecycle/04-03-PLAN.md

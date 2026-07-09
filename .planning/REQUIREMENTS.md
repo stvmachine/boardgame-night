@@ -56,12 +56,12 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 ### Friend Groups
 
-- [ ] **GROUP-01**: User can create a friend group (title, description)
-- [ ] **GROUP-02**: Group owner can generate an invite code + magic link for others to join
-- [ ] **GROUP-03**: User can join a group via invite link (becomes member role)
-- [ ] **GROUP-04**: Group owner/admin can manage members (remove, change roles)
-- [ ] **GROUP-05**: Group has three roles: owner (full control), admin (manage members, create sessions), member (RSVP, suggest, vote)
-- [ ] **GROUP-06**: Group has a persistent merged collection view (union of all members' bound BGG collections, deduped by objectId)
+- [x] **GROUP-01**: User can create a friend group (title, description)
+- [x] **GROUP-02**: Group owner can generate an invite code + magic link for others to join
+- [x] **GROUP-03**: User can join a group via invite link (becomes member role)
+- [x] **GROUP-04**: Group owner/admin can manage members (remove, change roles)
+- [x] **GROUP-05**: Group has three roles: owner (full control), admin (manage members, create sessions), member (RSVP, suggest, vote)
+- [x] **GROUP-06**: Group has a persistent merged collection view (union of all members' bound BGG collections, deduped by objectId)
 
 ### Session Lifecycle (Minimal v1)
 
@@ -148,12 +148,12 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | AUTH-02 | Phase 4 | Complete |
 | AUTH-03 | Phase 4 | Complete |
 | AUTH-04 | Phase 4 | Complete |
-| GROUP-01 | Phase 4 | Pending |
-| GROUP-02 | Phase 4 | Pending |
-| GROUP-03 | Phase 4 | Pending |
-| GROUP-04 | Phase 4 | Pending |
-| GROUP-05 | Phase 4 | Pending |
-| GROUP-06 | Phase 4 | Pending |
+| GROUP-01 | Phase 4 | Complete |
+| GROUP-02 | Phase 4 | Complete |
+| GROUP-03 | Phase 4 | Complete |
+| GROUP-04 | Phase 4 | Complete |
+| GROUP-05 | Phase 4 | Complete |
+| GROUP-06 | Phase 4 | Complete |
 | SESS-01 | Phase 4 | Pending |
 | SESS-02 | Phase 4 | Pending |
 | SESS-03 | Phase 4 | Pending |
