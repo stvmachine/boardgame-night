@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed Phase 04 Plan 04 (Game Picking & Lifecycle)
-last_updated: "2026-07-09T20:02:32.000+10:00"
+status: completed
+stopped_at: Completed Phase 04 and Milestone v1.0
+last_updated: "2026-07-09T20:14:49.000+10:00"
 last_activity: 2026-07-09
-last_activity_desc: Completed Phase 04 Plan 04
+last_activity_desc: Completed Phase 04 / Milestone v1.0
 progress:
   total_phases: 4
   completed_phases: 4
@@ -30,8 +30,8 @@ See: .planning/PROJECT.md (updated 2026-06-30)
 
 Phase: 04-auth-friend-groups-session-lifecycle — COMPLETE
 Plan: 04 complete, Phase 04 complete
-Status: Completed Plan 04 (Game Picking & Lifecycle)
-Last activity: 2026-07-09 — Completed Phase 04 Plan 04
+Status: Completed Phase 04 (Game Picking & Lifecycle); Milestone v1.0 complete
+Last activity: 2026-07-09 — Completed Phase 04 / Milestone v1.0
 
 Progress: [███████████] 100% (Phase 1 ✅, Phase 2 ✅, Phase 3 ✅, Phase 4 ✅ — 4 phases total, milestone v1.0 complete)
 
@@ -174,6 +174,6 @@ Items acknowledged and carried forward (v2 per REQUIREMENTS.md):
 
 ## Session Continuity
 
-Last session: 2026-07-09T18:50:00.000Z
-Stopped at: Completed Phase 04 Plan 03 (sessions & RSVPs)
-Resume file: .planning/phases/04-auth-friend-groups-session-lifecycle/04-04-PLAN.md
+Last session: 2026-07-09T20:14:49.000Z
+Stopped at: Completed Phase 04 and Milestone v1.0
+Resume file: none — milestone v1.0 complete
