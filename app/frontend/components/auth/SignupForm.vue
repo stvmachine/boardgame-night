@@ -2,7 +2,10 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { useAuth } from '@/composables/useAuth'
+
 const router = useRouter()
+const { signUp, signUpError } = useAuth()
 
 const email = ref('')
 const password = ref('')
@@ -18,9 +21,6 @@ async function handleSubmit() {
   errorMessage.value = ''
   loading.value = true
   try {
-    // Dynamically import to avoid circular deps with Apollo provider
-    const { useAuth } = await import('@/composables/useAuth')
-    const { signUp, signUpError } = useAuth()
     const data = await signUp(email.value, password.value, username.value)
     if (signUpError.value) {
       throw new Error('Signup failed')

@@ -2,7 +2,10 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { useAuth } from '@/composables/useAuth'
+
 const router = useRouter()
+const { signIn, signInError } = useAuth()
 
 const email = ref('')
 const password = ref('')
@@ -17,8 +20,6 @@ async function handleSubmit() {
   errorMessage.value = ''
   loading.value = true
   try {
-    const { useAuth } = await import('@/composables/useAuth')
-    const { signIn, signInError } = useAuth()
     const data = await signIn(email.value, password.value)
     if (signInError.value) {
       throw new Error('Login failed')

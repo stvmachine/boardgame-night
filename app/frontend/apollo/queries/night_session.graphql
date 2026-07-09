@@ -16,6 +16,7 @@ query NightSession($id: ID!) {
     group {
       id
       name
+      inviteCode
       myRole
       members {
         id
@@ -49,5 +50,6 @@ query NightSession($id: ID!) {
         avatar
       }
     }
+    previousState
   }
 }

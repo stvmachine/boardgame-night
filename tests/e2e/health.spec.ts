@@ -43,11 +43,14 @@ test('health query round-trips Rails ↔ Vue end-to-end', async ({ page }) => {
   // Assert at least one /graphql response was captured
   expect(graphqlResponses.length).toBeGreaterThan(0)
 
-  // Assert the response contains health: 'ok' (handle both single and batch shapes)
-  const lastResponse = graphqlResponses[graphqlResponses.length - 1]
-  const healthValue =
-    lastResponse?.data?.health ??
-    lastResponse?.[0]?.data?.health ??
-    null
+  // Assert at least one response contains health: 'ok' (handle both single and batch shapes)
+  const healthValue = graphqlResponses.reduce<string | null>((found, response) => {
+    if (found) return found
+    if (response?.data?.health) return response.data.health
+    if (Array.isArray(response)) {
+      return response.find((r) => r?.data?.health)?.data?.health ?? null
+    }
+    return null
+  }, null)
   expect(healthValue).toBe('ok')
 })

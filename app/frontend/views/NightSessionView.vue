@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useNightSessionQuery, useScheduleSessionMutation, useStartPickingMutation, useCurrentUserQuery } from '@/generated/operations'
+import { useNightSessionQuery, useScheduleSessionMutation, useStartPickingMutation, useCancelSessionMutation, useReopenSessionMutation, useCurrentUserQuery } from '@/generated/operations'
 import { useSessionDraftStore } from '@/stores/sessionDraft'
 import AppShell from '@/components/layout/AppShell.vue'
 import SessionEditor from '@/components/session/SessionEditor.vue'
 import RsvpDashboard from '@/components/session/RsvpDashboard.vue'
 import GamePicker from '@/components/session/GamePicker.vue'
+import SessionSummary from '@/components/session/SessionSummary.vue'
 import EmptyState from '@/components/collection/EmptyState.vue'
 
 const route = useRoute()
@@ -17,10 +18,13 @@ const { result, loading, error: queryError } = useNightSessionQuery(() => ({ id:
 const { result: currentUserResult } = useCurrentUserQuery()
 const { mutate: schedule, loading: scheduling, error: scheduleError, onDone } = useScheduleSessionMutation()
 const { mutate: startPicking, loading: startingPicking, error: startPickingError } = useStartPickingMutation()
+const { mutate: cancelSession, loading: cancelling, error: cancelError } = useCancelSessionMutation()
+const { mutate: reopenSession, loading: reopening, error: reopenError } = useReopenSessionMutation()
 
 const session = computed(() => result.value?.nightSession)
 const currentUser = computed(() => currentUserResult.value?.currentUser)
 const isHost = computed(() => session.value?.host?.id === currentUser.value?.id)
+const showCancelConfirm = ref(false)
 
 const stateBadge = computed(() => {
   switch (session.value?.state) {
@@ -32,6 +36,8 @@ const stateBadge = computed(() => {
       return 'bg-amber-100 text-amber-800'
     case 'COMPLETED':
       return 'bg-green-100 text-green-800'
+    case 'CANCELLED':
+      return 'bg-red-100 text-red-800'
     default:
       return 'bg-neutral-100 text-neutral-700'
   }
@@ -72,6 +78,15 @@ function handlePicked() {
   // Apollo cache updates via mutation result; no manual refetch needed
 }
 
+async function handleCancel() {
+  await cancelSession({ sessionId: sessionId.value })
+  showCancelConfirm.value = false
+}
+
+async function handleReopen() {
+  await reopenSession({ sessionId: sessionId.value })
+}
+
 const isActiveState = computed(() => {
   return ['DRAFT', 'INVITED', 'PICKING'].includes(session.value?.state ?? '')
 })
@@ -104,6 +119,24 @@ const isActiveState = computed(() => {
             >
               {{ startingPicking ? 'Starting...' : 'Start picking' }}
             </button>
+            <button
+              v-if="session.state === 'CANCELLED' && isHost"
+              type="button"
+              class="rounded-md bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-neutral-300 disabled:text-neutral-500"
+              :disabled="reopening"
+              @click="handleReopen"
+            >
+              {{ reopening ? 'Reopening...' : 'Reopen session' }}
+            </button>
+            <button
+              v-if="isActiveState && isHost"
+              type="button"
+              class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:bg-neutral-300 disabled:text-neutral-500"
+              :disabled="cancelling"
+              @click="showCancelConfirm = true"
+            >
+              Cancel
+            </button>
             <span
               class="rounded-full px-3 py-1 text-xs font-medium"
               :class="stateBadge"
@@ -119,6 +152,48 @@ const isActiveState = computed(() => {
           role="alert"
         >
           {{ startPickingError.message }}
+        </div>
+
+        <div
+          v-if="cancelError"
+          class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          role="alert"
+        >
+          {{ cancelError.message }}
+        </div>
+
+        <div
+          v-if="reopenError"
+          class="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          role="alert"
+        >
+          {{ reopenError.message }}
+        </div>
+
+        <div
+          v-if="showCancelConfirm"
+          class="mb-4 rounded-md border border-red-200 bg-red-50 p-4"
+        >
+          <p class="text-sm font-medium text-red-900">
+            Cancel night: This will delete the session and notify invited guests. This action cannot be undone.
+          </p>
+          <div class="mt-3 flex gap-2">
+            <button
+              type="button"
+              class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:bg-neutral-300 disabled:text-neutral-500"
+              :disabled="cancelling"
+              @click="handleCancel"
+            >
+              {{ cancelling ? 'Cancelling...' : 'Yes, cancel session' }}
+            </button>
+            <button
+              type="button"
+              class="rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              @click="showCancelConfirm = false"
+            >
+              Never mind
+            </button>
+          </div>
         </div>
 
         <div v-if="session.state === 'DRAFT'" class="rounded-lg bg-white p-4 shadow-sm">
@@ -144,7 +219,30 @@ const isActiveState = computed(() => {
         </div>
 
         <div v-else-if="session.state === 'COMPLETED'" class="rounded-lg bg-white p-4 shadow-sm">
-          <p class="text-sm text-neutral-600">Session completed — summary view coming in the next step.</p>
+          <SessionSummary
+            :session="session"
+            @reopen="handleReopen"
+          />
+        </div>
+
+        <div v-else-if="session.state === 'CANCELLED'" class="rounded-lg bg-white p-4 shadow-sm">
+          <div class="space-y-4">
+            <p class="text-sm text-red-700">
+              This session was cancelled.
+              <span v-if="session.previousState">
+                It was previously {{ session.previousState.toLowerCase() }}.
+              </span>
+            </p>
+            <button
+              v-if="isHost"
+              type="button"
+              class="rounded-md bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-neutral-300 disabled:text-neutral-500"
+              :disabled="reopening"
+              @click="handleReopen"
+            >
+              {{ reopening ? 'Reopening...' : 'Reopen session' }}
+            </button>
+          </div>
         </div>
 
         <div v-else class="rounded-lg bg-white p-4 shadow-sm">

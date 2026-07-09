@@ -1,0 +1,35 @@
+mutation ReopenSession($sessionId: ID!) {
+  reopenSession(sessionId: $sessionId) {
+    session {
+      id
+      title
+      state
+      previousState
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        displayName
+      }
+      group {
+        id
+        name
+      }
+      attendances {
+        id
+        response
+        user {
+          id
+          displayName
+        }
+      }
+      pickedGame {
+        id
+        name
+        thumbnail
+      }
+    }
+  }
+}

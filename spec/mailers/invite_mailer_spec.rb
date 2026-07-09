@@ -3,10 +3,11 @@
 require "rails_helper"
 
 RSpec.describe InviteMailer, type: :mailer do
+  let(:owner) { User.create!(username: "owner", email: "owner@example.com", password: "password") }
+  let(:group) { Group.create!(name: "Night Owls", owner: owner) }
+  let(:raw_token) { "abc123" }
+
   describe "#group_invite" do
-    let(:owner) { User.create!(username: "owner", email: "owner@example.com", password: "password") }
-    let(:group) { Group.create!(name: "Night Owls", owner: owner) }
-    let(:raw_token) { "abc123" }
     let(:invite) do
       InviteToken.create!(
         group: group,

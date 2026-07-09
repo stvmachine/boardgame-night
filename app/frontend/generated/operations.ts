@@ -23,6 +23,13 @@ export type BindBggUsernameMutationVariables = Exact<{
 
 export type BindBggUsernameMutation = { bindBggUsername: { user: { id: string, username: string, bggUsername: string | null, displayName: string } } | null };
 
+export type CancelSessionMutationVariables = Exact<{
+  sessionId: string | number;
+}>;
+
+
+export type CancelSessionMutation = { cancelSession: { session: { id: string, title: string, state: Types.SessionState, previousState: Types.SessionState | null, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, displayName: string }, group: { id: string, name: string }, attendances: Array<{ id: string, response: string, user: { id: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> } | null } } | null };
+
 export type CreateGroupMutationVariables = Exact<{
   name: string;
   description?: string | null | undefined;
@@ -74,6 +81,13 @@ export type RemoveGroupMemberMutationVariables = Exact<{
 
 
 export type RemoveGroupMemberMutation = { removeGroupMember: { success: boolean } | null };
+
+export type ReopenSessionMutationVariables = Exact<{
+  sessionId: string | number;
+}>;
+
+
+export type ReopenSessionMutation = { reopenSession: { session: { id: string, title: string, state: Types.SessionState, previousState: Types.SessionState | null, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, displayName: string }, group: { id: string, name: string }, attendances: Array<{ id: string, response: string, user: { id: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null } | null } } | null };
 
 export type RsvpMutationVariables = Exact<{
   token: string;
@@ -187,7 +201,7 @@ export type NightSessionQueryVariables = Exact<{
 }>;
 
 
-export type NightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, username: string, displayName: string }, group: { id: string, name: string, myRole: Types.GroupRole | null, members: Array<{ id: string, username: string, displayName: string }> }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, username: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> } | null } | null };
+export type NightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, previousState: Types.SessionState | null, host: { id: string, username: string, displayName: string }, group: { id: string, name: string, inviteCode: string | null, myRole: Types.GroupRole | null, members: Array<{ id: string, username: string, displayName: string }> }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, username: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> } | null } | null };
 
 export type SearchQueryVariables = Exact<{
   query: string;
@@ -296,6 +310,76 @@ export function useBindBggUsernameMutation(options: VueApolloComposable.UseMutat
   return VueApolloComposable.useMutation<BindBggUsernameMutation, BindBggUsernameMutationVariables>(BindBggUsernameDocument, options);
 }
 export type BindBggUsernameMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<BindBggUsernameMutation, BindBggUsernameMutationVariables>;
+export const CancelSessionDocument = gql`
+    mutation CancelSession($sessionId: ID!) {
+  cancelSession(sessionId: $sessionId) {
+    session {
+      id
+      title
+      state
+      previousState
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        displayName
+      }
+      group {
+        id
+        name
+      }
+      attendances {
+        id
+        response
+        user {
+          id
+          displayName
+        }
+      }
+      pickedGame {
+        id
+        name
+        thumbnail
+        yearPublished
+        minPlayers
+        maxPlayers
+        minPlaytime
+        maxPlaytime
+        average
+        averageWeight
+        owners {
+          bggUsername
+          avatar
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useCancelSessionMutation__
+ *
+ * To run a mutation, you first call `useCancelSessionMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useCancelSessionMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useCancelSessionMutation({
+ *   variables: {
+ *     sessionId: // value for 'sessionId'
+ *   },
+ * });
+ */
+export function useCancelSessionMutation(options: VueApolloComposable.UseMutationOptions<CancelSessionMutation, CancelSessionMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<CancelSessionMutation, CancelSessionMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<CancelSessionMutation, CancelSessionMutationVariables>(CancelSessionDocument, options);
+}
+export type CancelSessionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<CancelSessionMutation, CancelSessionMutationVariables>;
 export const CreateGroupDocument = gql`
     mutation CreateGroup($name: String!, $description: String) {
   createGroup(name: $name, description: $description) {
@@ -581,6 +665,65 @@ export function useRemoveGroupMemberMutation(options: VueApolloComposable.UseMut
   return VueApolloComposable.useMutation<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>(RemoveGroupMemberDocument, options);
 }
 export type RemoveGroupMemberMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<RemoveGroupMemberMutation, RemoveGroupMemberMutationVariables>;
+export const ReopenSessionDocument = gql`
+    mutation ReopenSession($sessionId: ID!) {
+  reopenSession(sessionId: $sessionId) {
+    session {
+      id
+      title
+      state
+      previousState
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        displayName
+      }
+      group {
+        id
+        name
+      }
+      attendances {
+        id
+        response
+        user {
+          id
+          displayName
+        }
+      }
+      pickedGame {
+        id
+        name
+        thumbnail
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useReopenSessionMutation__
+ *
+ * To run a mutation, you first call `useReopenSessionMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useReopenSessionMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useReopenSessionMutation({
+ *   variables: {
+ *     sessionId: // value for 'sessionId'
+ *   },
+ * });
+ */
+export function useReopenSessionMutation(options: VueApolloComposable.UseMutationOptions<ReopenSessionMutation, ReopenSessionMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<ReopenSessionMutation, ReopenSessionMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<ReopenSessionMutation, ReopenSessionMutationVariables>(ReopenSessionDocument, options);
+}
+export type ReopenSessionMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<ReopenSessionMutation, ReopenSessionMutationVariables>;
 export const RsvpDocument = gql`
     mutation Rsvp($token: String!, $response: String!, $nickname: String) {
   rsvp(token: $token, response: $response, nickname: $nickname) {
@@ -1241,6 +1384,7 @@ export const NightSessionDocument = gql`
     group {
       id
       name
+      inviteCode
       myRole
       members {
         id
@@ -1274,6 +1418,7 @@ export const NightSessionDocument = gql`
         avatar
       }
     }
+    previousState
   }
 }
     `;

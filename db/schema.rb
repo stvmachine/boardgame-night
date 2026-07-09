@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_000008) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_09_000009) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -108,6 +108,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000008) do
     t.integer "host_id", null: false
     t.string "location"
     t.integer "picked_game_id"
+    t.string "previous_state"
     t.datetime "scheduled_at"
     t.string "state", default: "draft", null: false
     t.string "title", null: false
