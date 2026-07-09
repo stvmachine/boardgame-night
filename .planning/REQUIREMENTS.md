@@ -65,12 +65,12 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 
 ### Session Lifecycle (Minimal v1)
 
-- [ ] **SESS-01**: Group owner/admin can create a boardgame night session (title, date/time, location, capacity)
-- [ ] **SESS-02**: Session owner can send magic-link invitations to group members
-- [ ] **SESS-03**: Invitee can RSVP via magic link without creating an account (Going / Not Going — binary for v1)
-- [ ] **SESS-04**: Session owner sees RSVP attendee count and status
+- [x] **SESS-01**: Group owner/admin can create a boardgame night session (title, date/time, location, capacity)
+- [x] **SESS-02**: Session owner can send magic-link invitations to group members
+- [x] **SESS-03**: Invitee can RSVP via magic link without creating an account (Going / Not Going — binary for v1)
+- [x] **SESS-04**: Session owner sees RSVP attendee count and status
 - [ ] **SESS-05**: Session owner can manually pick a game from the group's merged collection (host selects, no suggestion engine or voting yet)
-- [ ] **SESS-06**: Session transitions through states: draft → scheduled → rsvp_open → picking → completed
+- [x] **SESS-06**: Session transitions through states: draft → scheduled → rsvp_open → picking → completed (draft → invited implemented; picking → completed in 04-04)
 
 ### GraphQL API
 
@@ -154,12 +154,12 @@ Requirements grouped by category with REQ-IDs. v1 = rewrite parity + minimal nig
 | GROUP-04 | Phase 4 | Complete |
 | GROUP-05 | Phase 4 | Complete |
 | GROUP-06 | Phase 4 | Complete |
-| SESS-01 | Phase 4 | Pending |
-| SESS-02 | Phase 4 | Pending |
-| SESS-03 | Phase 4 | Pending |
-| SESS-04 | Phase 4 | Pending |
-| SESS-05 | Phase 4 | Pending |
-| SESS-06 | Phase 4 | Pending |
+| SESS-01 | Phase 4 | ✅ Complete (04-03) |
+| SESS-02 | Phase 4 | ✅ Complete (04-03) |
+| SESS-03 | Phase 4 | ✅ Complete (04-03) |
+| SESS-04 | Phase 4 | ✅ Complete (04-03) |
+| SESS-05 | Phase 4 | Pending (04-04) |
+| SESS-06 | Phase 4 | ✅ Partial — draft→invited in 04-03; picking→completed in 04-04 |
 | GQL-01 | Phase 1 | Complete |
 | GQL-02 | Phase 3 | Complete |
 | GQL-03 | Phase 4 | Complete |
