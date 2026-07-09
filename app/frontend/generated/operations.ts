@@ -59,6 +59,14 @@ export type InviteToGroupMutationVariables = Exact<{
 
 export type InviteToGroupMutation = { inviteToGroup: { inviteToken: { id: string, token: string | null, status: string, email: string, role: Types.GroupRole | null, expiresAt: unknown, group: { id: string, name: string } } } | null };
 
+export type PickGameMutationVariables = Exact<{
+  sessionId: string | number;
+  gameId: string | number;
+}>;
+
+
+export type PickGameMutation = { pickGame: { session: { id: string, title: string, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, displayName: string }, group: { id: string, name: string }, attendances: Array<{ id: string, response: string, user: { id: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> } | null } } | null };
+
 export type RemoveGroupMemberMutationVariables = Exact<{
   groupId: string | number;
   userId: string | number;
@@ -107,6 +115,13 @@ export type SignUpMutationVariables = Exact<{
 
 
 export type SignUpMutation = { signUp: { token: string, user: { id: string, username: string, email: string | null, displayName: string, isProvisional: boolean } } | null };
+
+export type StartPickingMutationVariables = Exact<{
+  sessionId: string | number;
+}>;
+
+
+export type StartPickingMutation = { startPicking: { session: { id: string, title: string, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, displayName: string }, group: { id: string, name: string }, attendances: Array<{ id: string, response: string, user: { id: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null } | null } } | null };
 
 export type UpdateGroupMemberRoleMutationVariables = Exact<{
   groupId: string | number;
@@ -172,7 +187,7 @@ export type NightSessionQueryVariables = Exact<{
 }>;
 
 
-export type NightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, username: string, displayName: string }, group: { id: string, name: string, myRole: Types.GroupRole | null, members: Array<{ id: string, username: string, displayName: string }> }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, username: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null } | null } | null };
+export type NightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, host: { id: string, username: string, displayName: string }, group: { id: string, name: string, myRole: Types.GroupRole | null, members: Array<{ id: string, username: string, displayName: string }> }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, username: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> } | null } | null };
 
 export type SearchQueryVariables = Exact<{
   query: string;
@@ -466,6 +481,76 @@ export function useInviteToGroupMutation(options: VueApolloComposable.UseMutatio
   return VueApolloComposable.useMutation<InviteToGroupMutation, InviteToGroupMutationVariables>(InviteToGroupDocument, options);
 }
 export type InviteToGroupMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<InviteToGroupMutation, InviteToGroupMutationVariables>;
+export const PickGameDocument = gql`
+    mutation PickGame($sessionId: ID!, $gameId: ID!) {
+  pickGame(sessionId: $sessionId, gameId: $gameId) {
+    session {
+      id
+      title
+      state
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        displayName
+      }
+      group {
+        id
+        name
+      }
+      attendances {
+        id
+        response
+        user {
+          id
+          displayName
+        }
+      }
+      pickedGame {
+        id
+        name
+        thumbnail
+        yearPublished
+        minPlayers
+        maxPlayers
+        minPlaytime
+        maxPlaytime
+        average
+        averageWeight
+        owners {
+          bggUsername
+          avatar
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __usePickGameMutation__
+ *
+ * To run a mutation, you first call `usePickGameMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `usePickGameMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = usePickGameMutation({
+ *   variables: {
+ *     sessionId: // value for 'sessionId'
+ *     gameId: // value for 'gameId'
+ *   },
+ * });
+ */
+export function usePickGameMutation(options: VueApolloComposable.UseMutationOptions<PickGameMutation, PickGameMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<PickGameMutation, PickGameMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<PickGameMutation, PickGameMutationVariables>(PickGameDocument, options);
+}
+export type PickGameMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<PickGameMutation, PickGameMutationVariables>;
 export const RemoveGroupMemberDocument = gql`
     mutation RemoveGroupMember($groupId: ID!, $userId: ID!) {
   removeGroupMember(groupId: $groupId, userId: $userId) {
@@ -705,6 +790,64 @@ export function useSignUpMutation(options: VueApolloComposable.UseMutationOption
   return VueApolloComposable.useMutation<SignUpMutation, SignUpMutationVariables>(SignUpDocument, options);
 }
 export type SignUpMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<SignUpMutation, SignUpMutationVariables>;
+export const StartPickingDocument = gql`
+    mutation StartPicking($sessionId: ID!) {
+  startPicking(sessionId: $sessionId) {
+    session {
+      id
+      title
+      state
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        displayName
+      }
+      group {
+        id
+        name
+      }
+      attendances {
+        id
+        response
+        user {
+          id
+          displayName
+        }
+      }
+      pickedGame {
+        id
+        name
+        thumbnail
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useStartPickingMutation__
+ *
+ * To run a mutation, you first call `useStartPickingMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useStartPickingMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useStartPickingMutation({
+ *   variables: {
+ *     sessionId: // value for 'sessionId'
+ *   },
+ * });
+ */
+export function useStartPickingMutation(options: VueApolloComposable.UseMutationOptions<StartPickingMutation, StartPickingMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<StartPickingMutation, StartPickingMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<StartPickingMutation, StartPickingMutationVariables>(StartPickingDocument, options);
+}
+export type StartPickingMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<StartPickingMutation, StartPickingMutationVariables>;
 export const UpdateGroupMemberRoleDocument = gql`
     mutation UpdateGroupMemberRole($groupId: ID!, $userId: ID!, $role: String!) {
   updateGroupMemberRole(groupId: $groupId, userId: $userId, role: $role) {
@@ -1119,6 +1262,17 @@ export const NightSessionDocument = gql`
       id
       name
       thumbnail
+      yearPublished
+      minPlayers
+      maxPlayers
+      minPlaytime
+      maxPlaytime
+      average
+      averageWeight
+      owners {
+        bggUsername
+        avatar
+      }
     }
   }
 }

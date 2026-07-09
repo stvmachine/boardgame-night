@@ -98,6 +98,9 @@ function initialFor(username: string): string {
           {{ initialFor(owner.bggUsername) }}
         </span>
       </div>
+      <div v-if="$slots.action" class="mt-3">
+        <slot name="action" />
+      </div>
     </div>
   </article>
 </template>

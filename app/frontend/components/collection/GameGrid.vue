@@ -65,32 +65,36 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
         </button>
       </div>
 
-      <CollapsibleGroup
-        v-for="group in groups"
-        :key="group.name"
-        :group-name="group.name"
-        :count="group.games.length"
-        :initially-open="!isCollapsed(group.name)"
-        @toggle="toggle(group.name)"
-      >
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
-          <GameCard
-            v-for="game in group.games"
-            :key="game.id"
-            :id="game.id"
-            :name="game.name"
-            :thumbnail="game.thumbnail"
-            :year-published="game.yearPublished"
-            :min-players="game.minPlayers"
-            :max-players="game.maxPlayers"
-            :min-playtime="game.minPlaytime"
-            :max-playtime="game.maxPlaytime"
-            :average="game.average"
-            :average-weight="game.averageWeight"
-            :owners="game.owners"
-          />
-        </div>
-      </CollapsibleGroup>
+        <CollapsibleGroup
+          v-for="group in groups"
+          :key="group.name"
+          :group-name="group.name"
+          :count="group.games.length"
+          :initially-open="!isCollapsed(group.name)"
+          @toggle="toggle(group.name)"
+        >
+          <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+            <GameCard
+              v-for="game in group.games"
+              :key="game.id"
+              :id="game.id"
+              :name="game.name"
+              :thumbnail="game.thumbnail"
+              :year-published="game.yearPublished"
+              :min-players="game.minPlayers"
+              :max-players="game.maxPlayers"
+              :min-playtime="game.minPlaytime"
+              :max-playtime="game.maxPlaytime"
+              :average="game.average"
+              :average-weight="game.averageWeight"
+              :owners="game.owners"
+            >
+              <template #action>
+                <slot name="game-action" :game="game" />
+              </template>
+            </GameCard>
+          </div>
+        </CollapsibleGroup>
     </template>
 
     <template v-else>
@@ -109,7 +113,11 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
           :average="game.average"
           :average-weight="game.averageWeight"
           :owners="game.owners"
-        />
+        >
+          <template #action>
+            <slot name="game-action" :game="game" />
+          </template>
+        </GameCard>
       </div>
     </template>
   </div>

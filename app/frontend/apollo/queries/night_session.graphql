@@ -37,6 +37,17 @@ query NightSession($id: ID!) {
       id
       name
       thumbnail
+      yearPublished
+      minPlayers
+      maxPlayers
+      minPlaytime
+      maxPlaytime
+      average
+      averageWeight
+      owners {
+        bggUsername
+        avatar
+      }
     }
   }
 }
