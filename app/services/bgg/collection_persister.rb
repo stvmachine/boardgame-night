@@ -2,22 +2,10 @@
 
 module Bgg
   class CollectionPersister
-    attr_reader :client, :user
+    attr_reader :user
 
-    def initialize(client: Bgg::Client.new, user:)
-      @client = client
+    def initialize(user:)
       @user = user
-    end
-
-    # Fetch collection from BGG and persist to database.
-    # Returns { added: Integer, updated: Integer, errors: Array }
-    def fetch_and_persist!(bgg_username: user.bgg_username)
-      raise ArgumentError, "User has no bgg_username" unless bgg_username
-
-      collection_xml = client.collection(bgg_username)
-      collection = Bgg::Normalizer.normalize_collection(collection_xml)
-
-      persist_collection!(collection)
     end
 
     # Persist a normalized collection hash.

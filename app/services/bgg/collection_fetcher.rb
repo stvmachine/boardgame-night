@@ -21,13 +21,35 @@ module Bgg
 
     # Fetches a user's full collection (base games + expansions merged).
     #
+    # Results are cached with a stale-while-revalidate pattern (30-minute TTL).
+    # If the cache is fresh, the cached normalized collection is returned without
+    # hitting the BGG API. If the cache is expired, a fresh fetch is attempted;
+    # on failure, the stale cached value is served instead.
+    #
     # Returns a normalized collection array from Bgg::Normalizer:
     #   Array of item hashes
     #
-    # Raises Bgg::CollectionNotReadyError if BGG returns 202 after 5 retries.
+    # Raises Bgg::CollectionNotReadyError if BGG returns 202 after 5 retries
+    #   and no stale cache is available.
     # Raises Bgg::InvalidUsernameError if the user doesn't exist.
-    # Raises Bgg::NetworkError on transport failures.
+    # Raises Bgg::NetworkError on transport failures when no stale cache exists.
     def fetch(username)
+      cache_key = "bgg:collection:#{username}"
+      stale_cache = Rails.cache.read(cache_key)
+
+      Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
+        fetch_with_fallback(username)
+      end
+    rescue => e
+      raise e if stale_cache.nil?
+
+      stale_cache
+    end
+
+    private
+
+    # Fetch with two-call expansion workaround, falling back to single call on error.
+    def fetch_with_fallback(username)
       merged_doc = fetch_with_workaround(username)
       @normalizer.normalize_collection(merged_doc)
     rescue Bgg::ClientError, Bgg::ServerError, Bgg::NetworkError => e

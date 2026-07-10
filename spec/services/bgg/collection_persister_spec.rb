@@ -5,21 +5,7 @@ require "rails_helper"
 RSpec.describe Bgg::CollectionPersister, type: :service do
   let(:user) { User.create!(username: "testuser", bgg_username: "testuser", password: "password") }
   let(:collection_xml) { File.read(Rails.root.join("spec/fixtures/files/stevmachine_collection.xml")) }
-  let(:client) { instance_double(Bgg::Client, collection: Nokogiri::XML(collection_xml)) }
-  subject { described_class.new(client: client, user: user) }
-
-  describe "#fetch_and_persist!" do
-    it "fetches collection from BGG and persists it" do
-      result = subject.fetch_and_persist!
-      expect(result[:added]).to be > 0
-      expect(user.bgg_things.count).to eq(result[:added])
-    end
-
-    it "raises ArgumentError when user has no bgg_username" do
-      user.update!(bgg_username: nil)
-      expect { subject.fetch_and_persist! }.to raise_error(ArgumentError, /bgg_username/)
-    end
-  end
+  subject { described_class.new(user: user) }
 
   describe "#persist_collection!" do
     it "persists all collection items (boardgames and expansions)" do

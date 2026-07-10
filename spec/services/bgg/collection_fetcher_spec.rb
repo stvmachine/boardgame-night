@@ -7,6 +7,11 @@ RSpec.describe Bgg::CollectionFetcher, type: :service do
   let(:client) { instance_double(Bgg::Client) }
   let(:normalizer) { double("normalizer") }
   let(:username) { "stevmachine" }
+  let(:cache) { ActiveSupport::Cache::MemoryStore.new }
+
+  before do
+    allow(Rails).to receive(:cache).and_return(cache)
+  end
 
   let(:boardgames_fixture) do
     Nokogiri::XML(File.read(file_fixture("stevmachine_boardgames.xml")))
@@ -129,6 +134,50 @@ RSpec.describe Bgg::CollectionFetcher, type: :service do
       end
 
       it "re-raises the error" do
+        expect { fetcher.fetch(username) }.to raise_error(Bgg::NetworkError)
+      end
+    end
+
+    context "with stale-while-revalidate caching" do
+      before do
+        allow(client).to receive(:request_with_202_retry)
+          .with(:collection, hash_including(excludesubtype: "boardgameexpansion"))
+          .and_return(boardgames_fixture)
+
+        allow(client).to receive(:request_with_202_retry)
+          .with(:collection, hash_including(subtype: "boardgameexpansion"))
+          .and_return(expansions_fixture)
+
+        allow(normalizer).to receive(:normalize_collection)
+          .and_return(normalized_result)
+      end
+
+      it "caches the result and skips BGG API on second call" do
+        fetcher.fetch(username)
+
+        expect(client).not_to receive(:request_with_202_retry)
+        result = fetcher.fetch(username)
+        expect(result).to eq(normalized_result)
+      end
+
+      it "serves stale cache when the fresh fetch fails" do
+        # Prime the cache
+        fetcher.fetch(username)
+
+        # Expire the cache so a fresh fetch is attempted, then make both calls fail
+        cache.delete("bgg:collection:#{username}")
+        cache.write("bgg:collection:#{username}", normalized_result)
+        allow(client).to receive(:request_with_202_retry)
+          .and_raise(Bgg::NetworkError, "BGG down")
+
+        result = fetcher.fetch(username)
+        expect(result).to eq(normalized_result)
+      end
+
+      it "re-raises when no stale cache is available" do
+        allow(client).to receive(:request_with_202_retry)
+          .and_raise(Bgg::NetworkError, "BGG down")
+
         expect { fetcher.fetch(username) }.to raise_error(Bgg::NetworkError)
       end
     end

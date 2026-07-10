@@ -13,7 +13,11 @@ export default defineConfig({
     port: 5173,
     // Fallback proxy (not needed if skipProxy: true + rack-cors, but kept as safety net)
     proxy: {
-      '/graphql': 'http://localhost:3000'
+      '/graphql': 'http://localhost:3000',
+      '/cable': {
+        target: 'http://localhost:3000',
+        ws: true,
+      },
     }
   }
 })
