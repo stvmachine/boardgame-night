@@ -1,19 +1,19 @@
 export const PALETTE = [
-  { bg: 'bg-blue-500', text: 'text-white' },
-  { bg: 'bg-green-500', text: 'text-white' },
-  { bg: 'bg-purple-500', text: 'text-white' },
-  { bg: 'bg-orange-500', text: 'text-white' },
-  { bg: 'bg-pink-500', text: 'text-white' },
-  { bg: 'bg-teal-500', text: 'text-white' },
-  { bg: 'bg-red-500', text: 'text-white' },
-  { bg: 'bg-yellow-500', text: 'text-black' },
-  { bg: 'bg-cyan-500', text: 'text-white' },
-  { bg: 'bg-indigo-500', text: 'text-white' },
-  { bg: 'bg-lime-500', text: 'text-black' },
-  { bg: 'bg-emerald-500', text: 'text-white' },
-  { bg: 'bg-rose-500', text: 'text-white' },
-  { bg: 'bg-violet-500', text: 'text-white' },
-  { bg: 'bg-sky-500', text: 'text-white' }
+  'bg-primary text-on-primary',
+  'bg-secondary text-on-secondary',
+  'bg-tertiary text-on-tertiary',
+  'bg-error text-on-error',
+  'bg-primary-container text-on-primary-container',
+  'bg-secondary-container text-on-secondary-container',
+  'bg-tertiary-container text-on-tertiary-container',
+  'bg-error-container text-on-error-container',
+  'bg-surface-variant text-on-surface-variant',
+  'bg-inverse-surface text-inverse-on-surface',
+  'bg-warning text-on-surface',
+  'bg-success text-on-surface',
+  'bg-primary-fixed text-on-primary-fixed',
+  'bg-secondary-fixed text-on-secondary-fixed',
+  'bg-tertiary-fixed text-on-tertiary-fixed'
 ]
 
 export function hashUsername(username: string): number {

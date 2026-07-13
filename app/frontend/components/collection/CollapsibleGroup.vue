@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Icon from '@/components/ui/icon/Icon.vue'
+
 interface Props {
   groupName: string
   count: number
@@ -31,28 +33,19 @@ function onToggle() {
   <div class="space-y-2">
     <button
       type="button"
-      class="flex items-center gap-2 w-full text-left focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded"
+      class="flex items-center gap-2 w-full text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
       :aria-expanded="isOpen"
       @click="onToggle"
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="w-5 h-5 text-neutral-500 transition-transform duration-200"
-        :class="{ 'rotate-90': isOpen }"
-        aria-hidden="true"
-      >
-        <polyline points="9 18 15 12 9 6" />
-      </svg>
-      <h3 class="text-lg font-semibold text-neutral-800">
+      <Icon
+        name="chevron-right"
+        class="w-5 h-5 text-on-surface-variant transition-transform duration-200"
+        :class="isOpen ? 'rotate-90' : ''"
+      />
+      <h3 class="text-lg font-semibold text-on-surface">
         {{ groupName }}
       </h3>
-      <span class="text-sm font-normal text-neutral-500">({{ count }})</span>
+      <span class="text-sm font-normal text-on-surface-variant">({{ count }})</span>
     </button>
     <div v-show="isOpen">
       <slot />

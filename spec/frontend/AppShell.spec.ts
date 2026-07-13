@@ -1,34 +1,57 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { provideApolloClient } from '@vue/apollo-composable'
+import { ApolloClient, InMemoryCache } from '@apollo/client/core'
+import { createRouter, createWebHistory } from 'vue-router'
 import AppShell from '@/components/layout/AppShell.vue'
+
+function createMockClient() {
+  return new ApolloClient({
+    link: { request: vi.fn() } as any,
+    cache: new InMemoryCache()
+  })
+}
+
+const mockRouter = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', component: { template: '<div>Home</div>' } },
+    { path: '/collection', component: { template: '<div>Collection</div>' } },
+    { path: '/hot', component: { template: '<div>Hot</div>' } },
+    { path: '/groups', component: { template: '<div>Groups</div>' } },
+    { path: '/account', component: { template: '<div>Account</div>' } }
+  ]
+})
+
+function mountAppShell() {
+  setActivePinia(createPinia())
+  provideApolloClient(createMockClient())
+  return mount(AppShell, {
+    slots: {
+      default: '<div data-testid="main-content">Main</div>'
+    },
+    global: {
+      plugins: [mockRouter]
+    }
+  })
+}
 
 describe('AppShell', () => {
   beforeEach(() => {
-    setActivePinia(createPinia())
+    vi.clearAllMocks()
   })
 
-  it('renders header, sidebar slot, and main content area', () => {
-    const wrapper = mount(AppShell, {
-      slots: {
-        sidebar: '<div data-testid="sidebar-slot">Sidebar</div>',
-        default: '<div data-testid="main-content">Main</div>'
-      }
-    })
+  it('renders desktop sidebar and main content area', () => {
+    const wrapper = mountAppShell()
 
-    expect(wrapper.text()).toContain('BoardGame Night')
-    expect(wrapper.find('[data-testid="sidebar-slot"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="desktop-sidebar"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="main-content"]').exists()).toBe(true)
   })
 
-  it('shows mobile drawer toggle on narrow viewports', () => {
-    const wrapper = mount(AppShell, {
-      slots: {
-        sidebar: '<div>Sidebar</div>',
-        default: '<div>Main</div>'
-      }
-    })
+  it('shows mobile navigation toggle', () => {
+    const wrapper = mountAppShell()
 
-    expect(wrapper.find('[data-testid="mobile-menu-toggle"]').exists()).toBe(true)
+    expect(wrapper.find('[aria-label="Open navigation"]').exists()).toBe(true)
   })
 })

@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import MemberAvatar from '@/components/common/MemberAvatar.vue'
 
 interface Owner {
   bggUsername: string
@@ -41,66 +44,44 @@ const hasWeight = computed(() => props.averageWeight != null && props.averageWei
 function openBgg() {
   window.open(`https://boardgamegeek.com/boardgame/${props.id}`, '_blank')
 }
-
-const PALETTE = [
-  'bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500',
-  'bg-pink-500', 'bg-teal-500', 'bg-red-500', 'bg-yellow-500',
-  'bg-cyan-500', 'bg-indigo-500', 'bg-lime-500', 'bg-emerald-500',
-  'bg-rose-500', 'bg-violet-500', 'bg-sky-500'
-]
-
-function colorFor(username: string): string {
-  let hash = 0
-  for (const char of username) {
-    hash = (hash << 5) - hash + char.charCodeAt(0)
-    hash = hash & hash
-  }
-  return PALETTE[Math.abs(hash) % PALETTE.length]
-}
-
-function initialFor(username: string): string {
-  return username.charAt(0).toUpperCase()
-}
 </script>
 
 <template>
-  <article
-    class="bg-white rounded-lg border border-neutral-200 overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg hover:border-indigo-200 cursor-pointer"
+  <Card
+    class="cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-300 p-0 gap-0 overflow-hidden"
     @click="openBgg"
   >
     <img
       v-if="thumbnail"
       :src="thumbnail"
       :alt="name"
-      class="w-full aspect-[4/3] object-cover bg-neutral-100"
+      class="w-full aspect-[4/3] object-cover bg-surface-container"
     />
-    <div v-else class="w-full aspect-[4/3] bg-neutral-200 flex items-center justify-center text-neutral-400 text-sm">
+    <div
+      v-else
+      class="w-full aspect-[4/3] bg-surface-variant flex items-center justify-center text-on-surface-variant text-sm"
+    >
       No image
     </div>
-    <div class="p-3">
+    <CardContent class="p-3">
       <h3 class="text-sm font-semibold line-clamp-2 leading-tight" :title="name">{{ name }}</h3>
-      <p v-if="meta" class="text-xs text-neutral-500 mt-1">{{ meta }}</p>
+      <p v-if="meta" class="text-xs text-on-surface-variant mt-1">{{ meta }}</p>
       <div class="flex items-center gap-2 mt-2">
-        <span v-if="hasAverage" class="text-xs font-medium bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded">
-          {{ average?.toFixed(1) }}
-        </span>
-        <span v-if="hasWeight" class="text-xs font-medium bg-neutral-100 text-neutral-700 px-1.5 py-0.5 rounded">
-          {{ averageWeight?.toFixed(1) }}
-        </span>
+        <Badge v-if="hasAverage" variant="invited">{{ average?.toFixed(1) }}</Badge>
+        <Badge v-if="hasWeight" variant="draft">{{ averageWeight?.toFixed(1) }}</Badge>
       </div>
       <div class="flex -space-x-1 mt-2">
-        <span
+        <MemberAvatar
           v-for="owner in owners"
           :key="owner.bggUsername"
+          :username="owner.bggUsername"
+          size="xs"
           :title="owner.bggUsername"
-          :class="['inline-flex items-center justify-center h-5 w-5 rounded-full text-[10px] font-medium text-white ring-2 ring-white', colorFor(owner.bggUsername)]"
-        >
-          {{ initialFor(owner.bggUsername) }}
-        </span>
+        />
       </div>
       <div v-if="$slots.action" class="mt-3">
         <slot name="action" />
       </div>
-    </div>
-  </article>
+    </CardContent>
+  </Card>
 </template>

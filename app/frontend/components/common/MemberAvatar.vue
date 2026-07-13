@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useMemberColor } from '@/composables/useMemberColor'
 
 interface Props {
@@ -12,7 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md'
 })
 
-const { bg, text } = useMemberColor(props.username)
+const colorClass = useMemberColor(props.username)
 
 const sizeClasses = {
   xs: 'h-4.5 w-4.5 text-[9px]',
@@ -26,18 +27,11 @@ const initial = props.username.charAt(0).toUpperCase()
 
 <template>
   <span class="inline-flex items-center gap-1.5">
-    <span
-      :class="[
-        'inline-flex items-center justify-center rounded-full font-medium',
-        bg,
-        text,
-        sizeClasses[size]
-      ]"
-      :title="username"
-      :aria-label="`Avatar for ${username}`"
-    >
-      {{ initial }}
-    </span>
-    <span v-if="showUsername" class="text-sm text-neutral-700">{{ username }}</span>
+    <Avatar :class="sizeClasses[size]" :title="username" :aria-label="`Avatar for ${username}`">
+      <AvatarFallback :class="colorClass">
+        {{ initial }}
+      </AvatarFallback>
+    </Avatar>
+    <span v-if="showUsername" class="text-sm text-on-surface-variant">{{ username }}</span>
   </span>
 </template>

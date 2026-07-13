@@ -42,21 +42,21 @@ function isDisabled(username: string): boolean {
     <div class="flex items-center justify-end gap-2">
       <button
         type="button"
-        class="text-xs text-indigo-600 hover:text-indigo-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 py-0.5"
+        class="text-xs text-primary hover:text-primary/80 font-medium focus:outline-none focus:ring-2 focus:ring-primary rounded px-1 py-0.5"
         @click="emit('select-all')"
       >
         Select All
       </button>
       <button
         type="button"
-        class="text-xs text-neutral-600 hover:text-neutral-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded px-1 py-0.5"
+        class="text-xs text-on-surface-variant hover:text-on-surface font-medium focus:outline-none focus:ring-2 focus:ring-primary rounded px-1 py-0.5"
         @click="emit('deselect-all')"
       >
         Deselect All
       </button>
     </div>
 
-    <div v-if="usernames.length === 0" class="text-sm text-neutral-500">
+    <div v-if="usernames.length === 0" class="text-sm text-on-surface-variant">
       No collectors selected.
     </div>
 
@@ -64,24 +64,24 @@ function isDisabled(username: string): boolean {
       <li
         v-for="username in usernames"
         :key="username"
-        class="flex items-center gap-2 rounded-md border border-neutral-200 bg-white p-2"
+        class="flex items-center gap-2 rounded-md border border-outline bg-surface-container p-2"
       >
         <input
           :id="`owner-${username}`"
           type="checkbox"
           :checked="selected.has(username)"
           :aria-label="username"
-          class="h-4 w-4 rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500"
+          class="h-4 w-4 rounded border-outline text-primary focus:ring-primary"
           @change="emit('toggle', username)"
         />
         <label :for="`owner-${username}`" class="flex items-center gap-2 flex-1 cursor-pointer">
           <MemberAvatar :username="username" size="sm" />
-          <span class="text-sm font-medium text-neutral-800">{{ username }}</span>
+          <span class="text-sm font-medium text-on-surface">{{ username }}</span>
         </label>
         <div class="flex items-center gap-2">
           <span
             v-if="statusFor(username, syncStatuses) === 'SYNCING'"
-            class="text-xs font-medium text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded"
+            class="text-xs font-medium bg-warning-container text-warning px-1.5 py-0.5 rounded"
           >
             Syncing
           </span>
