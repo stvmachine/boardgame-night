@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: GraphQL API + Collection Surface (v1 Parity)** - Full collection UI: N-user merge, search/filter/sort/group, hot games, permalinks, responsive layout
 - [x] **Phase 4: Auth + Friend Groups + Session Lifecycle** - Accounts, BGG username binding, friend groups, magic-link sessions, RSVP, manual game pick
 - [x] **Phase 5: Design System Foundation** - Tailwind v4/Material 3 tokens, Stitch primitives, app shell redesign (completed 2026-07-13)
-- [ ] **Phase 6: BGG Poll Data Layer** - Poll migrations, parser, enrichment job, one-time backfill
+- [x] **Phase 6: BGG Poll Data Layer** - Poll migrations, parser, enrichment job, one-time backfill (completed 2026-07-13)
 - [ ] **Phase 7: Suggestion Engine Backend** - Deterministic scoring service, explainable shortlist, GraphQL types
 - [ ] **Phase 8: Group Detail Surface** - Group hub with sessions, members, spotlight, invite link
 - [ ] **Phase 9: Home & Collection Redesign** - Dashboard hero, stats, trending, rich filters, game cards
@@ -180,7 +180,7 @@ Plans:
   3. Existing `BggThing` records are backfilled with poll data via a rate-limited background job that respects the BGG 1 req/5s limit.
   4. GraphQL exposes poll data per thing so the frontend can display per-player-count vote breakdowns.
 
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 **Wave 1**
 
@@ -189,7 +189,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 06-02-PLAN.md — Fetch + jobs: Bgg::Client#thing per-thing caching + 20-ID batching + XXE hardening, EnrichThingPollsJob, BackfillPollDataJob, ImportCollectionJob hook, bgg:backfill_polls rake task (Wave 2)
-- [ ] 06-03-PLAN.md — GraphQL exposure: PollType, PollResultType, PollsLoader, ThingFields polls/bestPlayerCount, schema dump + codegen (Wave 2)
+- [x] 06-03-PLAN.md — GraphQL exposure: PollType, PollResultType, PollsLoader, ThingFields polls/bestPlayerCount, schema dump + codegen (Wave 2)
 
 ### Phase 7: Suggestion Engine Backend
 
@@ -285,7 +285,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 3. GraphQL API + Collection Surface (v1 Parity) | 11/11 | Complete | 2026-07-08 |
 | 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete | 2026-07-09 |
 | 5. Design System Foundation | 4/4 | Complete   | 2026-07-13 |
-| 6. BGG Poll Data Layer | 2/3 | In Progress|  |
+| 6. BGG Poll Data Layer | 3/3 | Complete   | 2026-07-13 |
 | 7. Suggestion Engine Backend | 0/TBD | Not started | - |
 | 8. Group Detail Surface | 0/TBD | Not started | - |
 | 9. Home & Collection Redesign | 0/TBD | Not started | - |

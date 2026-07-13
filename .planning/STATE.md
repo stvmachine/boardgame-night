@@ -4,17 +4,17 @@ milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
 current_phase: 06
 current_phase_name: bgg-poll-data-layer
-status: executing
-stopped_at: Completed 06-bgg-poll-data-layer-01-PLAN.md
-last_updated: "2026-07-13T21:12:33.197Z"
+status: verifying
+stopped_at: Completed 06-bgg-poll-data-layer-03-PLAN.md
+last_updated: "2026-07-13T21:22:30.067Z"
 last_activity: 2026-07-13
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 11
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 28
-  completed_plans: 27
-  percent: 45
+  completed_plans: 28
+  percent: 55
 ---
 
 # Project State
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 
 Phase: 06 (bgg-poll-data-layer) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-07-13 — Phase 06 execution started
 
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (v1.1 planning; 4 of 11 phases from v1.0 complete, v1.1 plans TBD)
@@ -69,6 +69,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (v1.
 | Phase 05 P03 | 15min | 2 tasks | 18 files |
 | Phase 06-bgg-poll-data-layer P01 | 7min | 2 tasks | 10 files |
 | Phase 06 P02 | 8min | 2 tasks | 9 files |
+| Phase 06-bgg-poll-data-layer P03 | 4 min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Recent decisions affecting current work:
 - [Phase 06-bgg-poll-data-layer]: PollPersister implemented as class methods matching Bgg::PollPersister.persist_from_thing_xml behavior — Simpler caller API with no instance state needed; aligns with plan specification
 - [Phase ?]: Rescued Bgg::ResourceNotFound at batch level in enrichment/backfill jobs so a single missing batch does not discard the entire job. — Follows D-08 skip-and-continue pattern and keeps partial backfill progress even when one batch returns 404.
 - [Phase ?]: Backfill logs missing IDs and leaves poll_data_fetched_at nil, allowing retry on the next backfill run. — Matches Open Question 2 resolution: do not mark missing IDs as fetched so a subsequent backfill can retry them.
+- [Phase 06-bgg-poll-data-layer]: Used GraphQL::Dataloader::Source for poll loading to keep collection list queries O(1) in database round-trips.
+- [Phase 06-bgg-poll-data-layer]: Chose the lower player count on a tie for bestPlayerCount so the suggestion engine favors more inclusive options.
 
 ### Pending Todos
 
@@ -121,6 +124,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-13T21:11:32.984Z
-Stopped at: Completed 06-bgg-poll-data-layer-01-PLAN.md
+Last session: 2026-07-13T21:22:04.420Z
+Stopped at: Completed 06-bgg-poll-data-layer-03-PLAN.md
 Resume file: None
