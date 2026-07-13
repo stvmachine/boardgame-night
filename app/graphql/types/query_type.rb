@@ -108,9 +108,11 @@ module Types
 
     def sync_status_for(username, users)
       user = users.find { |u| u.bgg_username == username }
+      synced = user && user.last_synced_at.present?
+      status = synced ? "READY" : "QUEUED"
       SyncStatus.new(
         username: username,
-        status: "READY",
+        status: status,
         last_synced_at: user&.last_synced_at,
         error: nil,
         game_count: user&.bgg_collections&.count

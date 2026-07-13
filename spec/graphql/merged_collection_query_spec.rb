@@ -44,6 +44,25 @@ RSpec.describe "mergedCollection query" do
     expect(sync_statuses.map { |s| s["username"] }).to contain_exactly("bggalice", "bggbob")
   end
 
+  it "returns QUEUED status for a user that has never been synced" do
+    query = <<~GRAPHQL
+      query {
+        mergedCollection(usernames: ["bggalice"]) {
+          syncStatuses {
+            username
+            status
+          }
+        }
+      }
+    GRAPHQL
+
+    result = BoardgameNightSchema.execute(query)
+
+    expect(result["errors"]).to be_nil
+    sync_status = result.dig("data", "mergedCollection", "syncStatuses").first
+    expect(sync_status["status"]).to eq("QUEUED")
+  end
+
   it "returns the user's persisted last_synced_at in sync status" do
     alice.update!(last_synced_at: Time.new(2026, 7, 1, 12, 0, 0, "+00:00"))
 
