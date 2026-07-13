@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { h } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
@@ -64,9 +65,14 @@ describe('Primitive M3 token styling', () => {
   })
 
   it('AvatarFallback renders white text on a neutral background', () => {
-    const wrapper = mount(AvatarFallback, { props: { initials: 'AB' }, slots: { default: 'AB' } })
-    const classes = wrapper.classes().join(' ')
-    expect(classes).toContain('text-white')
+    const wrapper = mount(Avatar, {
+      slots: {
+        default: () => h(AvatarFallback, null, () => 'AB')
+      }
+    })
+    const fallback = wrapper.find('[data-slot="avatar-fallback"]')
+    expect(fallback.exists()).toBe(true)
+    expect(fallback.classes().join(' ')).toContain('text-white')
   })
 
   it('Skeleton uses M3 surface-variant with pulse animation', () => {
