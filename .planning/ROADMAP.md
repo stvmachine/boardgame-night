@@ -180,7 +180,12 @@ Plans:
   3. Existing `BggThing` records are backfilled with poll data via a rate-limited background job that respects the BGG 1 req/5s limit.
   4. GraphQL exposes poll data per thing so the frontend can display per-player-count vote breakdowns.
 
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+
+- [ ] 06-01-PLAN.md — Parse + persist: poll tables migration, BggPoll/BggPollResult models, Normalizer.normalize_polls, Bgg::PollPersister (Wave 1)
+- [ ] 06-02-PLAN.md — Fetch + jobs: Bgg::Client#thing per-thing caching + 20-ID batching + XXE hardening, EnrichThingPollsJob, BackfillPollDataJob, ImportCollectionJob hook, bgg:backfill_polls rake task (Wave 2)
+- [ ] 06-03-PLAN.md — GraphQL exposure: PollType, PollResultType, PollsLoader, ThingFields polls/bestPlayerCount, schema dump + codegen (Wave 2)
 
 ### Phase 7: Suggestion Engine Backend
 
