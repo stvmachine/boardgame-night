@@ -18,6 +18,7 @@ interface SheetContentProps extends DialogContentProps {
   class?: HTMLAttributes["class"]
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
+  closeAriaLabel?: string
 }
 
 defineOptions({
@@ -27,6 +28,7 @@ defineOptions({
 const props = withDefaults(defineProps<SheetContentProps>(), {
   side: "right",
   showCloseButton: true,
+  closeAriaLabel: "Close",
 })
 const emits = defineEmits<DialogContentEmits>()
 
@@ -51,9 +53,9 @@ const forwarded = useForwardPropsEmits(delegatedProps, emits)
         data-slot="sheet-close"
         as-child
       >
-        <Button variant="ghost" class="absolute top-3 right-3" size="icon">
+        <Button variant="ghost" class="absolute top-3 right-3" size="icon" :aria-label="closeAriaLabel">
           <Icon name="close" class="h-4 w-4" />
-          <span class="sr-only">Close</span>
+          <span class="sr-only">{{ closeAriaLabel }}</span>
         </Button>
       </DialogClose>
     </DialogContent>

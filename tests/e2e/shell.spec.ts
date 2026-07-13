@@ -1,6 +1,16 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
+
+async function signIn(page: Page, email: string, password: string) {
+  await page.goto('/login')
+  await page.waitForSelector('label:has-text("Email")', { timeout: 10_000 })
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Password').fill(password)
+  await page.getByRole('button', { name: 'Log in' }).click()
+  await page.waitForURL(/^(?!.*\/login).*$/, { timeout: 30_000 })
+}
 
 test('desktop sidebar shows 280px nav shell with New Session and nav items', async ({ page }) => {
+  await signIn(page, 'e2e_alice@example.com', 'password')
   await page.setViewportSize({ width: 1280, height: 720 })
   await page.goto('/')
 
