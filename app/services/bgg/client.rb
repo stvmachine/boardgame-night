@@ -30,9 +30,32 @@ module Bgg
     end
 
     def thing(ids)
-      handle_faraday_errors do
-        perform_request("thing", id: Array(ids).join(","), stats: 1)
+      ids = Array(ids).map(&:to_s).uniq
+      cached_xmls = {}
+      uncached_ids = []
+
+      ids.each do |id|
+        cached = Rails.cache.read(thing_cache_key(id))
+        if cached
+          cached_xmls[id] = cached
+        else
+          uncached_ids << id
+        end
       end
+
+      if uncached_ids.any?
+        handle_faraday_errors do
+          uncached_ids.each_slice(20) do |batch|
+            doc = perform_request("thing", id: batch.join(","), stats: 1)
+            doc.css("items > item").each do |item|
+              Rails.cache.write(thing_cache_key(item["id"]), item.to_xml, expires_in: 1.hour)
+              cached_xmls[item["id"]] = item.to_xml
+            end
+          end
+        end
+      end
+
+      merge_item_xmls(cached_xmls.values)
     end
 
     def search(query, type: "boardgame", exact: false)
@@ -86,12 +109,27 @@ module Bgg
     end
 
     def parse_xml(body)
-      Nokogiri::XML(body) { |config| config.strict }
+      Nokogiri::XML(body) { |config| config.strict; config.nonet }
     rescue Nokogiri::XML::SyntaxError => e
       raise Bgg::ParseError, e.message
     end
 
     private
+
+    def thing_cache_key(id)
+      "bgg:thing:#{id}"
+    end
+
+    def merge_item_xmls(xml_strings)
+      merged = Nokogiri::XML::Document.new
+      root = merged.create_element("items")
+      xml_strings.each do |xml|
+        item = Nokogiri::XML(xml).at_css("item")
+        root.add_child(item.dup) if item
+      end
+      merged.root = root
+      merged
+    end
 
     def build_connection
       Faraday.new(url: BASE_URL, request: { timeout: 10, open_timeout: 5 }) do |f|
