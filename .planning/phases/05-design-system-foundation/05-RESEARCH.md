@@ -767,22 +767,22 @@ export function useMemberColor(username: string) {
 | A5 | Custom `warning` and `success` colors are acceptable as static hex values rather than generated from the M3 seed | Code Examples | If strict M3 generation is required, the script can be extended to use `customColor()` with amber/green seeds. Static values match the UI-SPEC table. |
 | A6 | `unplugin-vue-components` is not needed for primitives | Standard Stack | If auto-import is desired later, it can be added without breaking the design system. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Iconify offline requirement**
    - What we know: API mode is the default, loads only used icons, and matches the project constraints. The offline package `@iconify-json/material-symbols` exists but is flagged SUS and adds ~11 MB of JSON.
-   - What's unclear: Whether the target environment (CI, prod VPS, developer with spotty internet) allows runtime calls to `api.iconify.design`.
-   - Recommendation: Start with API mode. Add a note in the plan to revisit offline bundling only if network failures are observed in CI or production.
+   - What was unclear: Whether the target environment (CI, prod VPS, developer with spotty internet) allows runtime calls to `api.iconify.design`.
+   - RESOLVED: Start with API mode (on-demand fetching). Do NOT install `@iconify-json/material-symbols` (SUS, 11 MB). Revisit offline bundling only if network failures are observed in CI or production. Plan 05-01 Task 2 installs only `@iconify/vue@5.0.1` and uses the on-demand API.
 
 2. **shadcn-vue init impact on existing Vite/Tailwind config**
    - What we know: shadcn-vue init installs `components.json`, the `cn()` utility, and default CSS variables. The project already has `vite.config.ts` with `@tailwindcss/vite`, `tsconfig.json` with `@/*`, and `styles.css` with a minimal `@theme` block.
-   - What's unclear: Whether init will overwrite `styles.css` or create a new CSS file. We need to preserve the existing import and Apollo setup in `application.ts`.
-   - Recommendation: Run init with `--yes` but inspect the diff. If it writes a new `tailwind.css`, merge it into `app/frontend/entrypoints/styles.css` before committing.
+   - What was unclear: Whether init will overwrite `styles.css` or create a new CSS file. We need to preserve the existing import and Apollo setup in `application.ts`.
+   - RESOLVED: Run `npx shadcn-vue@latest init` and inspect the diff to `tsconfig.json` and `styles.css` before committing. If init creates a separate `tailwind.css` or `globals.css`, merge its content into `app/frontend/entrypoints/styles.css` and delete the extra file. Do not let init overwrite the `@/*` path mapping or break the existing `@import "tailwindcss"` line. Plan 05-01 Task 2 documents this merge step explicitly.
 
 3. **Exact surface-level mapping to UI-SPEC "Level 0 / Level 1"**
    - What we know: M3 has `surface`, `surfaceContainerLowest`, `surfaceContainerLow`, `surfaceContainer`, `surfaceContainerHigh`, `surfaceContainerHighest`. The UI-SPEC says Level 0 = `surface` and Level 1 = `surface-container` with a 1px `outline` border.
-   - What's unclear: Whether higher surfaces (cards stacked on cards, dialogs) should use `surface-container-high` or `surface-container-highest`.
-   - Recommendation: Map Level 0 → `surface`, Level 1 → `surface-container`, Level 2 → `surface-container-high`, Level 3+ → `surface-container-highest`. Document this in the design tokens comment block so later phases use consistent levels.
+   - What was unclear: Whether higher surfaces (cards stacked on cards, dialogs) should use `surface-container-high` or `surface-container-highest`.
+   - RESOLVED: Map Level 0 → `surface`, Level 1 → `surface-container`, Level 2 → `surface-container-high`, Level 3+ → `surface-container-highest`. Document this in the design tokens comment block in `styles.css` so later phases use consistent levels. Plan 05-01 Task 2 generates all surface-container roles via the M3_ROLES array, and Plan 05-04 (primitive scaffolding) applies Level 1 (`bg-surface-container border-outline`) to the Card primitive.
 
 ## Environment Availability
 
