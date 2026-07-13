@@ -67,5 +67,33 @@ module Bgg
         }
       }
     end
+
+    def normalize_polls(item_node)
+      poll = item_node.at_css('poll[name="suggested_numplayers"]')
+      return nil unless poll
+
+      {
+        name: poll["name"],
+        title: poll["title"],
+        total_votes: poll["totalvotes"]&.to_i,
+        results: poll.css("results").map do |result_node|
+          {
+            player_count: parse_player_count(result_node["numplayers"]),
+            votes: result_node.css("result").map do |vote_node|
+              {
+                value: vote_node["value"],
+                num_votes: vote_node["numvotes"]&.to_i
+              }
+            end
+          }
+        end
+      }
+    end
+
+    def parse_player_count(numplayers)
+      return nil if numplayers.nil?
+
+      numplayers.to_i
+    end
   end
 end

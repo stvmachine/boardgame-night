@@ -177,4 +177,64 @@ RSpec.describe Bgg::Normalizer do
       end
     end
   end
+
+  describe ".normalize_polls" do
+    context "with full thing data" do
+      let(:xml) { Nokogiri::XML(file_fixture("stevmachine_thing.xml").read) }
+      let(:item) { xml.at_css("items > item") }
+      let(:result) { described_class.normalize_polls(item) }
+
+      it "extracts poll name and title" do
+        expect(result[:name]).to eq("suggested_numplayers")
+        expect(result[:title]).to eq("User Suggested Number of Players")
+      end
+
+      it "extracts total votes as an integer" do
+        expect(result[:total_votes]).to eq(2000)
+      end
+
+      it "returns results for each player count" do
+        expect(result[:results].length).to eq(4)
+        expect(result[:results].map { |r| r[:player_count] }).to eq([1, 2, 3, 4])
+      end
+
+      it "extracts Best/Recommended/Not Recommended votes" do
+        first_result = result[:results].first
+        expect(first_result[:votes].map { |v| v[:value] }).to eq(
+          ["Best", "Recommended", "Not Recommended"]
+        )
+        best_vote = first_result[:votes].find { |v| v[:value] == "Best" }
+        expect(best_vote[:num_votes]).to eq(100)
+      end
+    end
+
+    context "when the item has no suggested_numplayers poll" do
+      it "returns nil" do
+        minimal_xml = Nokogiri::XML(<<~XML)
+          <?xml version="1.0" encoding="utf-8"?>
+          <items>
+            <item type="boardgame" id="99999">
+              <name type="primary" value="Mystery Game" />
+            </item>
+          </items>
+        XML
+        item = minimal_xml.at_css("items > item")
+        expect(described_class.normalize_polls(item)).to be_nil
+      end
+    end
+  end
+
+  describe ".parse_player_count" do
+    it "returns integer for numeric player count" do
+      expect(described_class.parse_player_count("4")).to eq(4)
+    end
+
+    it "returns nil for nil input" do
+      expect(described_class.parse_player_count(nil)).to be_nil
+    end
+
+    it "returns integer part for '4+'" do
+      expect(described_class.parse_player_count("4+")).to eq(4)
+    end
+  end
 end
