@@ -1,0 +1,1 @@
+{"content":"BGG XML API2 /thing endpoint accepts up to 20 comma-delimited IDs per request. The suggested_numplayers poll element contains results with Best/Recommended/Not Recommended vote counts per player count.","source":"web","provider":"webfetch","confidence":"LOW","fetched_at":"2026-07-13T18:17:39.939Z","ttl":86400000,"kind":"docs"}
