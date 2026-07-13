@@ -5,15 +5,15 @@ milestone_name: UI Redesign + Suggestion Engine
 current_phase: 05
 current_phase_name: design-system-foundation
 status: executing
-stopped_at: "Phase 5 planned (D-04 coverage override: decision covered but citation missing)"
-last_updated: "2026-07-13T07:10:17.608Z"
+stopped_at: Completed 05-04-PLAN.md
+last_updated: "2026-07-13T07:34:24.316Z"
 last_activity: 2026-07-13
 last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 11
   completed_phases: 4
   total_plans: 25
-  completed_plans: 22
+  completed_plans: 23
   percent: 36
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 05 (design-system-foundation) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-13 — Phase 05 execution started
 
@@ -65,6 +65,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (v1.
 - Trend: Plan durations scale with UI + backend integration complexity; expect v1.1 UI phases to land in the 30-60 min/plan range
 
 | Phase 05 P01 | 45min | 8 tasks | 8 files |
+| Phase 05 P04 | 15min | 1 tasks | 90 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - **Stack pins:** Tailwind v4 CSS-first `@theme` for M3 tokens; Material Symbols Outlined; Inter font; indigo primary. Apollo 3.13.9 path remains stable (Apollo 4 + composable v5 still beta).
 - [Phase ?]: Use shadcn-vue style 'reka-nova' (New York equivalent in shadcn-vue 2.x) because 'New York' is not a valid CLI option; M3 tokens override default colors anyway.
 - [Phase ?]: Uninstall @lucide/vue after shadcn-vue init because the project uses @iconify/vue + Material Symbols for icons, not Lucide.
+- [Phase ?]: Follow the plan's explicit Button/Badge sizes and variants rather than shadcn defaults; use only default, sm, lg, icon sizes and primary/secondary/outline/ghost/destructive + default/draft/invited/picking/completed variants
+- [Phase ?]: Use explicit M3 Tailwind utility classes (bg-primary, bg-surface-container, border-outline) in primitive class strings rather than relying solely on shadcn CSS variables like bg-card
+- [Phase ?]: Replace all shadcn-generated @lucide/vue icon imports with the project's Iconify wrapper (Icon) to maintain the single Material Symbols icon dependency from Plan 05-01
 
 ### Pending Todos
 
@@ -105,6 +109,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-13T07:04:22.252Z
-Stopped at: Phase 5 planned (D-04 coverage override: decision covered but citation missing)
-Resume file: .planning/phases/05-design-system-foundation/05-01-PLAN.md
+Last session: 2026-07-13T07:34:24.309Z
+Stopped at: Completed 05-04-PLAN.md
+Resume file: None

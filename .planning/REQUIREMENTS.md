@@ -17,10 +17,10 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 - [x] **DS-01**: App uses the "Tabletop Social" Material 3 design system (Inter font, indigo `#4f46e5` primary, M3 tonal palette, Material Symbols Outlined icons)
 - [ ] **DS-02**: App shell has a 280px fixed sidebar (Home/Collection/Hot/Groups/Account + Settings/Logout + "New Session" primary button) with mobile drawer
-- [ ] **DS-03**: Cards use rounded-xl corners, soft shadows, and M3 surface tonal layering (Level 0 background, Level 1 cards with 1px border)
-- [ ] **DS-04**: Status badges render with semantic colors (Draft=gray, Invited=indigo, Picking=amber, Completed=green) using small-caps label-sm typography
-- [ ] **DS-05**: Loading states use skeleton loaders (animated pulse placeholders matching game card layout)
-- [ ] **DS-06**: Avatars are circular with deterministic per-username color backgrounds and white centered initials
+- [x] **DS-03**: Cards use rounded-xl corners, soft shadows, and M3 surface tonal layering (Level 0 background, Level 1 cards with 1px border)
+- [x] **DS-04**: Status badges render with semantic colors (Draft=gray, Invited=indigo, Picking=amber, Completed=green) using small-caps label-sm typography
+- [x] **DS-05**: Loading states use skeleton loaders (animated pulse placeholders matching game card layout)
+- [x] **DS-06**: Avatars are circular with deterministic per-username color backgrounds and white centered initials
 
 ### Home Dashboard (HOME)
 
@@ -101,10 +101,10 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 |--------|-------|--------|
 | DS-01 | Phase 5 | Complete |
 | DS-02 | Phase 5 | Pending |
-| DS-03 | Phase 5 | Pending |
-| DS-04 | Phase 5 | Pending |
-| DS-05 | Phase 5 | Pending |
-| DS-06 | Phase 5 | Pending |
+| DS-03 | Phase 5 | Complete |
+| DS-04 | Phase 5 | Complete |
+| DS-05 | Phase 5 | Complete |
+| DS-06 | Phase 5 | Complete |
 | HOME-01 | Phase 9 | Pending |
 | HOME-02 | Phase 9 | Pending |
 | HOME-03 | Phase 9 | Pending |
