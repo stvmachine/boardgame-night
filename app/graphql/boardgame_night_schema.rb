@@ -21,7 +21,9 @@ class BoardgameNightSchema < GraphQL::Schema
     Types::GroupMembershipType,
     Types::SessionInviteType,
     Types::NightSessionType,
-    Types::AttendanceType
+    Types::AttendanceType,
+    Types::PollType,
+    Types::PollResultType
   )
 
   # SyncStatusEnum is reachable via UserSyncStatusType and does not need to be
