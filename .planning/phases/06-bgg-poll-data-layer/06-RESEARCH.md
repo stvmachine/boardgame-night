@@ -631,22 +631,25 @@ end
 | A5 | Poll enrichment does not need a Solid Cable broadcast; consumers read poll data on demand. | User Constraints | If real-time poll status is needed later, a broadcast can be added without breaking existing flow. |
 | A6 | The existing `Bgg::Client#thing` endpoint is sufficient for batch fetching; the 202-retry path from collections is not required for things. | Code Examples | If BGG starts returning 202 for things, the backfill/enrichment may fail; can be mitigated by reusing `request_with_202_retry`. |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should `Bgg::Client#thing` reuse the existing 202-retry logic?**
    - What we know: `request_with_202_retry` handles BGG's async collection generation; `Bgg::Client#thing` currently uses `perform_request` without 202 handling.
    - What's unclear: Whether the `/thing` endpoint ever returns 202 for newly added games.
    - Recommendation: Start with the existing `perform_request` behavior to keep the change minimal; add a 202-retry wrapper if backfill tests against live BGG show it is needed.
+   - RESOLVED: Keep existing `perform_request` for things; revisit 202-retry only if live backfill shows it is needed. Plan 06-02 Task 1 implements caching on top of `perform_request` without 202 handling.
 
 2. **Should the backfill mark missing `<item>` responses as fetched or leave them for retry?**
    - What we know: `Bgg::PollPersister` should guard against missing things.
    - What's unclear: Whether BGG can return a successful 200 response that omits a requested ID.
    - Recommendation: If an ID is missing from the response, do not update `poll_data_fetched_at`; let the next backfill run retry it. Log the missing ID.
+   - RESOLVED: Do not update `poll_data_fetched_at` for missing IDs; log and let next backfill retry. Plan 06-02 Task 2 implements this skip-and-continue pattern.
 
 3. **Should the schema support `level` on poll results (for future `language_dependence` polls)?**
    - What we know: The proxy's `PollResult` type includes `level` and `players`; the `suggested_numplayers` XML has only `value` and `numvotes`.
    - What's unclear: Whether v1 will ever need other polls.
    - Recommendation: Add `level` as a nullable column now to avoid a future migration; keep it unpopulated for `suggested_numplayers`.
+   - RESOLVED: Add nullable `level` column to `bgg_poll_results` for forward compatibility. Plan 06-01 Task 1 includes this column in the migration.
 
 ## Environment Availability
 
