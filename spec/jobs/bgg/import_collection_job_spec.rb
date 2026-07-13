@@ -71,6 +71,12 @@ RSpec.describe Bgg::ImportCollectionJob, type: :job do
         }.from(nil).to(be_within(1.second).of(Time.current))
       end
 
+      it "enqueues Bgg::EnrichThingPollsJob before broadcasting READY" do
+        expect {
+          job.perform(username)
+        }.to have_enqueued_job(Bgg::EnrichThingPollsJob).with(username)
+      end
+
       it "broadcasts status transitions" do
         expect(BoardgameNightSchema.subscriptions).to receive(:trigger).with(
           :collection_synced,
