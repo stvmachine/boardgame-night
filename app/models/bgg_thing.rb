@@ -2,6 +2,7 @@
 
 class BggThing < ApplicationRecord
   has_many :bgg_collections, dependent: :destroy
+  has_many :bgg_polls, dependent: :destroy
   has_many :users, through: :bgg_collections
 
   validates :objectid, presence: true, uniqueness: true

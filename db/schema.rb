@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_09_000009) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_14_000001) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -34,6 +34,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000009) do
     t.index ["user_id"], name: "index_bgg_collections_on_user_id"
   end
 
+  create_table "bgg_poll_results", force: :cascade do |t|
+    t.integer "bgg_poll_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "level"
+    t.integer "num_votes", default: 0, null: false
+    t.integer "player_count"
+    t.datetime "updated_at", null: false
+    t.string "value", null: false
+    t.index ["bgg_poll_id", "player_count", "value"], name: "idx_on_bgg_poll_id_player_count_value_ac97d142f9", unique: true
+    t.index ["bgg_poll_id"], name: "index_bgg_poll_results_on_bgg_poll_id"
+  end
+
+  create_table "bgg_polls", force: :cascade do |t|
+    t.integer "bgg_thing_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.string "title"
+    t.integer "total_votes"
+    t.datetime "updated_at", null: false
+    t.index ["bgg_thing_id", "name"], name: "index_bgg_polls_on_bgg_thing_id_and_name", unique: true
+    t.index ["bgg_thing_id"], name: "index_bgg_polls_on_bgg_thing_id"
+  end
+
   create_table "bgg_things", force: :cascade do |t|
     t.decimal "average", precision: 10, scale: 6
     t.decimal "average_weight", precision: 10, scale: 6
@@ -50,12 +73,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000009) do
     t.integer "num_comments"
     t.integer "objectid", null: false
     t.integer "playing_time"
+    t.text "poll_data_error"
+    t.datetime "poll_data_fetched_at"
     t.string "thumbnail"
     t.datetime "updated_at", null: false
     t.integer "users_rated"
     t.integer "year_published"
     t.index ["name"], name: "index_bgg_things_on_name"
     t.index ["objectid"], name: "index_bgg_things_on_objectid", unique: true
+    t.index ["poll_data_fetched_at"], name: "index_bgg_things_on_poll_data_fetched_at"
   end
 
   create_table "group_memberships", force: :cascade do |t|
@@ -147,10 +173,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_09_000009) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
-  add_foreign_key "attendances", "night_sessions"
-  add_foreign_key "attendances", "users"
-  add_foreign_key "bgg_collections", "bgg_things"
-  add_foreign_key "bgg_collections", "users"
+  add_foreign_key "bgg_poll_results", "bgg_polls"
+  add_foreign_key "bgg_polls", "bgg_things"
   add_foreign_key "group_memberships", "groups"
   add_foreign_key "group_memberships", "users"
   add_foreign_key "groups", "users", column: "owner_id"
