@@ -147,11 +147,11 @@ Plans:
   4. User sees circular avatars with deterministic per-username colored backgrounds and white centered initials.
   5. User sees skeleton loading placeholders matching the game card layout while data is loading.
 
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 Plans:
 **Wave 1**
 
-- [ ] 05-01-PLAN.md — Design tokens & infrastructure (M3 tonal palette, Inter font, Iconify icons, shadcn-vue init, cn() utility)
+- [x] 05-01-PLAN.md — Design tokens & infrastructure (M3 tonal palette, Inter font, Iconify icons, shadcn-vue init, cn() utility)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -275,7 +275,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. BGG Integration Layer + Persistence | 3/3 | Complete | 2026-07-04 |
 | 3. GraphQL API + Collection Surface (v1 Parity) | 11/11 | Complete | 2026-07-08 |
 | 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete | 2026-07-09 |
-| 5. Design System Foundation | 0/TBD | Not started | - |
+| 5. Design System Foundation | 1/4 | In Progress|  |
 | 6. BGG Poll Data Layer | 0/TBD | Not started | - |
 | 7. Suggestion Engine Backend | 0/TBD | Not started | - |
 | 8. Group Detail Surface | 0/TBD | Not started | - |
