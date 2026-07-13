@@ -22,7 +22,7 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 - [ ] Redesign Collection view (structured filter sidebar with range slider, checkbox groups, segmented buttons + rich game cards + sort + grid/list toggle + skeleton loaders)
 - [ ] Build Group Detail surface (group header + upcoming sessions list + shared collection spotlight + members panel with roles + invite link with copy)
 - [ ] Redesign Picking a Game screen (session header with status badge + attendee-aware filtered game suggestions + "Pick this game" cards)
-- [ ] Build full poll-based suggestion engine (SUGG-01/02: session-scoped weighted scoring with BGG best-player-count poll data, explainable shortlist)
+- [~] Build full poll-based suggestion engine (SUGG-01/05 ✓ Phase 6: poll data parsed, persisted, backfilled; SUGG-02/03/04 pending Phase 7: scoring + explainable shortlist)
 - [ ] Address v1.0 tech debt (E2E suite in CI, Action Cable dev config, cleanup legacy BGG classes, update REQUIREMENTS checkboxes)
 
 ### Out of Scope
@@ -108,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-13 after Milestone v1.0 complete; starting v1.1 (UI Redesign + Suggestion Engine)*
+*Last updated: 2026-07-14 after Phase 6 complete (BGG Poll Data Layer); Milestone v1.1 in progress*
