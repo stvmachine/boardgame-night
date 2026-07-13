@@ -52,8 +52,8 @@ test('sorts by rating descending', async ({ page }) => {
 
   await page.getByLabel('Sort').selectOption('rating_desc')
 
-  // Game cards are h3 headings inside the grid, not the sidebar "Collectors" h3
-  const gameHeadings = page.locator('[data-testid="game-grid"] h3, article h3')
+  // Game cards are h3 headings inside Card primitives, not the sidebar "Collectors" h3
+  const gameHeadings = page.locator('[data-slot="card"] h3')
   await expect(gameHeadings.first()).toHaveText('Gloomhaven')
 })
 
