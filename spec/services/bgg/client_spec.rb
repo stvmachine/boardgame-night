@@ -167,22 +167,93 @@ RSpec.describe Bgg::Client, :bgg do
   end
 
   describe "#thing" do
-    it "fetches a single thing by ID" do
+    let(:rate_limiter) { instance_double(Bgg::RateLimiter) }
+
+    before do
+      allow(rate_limiter).to receive(:throttle).and_yield
+    end
+
+    def thing_xml_response(ids)
+      items = ids.map do |id|
+        %(<item type="boardgame" id="#{id}"><name type="primary" value="Game #{id}" /></item>)
+      end.join
+
+      <<~XML
+        <?xml version="1.0" encoding="utf-8"?>
+        <items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
+          #{items}
+        </items>
+      XML
+    end
+
+    it "fetches a single thing by ID and returns a Nokogiri doc with one item" do
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
+        .with(query: hash_including(id: "174430", stats: "1"))
+        .to_return(status: 200, body: thing_xml, headers: { "Content-Type" => "text/xml" })
+
+      result = client.thing(174_430)
+
+      expect(result).to be_a(Nokogiri::XML::Document)
+      expect(result.css("items > item").length).to eq(1)
+      expect(result.at_css("items > item")["id"]).to eq("174430")
+    end
+
+    it "batches 25 uncached IDs into 2 BGG requests" do
+      ids = (1..25).to_a
+      first_batch = ids[0...20]
+      second_batch = ids[20...25]
+
+      first_xml = thing_xml_response(first_batch)
+      second_xml = thing_xml_response(second_batch)
+
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
+        .with(query: hash_including(id: first_batch.join(",")))
+        .to_return(status: 200, body: first_xml, headers: { "Content-Type" => "text/xml" })
+
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
+        .with(query: hash_including(id: second_batch.join(",")))
+        .to_return(status: 200, body: second_xml, headers: { "Content-Type" => "text/xml" })
+
+      result = client.thing(ids)
+
+      expect(result).to be_a(Nokogiri::XML::Document)
+      expect(result.css("items > item").length).to eq(25)
+      expect(result.css("items > item").map { |i| i["id"].to_i }).to eq(ids)
+      expect(a_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)).to have_been_made.twice
+    end
+
+    it "caches each returned item under bgg:thing:{id} for 1 hour" do
       stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
         .with(query: hash_including(id: "174430"))
         .to_return(status: 200, body: thing_xml, headers: { "Content-Type" => "text/xml" })
 
-      result = client.thing(174430)
-      expect(result).to be_a(Nokogiri::XML::Document)
+      client.thing(174_430)
+
+      cached = Rails.cache.read("bgg:thing:174430")
+      expect(cached).to be_present
+      expect(cached).to include('<item type="boardgame" id="174430"')
     end
 
-    it "fetches multiple things by array of IDs" do
-      stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
-        .with(query: hash_including(id: "174430,9209"))
-        .to_return(status: 200, body: thing_xml, headers: { "Content-Type" => "text/xml" })
+    it "serves a second request for the same IDs from cache with 0 additional BGG requests" do
+      ids = (1..25).to_a
+      first_batch = ids[0...20]
+      second_batch = ids[20...25]
 
-      result = client.thing([174430, 9209])
-      expect(result).to be_a(Nokogiri::XML::Document)
+      first_xml = thing_xml_response(first_batch)
+      second_xml = thing_xml_response(second_batch)
+
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
+        .with(query: hash_including(id: first_batch.join(",")))
+        .to_return(status: 200, body: first_xml, headers: { "Content-Type" => "text/xml" })
+
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
+        .with(query: hash_including(id: second_batch.join(",")))
+        .to_return(status: 200, body: second_xml, headers: { "Content-Type" => "text/xml" })
+
+      client.thing(ids)
+      client.thing(ids)
+
+      expect(a_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)).to have_been_made.twice
     end
   end
 
