@@ -48,11 +48,11 @@ Exceptions: 44px minimum touch targets for icon-only controls (mobile menu toggl
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 16px | 400 | 1.5 |
-| Label | 14px | 500 | 1.25 |
+| Label | 14px | 600 | 1.25 |
 | Heading | 20px | 600 | 1.2 |
 | Display | 28px | 600 | 1.2 |
 
-**Badge label-sm:** 12px / 600 / 1.25, uppercase, letter-spacing 0.025em, small-caps. *Default from Material 3 label style.*
+**Badge:** 14px / 600 / 1.25, uppercase, letter-spacing 0.025em, small-caps. *Labels and badges share the same weight and size to keep the type scale to two weights and four sizes.*
 
 ---
 
@@ -85,7 +85,7 @@ Accent reserved for: New Session button, active nav item (icon + background pill
 | Element | Copy |
 |---------|------|
 | Primary CTA | New Session |
-| Empty state heading | Nothing to show |
+| Empty state heading | No games yet |
 | Empty state body | Add a collector or start a new session to see games here. |
 | Error state | Something went wrong while loading the data. Please try again or refresh the page. |
 | Destructive confirmation | Log out: Are you sure you want to log out? |
@@ -109,7 +109,7 @@ Accent reserved for: New Session button, active nav item (icon + background pill
 
 - **Button** — variants: `primary`, `secondary`, `outline`, `ghost`, `destructive`; sizes: `default`, `sm`, `lg`, `icon`.
 - **Input** — text input with M3 `outline` border and `primary` focus ring.
-- **Badge** — variants: `default`, `draft`, `invited`, `picking`, `completed`; all use `rounded-full` and small-caps label-sm text.
+- **Badge** — variants: `default`, `draft`, `invited`, `picking`, `completed`; all use `rounded-full` and small-caps 14px text.
 - **Card** — `rounded-xl` (12px), `surface-container` background, 1px `outline` border, soft shadow (M3 elevation 1).
 - **Avatar** — circular, deterministic per-username color from a tokenized M3 palette, white centered initials; sizes `xs` (18px), `sm` (20px), `md` (24px), `lg` (32px).
 - **Skeleton** — `animate-pulse`, `surface-variant` background; shapes: `card`, `text`, `circle`, `rect`, `avatar`.
@@ -160,7 +160,7 @@ Accent reserved for: New Session button, active nav item (icon + background pill
 ### Badges
 
 - Shape: `rounded-full`, horizontal padding `px-2.5`, vertical `py-0.5`.
-- Typography: 12px / 600, uppercase, tracking-wider, small-caps.
+- Typography: 14px / 600, uppercase, tracking-wider, small-caps.
 - Status variants map directly to the semantic alias table above.
 
 ### Avatars
@@ -189,6 +189,7 @@ Accent reserved for: New Session button, active nav item (icon + background pill
 - Focus ring: 2px solid `primary` with 2px offset.
 - Visible focus only (`focus-visible`); no persistent focus rings on click.
 - All interactive primitives must preserve reka-ui keyboard behavior (Enter/Space on buttons, Escape on dialogs/drawers, arrow keys in selects/tabs).
+- Icon-only controls (mobile hamburger toggle and drawer close button) must have an accessible label: `aria-label="Open navigation"` for the toggle and `aria-label="Close navigation"` for the drawer close, or equivalent visually hidden text.
 
 ### Dark Mode
 
