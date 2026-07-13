@@ -304,5 +304,183 @@ npm install -D eslint@^9 eslint-plugin-vue typescript-eslint@^8 prettier@^3 esli
 - **Reference apps (MEDIUM):** `bgg-graphql-proxy/package.json` (what Rails replaces: Apollo Server + xml2js + Keyv/Redis + Express) and `bggeek-shared-list/package.json` (what Vue 3 replaces: Next.js 15 + Chakra UI v3 + Apollo Client 4 + Fuse.js 7).
 
 ---
+
+## v1.1 Stack Additions — Material 3 Design System + Poll-Based Suggestion Engine
+
+**Researched:** 2026-07-13
+**Confidence:** HIGH (versions verified against npm registry and GitHub source; BGG poll structure verified against open-source BGG parser)
+
+### New Frontend Libraries
+
+| Library | Version | Purpose | Why Recommended | Confidence |
+|---------|---------|---------|-----------------|------------|
+| **material-symbols** | **^0.45.7** (latest, auto-updated from Google Fonts) | Material Symbols Outlined icon font for the Stitch "Tabletop Social" design system | De facto standard npm package for Material Symbols (Google does not publish an official npm package). Ships WOFF2 variable fonts + CSS for Outlined, Rounded, and Sharp. Import only `outlined.css` to keep the build small. Auto-updated via GitHub Actions, so it stays in sync with fonts.google.com. | HIGH |
+| **@vueform/slider** | **^2.1.10** | Dual-handle range slider for the Collection filter sidebar (player count range) | Vue 3 native, TypeScript support, accessible, based on noUiSlider. Supports single/multiple handles, tooltips, and formatting without pulling in a heavy UI framework. | HIGH |
+
+### Optional Frontend Libraries
+
+| Library | Version | Purpose | When to Use | Confidence |
+|---------|---------|---------|-------------|------------|
+| **@material/material-color-utilities** | **^0.4.0** | Generate Material Design 3 tonal palettes from a seed color | Only if the app later supports user-defined or dynamic seed colors. For the static Stitch "Tabletop Social" tokens, hardcode the values in `@theme` instead. | MEDIUM |
+| **vue-material-symbols** | **^1.0.1** | Drop-in Vue 3 component for Material Symbols | **Skip.** The package is built on older Vite 2 / Vue 3.2 tooling and adds little value over a custom 20-line `Icon.vue` wrapper around the `material-symbols` font. | LOW |
+
+### Design System Integration
+
+#### Material Symbols Outlined
+
+- **Install:** `npm install material-symbols@^0.45.7`
+- **Import in `app/frontend/entrypoints/styles.css`:**
+  ```css
+  @import "material-symbols/outlined.css";
+  ```
+  (Import only `outlined.css` to avoid copying unused Rounded/Sharp font files into the production build.)
+- **Use in markup:**
+  ```html
+  <span class="material-symbols-outlined">home</span>
+  ```
+- **Vue wrapper:** Create `app/frontend/components/common/Icon.vue` that accepts `name`, `fill`, `weight`, `grade`, and `opsz` props and emits `font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;`. This is the only component abstraction needed.
+
+#### Material Design 3 Tonal Palette with Tailwind v4
+
+Tailwind v4 is CSS-first and uses the `@theme` directive for design tokens. The Stitch "Tabletop Social" system should map M3 color roles directly to Tailwind variables in `app/frontend/entrypoints/styles.css`:
+
+```css
+@import "tailwindcss";
+@import "material-symbols/outlined.css";
+
+@theme {
+  --color-primary: #4f46e5;                /* indigo-600 from UI-SPEC */
+  --color-on-primary: #ffffff;
+  --color-primary-container: #e0e7ff;      /* indigo-100 */
+  --color-on-primary-container: #1e1b4b;   /* indigo-950 */
+  --color-secondary: #64748b;              /* slate-500 */
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #e2e8f0;    /* slate-200 */
+  --color-on-secondary-container: #1e293b; /* slate-800 */
+  --color-tertiary: #0ea5e9;               /* sky-500 */
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #e0f2fe;     /* sky-100 */
+  --color-on-tertiary-container: #082f49; /* sky-950 */
+  --color-error: #dc2626;
+  --color-on-error: #ffffff;
+  --color-error-container: #fee2e2;
+  --color-on-error-container: #7f1d1d;
+  --color-background: #fafaf9;             /* stone-50 */
+  --color-surface: #ffffff;
+  --color-surface-container: #f5f5f4;      /* stone-100 */
+  --color-surface-container-high: #e7e5e4;  /* stone-200 */
+  --color-on-surface: #1c1917;             /* stone-900 */
+  --color-on-surface-variant: #57534e;     /* stone-600 */
+  --color-outline: #a8a29e;                /* stone-400 */
+  --color-outline-variant: #e7e5e4;        /* stone-200 */
+  --color-inverse-surface: #292524;        /* stone-800 */
+  --color-inverse-on-surface: #f5f5f4;
+}
+```
+
+- **Why this approach:** Tailwind v4's `@theme` generates utilities like `bg-primary`, `text-on-primary`, `border-outline`, etc. It also emits CSS variables (`--color-primary`) that can be referenced in custom CSS. No `tailwind.config.js` is required.
+- **Dynamic palettes:** If the app later needs to derive palettes from a user-selected seed color, use `@material/material-color-utilities` to compute tones and write them into CSS variables at runtime. For v1.1, hardcode the Stitch tokens.
+
+### BGG Community Poll Data (Best Player Count)
+
+- **No new Ruby gem is needed.** The existing `faraday` + `nokogiri` stack handles the `thing` endpoint. The only change is adding `polls=1` to the `/thing` request.
+- **XML structure** (verified against the open-source `boardgamegeek` Python parser):
+  ```xml
+  <item id="13" type="boardgame">
+    <poll name="suggested_numplayers" title="User Suggested Number of Players" totalvotes="...">
+      <results numplayers="1">
+        <result value="Best" numvotes="5" />
+        <result value="Recommended" numvotes="10" />
+        <result value="Not Recommended" numvotes="85" />
+      </results>
+      <results numplayers="2">
+        ...
+      </results>
+      <!-- ... continues up to the game's max player count, sometimes with a "N+" entry -->
+    </poll>
+  </item>
+  ```
+- **`numplayers` attribute** can be a single integer (`"4"`) or an open-ended upper bound (`"4+"`). The "+" form means "this player count or more".
+- **Storage:** Add a `bgg_polls` table (or a JSON column on `bgg_things`) with:
+  - `bgg_thing_id` (FK)
+  - `poll_name` (e.g., `suggested_numplayers`)
+  - `player_count` (string, e.g., `"4"` or `"4+"`)
+  - `best_votes` (integer)
+  - `recommended_votes` (integer)
+  - `not_recommended_votes` (integer)
+  - `total_votes` (integer)
+- **Parsing rule:** Use Nokogiri CSS selectors with nil-safe access. For each `<results numplayers="...">`, iterate over its `<result>` children and sum votes by `value`. Do not regex-parse the XML.
+- **Usage:** The suggestion engine reads these rows to compute a player-count fit score for the session's attendee count.
+
+### Poll-Based Suggestion Engine
+
+- **No new gem is needed.** Implement as a plain Ruby service object in `app/services/suggestions/`.
+- **Recommended scoring pattern:** a weighted, normalized sum of criteria, each producing a 0–1 score, multiplied by a weight, then scaled to 0–100. Return both the final score and an explainable breakdown.
+- **Suggested criteria and weights (v1.1 starting point):**
+  | Criterion | Weight | Source |
+  |-----------|--------|--------|
+  | Player-count fit | 0.35 | BGG `suggested_numplayers` poll (Best = 1.0, Recommended = 0.6, Not Recommended = 0.0) |
+  | BGG rating | 0.25 | `average` or `bayesaverage` from `statistics/ratings` |
+  | Play-time fit | 0.15 | Difference between session target duration and `playingtime` |
+  | Game weight fit | 0.10 | Difference between group preference and `averageweight` |
+  | Attendee ownership | 0.15 | Fraction of attending members who own the game in the merged collection |
+- **Tunability:** Store weights in a configuration object or constant so they can be adjusted without changing the algorithm code.
+- **Performance:** Scoring a few hundred games per session is an in-memory calculation; no background job is required. If the merged collection grows past ~1,000 games, consider caching the suggestion shortlist keyed by `(group_id, session_id, player_count)`.
+
+### Alternatives Considered for v1.1
+
+| Category | Recommended | Alternative | When to Use Alternative |
+|----------|-------------|-------------|-------------------------|
+| Icons | `material-symbols` + custom `Icon.vue` | `vue-material-symbols` | Only if you want a drop-in Vue component and accept older Vite/Vue dev dependencies. |
+| Range slider | `@vueform/slider` with CSS variables | Native `<input type="range">` | Native is fine for a single handle with no tooltip. Use `@vueform/slider` for dual-handle ranges, tooltips, or merged handles. |
+| M3 palette | Hardcoded `@theme` tokens | `@material/material-color-utilities` | Only if the app supports dynamic/user-defined seed colors later. |
+| Scoring algorithm | Plain Ruby service object | `decisiontree`, `ai4r`, or ML gems | Only if evolving to ML-based recommendations; overkill for v1.1. |
+
+### What NOT to Add for v1.1
+
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| `material-icons` npm package | Google's old static icon set; no longer updated since 2022. | `material-symbols` |
+| `@mdi/js` / `vue-material-design-icons` | These are Material *Design* Icons, a different icon family. | `material-symbols` |
+| Full M3 component library (`@material/web`, `material-tailwind`) | Heavy, web-component or React-centric; conflicts with the Vue 3 SPA and Tailwind v4 setup. | Tailwind v4 + custom Vue components |
+| `vue-slider-component` v3.2.24 | Primarily Vue 2 based; the Vue 3 version is less mature. | `@vueform/slider` |
+| `@vueform/slider` Tailwind v3 plugin path | Project uses Tailwind v4 CSS-first config (`@theme`), not `tailwind.config.js` plugins. | CSS variables or the `:classes` prop |
+| ML/AI gem for suggestion engine | Overkill for a friend-group app; adds heavy native/scientific dependencies. | Plain Ruby weighted scoring |
+| Separate BGG poll API calls | Polls are returned by the existing `/thing` endpoint; no extra request is needed. | Add `polls=1` to the existing thing fetch |
+| Regex parsing of BGG XML | Polls have optional attributes and mixed content; regex is fragile. | Nokogiri CSS selectors with nil-safe access |
+
+### Version Compatibility — v1.1 Additions
+
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| `material-symbols@0.45.7` | Vite 8, Vue 3.5 | CSS-only import; no JS runtime or peer dependencies. |
+| `@vueform/slider@2.1.10` | Vue 3.5, Vite 8 | The documented Tailwind v3 plugin path does not apply; use CSS variables or `:classes` for Tailwind v4. |
+| `@material/material-color-utilities@0.4.0` | TypeScript 5.x | Optional; only if dynamic palette generation is required. |
+
+### Installation — v1.1 Additions
+
+```bash
+# Material Symbols Outlined icons (CSS-only, no runtime JS)
+npm install material-symbols@^0.45.7
+
+# Range slider for Collection filter sidebar
+npm install @vueform/slider@^2.1.10
+
+# Optional: dynamic M3 palette generation from seed color
+npm install @material/material-color-utilities@^0.4.0
+```
+
+No new Ruby gems are required for the suggestion engine or BGG poll parsing; the existing `faraday`, `faraday-retry`, `nokogiri`, and `solid_queue` gems are sufficient.
+
+### Sources — v1.1 Additions
+
+- **`material-symbols` npm registry (0.45.7) and GitHub README (HIGH):** community-maintained package that auto-syncs with Google Fonts; supports Outlined/Rounded/Sharp; recommends importing only `outlined.css` to reduce build size.
+- **Material Design 3 color docs (`material-components/material-web`) (HIGH):** M3 color roles are exposed as `--md-sys-color-*` CSS custom properties; tokens include primary, secondary, tertiary, error, surface, background, outline, and container variants.
+- **Tailwind CSS v4 docs (`tailwindcss.com/docs/theme`) (HIGH):** Tailwind v4 uses CSS-first `@theme` variables; `--color-*` tokens generate `bg-*`, `text-*`, `border-*`, etc.
+- **Open-source `boardgamegeek` Python parser (`lcosmin/boardgamegeek`) (HIGH):** verified `suggested_numplayers` XML structure: `<poll name="suggested_numplayers">` → `<results numplayers="N">` → `<result value="Best|Recommended|Not Recommended" numvotes="..." />`.
+- **`@vueform/slider` npm registry and README (HIGH):** Vue 3 native, noUiSlider-based, supports single/multiple handles, tooltips, and Tailwind styling via CSS variables or `:classes` prop.
+- **Project context (`PROJECT.md`) (HIGH):** v1.1 scope is Stitch "Tabletop Social" design system (Inter, indigo, M3 tonal palette, Material Symbols, 280px sidebar) + poll-based suggestion engine (SUGG-01/02).
+
+---
 *Stack research for: Rails 8 API-only + Vue 3 SPA monorepo with GraphQL, dry-validation, and BoardGameGeek XML API v2 integration*
-*Researched: 2026-07-01*
+*Researched: 2026-07-01; v1.1 additions researched 2026-07-13*

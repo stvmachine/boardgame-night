@@ -1,600 +1,613 @@
-# Architecture Research
+# Architecture Research: v1.1 UI Redesign + Suggestion Engine
 
 **Domain:** Rails 8 API-only + Vue 3 SPA monorepo, GraphQL API, BGG XML API v2 integration, friend groups + boardgame night sessions
-**Researched:** 2026-06-30
-**Confidence:** HIGH (architecture shape verified against official graphql-ruby/vite-ruby/dry-rails/Rails 8 docs via Context7, and cross-checked against 5 real-world Rails+Vite monorepo examples via Exa)
+**Milestone:** v1.1 — UI Redesign ("Tabletop Social" / Stitch) + Poll-based Suggestion Engine
+**Researched:** 2026-07-13
+**Confidence:** MEDIUM (integration patterns derived from project context, existing v1.0 architecture, and Tailwind/Material 3 docs; BGG poll XML structure inferred from schema + reference proxy + BGG API docs; no live BGG XML sample fetched because BGG now requires authenticated access)
 
-## Standard Architecture
+> **Scope note:** This document focuses on how the new v1.1 features integrate with the existing v1.0 architecture. The base architecture (Rails 8.1 API-only, vite_rails, Apollo Client, GraphQL::Dataloader, Solid Queue/Cache, dry-rails contracts, BGG client) is established in the previous version of this file and in `PROJECT.md`. Do not re-research that base; reuse it.
+
+## Standard Architecture for v1.1
 
 ### System Overview
 
+The v1.1 milestone adds two independent but UI-converging workstreams to the existing v1.0 monorepo:
+
+1. **Design-system migration** — replace the ad-hoc Tailwind v4 styling with a structured "Tabletop Social" (Stitch) design system: Material 3 tonal palette, Inter typography, Material Symbols icons, 280px sidebar, rounded-xl cards, status badges, skeleton loaders.
+2. **Suggestion engine** — replace the manual "host picks a game" flow with a session-scoped, poll-based scoring engine that uses BGG's community "Best / Recommended / Not Recommended" player-count polls to rank games for the RSVP'd attendees.
+
+Both workstreams touch the same views (Home, Collection, Group Detail, Night Session). The architecture challenge is to keep the data work (polls, scoring) independent from the UI reskin so they can ship in parallel and converge without blocking each other.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              BROWSER (Vue 3 SPA)                              │
-│  ┌──────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────────────┐  │
-│  │ Router   │  │ Apollo Client│  │ Pinia Stores │  │ Feature Components │  │
-│  │ (Vue     │  │ (normalized  │  │ (UI/session  │  │ (Collection, Group,│  │
-│  │  Router) │  │  cache +     │  │  state only) │  │  Session, Suggest) │  │
-│  │          │→ │  batch link) │→ │              │  │                    │  │
-│  └──────────┘  └──────┬───────┘  └──────────────┘  └────────────────────┘  │
-└─────────────────────────┼───────────────────────────────────────────────────┘
-                          │ HTTPS POST /graphql  (single endpoint, batched)
-                          ▼
+│                         BROWSER (Vue 3 SPA)                                 │
+│  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────┐ │
+│  │ Stitch Design System │  │ Feature Views        │  │ Apollo + Pinia   │ │
+│  │ (tokens, primitives,  │  │ (Home, Collection,  │  │ (server data +   │ │
+│  │  layout shell)        │  │  Group, Session)     │  │  UI state)       │ │
+│  └──────────────────────┘  └──────────────────────┘  └──────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │ GraphQL POST /graphql
+                                    ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                    RAILS 8 API-ONLY APP (single deploy)                       │
-│  ┌─────────────────┐  ┌──────────────────────────────────────────────────┐  │
-│  │ GraphqlController│→ │              GraphQL Schema (graphql-ruby)        │  │
-│  │ (Apollo batch +  │  │  use GraphQL::Dataloader  •  max_complexity 400  │  │
-│  │  Schema.multiplex)│  │  Query / Mutation roots  •  class-based types   │  │
-│  └─────────────────┘  │  ┌────────────┐  ┌─────────────┐  ┌───────────┐  │  │
-│                       │  │  Resolvers │  │  Mutations  │  │  Loaders  │  │  │
-│                       │  │  (Query)   │  │ (class-based)│  │(Dataloader)│  │  │
-│                       │  └─────┬──────┘  └──────┬──────┘  └─────┬─────┘  │  │
-│                       └────────┼─────────────────┼───────────────┼────────┘  │
-│                                │                 │               │           │
-│  ┌─────────────────────────────▼─────────────────▼───────────────▼───────┐  │
-│  │                       app/contracts (dry-validation)                  │  │
-│  │  ApplicationContract → CreateGroupContract, CreateSessionContract,    │  │
-│  │  ImportCollectionContract, ValidateBggUsernameContract …              │  │
-│  └─────────────────────────────┬────────────────────────────────────────┘  │
-│                                │ validates input → calls                   │
-│  ┌─────────────────────────────▼────────────────────────────────────────┐  │
-│  │                          app/services                                  │  │
-│  │  Bgg::Client (HTTP+XML+rate-limit)  •  Groups::Create  •  Sessions::* │  │
-│  │  Suggestions::Engine  •  Collections::Merge  •  Collections::Import   │  │
-│  └─────────────┬───────────────────────────────────────┬────────────────┘  │
-│                │ enqueues                                 │ reads/writes      │
-│                ▼                                          ▼                   │
-│  ┌──────────────────────────┐        ┌────────────────────────────────────┐ │
-│  │ Solid Queue (DB-backed)  │        │      PostgreSQL / SQLite            │ │
-│  │  Bgg::ImportCollectionJob│        │  bgg_things, bgg_collection_items,  │ │
-│  │  Bgg::RefreshHotItemsJob │        │  bgg_users, groups, group_members,  │ │
-│  │  (concurrency: 1 BGG)    │        │  sessions, session_attendees, …     │ │
-│  └──────────┬───────────────┘        └────────────────────────────────────┘ │
-│             │ throttle 1 req / 5s via                                      │
-│             ▼ Solid Cache key `bgg:last_request_at`                        │
+│                      RAILS 8 API-ONLY (single deploy)                         │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────────────┐  │
+│  │ GraphQL Schema   │  │ Suggestions::    │  │ BGG Poll Persistence    │  │
+│  │ (new types +     │  │ Engine + scoring │  │ (BggPoll/BggPollResult) │  │
+│  │  resolvers)      │  │ services         │  │                         │  │
+│  └──────────────────┘  └──────────────────┘  └─────────────────────────┘  │
 │  ┌──────────────────────────────────────────────────────────────────────┐  │
-│  │  Solid Cache (DB-backed) — BGG response cache + rate-limit mutex      │  │
-│  │  key: bgg:thing:{id}  •  bgg:collection:{user}  •  bgg:hot  •  …      │  │
+│  │ Existing v1.0 services: Collections::Merge, Sessions::*, Groups::*, │  │
+│  │ Bgg::Client, Solid Queue/Cache, dry-rails contracts                  │  │
 │  └──────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────┬───────────────────────────────────────────┘
-                                  │ Faraday GET, XML body, BGG XML API v2
-                                  ▼
-                  ┌───────────────────────────────────────┐
-                  │  boardgamegeek.com/xmlapi2  (~1 req/5s)│
-                  │  /thing  /search  /user  /collection   │
-                  │  /hot  /plays  (read-only, public)     │
-                  └───────────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Component Responsibilities
+### Component Responsibilities (v1.1 additions and modifications)
 
-| Component | Responsibility | Typical Implementation |
-|-----------|----------------|------------------------|
-| **Vue Router** | SPA route table, permalink → state hydration (`/u/:usernames`, `/g/:token`, `/s/:id`) | `vue-router` with lazy-loaded routes |
-| **Apollo Client** | Single data layer to Rails GraphQL; normalized entity cache; query batching | `@apollo/client` + `@vue/apollo-composable`, `HttpLink` → `/graphql`, `InMemoryCache` |
-| **Pinia stores** | UI-only / cross-component session state (selected filters, current group, draft session) — NOT a duplicate of server data | Setup stores via `defineStore('name', () => …)` |
-| **GraphqlController** | Single `/graphql` endpoint; handles Apollo query batching + non-batched | `params[:_json] ? Schema.multiplex(…) : Schema.execute(…)` |
-| **GraphQL Schema** | Contract between Vue and Rails; class-based types, resolvers, mutations; complexity + dataloader | `class BggNightSchema < GraphQL::Schema` |
-| **Resolvers (app/graphql/resolvers)** | Per-field resolution; delegate to services; use Dataloader for batched BGG/DB reads | `class ThingsResolver < GraphQL::Schema::Resolver` |
-| **Loaders (app/graphql/loaders)** | Batch N+1: `BggThingLoader` (fetch many thing ids in one BGG call), `CollectionItemLoader` | `class BggThingLoader < GraphQL::Dataloader::Source` |
-| **Contracts (app/contracts)** | Validate all external input entering mutations/services (BGG usernames, group names, session params) | `class CreateGroupContract < ApplicationContract` (dry-validation via dry-rails) |
-| **Services (app/services)** | Business logic; one class per use case; called by resolvers/mutations/jobs; never call GraphQL | `Groups::Create`, `Sessions::Suggest`, `Bgg::Client`, `Collections::Merge` |
-| **Bgg::Client** | HTTP + XML parse + rate limit + response cache for BGG API v2; the only thing that talks to BGG | Faraday + Nokogiri + Solid Cache |
-| **Solid Queue jobs** | Background BGG imports (collection refresh, hot items refresh); throttled to 1 concurrent BGG call | `Bgg::ImportCollectionJob` |
-| **Solid Cache** | BGG response cache (TTL by endpoint: thing=1h, collection=30m, hot=24h, search=30m, user=1h) + rate-limit timestamp | DB-backed; no Redis |
-| **Database** | Source of truth for app state (groups, sessions) + cached BGG data (things, collection items, users) | Postgres in prod (SQLite acceptable for v1) |
+| Component | Responsibility | New or Modified? | Implementation Notes |
+|-----------|----------------|------------------|----------------------|
+| **Tailwind v4 token layer** | Map Material 3 tonal roles to `@theme` variables | New | Single source of truth in `app/frontend/entrypoints/styles.css` or imported `theme.css` |
+| **Stitch primitive components** | Reusable M3-styled building blocks (Surface, Text, Button, Badge, Skeleton, Icon, Avatar) | New | `app/frontend/components/stitch/`; no business logic; props-based |
+| **Stitch layout components** | AppShell, Sidebar, MobileDrawer, Navbar, PageHeader | New/Modified | Replace existing `components/layout/*` with token-aware versions |
+| **GameCard / SuggestionCard** | Rich game cards with M3 elevation, badges, action buttons | Modified | Consume Stitch primitives; accept `suggestion` prop for score reasons |
+| **Home dashboard** | Hero + BGG merge input + personal stats + trending games | Modified | New `HomeView.vue` layout; reuses `hotItems` query |
+| **Collection view** | Structured filter sidebar + rich cards + sort + grid/list toggle | Modified | New `CollectionFilters.vue` and `GameGrid.vue` skins; filter logic unchanged |
+| **Group Detail view** | Group header + sessions list + shared collection spotlight + members | New | `app/frontend/views/GroupView.vue` already exists; extend with new panels |
+| **Picking a Game view** | Session header + attendee-aware suggestions + "Pick this game" cards | Modified | New `NightSessionView.vue` skin; wires to `suggestions` query |
+| **Suggestions resolver** | GraphQL resolver for `suggestions(sessionId:)` | New | `app/graphql/resolvers/suggestions_resolver.rb` |
+| **Suggestions::Engine** | Pure function: merged collection × session context → ranked shortlist | New | `app/services/suggestions/engine.rb` |
+| **Suggestions::Scoring functions** | Player-count suitability, time fit, complexity fit, rating, freshness | New | `app/services/suggestions/player_count_scorer.rb`, etc. |
+| **BggPoll / BggPollResult models** | Persist parsed BGG poll data per thing | New | Extend `BggThing` via `has_many :bgg_polls` |
+| **Bgg::XmlParser poll extraction** | Parse `<poll>` elements from thing XML | Modified | Add to existing normalizer; handle array-or-single-item shape |
+| **Bgg::ImportThingJob** | Background job to enrich thing records with poll data | New | Reuses `Bgg::Client` and rate limiter; concurrency: 1 BGG |
+| **Group type extensions** | New fields: `sessions`, `collectionSpotlight`, `inviteCode` | Modified | Add to existing `app/graphql/types/group_type.rb` |
+| **NightSession type extensions** | New field: `suggestions` | Modified | Add to existing `app/graphql/types/night_session_type.rb` |
 
-## Recommended Project Structure
-
-Single Rails 8 app with the Vue SPA co-located via **vite-ruby** (default `sourceCodeDir: app/frontend`). One repo, one Gemfile, one `package.json`, one deploy. Rails serves the compiled SPA from `public/` in production and proxies to the Vite dev server in development.
+## Recommended Project Structure (additions to v1.0)
 
 ```
 boardgame-night-rails-vue/
-├── Gemfile                          # Rails 8 + graphql-ruby + dry-rails + faraday + nokogiri + solid_queue + solid_cache
-├── config/
-│   ├── environments/
-│   │   └── production.rb            # config.active_job.queue_adapter = :solid_queue
-│   ├── initializers/
-│   │   ├── graphql.rb               # GraphQL schema config, complexity, dataloader
-│   │   ├── dry_rails.rb             # Dry::Rails.container { component_dirs.add "app/services" … }
-│   │   ├── vite.rb                  # vite_rails config
-│   │   └── faraday.rb               # BGG HTTP client defaults (retry, timeout, UA)
-│   ├── routes.rb                    # root → GraphqlController#execute; catch-all → SPA shell
-│   └── database.yml                 # primary + queue + cache DBs (Solid Queue / Solid Cache)
 ├── app/
-│   ├── controllers/
-│   │   ├── application_controller.rb
-│   │   ├── graphql_controller.rb    # POST /graphql — Apollo batch + multiplex
-│   │   └── spa_controller.rb        # GET * → serves public/index.html (SPA shell)
-│   ├── models/
-│   │   ├── bgg_thing.rb             # cached game (id, name, players, playtime, image, stats)
-│   │   ├── bgg_user.rb              # cached BGG user profile (bgg_username, bgg_id, avatar)
-│   │   ├── bgg_collection_item.rb   # (bgg_username, bgg_thing_id, status_own, num_plays, cached_at)
-│   │   ├── group.rb
-│   │   ├── group_member.rb          # (group_id, bgg_username, display_name, role)
-│   │   ├── session.rb               # (group_id, scheduled_at, host_bgg_username, status)
-│   │   └── session_attendee.rb      # (session_id, bgg_username, rsvp_status)
+│   ├── frontend/
+│   │   ├── entrypoints/
+│   │   │   ├── styles.css          # ← extend with M3 @theme tokens
+│   │   │   └── application.ts
+│   │   ├── components/
+│   │   │   ├── stitch/             # ← NEW: design-system primitives
+│   │   │   │   ├── StSurface.vue
+│   │   │   │   ├── StText.vue
+│   │   │   │   ├── StButton.vue
+│   │   │   │   ├── StBadge.vue
+│   │   │   │   ├── StSkeleton.vue
+│   │   │   │   ├── StIcon.vue
+│   │   │   │   └── StAvatar.vue
+│   │   │   ├── layout/             # ← MODIFY: use stitch primitives
+│   │   │   │   ├── AppShell.vue
+│   │   │   │   ├── Sidebar.vue
+│   │   │   │   ├── MobileDrawer.vue
+│   │   │   │   └── AppHeader.vue
+│   │   │   ├── collection/         # ← MODIFY: new skins, same logic
+│   │   │   │   ├── GameCard.vue
+│   │   │   │   ├── GameGrid.vue
+│   │   │   │   ├── CollectionFilters.vue
+│   │   │   │   ├── SortControl.vue
+│   │   │   │   └── ResultsSkeleton.vue
+│   │   │   ├── group/              # ← MODIFY/ADD: Group Detail panels
+│   │   │   │   ├── GroupHeader.vue
+│   │   │   │   ├── GroupSessionsList.vue
+│   │   │   │   ├── GroupCollectionSpotlight.vue
+│   │   │   │   ├── GroupMembersPanel.vue
+│   │   │   │   └── InviteLink.vue
+│   │   │   ├── session/            # ← MODIFY: suggestion-aware
+│   │   │   │   ├── SessionHeader.vue
+│   │   │   │   ├── AttendeePicker.vue
+│   │   │   │   ├── SuggestionList.vue
+│   │   │   │   ├── SuggestionCard.vue
+│   │   │   │   └── GamePicker.vue
+│   │   │   └── home/               # ← NEW: dashboard components
+│   │   │       ├── HomeHero.vue
+│   │   │       ├── StatsCard.vue
+│   │   │       └── TrendingGames.vue
+│   │   ├── views/
+│   │   │   ├── HomeView.vue        # ← MODIFY: dashboard layout
+│   │   │   ├── CollectionView.vue  # ← MODIFY: new filter sidebar
+│   │   │   ├── GroupView.vue       # ← MODIFY: Group Detail surface
+│   │   │   └── NightSessionView.vue # ← MODIFY: suggestions skin
+│   │   ├── apollo/
+│   │   │   ├── queries/
+│   │   │   │   ├── group.graphql   # ← extend with sessions, members, spotlight
+│   │   │   │   ├── suggestions.graphql # ← NEW
+│   │   │   │   └── home_dashboard.graphql # ← NEW (personal stats)
+│   │   │   └── mutations/
+│   │   │       └── run_suggestions.graphql # ← optional
+│   │   └── composables/
+│   │       ├── useSuggestions.ts   # ← NEW
+│   │       └── useHomeDashboard.ts   # ← NEW
 │   ├── graphql/
-│   │   ├── bgg_night_schema.rb      # class BggNightSchema < GraphQL::Schema; use GraphQL::Dataloader; max_complexity 400
 │   │   ├── types/
-│   │   │   ├── query_type.rb        # thing, things, search, user, userCollection, hotItems, group, session, suggestions
-│   │   │   ├── mutation_type.rb     # createGroup, addGroupMember, createSession, rsvpSession, importCollection, validateBggUsername
-│   │   │   ├── base_*.rb            # BaseObject, BaseInputObject, BaseEnum, BaseField, BaseConnection
-│   │   │   ├── thing_type.rb        # mirrors reference proxy's Thing
-│   │   │   ├── collection_type.rb
-│   │   │   ├── group_type.rb
-│   │   │   ├── session_type.rb
-│   │   │   ├── game_suggestion_type.rb
-│   │   │   └── …
-│   │   ├── resolvers/               # class-based resolvers for Query fields needing args
-│   │   │   ├── things_resolver.rb
-│   │   │   ├── search_resolver.rb
-│   │   │   ├── user_collection_resolver.rb
-│   │   │   └── suggestions_resolver.rb
-│   │   ├── mutations/               # class-based mutations (one class per mutation)
-│   │   │   ├── base_mutation.rb
-│   │   │   ├── create_group.rb
-│   │   │   ├── add_group_member.rb
-│   │   │   ├── create_session.rb
-│   │   │   ├── rsvp_session.rb
-│   │   │   ├── import_collection.rb
-│   │   │   └── validate_bgg_username.rb
-│   │   └── loaders/                 # GraphQL::Dataloader::Source subclasses (N+1 prevention)
-│   │       ├── bgg_thing_loader.rb  # batch: many thing ids → 1 BGG /thing?id=1,2,3 call
-│   │       ├── collection_item_loader.rb
-│   │       └── bgg_user_loader.rb
-│   ├── contracts/                   # dry-validation contracts (auto-registered by dry-rails)
-│   │   ├── application_contract.rb  # base, preconfigured for I18n
-│   │   ├── create_group_contract.rb
-│   │   ├── add_group_member_contract.rb
-│   │   ├── create_session_contract.rb
-│   │   ├── rsvp_session_contract.rb
-│   │   ├── import_collection_contract.rb
-│   │   └── validate_bgg_username_contract.rb
-│   ├── services/                    # business logic (auto-registered by dry-rails container)
-│   │   ├── bgg/
-│   │   │   ├── client.rb            # Faraday + Nokogiri + rate limiter + response cache (ONLY BGG caller)
-│   │   │   ├── rate_limiter.rb      # Solid Cache key bgg:last_request_at — 1 req / 5s across workers
-│   │   │   ├── xml_parser.rb        # Nokogiri → normalized Ruby hashes (replaces xml2js normalization)
-│   │   │   └── endpoints/           # one class per BGG endpoint: thing, search, user, collection, hot
-│   │   │       ├── thing.rb
-│   │   │       ├── search.rb
-│   │   │       ├── user.rb
-│   │   │       ├── collection.rb    # incl. expansion-merge workaround (2 calls merged)
-│   │   │       └── hot.rb
-│   │   ├── collections/
-│   │   │   ├── import.rb            # enqueue Bgg::ImportCollectionJob + return job_id
-│   │   │   ├── merge.rb             # dedupe N users' cached collections → shared view
-│   │   │   └── refresh.rb
-│   │   ├── groups/
-│   │   │   ├── create.rb
-│   │   │   └── add_member.rb
+│   │   │   ├── group_type.rb         # ← extend
+│   │   │   ├── night_session_type.rb # ← extend
+│   │   │   ├── suggestion_type.rb    # ← NEW
+│   │   │   ├── bgg_poll_type.rb      # ← NEW
+│   │   │   └── merged_thing_type.rb  # ← extend with polls
+│   │   ├── resolvers/
+│   │   │   └── suggestions_resolver.rb # ← NEW
+│   │   └── mutations/
+│   │       └── run_suggestions.rb    # ← optional NEW
+│   ├── models/
+│   │   ├── bgg_thing.rb              # ← extend: has_many :bgg_polls
+│   │   ├── bgg_poll.rb               # ← NEW
+│   │   └── bgg_poll_result.rb        # ← NEW
+│   ├── services/
+│   │   ├── suggestions/              # ← NEW namespace
+│   │   │   ├── engine.rb
+│   │   │   ├── player_count_scorer.rb
+│   │   │   ├── time_fit_scorer.rb
+│   │   │   ├── complexity_scorer.rb
+│   │   │   └── explain.rb
 │   │   ├── sessions/
-│   │   │   ├── create.rb
-│   │   │   ├── rsvp.rb
-│   │   │   └── suggest.rb           # merged collection × attendees × player-count filter + ranking
-│   │   └── suggestions/
-│   │       └── engine.rb            # pure: takes [bgg_things] + attendee_count → ranked suggestions
-│   ├── jobs/
-│   │   ├── application_job.rb
+│   │   │   └── suggest.rb            # ← NEW or extend existing
 │   │   └── bgg/
-│   │       ├── import_collection_job.rb   # concurrency controls: max 1 BGG job at a time
-│   │       └── refresh_hot_items_job.rb   # scheduled (cron-style) every 24h
-│   └── frontend/                    # ← vite-ruby sourceCodeDir (the Vue 3 SPA lives here)
-│       ├── entrypoints/             # ONLY Vite entry files (vite_ruby convention)
-│       │   ├── application.js       # mounts App.vue, registers Apollo + Router + Pinia
-│       │   └── styles.css           # global styles / Tailwind entry
-│       ├── App.vue                  # root layout (responsive: mobile drawer / desktop sidebar)
-│       ├── router/
-│       │   └── index.js             # routes: /, /u/:usernames, /g/:token, /s/:id, /collection
-│       ├── apollo/
-│       │   ├── client.js            # ApolloClient + HttpLink(/graphql) + InMemoryCache + batch link
-│       │   ├── queries/             # co-located .graphql files OR gql tags
-│       │   └── mutations/
-│       ├── stores/                  # Pinia setup stores (UI/session state only — NOT server data)
-│       │   ├── filters.js           # search query, player filter, sort, group-by
-│       │   ├── session-draft.js     # current session being planned
-│       │   └── ui.js                # sidebar open, theme
-│       ├── composables/             # stateful logic reuse (Vue Composition API)
-│       │   ├── useUserCollection.js # Apollo query wrapper + loading/error state
-│       │   ├── useMultiUserCollections.js
-│       │   ├── useHotGames.js
-│       │   ├── useFuzzySearch.js    # fuse.js over cached collection
-│       │   ├── useDebounce.js
-│       │   └── useGroupSession.js
-│       ├── components/
-│       │   ├── layout/              # AppShell, Sidebar, MobileDrawer, Navbar
-│       │   ├── collection/          # GameCard, Results, SortBar, FilterPanel, CollapsibleGroup, ResultsSkeleton
-│       │   ├── group/               # GroupForm, GroupMemberList, MemberAvatar
-│       │   ├── session/             # SessionForm, AttendeePicker, SuggestionList, SuggestionCard
-│       │   └── common/              # UsernameInput, CTA, Toaster, Container
-│       ├── views/                   # route-level pages
-│       │   ├── HomeView.vue         # hot games + username input + permalink CTA
-│       │   ├── CollectionView.vue   # merged collection (parity with bggeek-shared-list)
-│       │   ├── GroupView.vue
-│       │   └── SessionView.vue
-│       ├── lib/
-│       │   ├── permalink.js         # /u/user1,user2,user3 encoding (parity with reference)
-│       │   ├── sorting.js           # sort comparators (parity)
-│       │   ├── grouping.js          # group-by logic (parity)
-│       │   └── memberColors.js      # deterministic color per username (parity)
-│       └── generated/               # graphql-codegen output (types + Vue Apollo composables)
-├── public/
-│   └── (Vite build output — index.html + fingerprinted assets, served by Rails in prod)
-├── db/
-│   ├── migrate/                     # schema_migrations
-│   ├── queue_migrate/               # Solid Queue migrations
-│   └── cache_migrate/               # Solid Cache migrations
-├── storage/                         # SQLite files in prod (production.sqlite3, _queue, _cache) if SQLite
-├── config/deploy.yml                # Kamal 2 deploy config (single container)
-├── vite.config.ts                   # Vite config (@vitejs/plugin-vue, alias @ → app/frontend)
-├── package.json                     # Vue + Vite + Apollo + Pinia + fuse.js + tailwind + codegen
-├── .env.bggeek                      # BGG token (gitignored) — loaded via dotenv-rails
-└── .planning/                       # GSD planning artifacts
+│   │       ├── xml_parser.rb         # ← extend with poll parsing
+│   │       └── endpoints/thing.rb    # ← ensure stats=1 includes polls
+│   └── jobs/
+│       └── bgg/
+│           └── enrich_thing_job.rb   # ← NEW: backfill polls for existing things
+├── db/migrate/
+│   ├── create_bgg_polls.rb           # ← NEW
+│   └── create_bgg_poll_results.rb    # ← NEW
+└── schema.graphql                    # ← extend (dump after changes)
 ```
 
 ### Structure Rationale
 
-- **`app/frontend/` (vite-ruby default):** Keeps the SPA inside the Rails app tree, lets `vite_asset_path` / `vite_stylesheet_tag` helpers integrate with the SPA shell view, and produces a single deployable artifact. One `package.json` at the repo root keeps `npm install` simple. **Alternative if the team wants a harder boundary:** configure `sourceCodeDir: frontend` and move the SPA to a top-level `frontend/` dir — vite-ruby supports it, but you lose the "it's all one Rails app" mental model. **Not recommended:** the fully-decoupled `apps/api` + `apps/web` layout with two Dockerfiles — it violates the PROJECT.md constraint of a single deploy from Rails and adds CORS + two-deploy operational overhead for no benefit at this scale.
-- **`app/graphql/{types,resolvers,mutations,loaders}`:** This is the exact layout produced by `rails g graphql:install` plus a `loaders/` dir for `GraphQL::Dataloader::Source` subclasses. Class-based types/mutations are the modern graphql-ruby convention (the old `.define` style is deprecated). Resolvers live separately from types so Query fields with complex args get their own testable class.
-- **`app/contracts/`:** dry-rails auto-registers `ApplicationContract` subclasses here into the container; mutations instantiate the relevant contract, call it with input args, and return validation errors as GraphQL errors if it fails. This is the input-validation boundary — every mutation MUST go through a contract before touching a service.
-- **`app/services/`:** Business logic lives here, namespaced by domain (`Bgg::`, `Collections::`, `Groups::`, `Sessions::`, `Suggestions::`). dry-rails auto-registers these into the container so resolvers/mutations/jobs can resolve them via `Container[:groups_create]` or `Deps["groups.create"]`. Services never call GraphQL; they're called by GraphQL.
-- **`Bgg::Client` under `app/services/bgg/`:** The BGG integration is a service namespace, not a model concern. The client is the **only** code allowed to make BGG HTTP calls. Endpoints are split one class per BGG URL (`Bgg::Endpoints::Thing`, `Bgg::Endpoints::Collection`, …) so each is independently testable with XML fixtures (mirroring the reference proxy's `bggDataSource.ts` method-per-endpoint structure).
-- **`app/jobs/bgg/`:** Solid Queue jobs for background imports. Solid Queue's concurrency controls enforce "max 1 BGG job running at a time" — the rate limiter is the second line of defense for in-request (synchronous) BGG calls.
-- **`db/queue_migrate/` + `db/cache_migrate/`:** Rails 8 separates Solid Queue and Solid Cache into their own databases with their own migration paths. Postgres in production (one DB, three schemas) or SQLite (three files in `storage/`).
+- **`app/frontend/components/stitch/`**: Isolates the design system from feature components. This lets the redesign proceed in parallel with the suggestion engine work. Once primitives exist, feature components are reskins, not rewrites.
+- **`app/frontend/entrypoints/styles.css`**: Tailwind v4 is CSS-first; the entire token system lives here via `@theme`. No `tailwind.config.js`. Light/dark switching is done by changing the values of the CSS custom properties, not by toggling classes at runtime.
+- **`app/services/suggestions/`**: The scoring engine is a pure service namespace. It is called from GraphQL resolvers and can be unit-tested without Apollo or Vue. Each scoring function is its own class so weights and heuristics can be tuned independently.
+- **`BggPoll` normalized model**: A thing has multiple polls; each poll has multiple results. Normalized storage is preferable to a JSON blob because the suggestion engine queries per-player-count results and because the schema may expose polls directly to the frontend.
+- **`Bgg::EnrichThingJob`**: Existing `BggThing` rows from v1.0 do not have poll data. A one-time backfill job (Solid Queue, concurrency: 1 BGG) fetches `thing?id=...&stats=1` for each unique thing and persists the polls. New imports fetch polls automatically.
 
 ## Architectural Patterns
 
-### Pattern 1: Single GraphQL Schema with Class-Based Types + Dataloader
+### Pattern 1: Material 3 Tokens in Tailwind v4 (CSS-first)
 
-**What:** One `BggNightSchema < GraphQL::Schema` with `use GraphQL::Dataloader` and `max_complexity 400`. Class-based types in `app/graphql/types/`, class-based mutations in `app/graphql/mutations/`. N+1 prevention via `GraphQL::Dataloader::Source` loaders in `app/graphql/loaders/`.
+**What:** Map Material 3's tonal palette roles to Tailwind v4 `@theme` variables. The design system becomes a thin layer of CSS custom properties that generate matching utility classes.
 
-**When to use:** Always for this app. The schema is small enough that a single modular schema is correct — no need for multiple schemas or federation.
+**Why use it:** Tailwind v4 removed `tailwind.config.js` in favor of CSS-based `@theme`. The "Tabletop Social" system requires a consistent palette (indigo primary, neutral surfaces, error/tertiary accents), so the tokens should be first-class CSS variables that also produce utilities like `bg-primary-500`, `text-on-surface`, etc.
 
-**Trade-offs:** Dataloader is Fiber-based (modern, built into graphql-ruby, recommended over the older `graphql-batch` gem which is promise-based). Tradeoff: Dataloader cannot be used outside of GraphQL execution, but we don't need to. `graphql-batch` is more mature but Dataloader is the path forward per the official graphql-ruby docs.
+**Trade-offs:** Disabling the default Tailwind palette (`--color-*: initial`) reduces CSS output but forces every color to be defined in the token file. Keeping the default palette plus M3 tokens is safer for incremental migration but can produce color inconsistencies if designers accidentally mix palettes.
 
 **Example:**
-```ruby
-# app/graphql/bgg_night_schema.rb
-class BggNightSchema < GraphQL::Schema
-  query    Types::QueryType
-  mutation Types::MutationType
-  use GraphQL::Dataloader
-  max_complexity 400
-  default_max_page_size 50
-end
+```css
+/* app/frontend/entrypoints/styles.css */
+@import "tailwindcss";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
 
-# app/graphql/loaders/bgg_thing_loader.rb — batch N+1 for Thing relationships
-class BggThingLoader < GraphQL::Dataloader::Source
-  def fetch(ids)            # called once per batch with all requested ids
-    things = BggThing.where(bgg_id: ids).index_by(&:bgg_id)
-    missing = ids - things.keys
-    fetched = missing.empty? ? {} : Bgg::Endpoints::Thing.new.fetch_many(missing)
-    ids.map { |id| things[id] || fetched[id] }
-  end
-end
+@theme {
+  /* Keep default spacing/breakpoints; override only the color namespace */
+  --color-*: initial;
 
-# app/graphql/types/thing_type.rb
-module Types
-  class ThingType < BaseObject
-    field :id, ID, null: false
-    field :name, String, null: false
-    field :base_game, ThingType, null: true
-    def base_game
-      dataloader.with(BggThingLoader).load(object.base_game_bgg_id)  # batched
-    end
-  end
-end
+  /* Material 3 tonal roles — example indigo primary palette */
+  --color-primary-0: #000000;
+  --color-primary-10: #001944;
+  --color-primary-20: #002d6d;
+  --color-primary-30: #004397;
+  --color-primary-40: #1b5bc2;
+  --color-primary-50: #4674c6;
+  --color-primary-60: #688ee0;
+  --color-primary-70: #8aa8fb;
+  --color-primary-80: #b3c7ff;
+  --color-primary-90: #dae2ff;
+  --color-primary-95: #eff4ff;
+  --color-primary-99: #fefbff;
+  --color-primary-100: #ffffff;
+
+  --color-surface: #f8f9ff;
+  --color-surface-variant: #e1e2ec;
+  --color-on-surface: #1a1b21;
+  --color-on-surface-variant: #44464f;
+  --color-outline: #75777f;
+  --color-inverse-surface: #2f3036;
+  --color-inverse-on-surface: #f2f0f4;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-tertiary: #7d5260;
+  --color-on-tertiary: #ffffff;
+  --color-secondary: #585e71;
+  --color-on-secondary: #ffffff;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+}
+
+/* Dark mode: override token values via a media query or data attribute */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: #1a1b21;
+    --color-surface-variant: #44464f;
+    --color-on-surface: #f8f9ff;
+    --color-on-surface-variant: #c5c6d0;
+  }
+}
 ```
 
-### Pattern 2: Contract-First Mutation → Service → Job
+**Design system component usage:**
+```vue
+<!-- app/frontend/components/stitch/StButton.vue -->
+<script setup lang="ts">
+defineProps<{ variant?: 'filled' | 'tonal' | 'outlined' }>()
+</script>
+<template>
+  <button :class="[
+    'inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-medium',
+    variant === 'filled' && 'bg-primary-40 text-on-primary',
+    variant === 'tonal' && 'bg-primary-90 text-on-primary-container',
+    variant === 'outlined' && 'border border-outline text-primary-40',
+  ]">
+    <slot />
+  </button>
+</template>
+```
 
-**What:** Every GraphQL mutation follows a strict 3-layer pipeline: (1) dry-validation contract validates input, (2) service object executes business logic synchronously, (3) if a side effect is slow (BGG fetch), the service enqueues a Solid Queue job and returns a job handle. The mutation returns either validation errors or a success payload with the job id for polling.
+### Pattern 2: Poll-Based Suggestion Engine as a Pure Service
 
-**When to use:** Every mutation. No exceptions — this is the input-validation boundary and the sync/async split.
+**What:** The suggestion engine is a deterministic, explainable scorer. It takes a merged collection and a session context, reads BGG poll data from the database, and returns a ranked shortlist with per-score reasons.
 
-**Trade-offs:** More files per use case (contract + service + mutation + job), but each is independently testable and the validation boundary is explicit. Worth it.
+**Why use it:** The engine is a pure function over cached data. It does not call BGG, so it is fast and testable. It is also the right place for the "Schmaus" player-count suitability formula because the formula is a business rule, not a GraphQL concern.
+
+**Trade-offs:** The score is computed live per request. For a group with 500 games this is trivial; for 5,000 games it may need caching or pagination. Compute the shortlist and cache it per session for 5 minutes if needed.
 
 **Example:**
 ```ruby
-# app/contracts/import_collection_contract.rb
-class ImportCollectionContract < ApplicationContract
-  params do
-    required(:bgg_username).filled(:string)
-    optional(:force).value(:bool)  # skip cache
-  end
-  rule(:bgg_username) do
-    key.failure("must be 1-50 chars") unless values[:bgg_username].to_s.length.between?(1, 50)
-  end
-end
+# app/services/suggestions/engine.rb
+module Suggestions
+  class Engine
+    DEFAULT_WEIGHTS = {
+      players: 0.40,
+      time: 0.20,
+      complexity: 0.20,
+      rating: 0.10,
+      freshness: 0.10
+    }.freeze
 
-# app/graphql/mutations/import_collection.rb
-module Mutations
-  class ImportCollection < BaseMutation
-    argument :bgg_username, String, required: true
-    argument :force, Boolean, required: false, default_value: false
-    field :job_id, String, null: true
-    field :collection, Types::CollectionType, null: true
+    def initialize(weights: DEFAULT_WEIGHTS)
+      @weights = weights
+    end
 
-    def resolve(args)
-      contract = ImportCollectionContract.new.call(args.to_h)
-      if contract.failure?
-        raise GraphQL::ExecutionError.new("invalid", extensions: { errors: contract.errors.to_h })
+    def call(merged_collection:, session:)
+      attendees = session.attendances.going.map(&:user)
+      owner_ids = attendees.map(&:bgg_username).to_set
+      player_count = attendees.size
+      time_budget = session.time_budget_minutes
+      complexity_pref = session.complexity_preference
+
+      candidates = merged_collection.items.select do |item|
+        item.owners.any? { |o| owner_ids.include?(o.bgg_username) }
       end
-      result = Collections::Import.new.call(**contract.values)  # enqueues Bgg::ImportCollectionJob
-      { job_id: result.job_id, collection: result.cached_snapshot }
+
+      candidates.map do |item|
+        score, reasons = score_item(item, player_count, time_budget, complexity_pref)
+        Suggestion.new(item:, score:, reasons:)
+      end.sort_by(&:score).reverse.first(8)
+    end
+
+    private
+
+    def score_item(item, player_count, time_budget, complexity_pref)
+      players = PlayerCountScorer.new(item.bgg_thing).call(player_count)
+      time = TimeFitScorer.new(item.bgg_thing).call(time_budget)
+      complexity = ComplexityScorer.new(item.bgg_thing).call(complexity_pref)
+      rating = (item.bgg_thing.average || 0) * 10
+      freshness = 50 # default until play logging exists
+
+      score = @weights[:players] * players +
+              @weights[:time] * time +
+              @weights[:complexity] * complexity +
+              @weights[:rating] * rating +
+              @weights[:freshness] * freshness
+
+      reasons = Explain.call(
+        players:, time:, complexity:, rating:, freshness:,
+        item_name: item.bgg_thing.name
+      )
+      [score.round(2), reasons]
     end
   end
 end
 ```
 
-### Pattern 3: BGG Client as the Single Egress Point with DB-Backed Rate Limiting
+### Pattern 3: BGG Poll Data Fetch and Storage
 
-**What:** `Bgg::Client` is the only class that issues BGG HTTP requests. It composes Faraday (HTTP + retry on 502/503/429 with exponential backoff), Nokogiri (XML → Ruby), a Solid Cache response cache (per-endpoint TTL), and a Solid Cache-backed rate limiter enforcing 1 req / 5s **across all workers** via a `bgg:last_request_at` timestamp key. Solid Queue concurrency controls cap BGG jobs to 1 concurrent.
+**What:** BGG poll data is parsed from the `/thing` XML response and persisted as normalized `BggPoll` + `BggPollResult` rows attached to `BggThing`. The existing `Bgg::Client` fetches thing details; the existing `Bgg::XmlParser` is extended to extract polls.
 
-**When to use:** Every BGG call, whether synchronous (in a resolver — username validation, hot items) or asynchronous (in a job — collection import).
+**Why use it:** The suggestion engine needs fast, set-based access to "Best / Recommended / Not Recommended" votes per player count. Storing polls in the DB (rather than a JSON blob or live BGG call) lets the engine query with SQL and avoids the 1 req/5s BGG limit during suggestion requests.
 
-**Trade-offs:** Solid Cache (DB-backed) for rate limiting is slightly slower than Redis but eliminates the Redis dependency entirely, matching Rails 8's "no Redis by default" philosophy. For v1 single-VPS deployment this is correct. If BGG traffic grows, swap the rate limiter backend to Redis without changing the `Bgg::RateLimiter` interface.
+**Trade-offs:** Poll data is a one-to-many-to-many structure. Normalized storage is slightly more schema work than a JSON column, but it enables indexing and cleaner GraphQL types. If the app later exposes raw polls to the UI, the GraphQL type maps cleanly to the model.
 
-**Example:**
+**XML structure:**
+```xml
+<poll name="suggested_numplayers" title="User Suggested Number of Players" totalvotes="742">
+  <results numplayers="1">
+    <result value="Best" numvotes="0" />
+    <result value="Recommended" numvotes="1" />
+    <result value="Not Recommended" numvotes="553" />
+  </results>
+  <results numplayers="2">
+    <result value="Best" numvotes="23" />
+    <result value="Recommended" numvotes="312" />
+    <result value="Not Recommended" numvotes="201" />
+  </results>
+  <!-- ... -->
+</poll>
+```
+
+**Model design:**
 ```ruby
-# app/services/bgg/rate_limiter.rb
-class Bgg::RateLimiter
-  MIN_INTERVAL = 5.seconds
-  KEY = "bgg:last_request_at"
-
-  def acquire
-    loop do
-      last = Rails.cache.read(KEY).to_f
-      wait = [0, MIN_INTERVAL - (Time.current.to_f - last)].max
-      sleep(wait) if wait.positive?
-      # compare-and-set: only proceed if we're the winner
-      break if Rails.cache.write(KEY, Time.current.to_f, exists: false) || refresh_if_stale(last)
-    end
-  end
+# app/models/bgg_thing.rb
+class BggThing < ApplicationRecord
+  has_many :bgg_polls, dependent: :destroy
 end
 
-# app/services/bgg/client.rb
-class Bgg::Client
-  def initialize(rate_limiter: Bgg::RateLimiter.new, cache: Rails.cache)
-    @rate_limiter = rate_limiter
-    @cache = cache
-    @http = Faraday.new(BGG_BASE_URL) do |f|
-      f.request  :retry, max: 3, interval: 1, backoff_factor: 2,
-                 exceptions: [Faraday::TimeoutError, Faraday::ConnectionFailed]
-      f.response :raise_error   # 502/503/429 → retried
-      f.options.timeout = 15
-    end
-  end
+# app/models/bgg_poll.rb
+class BggPoll < ApplicationRecord
+  belongs_to :bgg_thing
+  has_many :bgg_poll_results, dependent: :destroy
 
-  def thing(id)      = cached("bgg:thing:#{id}", ttl: 1.hour)   { fetch_xml("/thing?id=#{id}&stats=1") }
-  def collection(u)  = cached("bgg:collection:#{u}", ttl: 30.minutes) { Bgg::Endpoints::Collection.new.fetch(u) }
-  def hot(type=nil)  = cached("bgg:hot:#{type}", ttl: 24.hours)  { fetch_xml("/hot#{"?type=#{type}" if type}") }
+  enum name: {
+    suggested_numplayers: "suggested_numplayers",
+    suggested_playerage: "suggested_playerage",
+    language_dependence: "language_dependence"
+  }
+end
 
-  private
-  def cached(key, ttl:)
-    @cache.fetch(key, expires_in: ttl) { @rate_limiter.acquire; yield }
+# app/models/bgg_poll_result.rb
+class BggPollResult < ApplicationRecord
+  belongs_to :bgg_poll
+
+  # value: "Best", "Recommended", "Not Recommended"
+  # numplayers: "1", "2", "3+" (only for suggested_numplayers)
+  # num_votes: integer
+end
+```
+
+**Parser addition:**
+```ruby
+# app/services/bgg/xml_parser.rb (excerpt)
+def self.extract_polls(item_node)
+  item_node.css("poll").map do |poll_node|
+    {
+      name: poll_node["name"],
+      title: poll_node["title"],
+      total_votes: poll_node["totalvotes"].to_i,
+      results: poll_node.css("results").map do |results_node|
+        {
+          numplayers: results_node["numplayers"],
+          entries: results_node.css("result").map do |result_node|
+            {
+              value: result_node["value"],
+              num_votes: result_node["numvotes"].to_i
+            }
+          end
+        }
+      end
+    }
   end
 end
 ```
 
-### Pattern 4: Cache-Aside Persistence for BGG Data (Persist vs Fetch Live)
-
-**What:** BGG data falls into two tiers:
-- **Persisted in our DB (cache-aside):** `bgg_things`, `bgg_collection_items`, `bgg_users` — written by background import jobs, read by resolvers/suggestions from the DB. The DB is the source of truth for the app's working set; BGG is the origin but is too slow (1 req/5s) to query synchronously for multi-user merges.
-- **Fetched live (with HTTP cache, not persisted):** hot items, search results, user-validation lookups, single-thing detail — these are cache-through `Bgg::Client` with TTLs and never touch our DB.
-
-**When to use:** Persist collections (multi-user merge needs all users' items in one query — impossible to fetch 5 users × 2 BGG calls = 50s synchronously). Don't persist hot/search (volatile, cheap to cache-through).
-
-**Trade-offs:** Persistence means collections can be stale. Mitigation: `cached_at` timestamp on `bgg_collection_items`, a `force: true` arg on `importCollection` mutation to trigger re-import, and a "last synced X minutes ago" UI affordance. Background re-sync job for groups with active sessions.
-
-**Example:**
+**Backfill job:**
 ```ruby
-# app/services/collections/merge.rb — pure DB query, no BGG calls
-class Collections::Merge
-  def call(bgg_usernames:)
-    BggCollectionItem
-      .where(bgg_username: bgg_usernames, status_own: true)
-      .includes(:bgg_thing)
-      .group_by(&:bgg_thing_id)        # dedupe across users
-      .map { |thing_id, items| MergedGame.new(thing: items.first.bgg_thing, owners: items.map(&:bgg_username)) }
-  end
-end
+# app/jobs/bgg/enrich_thing_job.rb
+class Bgg::EnrichThingJob < ApplicationJob
+  limits_concurrency to: 1, key: "bgg_api"
+  retry_on Bgg::RateLimitError, wait: :polynomially_longer, attempts: 5
 
-# app/services/sessions/suggest.rb — computed from cached data only
-class Sessions::Suggest
-  def call(session)
-    attendees = session.attendees.accepted.map(&:bgg_username)
-    merged    = Collections::Merge.new.call(bgg_usernames: attendees)
-    Suggestions::Engine.new.rank(merged, player_count: attendees.size)
+  def perform(bgg_thing_id)
+    thing = BggThing.find(bgg_thing_id)
+    data = Bgg::Client.new.thing(thing.bgg_id)
+    Bgg::PollUpsert.new(thing, data[:polls]).call
   end
 end
+```
+
+### Pattern 4: Group Detail Page Integration
+
+**What:** The Group Detail page is a new route-level view (`/g/:token` or `/groups/:id`) that surfaces the group header, upcoming sessions, members panel, invite link, and a spotlight of the shared collection. It reuses existing data (Group, Membership, NightSession, MergedCollection) but presents it in a single dashboard-like surface.
+
+**Why use it:** The existing v1.0 `GroupView` is minimal. The v1.1 design calls for a dedicated Group Detail surface that is the primary landing page for a group.
+
+**Trade-offs:** The page naturally requests a lot of nested data (group → sessions → attendees → users → avatars). Use GraphQL::Dataloader to batch user lookups and avoid N+1. Consider exposing `collectionSpotlight` as a separate field with a `limit` arg so the full merged collection is not fetched unless needed.
+
+**GraphQL additions:**
+```graphql
+# schema additions
+type Group {
+  id: ID!
+  name: String!
+  description: String
+  owner: User!
+  members: [User!]!
+  memberships: [GroupMembership!]!
+  myRole: GroupRole
+  inviteCode: String           # only for owner/admin
+  sessions: [NightSession!]!   # upcoming first, then past
+  collectionSpotlight(limit: Int = 6): [MergedThing!]!
+  collection: MergedCollection!
+}
+
+type NightSession {
+  id: ID!
+  title: String!
+  status: String!
+  scheduledAt: ISO8601DateTime
+  attendees: [Attendance!]!
+  pickedGame: MergedThing
+  suggestions: [Suggestion!]!   # computed live
+}
+```
+
+**Vue additions:**
+```ts
+// app/frontend/router/index.ts
+{ path: '/groups/:id', name: 'group', component: () => import('@/views/GroupView.vue') }
+
+// app/frontend/views/GroupView.vue
+const { result, loading } = useQuery(
+  GroupDocument,
+  { id: route.params.id },
+  { fetchPolicy: 'cache-first' }
+)
+```
+
+### Pattern 5: Home Dashboard Redesign
+
+**What:** The Home view becomes a dashboard with three zones: a hero that invites the user to merge a BGG collection, a personal stats card, and a trending games section.
+
+**Why use it:** The redesign moves the app from a utility ("enter username") to a social hub ("your groups, your stats, what's hot"). The data already exists (current user, groups, hot items); the work is presentation and a few new lightweight queries.
+
+**Trade-offs:** Personal stats require a new query (`homeDashboard`) that aggregates data the frontend could otherwise fetch separately. A single query is more cache-friendly and reduces request waterfalls, but it makes the resolver slightly heavier. Keep it simple: count groups, count sessions, count games, next upcoming session.
+
+**GraphQL additions:**
+```graphql
+type HomeDashboard {
+  user: User!
+  groupCount: Int!
+  upcomingSession: NightSession
+  ownedGameCount: Int!
+  hotItems: [HotItem!]!
+}
+
+type Query {
+  homeDashboard: HomeDashboard!
+}
 ```
 
 ## Data Flow
 
-### Request Flow: On-Demand Collection Import (end-to-end)
+### Suggestion Engine Flow (end-to-end)
 
 ```
-[User enters "alice,bob" in Vue username input]
+[Host opens session /sessions/:id and clicks "Suggest games"]
     ↓
-Vue Router → /u/alice,bob  →  CollectionView mounts
+Vue: useQuery(SuggestionsDocument, { sessionId: 42 })
     ↓
-useMultiUserCollections composable → Apollo useQuery(USER_COLLECTIONS, {usernames:["alice","bob"]})
+Apollo POST /graphql
     ↓
-Apollo batched POST /graphql  →  GraphqlController#execute (or Schema.multiplex if batched)
-    ↓
-Types::QueryType.userCollection resolver → Collections::Merge service
-    ↓
-Collections::Merge queries BggCollectionItem WHERE bgg_username IN ("alice","bob")
-    ↓
-CASE A: cached rows exist & fresh (< 30 min)
-    → returns merged collection immediately → GraphQL response → Apollo cache → Vue renders
-CASE B: no rows OR stale OR force=true
-    → returns partial/null + enqueues Bgg::ImportCollectionJob per missing user (via importCollection mutation, OR the resolver triggers import and returns a "syncing" state)
-    ↓
-Bgg::ImportCollectionJob (Solid Queue, concurrency: 1 BGG)
-    ↓
-Bgg::Client.collection("alice")  →  rate_limiter.acquire (1 req/5s across workers)
-    ↓
-Faraday GET /collection?username=alice&stats=1&excludesubtype=boardgameexpansion&own=1
-    + Faraday GET /collection?username=alice&subtype=boardgameexpansion&stats=1&own=1   # expansion workaround
-    ↓
-Nokogiri::XML parse → Bgg::XmlParser.normalize_collection → array of item hashes
-    ↓
-upsert BggThing (id, name, players, playtime, image, stats…) + BggCollectionItem (user, thing, own, num_plays, cached_at)
-    ↓
-ActionCable/Solid Cable broadcasts "collection_synced" → Vue Apollo cache refetches
-    (OR: Vue polls a syncStatus query; OR: mutation returns job_id and Vue polls)
-    ↓
-Collections::Merge now returns full merged set → Vue re-renders
-```
-
-### Request Flow: Game Suggestions for a Session
-
-```
-[User opens session /s/42 → picks attendees → clicks "Suggest games"]
-    ↓
-Apollo useQuery(SUGGESTIONS, {sessionId: 42})  →  POST /graphql
-    ↓
-Types::QueryType.suggestions resolver → Sessions::Suggest service
+SuggestionsResolver.load(session_id) → Sessions::Suggest.new.call(session)
     ↓
 Sessions::Suggest:
-  1. attendees = session.accepted_attendees.map(&:bgg_username)   # from DB
-  2. merged    = Collections::Merge.call(attendees)                # pure DB query
-  3. ranked    = Suggestions::Engine.new.rank(merged, player_count: attendees.size)
+  1. attendees = session.attendances.going
+  2. owner_usernames = attendees.map(&:bgg_username)
+  3. merged = Collections::Merge.new.call(owner_usernames)
+  4. ranked = Suggestions::Engine.new.call(merged_collection: merged, session: session)
     ↓
-Suggestions::Engine filters/ranks:
-  - keep things where max_players >= attendees.size AND min_players <= attendees.size
-  - keep things where playing_time within session's chosen time bucket
-  - rank by: # owners who own it (more owners = more likely everyone can play) → bayes_average → -average_weight (lighter first for casual nights)
+Suggestions::Engine per candidate:
+  - player_count_suitability from BggPoll/BggPollResult (Schmaus formula)
+  - time_fit from BggThing playtime
+  - complexity_fit from BggThing.average_weight
+  - community_rating from BggThing.average
     ↓
-Returns [GameSuggestion] with thing + owner_bgg_usernames + score + reason
+Returns [Suggestion] with score + reasons
     ↓
-GraphQL response → Apollo cache → SuggestionList.vue renders
+GraphQL response → Apollo cache → SuggestionList.vue renders cards
 ```
 
-### State Management (Vue side)
+### Group Detail Flow
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  Apollo InMemoryCache (normalized by __typename + id)           │
-│  — the ONLY source of server data. Entities (Thing, Group,       │
-│    Session, CollectionItem) sync across views automatically.     │
-│    A createSession mutation updates Group.sessions everywhere.    │
-└───────────────────────┬─────────────────────────────────────────┘
-                        │ composables wrap useQuery/useMutation
-                        ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Pinia stores (UI / session-draft state ONLY — NOT server data)  │
-│  filtersStore: { query, playerCount, sortBy, groupBy }           │
-│  sessionDraftStore: { selectedGroup, attendees[], timeBucket }   │
-│  uiStore: { sidebarOpen, theme }                                  │
-└─────────────────────────────────────────────────────────────────┘
+[User navigates to /groups/7]
+    ↓
+Vue: useQuery(GroupDocument, { id: 7 })
+    ↓
+Apollo POST /graphql
+    ↓
+GroupResolver.load(id: 7) → Group.find(id) + authorization
+    ↓
+GraphQL field resolution (with Dataloader):
+  - group.owner → UserLoader.load(owner_id)
+  - group.members → MembershipLoader.load(group_id) → UserLoader.load(user_ids)
+  - group.sessions → SessionLoader.load(group_id)
+  - group.collectionSpotlight(limit: 6) → Collections::Merge.spotlight(group.member_usernames)
+  - group.inviteCode → InviteTokenService.for_group(group) if role >= admin
+    ↓
+GraphQL response → Apollo cache → GroupView renders panels
 ```
 
-### Key Data Flows
-
-1. **Read path (hot/search/thing/user validation):** Vue → Apollo → `/graphql` → resolver → `Bgg::Client` (HTTP cache hit? return : miss → rate-limit → BGG → cache-write) → Nokogiri normalize → GraphQL type → response. No DB write.
-2. **Read path (collection merge / suggestions):** Vue → Apollo → `/graphql` → resolver → `Collections::Merge` / `Sessions::Suggest` → pure DB query on `bgg_collection_items` + `bgg_things` → GraphQL response. No BGG call (works only if collections are cached).
-3. **Write path (import collection):** Vue → `importCollection` mutation → contract → `Collections::Import` service → enqueues `Bgg::ImportCollectionJob` → returns job_id → Vue polls `syncStatus(username)` query → job completes → DB rows upserted → next `userCollection` query returns fresh data.
-4. **Write path (group/session CRUD):** Vue → mutation → contract → service → DB write → GraphQL response → Apollo cache auto-updates (normalized cache). No BGG.
-5. **Hot items refresh:** Scheduled `Bgg::RefreshHotItemsJob` (Solid Queue cron) every 24h → `Bgg::Client.hot` → upsert `bgg_things` (or cache-only) → landing page reads from cache.
-
-## What to Persist vs Fetch Live
-
-| Data | Persist in DB? | Fetch Live (cache-through)? | Rationale |
-|------|:---:|:---:|-----------|
-| `bgg_things` (game metadata: name, players, playtime, image, stats) | ✅ | ✅ (backfill on miss) | Multi-user merge + suggestions need set queries over many games — impossible over BGG's 1 req/5s. Cache-aside: job fetches & upserts; resolvers read DB. |
-| `bgg_collection_items` (per-username owned items) | ✅ | ❌ (only via import job) | Merging 5 users' collections = 10 BGG calls = 50s synchronously. Must persist. `cached_at` per row + `force` re-import. |
-| `bgg_users` (BGG profile for username validation) | ✅ (light) | ✅ (validate via live `Bgg::Client.user`, cache 1h, persist id+avatar) | Validation needs a live BGG `/user` call to confirm existence; persist the result so group members show avatars without re-fetching. |
-| Hot items (trending) | ❌ (or light cache) | ✅ (24h TTL via `Bgg::Client`) | Volatile, single BGG call, cheap to cache-through. |
-| Search results | ❌ | ✅ (30min TTL) | Volatile, user-specific query, not worth persisting. |
-| `groups`, `group_members` | ✅ | ❌ | Pure app state — no BGG. |
-| `sessions`, `session_attendees` | ✅ | ❌ | Pure app state. |
-| Game suggestions | ❌ (compute live) | ❌ | Pure function over cached collections + attendees. Recompute per request; cheap (DB query + Ruby sort). Optionally cache result per session for 5 min. |
-| Single-thing detail (deep view) | ✅ (if in working set) | ✅ (1h TTL fallback) | If the thing is in `bgg_things`, serve from DB; else `Bgg::Client.thing(id)` cache-through + lazy persist. |
-
-## Build Order (drives phase sequencing)
-
-Phases are ordered by dependency — each builds on the previous. Earlier phases unblock more later work.
-
-| # | Build | Unblocks | Why this order |
-|---|-------|----------|----------------|
-| 1 | **Rails 8 API scaffold + Vue 3 + Vite (vite-ruby) monorepo shell** — `rails new --api`, vite-ruby install, Vue 3 mount, Apollo Client wired to `/graphql`, Vue Router, Pinia, Tailwind, Kamal 2 config, `.env.bggeek` loading | everything | Foundation. Nothing compiles or deploys without it. |
-| 2 | **BGG client** — `Bgg::Client` + `Bgg::RateLimiter` (Solid Cache) + `Bgg::XmlParser` (Nokogiri) + endpoint classes (`Thing`, `Search`, `User`, `Collection` with expansion workaround, `Hot`). No GraphQL yet. Tested with XML fixtures from reference proxy. | 3, 4 | The data source. Every later feature needs it. Validates the rate-limit + cache strategy early. |
-| 3 | **BGG persistence layer** — migrations for `bgg_things`, `bgg_collection_items`, `bgg_users`; `Bgg::ImportCollectionJob` (Solid Queue, concurrency: 1); `Collections::Import` service; upsert logic. | 4, 9 | Decouples BGG's slowness from the read path. Once collections persist, merges/suggestions become pure DB queries. |
-| 4 | **GraphQL schema (Query root) — BGG read queries** — `BggNightSchema` + `GraphQL::Dataloader` + `max_complexity 400`; `Types::QueryType` with `thing`, `things`, `search`, `user`, `userCollection`, `hotItems`; `BggThingLoader` for N+1; `GraphqlController` with Apollo batch support. | 5, 6 | Exposes BGG data to Vue. This is the contract the frontend consumes. |
-| 5 | **Vue shell + collection view (parity with bggeek-shared-list)** — `HomeView` (hot games + username input), `CollectionView` (merged collection display), `useMultiUserCollections`, `useHotGames`, `GameCard`, `Results`, `ResultsSkeleton`, responsive layout (mobile drawer + desktop sidebar). | 6, 7 | First user-visible feature. Validates the whole stack end-to-end (Vue → Apollo → GraphQL → BGG). |
-| 6 | **Filtering / sorting / grouping / fuzzy search + permalinks (parity)** — `lib/sorting`, `lib/grouping`, `lib/permalink`, `useFuzzySearch` (fuse.js), `SortBar`, `FilterPanel`, `CollapsibleGroup`, `/u/:usernames` permalink route. | 7 | Completes collection-view parity. These are pure-client over Apollo cache — no new backend. |
-| 7 | **Groups + memberships** — migrations for `groups`, `group_members`; `CreateGroup`/`AddGroupMember` contracts + services + mutations; `Types::GroupType`; Vue `GroupView` + `GroupForm` + `GroupMemberList`; `importCollection` mutation wired to import job for group members' collections. | 8 | Sessions belong to groups. Groups also drive "pool multiple users' collections" cleanly. |
-| 8 | **Sessions + invitations/RSVP** — migrations for `sessions`, `session_attendees`; `CreateSession`/`RsvpSession` contracts + services + mutations; `Types::SessionType`; Vue `SessionView` + `SessionForm` + `AttendeePicker`. | 9 | Suggestions need session attendees. |
-| 9 | **Game suggestions engine** — `Suggestions::Engine` (pure: merged collection × attendees × player-count filter + ranking); `Sessions::Suggest` service; `suggestions` Query resolver; `GameSuggestionType`; Vue `SuggestionList` + `SuggestionCard`. | (v1 complete) | The headline feature. Depends on cached collections (3), groups (7), sessions (8). |
-| 10 | **Polish: scheduled hot-items refresh, sync-status UX, re-import button, permalink sharing for groups/sessions** — `Bgg::RefreshHotItemsJob` (cron), sync-status polling, share buttons. | (v1 ship) | Non-blocking polish after the spine works. |
-
-### Dependency graph (condensed)
+### Home Dashboard Flow
 
 ```
-1 ──→ 2 ──→ 3 ──→ 4 ──→ 5 ──→ 6
-              │        │      │
-              │        ├─────→ 7 ──→ 8 ──→ 9
-              └──→ 9 (needs cached collections)
-                                          └──→ 10
+[User lands on /]
+    ↓
+Vue: useQuery(HomeDashboardDocument)
+    ↓
+Apollo POST /graphql
+    ↓
+HomeDashboardResolver → HomeDashboardService.call(current_user)
+    ↓
+HomeDashboardService:
+  - user.groups.count
+  - user.sessions.upcoming.first
+  - user.bgg_collection_items.count (distinct bgg_thing_id)
+  - Bgg::Client.hot("boardgame") (Solid Cache, 24h TTL)
+    ↓
+GraphQL response → Apollo cache → HomeView renders hero + stats + trending
 ```
-
-**Critical path:** 1 → 2 → 3 → 4 → 5 → 7 → 8 → 9. Phase 6 (filters/sort/permalinks) can run in parallel with 7–8 since it's pure-client. Phase 10 is post-spine polish.
 
 ## Scaling Considerations
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 0–1k users (v1 target) | Single Rails process + Solid Queue worker on one VPS (Kamal 2). SQLite or Postgres. Solid Cache (DB-backed) for BGG rate-limit + response cache. In-memory rate limiter fallback. This is plenty. |
-| 1k–100k users | Add a 2nd Rails worker + 2nd Solid Queue worker. Move Solid Cache to a dedicated DB. Switch `Bgg::RateLimiter` to Redis (MX mutex) if cache-write race causes BGG 429s. Add a CDN in front of `public/` for static assets. Consider read replica for `bgg_collection_items`. |
-| 100k+ users | Unlikely for a friend-group app, but: split BGG import into its own service with a dedicated queue + Redis rate limiter. Pre-warm hot items into a separate cache tier. Paginate `Collections::Merge` with keyset pagination. Move suggestions computation to a materialized view refreshed by the import job. |
+| Scale | v1.1 Adjustments |
+|-------|------------------|
+| 0–1k users (target) | Single Rails process + Solid Queue worker. SQLite is fine. Poll data stored in DB. Suggestion engine computes live per request. Design-system CSS output is small because tokens are explicit. |
+| 1k–10k users | Add Solid Cache shortlist caching per session (5 min TTL). Add DB indexes on `bgg_poll_results(bgg_poll_id, value)` and `bgg_polls(bgg_thing_id, name)`. Consider Postgres for better concurrent query performance. |
+| 10k+ users | Move suggestion computation to a materialized view or cached shortlist generated at RSVP close. Pre-compute player-count suitability per (thing, count) pair during import. This is unlikely for a friend-group app. |
 
-### Scaling Priorities
+### Scaling Priorities for v1.1
 
-1. **First bottleneck — BGG rate limit (1 req/5s):** Hits long before DB or CPU. Mitigation: aggressive response caching (TTLs by endpoint), persist collections so merges don't hit BGG, Solid Queue concurrency: 1 for BGG jobs, `force: false` default on imports. The rate limiter is the single most important scaling decision — get it right in Phase 2.
-2. **Second bottleneck — synchronous GraphQL resolution of large collections:** A group of 10 users × 200 games = 2000 collection items. `Collections::Merge` + `Suggestions::Engine` must use DB indexes (`bgg_collection_items(bgg_username, bgg_thing_id)`, `bgg_things(bgg_id)`) and avoid N+1 via `includes(:bgg_thing)`. GraphQL `max_complexity 400` + `default_max_page_size 50` prevent runaway queries.
+1. **First bottleneck: BGG thing enrichment for poll backfill.** The app already has `bgg_things` from v1.0 but without polls. Backfilling 1,000 unique games at 1 req/5s = ~84 minutes. Run `Bgg::EnrichThingJob` in batches with Solid Queue concurrency: 1, and show a progress indicator in the UI.
+2. **Second bottleneck: suggestion computation for large groups.** A group of 10 users with 500 unique games = 500 candidates. The engine is O(n) over candidates and O(1) per candidate, so this is fine in Ruby. If groups grow larger, add a `limit` to the merged collection query or cache the shortlist.
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Synchronous multi-user BGG fetch in a GraphQL resolver
+### Anti-Pattern 1: Computing Suggestions by Calling BGG Live
 
-**What people do:** `userCollection(usernames: [String!]!)` resolver calls `Bgg::Client.collection(u)` for each username inside the request. For 5 users that's 50s of blocked request.
-**Why it's wrong:** BGG's 1 req/5s limit makes this unusable; the request times out; one slow user blocks everyone (Solid Queue concurrency: 1).
-**Do this instead:** Persist collections (`bgg_collection_items`). Resolvers read from DB (instant). Imports happen async via `importCollection` mutation → Solid Queue job. The resolver returns cached data + a `syncStatus` field indicating staleness.
+**What people do:** The `suggestions` resolver calls `Bgg::Client.thing` for every candidate to get poll data.
+**Why it's wrong:** BGG's 1 req/5s limit makes this unusable for any non-trivial collection. A 50-game suggestion request would take 250 seconds.
+**Do this instead:** Persist polls in `BggPoll`/`BggPollResult` during import/enrichment. The resolver reads only from the DB.
 
-### Anti-Pattern 2: Redis for rate limiting / caching / jobs in a Rails 8 app
+### Anti-Pattern 2: Storing Poll Data as an Unstructured JSON Blob
 
-**What people do:** Reach for Sidekiq + Redis + redis-rack-cache because "that's what Rails apps do."
-**Why it's wrong:** Rails 8 ships Solid Queue + Solid Cache specifically to eliminate the Redis dependency for the default deployment. Adding Redis reintroduces an external service to operate, monitor, and back up — for an app where DB-backed equivalents are fast enough.
-**Do this instead:** Solid Queue (jobs) + Solid Cache (BGG response cache + rate-limit timestamp). Only introduce Redis if/when the rate-limit write contention becomes measurable (100k+ users tier) — and even then, only the rate limiter, not jobs/cache.
+**What people do:** Add a `polls_json` text column to `bgg_things` and store the raw XML-derived hash.
+**Why it's wrong:** You lose the ability to query, index, or type the data in GraphQL. The schema becomes a black box.
+**Do this instead:** Normalize into `bgg_polls` and `bgg_poll_results`. The engine can query with Active Record, and the GraphQL type maps cleanly.
 
-### Anti-Pattern 3: GraphQL resolvers doing business logic / calling BGG directly
+### Anti-Pattern 3: Mixing Design Tokens with Runtime Theme State in Pinia
 
-**What people do:** Stuff all logic into `Types::QueryType` field blocks: `field :suggestions, [SuggestionType] do; def suggestions; Bgg::Client.collection(...); compute_suggestions(...); end; end`
-**Why it's wrong:** Untestable, mixes layers, hides side effects, can't be reused by jobs or other services.
-**Do this instead:** Resolvers are thin — they pull args, call a service object, return the result. `def suggestions = Sessions::Suggest.new.call(object)`. Services own logic. Contracts own validation. Jobs own async. Resolvers own GraphQL shaping only.
+**What people do:** Store the current theme (light/dark) as a Pinia state and apply classes at runtime, while also defining CSS tokens.
+**Why it's wrong:** Two sources of truth for theme. Flicker on load, complex hydration, and unnecessary JavaScript.
+**Do this instead:** Use CSS media queries (`prefers-color-scheme`) or a single `data-theme` attribute on `<html>` that reassigns CSS custom property values. Pinia stores only the user's theme preference (e.g., `'system' | 'light' | 'dark'`), not the computed colors.
 
-### Anti-Pattern 4: Duplicating server data in Pinia
+### Anti-Pattern 4: Redesigning Feature Components Before Primitives Exist
 
-**What people do:** "I'll keep the merged collection in a Pinia store so components can read it." Then Apollo cache and Pinia drift, mutations update one but not the other, debugging becomes hell.
-**Why it's wrong:** Two sources of truth for server data → cache invalidation bugs.
-**Do this instead:** Apollo `InMemoryCache` (normalized) is the ONLY source of server data. Pinia stores hold UI-only state (filter selections, sidebar open, draft session selections before mutation). Composables (`useMultiUserCollections`) wrap Apollo queries and expose `loading`/`error`/`data` refs — components consume those, never a Pinia copy of server data.
+**What people do:** Start with `HomeView.vue` and sprinkle Tailwind classes directly, then try to refactor into a design system later.
+**Why it's wrong:** Inconsistent spacing, colors, and elevations. The redesign becomes a copy-paste mess and harder to maintain.
+**Do this instead:** Build the Stitch primitives first (Surface, Text, Button, Badge, Skeleton, Icon, Avatar). Then reskin feature components by replacing old class strings with primitive components. The redesign work becomes mechanical and reviewable.
 
-### Anti-Pattern 5: Two separate deploys (frontend Nginx + backend Rails) for a single-user friend app
+### Anti-Pattern 5: Returning the Entire Merged Collection in the Group Detail Query
 
-**What people do:** Copy a SaaS template with `apps/web` (Nginx) + `apps/api` (Rails) as two Docker containers with two Kamal configs.
-**Why it's wrong:** Doubles operational surface (two deploys, two health checks, CORS config, two TLS certs) for zero benefit at this scale. The app has one user persona looking at one SPA hitting one GraphQL endpoint.
-**Do this instead:** vite-ruby compiles Vue into `public/`; Rails serves the SPA shell + assets + `/graphql` from one process; one Kamal 2 deploy to one VPS. If the frontend ever needs to scale independently (it won't, for this app), split then.
+**What people do:** The `Group` type's `collection` field always returns the full merged collection, which the Group Detail page only spotlights.
+**Why it's wrong:** Over-fetching and slow initial page loads for large groups. The Collection view already has its own query for the full collection.
+**Do this instead:** Add a `collectionSpotlight(limit: Int)` field that returns a small sample. The full collection is fetched only when the user navigates to the Collection view.
 
-### Anti-Pattern 6: Skipping dry-validation contracts because "GraphQL already validates types"
+### Anti-Pattern 6: Putting the Suggestion Engine in the Frontend
 
-**What people do:** Rely on graphql-ruby's type checking for mutation args and skip dry-validation.
-**Why it's wrong:** GraphQL types check shape (String vs Int) but not domain rules (username length 1–50, no banned names, group name uniqueness, RSVP status transitions). Putting those rules in the mutation class makes it fat and untestable.
-**Do this instead:** Every mutation instantiates a `*Contract` and calls it first; failed contracts raise `GraphQL::ExecutionError` with `extensions: { errors: contract.errors.to_h }`. Contracts are pure, testable, reusable by jobs/controllers.
+**What people do:** Ship the scoring algorithm to the browser and run it over the merged collection in JavaScript.
+**Why it's wrong:** Leaks business logic into the client, duplicates the engine in any non-Vue consumer, and makes A/B testing or weight tuning hard.
+**Do this instead:** Keep `Suggestions::Engine` in Rails. The frontend receives a ranked shortlist and renders it.
 
 ## Integration Points
 
@@ -602,36 +615,60 @@ Phases are ordered by dependency — each builds on the previous. Earlier phases
 
 | Service | Integration Pattern | Notes |
 |---------|---------------------|-------|
-| **BGG XML API v2** (`boardgamegeek.com/xmlapi2`) | `Bgg::Client` (Faraday + Nokogiri) — the only egress. Rate-limited 1 req/5s via Solid Cache key. Cached by endpoint (thing=1h, collection=30m, hot=24h, search=30m, user=1h). Expansion-merge workaround: 2 calls for `subtype=boardgame` (boardgames + expansions merged), ported from reference proxy. Retries on 502/503/429 with exp backoff (1s/2s/4s). `User-Agent: BggNightRails/1.0`. BGG token from `.env.bggeek` sent as cookie/header for headroom on private collections. | Read-only endpoints only in v1. No writes. |
-| **Solid Queue** (DB-backed jobs) | ActiveJob adapter. `Bgg::ImportCollectionJob` (concurrency: 1 BGG), `Bgg::RefreshHotItemsJob` (scheduled). | No Redis. |
-| **Solid Cache** (DB-backed cache) | `Rails.cache` for BGG response cache + rate-limit timestamp. | No Redis. |
-| **Apollo Client (Vue)** | `@apollo/client` + `@vue/apollo-composable`. `HttpLink` to `/graphql`. Batch link for query batching (handled by `Schema.multiplex`). `InMemoryCache` normalized by `__typename + id`. | Single GraphQL endpoint, same origin → no CORS. |
+| **BGG XML API v2 `/thing`** | Existing `Bgg::Client` with `stats=1` parameter to fetch polls | Polls are included in the standard `/thing` response when `stats=1` is present. Reuse the existing rate limiter and response cache. |
+| **Material Symbols** | Google Fonts via CSS `@import` or self-hosted font files | Use the variable font for dynamic weight. Load in `styles.css` to avoid an extra network round-trip from a `<link>` tag. |
+| **Inter font** | Fontsource package or Google Fonts | Prefer Fontsource for offline builds and deterministic deploys. |
 
 ### Internal Boundaries
 
 | Boundary | Communication | Notes |
 |----------|---------------|-------|
-| Vue ↔ Rails | GraphQL over HTTP (`POST /graphql`) | Single endpoint. Apollo batch link → `Schema.multiplex`. No REST. |
-| GraphqlController ↔ Schema | `BggNightSchema.execute` / `.multiplex` | Context carries `current_user` (none in v1) + dataloader. |
-| Schema (resolvers/mutations) ↔ Contracts | Mutation instantiates contract, calls it, raises `GraphQL::ExecutionError` on failure | Contracts are the validation gate. |
-| Contracts ↔ Services | Service called with `contract.values` (validated, coerced) only after success | Services trust their input. |
-| Services ↔ Models | Direct Active Record calls | Services own transaction boundaries. |
-| Services ↔ Bgg::Client | Only `Collections::Import` (via job) and read-through resolvers call `Bgg::Client` | BGG egress is centralized. |
-| Services ↔ Jobs | Services enqueue jobs (`Collections::Import` → `Bgg::ImportCollectionJob`); jobs call services back (`Job` → `Collections::Refresh`) | Async side effects only. |
-| Jobs ↔ Models | Jobs upsert `BggThing` / `BggCollectionItem` via services | Never call GraphQL. |
+| **Stitch primitives ↔ feature components** | Props/events | Primitives are agnostic; feature components inject data from Apollo/Pinia. |
+| **GraphQL schema ↔ Suggestions::Engine** | Resolver calls service | The resolver owns argument shape and authorization; the engine owns scoring. |
+| **BggPoll models ↔ Bgg::XmlParser** | Parser returns hashes; upserter writes rows | Keep parsing and persistence separate for testability. |
+| **Bgg::EnrichThingJob ↔ existing import jobs** | Both use `Bgg::Client` and `limits_concurrency to: 1, key: "bgg_api"` | Schedule backfill after the poll parser is deployed. |
+| **Group Detail queries ↔ Dataloader** | Loaders batch user/membership/session lookups | Prevents N+1 when resolving the members panel and sessions list. |
+| **Home dashboard ↔ Bgg::Client.hot** | Cache-through with 24h TTL | Hot items are already fetched live in v1.0; the dashboard reuses them. |
+
+## Build Order (v1.1)
+
+Phases are ordered to unblock parallel work and respect data dependencies. The design system can proceed in parallel with the poll data layer once the token contract is defined.
+
+| # | Build | Unblocks | Why this order |
+|---|-------|----------|----------------|
+| 1 | **Design token system** — define M3 roles in `styles.css` (primary, surface, on-surface, error, etc.) and add Inter + Material Symbols. | 2, 5, 6 | The visual contract must exist before components are reskinned. |
+| 2 | **Stitch primitives** — `StSurface`, `StText`, `StButton`, `StBadge`, `StSkeleton`, `StIcon`, `StAvatar`. | 3, 5, 6 | Reusable building blocks. Feature reskins become mechanical. |
+| 3 | **BGG poll data model + parser** — migrations for `bgg_polls`/`bgg_poll_results`; extend `Bgg::XmlParser` to extract polls; update `Bgg::Endpoints::Thing` to request `stats=1`. | 4 | The engine needs poll data in the DB. |
+| 4 | **Backfill existing things** — `Bgg::EnrichThingJob` + a one-time rake task to populate polls for all existing `BggThing` rows. | 5 | Without backfill, the suggestion engine has no poll data for existing collections. |
+| 5 | **Poll-based suggestion engine** — `Suggestions::Engine`, scoring classes, `SuggestionsResolver`, `SuggestionType`, `suggestions` query. | 6 | The engine is the headline feature. It depends on poll data and sessions. |
+| 6 | **Group Detail surface** — extend `Group` type, build `GroupView` panels (header, sessions, members, invite link, collection spotlight). | 7 | Surfaces existing data in the new design; can be built once primitives exist. |
+| 7 | **Home dashboard redesign** — `HomeDashboard` query, `HomeView` dashboard layout, `StatsCard`, `TrendingGames`. | 8 | Reuses hot items query and current user data. |
+| 8 | **Collection redesign** — reskin filter sidebar, game cards, sort, grid/list toggle with Stitch primitives. | 9 | Pure UI work; the collection logic is unchanged. |
+| 9 | **Picking a Game redesign** — reskin session header, attendee picker, suggestion cards, game picker with Stitch primitives. | (milestone complete) | Converges the engine and the redesign in the most visible user flow. |
+| 10 | **Polish + tech debt** — E2E in CI, Action Cable dev config, cleanup legacy BGG classes, update REQUIREMENTS checkboxes. | (ship) | Non-blocking quality gates. |
+
+### Dependency Graph (condensed)
+
+```
+1 ──→ 2 ──→ 6 ──→ 9
+│     │
+│     └──→ 5 ──→ 9
+│
+3 ──→ 4 ──→ 5
+```
+
+**Critical path:** 1 → 2 → 5 → 9 (design system → primitives → suggestion engine → Picking a Game). The poll data work (3 → 4) runs in parallel with the design system but must finish before the engine (5). Group Detail (6) and Home/Collection (7, 8) can be built in parallel once primitives exist.
 
 ## Sources
 
-- **graphql-ruby official guides** (Context7 `/rmosolgo/graphql-ruby`) — class-based schema, `use GraphQL::Dataloader`, `max_complexity`, Apollo batch handling via `Schema.multiplex`, `rails g graphql:install` layout. Confidence: MEDIUM (official docs). https://github.com/rmosolgo/graphql-ruby/blob/master/guides/
-- **graphql-batch vs GraphQL::Dataloader** (Context7 `/shopify/graphql-batch` + graphql-ruby dataloader/adopting.md) — Dataloader is the modern Fiber-based built-in; graphql-batch is older promise-based. Confidence: MEDIUM (official docs).
-- **vite-ruby** (Context7 `/elmassimo/vite_ruby`) — `app/frontend` default `sourceCodeDir`, `entrypoints/` subdir, production extends `assets:precompile` to build into `public/` with manifest. Confidence: MEDIUM (official docs). https://github.com/elmassimo/vite_ruby
-- **Rails 8 guides** (Context7 `/websites/guides_rubyonrails_v8_0`) — Solid Queue as default ActiveJob adapter, `config.active_job.queue_adapter = :solid_queue`, separate queue DB via `db/queue_migrate`, SQLite-in-production default, Kamal 2. Confidence: MEDIUM (official docs). https://guides.rubyonrails.org/v8.0/
-- **dry-rails** (Context7 `/dry-rb/dry-rails`) — `ApplicationContract` base class, `app/contracts/` auto-registration, `safe_params` feature on `ActionController::API`, container auto-registers `app/services` + `app/operations`. Confidence: MEDIUM (official docs). https://dry-rb.org/gems/dry-rails/
-- **Pinia** (Context7 `/vuejs/pinia`) — setup stores via `defineStore('name', () => …)` Composition API, flat architecture (no nested modules). Confidence: MEDIUM (official docs).
-- **Apollo vs urql vs Villus for Vue** (Exa web search, verified against Context7 ecosystem knowledge) — Apollo ~33KB gz + normalized cache + `@vue/apollo-composable`; urql ~8KB gz + document cache + `@urql/vue`; Villus Vue-native but smaller community. For apps with mutations + shared entities, Apollo's normalized cache wins. Confidence: MEDIUM (cross-checked).
-- **Rails + Vite monorepo patterns** (Exa web search, verified) — 5 real-world examples: `hoshinotsuyoshi/rails-api-vite-easy-stack` (backend/+frontend/ with rsync build:move into Rails public/), `espoo-dev/rails_boilerplate` (backend/+frontend/ with docker-compose include), `jcflorville/rails-tanstack-starter` (apps/api + apps/web fully decoupled, Kamal 2 dual deploy), `JadeCathleen/microposts_api` (Rails root + client/ subdir, separate Netlify deploy). The decoupled `apps/api + apps/web` pattern is common for SaaS but violates this project's single-deploy constraint; the `app/frontend` (vite-ruby) pattern is the tightest fit. Confidence: MEDIUM (verified).
-- **Reference repos** (read directly) — `bgg-graphql-proxy/src/datasources/bggDataSource.ts` (BGG rate-limit + retry + expansion-merge workaround + XML normalization patterns to port), `bgg-graphql-proxy/src/schema/schema.graphql` (the GraphQL schema shape the Rails backend must reproduce), `bggeek-shared-list/src/lib/graphql/client.ts` (Apollo Client config to mirror in Vue), `bggeek-shared-list/src/utils/{search,sorting,grouping,permalink}.ts` (frontend logic to port). Confidence: HIGH (primary source — this is the app being rewritten).
+- **Tailwind CSS v4 theme variables** (official docs, fetched 2026-07-13) — CSS-first `@theme` directive, `--color-*` namespace, custom property generation, dark-mode override patterns. Confidence: HIGH (official documentation).
+- **Material 3 color system** (material.io, project context) — tonal palette roles (primary, secondary, tertiary, surface, on-surface, error, inverse-surface). Confidence: HIGH (design reference from Stitch project).
+- **BGG XML API2 documentation** (official wiki, fetched 2026-07-13) — `/thing` endpoint supports `stats=1`, rate limit 1 req/5s, poll data structure described. Confidence: HIGH (official documentation).
+- **Reference GraphQL proxy schema** (`bgg-graphql-proxy/src/schema/schema.graphql`) — defines `Poll`/`PollResult` types with `name`, `title`, `totalVotes`, `results { value, numVotes, level, players }`. Confidence: HIGH (primary source).
+- **Reference proxy implementation** (`bgg-graphql-proxy/src/datasources/bggDataSource.ts`) — confirms the proxy returned `polls: []` and did not implement poll parsing; the Rails rewrite must add it. Confidence: HIGH (primary source).
+- **Existing project architecture** (`boardgame-night-rails-vue/.planning/research/ARCHITECTURE.md` v1.0, `PROJECT.md`, `FEATURES.md`) — base Rails + Vue + GraphQL + Solid Queue/Cache patterns, suggestion algorithm (Schmaus formula), session lifecycle, feature dependencies. Confidence: HIGH (project context).
+- **Web search on Tailwind v4 + Material 3 integration** (general web patterns, LOW confidence via webfetch) — confirmed that CSS custom properties and `@theme` are the idiomatic Tailwind v4 path for design systems.
 
 ---
-*Architecture research for: Rails 8 API + Vue 3 SPA monorepo with GraphQL + dry-validation + BGG integration*
-*Researched: 2026-06-30*
+*Architecture research for: v1.1 UI Redesign + Poll-Based Suggestion Engine*
+*Researched: 2026-07-13*

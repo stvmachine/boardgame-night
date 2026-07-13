@@ -1,564 +1,450 @@
-# Pitfalls Research
+# Pitfalls Research: v1.1 UI Redesign + Suggestion Engine
 
-**Domain:** Rails 8 API + Vue 3 SPA monorepo with GraphQL, dry-validation, and BoardGameGeek XML API v2 integration
-**Researched:** 2026-06-30
-**Confidence:** HIGH (BGG API pitfalls verified against existing proxy source code; Rails 8/graphql-ruby/dry-validation verified against official docs via Context7)
+**Domain:** Rails 8 API + Vue 3 SPA monorepo with GraphQL, Tailwind v4, Material 3 / Stitch design system, and BoardGameGeek XML API v2 integration
+**Researched:** 2026-07-13
+**Confidence:** HIGH (Tailwind v4, Material Symbols, Apollo Client, and Rails N+1 guidance verified against official docs; BGG poll structure inferred from XML API documentation and known BGG API behavior; recommendation pitfalls verified against ML/recommendation-systems literature)
 
 ## Critical Pitfalls
 
-### Pitfall 1: Losing the BGG Expansion Subtype Workaround
+### Pitfall 1: Material 3 Design System / Material Symbols Integration Mistakes
 
 **What goes wrong:**
-The BGG collection endpoint returns expansions with `subtype=boardgame` when you query with the default `subtype=boardgame` parameter. Expansions are included in the results but are incorrectly labeled as base games. The rewrite omits the workaround and expansions silently disappear or are miscategorized, breaking the core "shared collection" feature.
+The redesign introduces Material 3 tokens (Inter font, indigo/Material tonal palette, Material Symbols icons, 280px sidebar, rounded-xl cards) but the implementation undermines performance and consistency: icons load as a 3 MB+ variable font because the team forgot to subset and pin axes; the whole app shows a flash of unstyled text (FOUT) or invisible ligatures during load; dark-mode surface colors are hand-picked and drift from the light palette; icons render at the wrong optical size or weight because Vue components don't pass `opsz`/`wght` values consistently.
 
 **Why it happens:**
-This is a documented BGG API bug. The official BGG XML API2 wiki states: "the default (or using subtype=boardgame) returns both boardgame and boardgameexpansion's in your collection... but incorrectly gives subtype=boardgame for the expansions." Developers who don't read the BGG wiki closely assume `subtype=boardgame` returns only base games. The old proxy solved this with a two-call workaround (confirmed in `bggDataSource.ts` lines 251-295 and `bggDataSource.expansion.test.ts`).
+Material Symbols is a single font file with 2,500+ glyphs and four variable axes (FILL, wght, GRAD, opsz). The default Google Fonts URL loads every glyph and every axis, which is fine for prototyping but not for production. Ligature-based icons rely on the font being present before rendering; without `font-display: block` and preloading, users see the literal text `arrow_forward` briefly or blank squares. Tailwind v4's CSS-first `@theme` makes it easy to define custom color tokens, but without a source-of-truth mapping to Material 3 color roles (primary, on-primary, surface, surface-variant, inverse-surface, etc.), light and dark modes diverge. Designers reference the Stitch Figma file; engineers hardcode hex values in components, and the two palettes drift within a few sprints.
 
 **How to avoid:**
-Replicate the exact workaround from the old proxy:
-1. Call 1: `GET /collection?username=NAME&excludesubtype=boardgameexpansion&stats=1&own=1` (base games only)
-2. Call 2: `GET /collection?username=NAME&subtype=boardgameexpansion&stats=1&own=1` (expansions only)
-3. Merge the two result sets, summing `totalitems` and concatenating `item` arrays.
-4. Have a fallback to the single-call method if the workaround fails (the old proxy does this at line 298-309).
-5. Write a test with real fixture XML that verifies 62 boardgames + 13 expansions = 75 total items (the old test at `bggDataSource.expansion.test.ts` line 65 does exactly this).
-
-**Warning signs:**
-- User collections show fewer items than the BGG website displays.
-- Expansions are missing from shared lists.
-- All items have `subtype=boardgame` with no `boardgameexpansion` entries.
-- `totalitems` from the API doesn't match the merged item count.
-
-**Phase to address:**
-BGG API integration phase (Phase 1 or 2 — the BGG client service layer). This must be a first-class concern, not an afterthought.
-
----
-
-### Pitfall 2: BGG Rate Limiting — The 5-Second Rule Is Non-Negotiable
-
-**What goes wrong:**
-BGG throttles requests aggressively. Sending requests faster than 1 per 5 seconds results in HTTP 500 or 503 errors ("server too busy"). In a multi-user collection app, fetching collections for 5 users = 10 API calls (with the expansion workaround) = 50 seconds minimum. Without rate limiting, the app gets 429/503 storms and appears broken. With naive sequential fetching, the UI feels frozen for a full minute.
-
-**Why it happens:**
-BGG's rate limit is documented but easy to underestimate. The old proxy enforces a 5000ms delay between requests (`RATE_LIMIT_DELAY = 5000` at line 19 of `bggDataSource.ts`). The BGG wiki confirms: "Currently, a 5-second wait between requests seems to suffice." A Rails rewrite using Faraday or HTTParty without a rate-limiting middleware will blast BGG and get rate-limited immediately. The old app also fetches collections **sequentially** (see `useCollections.ts` lines 126-143), which is correct for rate limiting but creates a UX problem.
-
-**How to avoid:**
-1. Implement a token-bucket or fixed-window rate limiter in the BGG client service (Ruby equivalent of the old `enforceRateLimit()` method). Use `concurrent-ruby` or a mutex to enforce it across threads.
-2. **Use Solid Queue (or Sidekiq) for background fetching.** Don't fetch BGG collections synchronously in the GraphQL resolver. Enqueue a job per user, fetch in the background, cache the result, and serve from cache. This transforms a 50-second blocking wait into an async operation.
-3. Cache aggressively (see Pitfall 3). Collection data doesn't change minute-to-minute.
-4. Implement retry with exponential backoff for 502/503/429 responses (the old proxy uses `[1000, 2000, 4000]` ms delays with `MAX_RETRIES = 3`).
-5. Set a 10-second timeout per request (the old proxy uses `AbortController` with 10s timeout).
-
-**Warning signs:**
-- Intermittent 503/500 errors from BGG, especially when multiple users load collections simultaneously.
-- GraphQL queries timing out.
-- BGG returning 202 (queued) responses that never resolve.
-- Works fine in development (single user) but breaks in production (concurrent users).
-
-**Phase to address:**
-BGG API integration phase + background jobs phase. The rate limiter must exist from day one; the background job pattern can come when the job infrastructure is set up.
-
----
-
-### Pitfall 3: BGG HTTP 202 "Queued" Response — The Silent Hang
-
-**What goes wrong:**
-The BGG collection endpoint returns HTTP 202 (Accepted) instead of 200 when the data isn't cached on their end. This means "we've queued your request, try again later." If the client treats 202 as a normal response, it parses an empty or incomplete XML body and returns an empty collection. The user sees "no games found" even though they have hundreds.
-
-**Why it happens:**
-This is unique to the collection endpoint. The BGG wiki states: "if it's 202 (vs 200) then it indicates BGG has queued your request and you need to keep retrying." The old proxy's `makeRequest` method doesn't explicitly handle 202 — it parses whatever XML comes back. The `bgg-api-ts` library (a third-party TS wrapper) handles this by retrying up to 5 times on 202. This is a gap in the old proxy that the rewrite must fix.
-
-**How to avoid:**
-1. Check HTTP status code before parsing XML. If 202, wait (e.g., 2-5 seconds) and retry.
-2. Implement a maximum retry count for 202 responses (5 retries is reasonable).
-3. After max retries, return a "collection is being prepared" status to the frontend, not an empty collection.
-4. In the GraphQL schema, add a `CollectionStatus` enum (`READY`, `QUEUED`, `ERROR`) so the frontend can show a loading state.
-
-**Warning signs:**
-- Collections appearing empty for users who definitely have games.
-- Intermittent empty results that resolve on retry.
-- 202 status codes in HTTP logs but no retry logic.
-- First request for a new user always fails; second request succeeds.
-
-**Phase to address:**
-BGG API integration phase. This must be handled in the HTTP client layer before XML parsing.
-
----
-
-### Pitfall 4: BGG XML Inconsistencies — Arrays vs Single Objects vs Missing Fields
-
-**What goes wrong:**
-The BGG XML API returns wildly inconsistent structures depending on data availability:
-- `item` can be a single object (1 item) or an array (multiple items) — the parser must handle both.
-- `name` can be a string, an array of objects with `{type, value}`, or an object with `{_, sortindex}` (XML mixed content).
-- Fields like `description`, `image`, `thumbnail` can be entirely missing.
-- `statistics.ratings.average` can be nested as `.value` attribute or as a direct property.
-- `yearpublished` can be `{value: "2020"}` or just `"2020"`.
-
-The old proxy handles all of these with defensive normalization (see `normalizeThing`, `getPrimaryName`, `parseNumber`, `parseFloat` in `bggDataSource.ts`). A rewrite using Nokogiri must replicate this defensive parsing or it will crash on real-world BGG data.
-
-**Why it happens:**
-BGG's XML API is old and inconsistent. xml2js (the old proxy's parser) with `explicitArray: false, mergeAttrs: true, explicitRoot: false` flattens the XML in a specific way that creates these shape variations. Nokogiri in Ruby works differently — it gives you a DOM tree you traverse explicitly. The parsing logic must be completely rewritten, not ported line-by-line.
-
-**How to avoid:**
-1. Use Nokogiri's CSS selector or XPath API to traverse XML explicitly — don't try to flatten it into a hash like xml2js does.
-2. Write a `BGG::ThingNormalizer` (or similar) service that handles every field with nil-safety: `node.at_css("yearpublished")&.attribute("value")&.value || 0`.
-3. Port the **test fixtures** from the old proxy (`stevmachine_collection.xml`, `stevmachine_boardgames.xml`, `stevmachine_expansions.xml`) and write Ruby tests that parse them with the same expected outputs.
-4. Handle the `name` field explicitly: check for `type="primary"` attribute, fall back to first name, handle text content vs attribute.
-5. Always default numeric fields to 0, string fields to `""`.
-
-**Warning signs:**
-- `NoMethodError: undefined method 'value' for nil` when parsing certain games.
-- Games with missing images crashing the serializer.
-- Single-item collections returning `NoMethodError` because `item` is an element, not an array.
-- Test fixtures pass but production data crashes.
-
-**Phase to address:**
-BGG API integration phase. The normalizer must be test-driven with real fixture XML from the start.
-
----
-
-### Pitfall 5: BGG Caching Traps — Stale Data and BGG's Own Cache Lag
-
-**What goes wrong:**
-BGG caches collection data on their end with a significant lag (hours, not minutes). A user adds a game on BGG.com, then checks the app, and the game isn't there. The app's own cache layer compounds this: if the app caches for 24 hours, the user might wait 25+ hours to see their new game. Conversely, caching too aggressively means the app serves stale data; caching too lightly means hitting BGG's rate limit.
-
-**Why it happens:**
-Two layers of caching are in play:
-1. **BGG's server-side cache**: BGG caches collection responses and doesn't invalidate immediately. The BGG forum thread (2025-11-04) documents users waiting hours for collection changes to appear via the API.
-2. **App-side cache**: The old proxy uses Redis with a 3600-second (1 hour) `defaultMaxAge` for Apollo response cache (see `index.ts` line 33). The old app has no client-side cache beyond Apollo's in-memory cache.
-
-The rewrite needs a deliberate caching strategy that accounts for BGG's own lag.
-
-**How to avoid:**
-1. **Two-tier caching**: Cache raw BGG XML responses (24h TTL for collections, 7d for thing details — game data rarely changes). Cache normalized/parsed results separately (shorter TTL, invalidated when raw cache changes).
-2. **Stale-while-revalidate pattern**: Serve cached data immediately, trigger a background refresh job, update cache when fresh data arrives. This gives instant responses while staying current.
-3. **User-triggered refresh**: Add a "refresh my collection" button that bypasses the cache and enqueues a high-priority background job. Set a minimum interval (e.g., 15 minutes) to prevent abuse.
-4. **Cache key by username + subtype + timestamp**: Include the `pubdate` from BGG's response in the cache — if BGG's `pubdate` changes, the data is fresh.
-5. **Don't cache 202 responses**: Only cache successful 200 responses with actual data.
-
-**Warning signs:**
-- Users reporting "I added a game but it's not showing up."
-- Cache hit rate too high (data never refreshes).
-- Cache hit rate too low (hitting BGG rate limits).
-- Same `pubdate` timestamp across multiple days of API calls (BGG's cache is stale).
-
-**Phase to address:**
-Caching phase (after BGG integration but before multi-user features). The cache strategy must be designed before the multi-user collection feature is built.
-
----
-
-### Pitfall 6: GraphQL N+1 Queries on BGG Expansion/Base Game Resolution
-
-**What goes wrong:**
-The old proxy's resolver for `Thing.expansionFor` (lines 113-147 of `resolvers/index.ts`) fetches expansions in batches of 3, with a limit of 10 expansions per game. Each batch is a separate BGG API call, rate-limited at 5 seconds. Resolving expansions for a single game = 10/3 = 4 batches × 5 seconds = 20 seconds. For a collection of 75 games, if the frontend requests expansions for each, that's 75 × 20 = 25 minutes. The GraphQL query appears to hang.
-
-**Why it happens:**
-GraphQL resolves fields per-object. When a query asks for `things { expansions { name } }`, graphql-ruby calls the `expansions` resolver once per thing. Without batching, each call hits BGG separately. The old proxy mitigates this by batching in groups of 3 and limiting to 10, but it's still O(n) API calls per collection item.
-
-**How to avoid:**
-1. **Use GraphQL::Batch** (Shopify's gem, confirmed via Context7) to batch expansion lookups across all things in a single query. Implement a `BGGThingLoader < GraphQL::Batch::Loader` that collects all expansion IDs across all things in the query, deduplicates them, and fetches them in a single BGG `/thing?id=1,2,3,...` call (BGG supports comma-separated IDs).
-2. **BGG's thing endpoint accepts multiple IDs**: `GET /thing?id=1,2,3,4,5&stats=1` returns all of them in one response. Use this to batch-fetch. However, there may be a URL length limit — test with 50+ IDs.
-3. **Cache thing details aggressively** (7-day TTL). Game metadata rarely changes. Once a game's expansions are fetched, cache the expansion list.
-4. **Set GraphQL `max_depth` and `max_complexity`** to prevent deeply nested queries that would cascade into hundreds of BGG calls. graphql-ruby supports `max_depth 15` and `max_complexity 100` at the schema level (confirmed via Context7).
-5. **Don't resolve expansions in the collection query.** Return expansion IDs only; let the frontend fetch details on demand (e.g., when expanding a game card).
-
-**Warning signs:**
-- GraphQL queries taking 30+ seconds when requesting nested expansion data.
-- BGG rate limit errors (503/429) during complex queries.
-- Server memory growing during query execution (accumulating promises).
-- Works for 1-2 games but times out for full collections.
-
-**Phase to address:**
-GraphQL schema design phase. The batching strategy must be designed before writing resolvers. `max_depth` and `max_complexity` must be set from day one.
-
----
-
-### Pitfall 7: Solid Queue Has No Automatic Retries — Jobs Die Silently
-
-**What goes wrong:**
-BGG API jobs (collection fetches, thing lookups) fail due to rate limiting (503) or network errors. Under Sidekiq, these would automatically retry up to 25 times with exponential backoff. Under Solid Queue (Rails 8 default), failed jobs die silently after the first failure unless `retry_on` is explicitly declared. The BGG integration appears broken because transient failures are never retried.
-
-**Why it happens:**
-This is the single most documented Solid Queue migration pitfall (confirmed across 4 independent web sources: nsinenko.com, ttb.software, caio.ca, dev.to). Sidekiq retries automatically (25 retries, exponential backoff). Solid Queue relies on Active Job's `retry_on` / `discard_on` macros. If you don't declare them, the job fails once and is done. The old proxy's retry logic (`MAX_RETRIES = 3`, `RETRY_DELAYS = [1000, 2000, 4000]`) was in the HTTP client itself, but the Rails rewrite may push this to the job layer.
-
-**How to avoid:**
-1. Declare `retry_on` explicitly on every BGG job class:
-   ```ruby
-   class FetchBggCollectionJob < ApplicationJob
-     retry_on Bgg::RateLimitError, wait: :polynomially_longer, attempts: 5
-     retry_on Faraday::TimeoutError, wait: 10.seconds, attempts: 3
-     discard_on Bgg::NotFoundError # don't retry 404s
-   end
+1. **Subset and lock Material Symbols axes in production.** Use the Google Fonts `icon_names` parameter to load only icons used in the app (drops payload from ~295 KB to ~1-3 KB per icon set). Pin the axes you actually need, e.g. `FILL@0..1,opsz@24,wght@400` instead of the full variable range. Example:
+   ```html
+   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL,opsz,wght@0..1,24,400&icon_names=home,group,settings,add,close,menu,light_mode,dark_mode,chevron_right,search,filter_list,sort,refresh,person,logout&display=block" rel="stylesheet" />
    ```
-2. Keep the retry logic in the HTTP client too (defense in depth) — the old proxy's exponential backoff in `makeRequest` is still valuable.
-3. Use Solid Queue's `concurrency_controls` to limit BGG jobs to 1 at a time (respecting the 5-second rate limit):
-   ```ruby
-   class FetchBggCollectionJob < ApplicationJob
-     limits_concurrency to: 1, key: "bgg_api"
-   end
+2. **Preload the icon font** in the Rails SPA shell (`app/views/application/index.html.erb` or equivalent) so the font is in flight before the CSSOM is built:
+   ```html
+   <link rel="preload" href="https://fonts.gstatic.com/s/materialsymbolsoutlined/v1..." as="font" type="font/woff2" crossorigin>
    ```
-4. Monitor via Mission Control - Jobs (Solid Queue's dashboard) — set up alerts for failed jobs.
+3. **Use `font-display: block`** in the Google Fonts URL (already shown above) to prevent ligature text flashing before the icon font loads.
+4. **Map Stitch/Material 3 tokens to Tailwind v4 `@theme` variables once.** Create a single `app/frontend/styles/theme.css` that defines `--color-primary`, `--color-on-primary`, `--color-surface`, `--color-surface-variant`, `--color-outline`, `--color-inverse-surface`, etc., and the corresponding light/dark values. Use `prefers-color-scheme` or a `.dark` class selector. Every component uses these tokens; never hardcode a hex value outside the theme file.
+5. **Create a single `<MaterialIcon>` Vue component** that enforces consistent `opsz`, `wght`, `GRAD`, and `FILL` values. Do not scatter raw `<span class="material-symbols-outlined">` across the codebase. Example:
+   ```vue
+   <span class="material-symbols-outlined" :style="{ fontVariationSettings: axes }">{{ name }}</span>
+   ```
+6. **Avoid the "variable font for everything" trap.** If the app only needs one static weight and no fill animation, request a static instance rather than the full variable font. Only request the full variable range if you are animating FILL or wght.
 
 **Warning signs:**
-- Jobs showing as "failed" in Mission Control with no retry attempts.
-- Users reporting that their collection "sometimes doesn't load" (transient failures not retried).
-- BGG 503 errors in logs but no corresponding retry log entries.
-- The app works when BGG is responsive but breaks during BGG's peak load hours.
+- Lighthouse "Reduce unused font bytes" flags Material Symbols as the largest asset.
+- Users see the literal text `arrow_forward` or `close` before icons render.
+- Icons look too heavy at small sizes or too thin at large sizes (wrong `opsz`/`wght`).
+- Dark mode cards use a different gray than the sidebar; some surfaces use `--color-neutral-200` while others use a hand-coded `#e5e7eb`.
+- Adding a new icon requires editing the Google Fonts URL in three places.
 
 **Phase to address:**
-Background jobs phase. Every job class must have explicit retry declarations before it's considered done.
+Design-system foundation phase (the first phase of the redesign). The token file, icon component, and font-loading strategy must be in place before any screens are rebuilt.
 
 ---
 
-### Pitfall 8: dry-validation and Rails Strong Parameters Conflict
+### Pitfall 2: Tailwind v4 CSS-First Config Conflicts During Design System Migration
 
 **What goes wrong:**
-The team uses dry-validation contracts for input validation but Rails controllers still have `strong_params` filtering. Two validation layers fight each other: strong_params strips keys that the dry-validation contract expects, causing cryptic "key missing" errors. Or worse, both pass but with different coercion results (strong_params leaves strings, dry-validation expects integers).
+The app is already on Tailwind v4 with a minimal CSS-first setup (`@import "tailwindcss";` plus a few `@theme` variables). The redesign introduces a comprehensive token system, but migration mistakes break existing components: old utilities like `rounded-sm`/`shadow-sm` no longer mean what they meant in v3; custom utilities defined with `@layer utilities` are silently ignored; `@apply` inside Vue `<style>` blocks fails because the new theme variables are not visible to separately bundled CSS; the team accidentally imports the default Tailwind color palette alongside the custom palette, causing token collisions and bloated CSS.
 
 **Why it happens:**
-dry-rails provides a `safe_params` macro that replaces strong_params with `Dry::Schema::Params` validation (confirmed via Context7 — `dry-rails` docs show `schema(:show) do ... end` in controllers). But if developers mix `params.require(:user).permit(:name, :email)` with `schema(:create) do ... end`, the two systems conflict. The `Dry::Schema::Params` type is specifically designed for form input (stringified keys, string values) and handles coercion, while strong_params does no coercion.
+Tailwind v4 is a major rewrite: it removes `@tailwind` directives, replaces `tailwind.config.js` with CSS `@theme`, changes default scales (e.g., `rounded-sm` → `rounded-xs`, `shadow-sm` → `shadow-xs`), removes deprecated utilities (`bg-opacity-*`, `flex-shrink-*`), renames utilities (`outline-none` → `outline-hidden`), and changes how custom utilities/components are registered (`@utility` instead of `@layer utilities`). Vue SFC `<style>` blocks are bundled separately from the main CSS, so they can't see theme variables unless you use `@reference`. The v3-to-v4 upgrade tool handles simple migrations, but design-system migrations are never simple and often leave behind stale `@apply` and `@layer` blocks.
 
 **How to avoid:**
-1. **Pick one validation strategy per controller and stick to it.** Use `dry-rails` `safe_params` for all input validation. Don't use `strong_params` in controllers that have `schema` declarations.
-2. Use `ApplicationContract` (dry-rails provides this base class) for complex validation with business rules. Use `schema` macros for simple parameter coercion.
-3. Use `Dry::Schema::Params` (not `Dry::Schema::JSON`) for form/HTTP params — it handles stringified keys and string-to-type coercion.
-4. For GraphQL inputs, graphql-ruby handles its own argument validation — don't double-validate with dry-validation at the resolver level. Use dry-validation for service objects and form objects, not for GraphQL arguments.
-5. Test the full pipeline: HTTP params → controller → service object → dry-validation contract. Don't test contracts in isolation only.
-
-**Warning signs:**
-- `Key :age is missing` errors from dry-validation even though the param is present in the request.
-- Type mismatches: contract expects `Integer`, gets `"25"` string.
-- Inconsistent error messages: some from Rails, some from dry-validation.
-- Developers bypassing contracts and using raw `params` because "it's easier."
-
-**Phase to address:**
-Foundation phase (when setting up the Rails app structure). The validation strategy must be decided before writing controllers.
-
----
-
-### Pitfall 9: Vue 3 + Vite + Rails Dev Server Proxy Chaos
-
-**What goes wrong:**
-In development, the Vue 3 SPA runs on Vite's dev server (e.g., `localhost:5173`) and the Rails API runs on Puma (e.g., `localhost:3000`). Without proper proxy configuration:
-- CORS errors block GraphQL requests from Vue to Rails.
-- Vite HMR (Hot Module Replacement) is slow because it's proxied through Rails.
-- Asset paths break: Vue assets reference `/assets/...` but Vite serves from `/vite-dev/...`.
-- WebSocket connections for HMR fail through the proxy.
-
-In production, the Vue build output must be served by Rails (from `public/`) or by a separate static file server, and the asset paths must match.
-
-**Why it happens:**
-Running two servers in development is inherently tricky. Vite Ruby's default proxies Vite dev server requests through Rails (confirmed via Context7 — `skipProxy` defaults to `false`). This works but is slow because Rails processes every asset request. The CSP (Content Security Policy) may also block Vite's inline styles and scripts.
-
-**How to avoid:**
-1. **Use `vite_rails` gem** with `vite-plugin-rails` in the Vue config. This is the canonical integration (confirmed via Context7 docs).
-2. **Set `skipProxy: true`** in `vite.json` for faster development — requests go directly to Vite dev server, bypassing Rails. Use Caddy or a similar reverse proxy if needed.
-3. **Configure CORS in Rails** for development: use `rack-cors` gem, allow `localhost:5173` origin for GraphQL endpoint. In production, serve Vue from the same origin as Rails (from `public/`) to avoid CORS entirely.
-4. **Configure CSP** to allow Vite's dev server origin and inline styles (needed for Vue SFCs with `<style>` blocks).
-5. **In production**, build Vue with `vite build` and output to `public/` (or `public/vite/`). Rails serves the `index.html` and Vite handles asset fingerprinting.
-6. **For the monorepo**: Keep Vue in `frontend/` and Rails in `backend/` (or `api/`). The Vite config references Rails for API calls via a proxy in `vite.config.ts`:
-   ```typescript
-   server: {
-     proxy: {
-       '/graphql': 'http://localhost:3000',
-       '/api': 'http://localhost:3000',
-     }
+1. **Run `npx @tailwindcss/upgrade` in a branch** and review the diff, but do not treat it as the final state. The tool will migrate `tailwind.config.js` to `@config`, but the goal is to replace it with a clean CSS-first `@theme` file.
+2. **Replace the old config with a single `@theme` file.** Define the full Stitch palette in `app/frontend/styles/theme.css` and import it before any components. If you must keep a legacy `tailwind.config.js`, load it explicitly with `@config` only for plugins that v4 does not yet support.
+3. **Reset the default color namespace** if the custom palette is comprehensive:
+   ```css
+   @theme {
+     --color-*: initial;
+     --color-primary: #4f46e5;
+     --color-on-primary: #ffffff;
+     /* ... all custom colors ... */
    }
    ```
+   This prevents accidental use of `bg-red-500` when the design system only wants `bg-error` or `bg-destructive`.
+4. **Audit renamed utilities.** Replace `rounded-sm` with `rounded-xs`, `shadow` with `shadow-sm`, `outline-none` with `outline-hidden`, and `flex-shrink-*` with `shrink-*` across the codebase. Do this as a single mechanical commit before the redesign starts.
+5. **Use `@reference "../styles/theme.css"` in Vue `<style>` blocks** whenever you need `@apply` with custom utilities or theme variables. Better yet, avoid `@apply` entirely and use the generated CSS variables directly (`color: var(--color-primary)`), which works across all bundles without `@reference`.
+6. **Register custom utilities with `@utility`, not `@layer utilities`.** For example, the status-badge styles should be defined as `@utility badge-pill { ... }` in the global theme CSS so they work with variants.
+7. **Keep the default Tailwind spacing/typography scale unless the design system explicitly overrides it.** Replacing `--spacing` or the full font scale is high-risk; limit the first migration to colors, shadows, and radii.
 
 **Warning signs:**
-- CORS errors in browser console during development.
-- Vite HMR taking 2+ seconds for each change.
-- 404s for Vue assets in production.
-- "Mixed content" warnings (HTTP assets on HTTPS page).
-- WebSocket connection failures for HMR.
+- `rounded-sm` produces a different radius than the design spec.
+- `outline-none` no longer hides the focus ring in forced-colors mode.
+- Custom classes in `@layer utilities` are not picked up by Tailwind.
+- Vue SFC styles fail to compile with "unknown utility" errors.
+- Production CSS is much larger than expected because both default and custom palettes are generated.
 
 **Phase to address:**
-Project setup phase (Phase 1). The dev server configuration must work before any features are built.
+Design-system foundation phase, immediately after the token file is created. Do this before migrating any existing screens to the new visual style.
 
 ---
 
-### Pitfall 10: Monorepo Deployment Coupling — Vue and Rails Must Deploy Together
+### Pitfall 3: BGG Poll Data Pitfalls in the Suggestion Engine
 
 **What goes wrong:**
-The Vue frontend and Rails backend are in the same repo but have different build processes. Deployment becomes a coordination nightmare:
-- Vue build changes the asset hashes, but Rails hasn't been redeployed with the new `index.html` reference.
-- Rails deploys a new GraphQL schema, but the Vue app still has the old generated types.
-- One deploys but the other doesn't, causing API mismatches.
-- CI/CD pipeline runs tests for both but deploys only one.
+The suggestion engine weights scores using BGG's "Suggested Number of Players" poll data, but the implementation produces bad results: games with no poll data get a zero score and disappear; games with few votes get ranked higher than games with thousands of votes because the raw "Best" vote count is used without normalization; the `numplayers` attribute contains strings like `"2"`, `"3-4"`, `"4+"`, or `"2, 3, 4"` that the parser treats inconsistently; fetching poll data requires an extra `/thing?id=...&stats=1` call per game, which exhausts the BGG rate limit; cached thing data is reused without invalidating the new poll fields, so the suggestion engine runs on stale data.
 
 **Why it happens:**
-A monorepo with two distinct build targets (Vite for Vue, Rails asset pipeline for backend) requires a unified deployment strategy. If deployment is manual or semi-automated, it's easy to deploy one half and forget the other.
+BGG's `/thing` endpoint returns three polls (`suggested_numplayers`, `suggested_playerage`, `language_dependence`) under `<statistics>`. Each poll has `<results numplayers="N">` with `<result value="Best" numvotes="...">`, `<result value="Recommended" numvotes="...">`, and `<result value="Not Recommended" numvotes="...">`. The structure is not identical for every game; some polls are missing entirely, some have `totalvotes="0"`, and the `numplayers` string can represent a single count, a range, or a "plus" count. The existing `BggThing` model already stores statistics (`average`, `bayes_average`, `users_rated`, `average_weight`, `num_comments`) but has no columns for poll data. The v1 normalizer in `app/services/bgg.rb` doesn't currently parse polls, and the old proxy normalized `polls: []` without storing them. Any new feature that reads polls must either extend the XML normalizer or fetch thing data on demand, which adds BGG API calls.
 
 **How to avoid:**
-1. **Single deploy command**: `bin/deploy` that builds Vue (`cd frontend && npm run build`), copies output to Rails `public/`, then deploys Rails (Kamal 2, Docker, etc.).
-2. **Version-lock the API contract**: Generate GraphQL types from the Rails schema (`rails graphql:schema:dump`) and commit the `schema.graphql` to the repo. The Vue codegen step uses this file. If the schema changes, the CI pipeline fails if the Vue types aren't regenerated.
-3. **Atomic deployment**: Deploy Vue and Rails in a single Docker image. Rails serves the Vue SPA from `public/` and the GraphQL API from `/graphql`. One container, one deploy.
-4. **CI pipeline checks both**: Run Rails tests AND Vue tests AND a contract test that verifies the Vue GraphQL queries match the Rails schema.
-5. **Use Kamal 2** (Rails 8 default deployment tool) for atomic deploys with zero-downtime rolling updates.
+1. **Add a structured `player_poll_scores` JSON column to `bgg_things`.** Store the parsed "best" and "recommended" scores per player count, normalized by total votes. Do not store raw vote counts only; precompute a score like `best_score = best_votes / total_votes` and `recommend_score = (best + recommended) / total_votes`. This makes the suggestion engine queryable and avoids re-parsing XML on every suggestion request.
+2. **Normalize the `numplayers` string defensively.** Use a `Bgg::PollNormalizer` service that handles:
+   - `"2"` → `[2]`
+   - `"3-4"` → `[3, 4]`
+   - `"4+"` → `[4, 5, 6, ... up to maxPlayers]`
+   - `"2, 3, 4, 5, 6, 7, 8, 9, 10+"` → split on comma and strip.
+   Always fall back to `min_players..max_players` if the poll is missing or malformed.
+3. **Require a minimum vote threshold.** Treat polls with `totalvotes < 10` (or similar) as "insufficient data" and fall back to the min/max player count heuristic, not to zero. This prevents niche games from dominating or disappearing.
+4. **Fetch poll data as part of the existing `/thing` import, not on demand.** The `ImportCollection` flow already enqueues background jobs to fetch and cache thing details. Extend `Bgg::ThingNormalizer` to parse `<poll name="suggested_numplayers">` and persist the scores. Do not make a separate `/thing` call from the suggestion engine; read from the database.
+5. **Respect the BGG rate limit when backfilling polls.** If you need to retroactively populate poll data for existing `bgg_things`, enqueue one `FetchBggThingJob` per game with `limits_concurrency to: 1, key: "bgg_api"` and a 5-second delay between jobs. The existing `Bgg::RateLimiter` and `retry_on` must apply. A backfill of 1,000 games will take ~85 minutes; plan for it.
+6. **Cache-invalidation strategy:** version the cache key for thing data to include a "poll schema version". When the normalizer changes, the old cached XML is invalidated. Use `Rails.cache` with a 7-day TTL for thing data and a 30-day TTL for poll scores (polls rarely change). If the suggestion engine scores are computed on the fly, cache the computed shortlist per `(session_id, attendee_ids)` with a short TTL (5 minutes) because session state changes frequently.
 
 **Warning signs:**
-- "Schema mismatch" errors in the Vue app after a Rails deploy.
-- 404s for JavaScript assets after a Vue build change.
-- GraphQL queries failing because the frontend expects fields the backend hasn't deployed yet.
-- Deployment runbooks that have separate steps for "deploy frontend" and "deploy backend."
+- Suggested games exclude well-known titles that happen to have no BGG poll votes.
+- A 2-player-only game scores highly for a 6-player session because `numplayers="2"` was misinterpreted as a range.
+- The `/thing` endpoint is hit repeatedly during the "Pick a Game" flow, causing 503 responses.
+- Suggestion results differ between the first load and a refresh because the cache contains stale XML without poll fields.
+- Games with identical mechanics but very different player counts receive the same score.
 
 **Phase to address:**
-Project setup phase + deployment phase. The monorepo structure and deploy script must be established early.
+Suggestion-engine backend phase. The poll parsing and persistence must be built before the scoring algorithm can be tested reliably. This is also a prerequisite for the "attendee-aware filtered suggestions" feature.
+
+---
+
+### Pitfall 4: Suggestion Engine Algorithm Pitfalls
+
+**What goes wrong:**
+The poll-based suggestion engine produces recommendations that feel random or unfair: new groups with no play history get an empty or generic shortlist (cold start); the algorithm over-fits to the exact player count and ignores games that are "good with 3-5" when 4 people are attending; a single owner's collection dominates the results because the score isn't normalized across owners; the "explainability" UI shows a raw numeric score with no human-readable reason; the engine becomes slow when the shared collection exceeds a few hundred games because it recomputes everything in the GraphQL resolver; or the algorithm suggests expansions that nobody has the base game for.
+
+**Why it happens:**
+Recommendation systems are easy to prototype and hard to get right. A naive implementation sums poll scores for each game and sorts, but that ignores ownership distribution, complexity preference, play time, and the fact that BGG polls are noisy. Cold start is real: a group with no session history has no signal about what they actually enjoy. Over-fitting to player count happens when the algorithm requires an exact match to `numplayers`. Performance degrades when scoring is done synchronously in a resolver that loops over every game in the merged collection. Explainability fails when the score is a black-box weighted average rather than a set of transparent criteria.
+
+**How to avoid:**
+1. **Start with a rule-based, explainable score, not a learned model.** The v1.1 engine should be a weighted sum of transparent factors:
+   - Player-count fit (from BGG poll or fallback heuristic) — high weight.
+   - Play-time fit vs. session duration preference — medium weight.
+   - Complexity fit vs. group average `average_weight` — medium weight.
+   - Ownership breadth (how many attendees own it) — medium weight.
+   - BGG community rating (`bayes_average`) — low weight, only as a tie-breaker.
+   Return each factor as a separate field in the GraphQL type so the UI can show "Good with 4 players · Owned by 3 of you · About 90 min · Weight 2.8".
+2. **Handle cold start explicitly.** For new groups or sessions with no picked games, fall back to:
+   - Games owned by the most attendees.
+   - BGG "Hot Items" filtered by the session's player count and time budget.
+   - A curated "starter night" list if the group has fewer than 10 candidate games.
+3. **Normalize by owner count, not raw score.** A game owned by 4 attendees should be weighted more than a game owned by 1 attendee with a slightly higher poll score. Use `ownership_score = attendees_who_own / total_attendees` as a multiplicative factor, not an additive bonus.
+4. **Exclude expansions without a base game in the merged pool.** The existing `BggThing` model hardcodes `is_expansion` to `false`; the redesign should either set this correctly during import or use the BGG links to identify base games. The suggestion engine must filter expansions unless the base game is also owned by at least one attendee.
+5. **Compute the shortlist in a background job or service object, not the resolver.** The resolver should read a precomputed `suggestion_shortlists` table or cache keyed by `(group_id, session_id, attendee_ids_hash)`. This keeps the GraphQL query fast and the algorithm testable in isolation.
+6. **Cap the shortlist and paginate.** Return the top 20-30 suggestions; don't send the entire scored collection to the frontend. The UI can show "See more" if needed.
+7. **Avoid ML for v1.1.** Collaborative filtering or neural recommenders require session/play history data the app does not yet have. They are also not explainable. Keep the algorithm deterministic and debuggable.
+
+**Warning signs:**
+- The same 5 popular BGG titles appear for every session regardless of the group.
+- The explanation panel just says "Score: 0.73" with no human-readable breakdown.
+- Suggestions change dramatically when one attendee's collection is added or removed (over-fitting to ownership).
+- "Pick a Game" takes 5+ seconds to load for large groups.
+- Suggested expansions show up without their base game.
+
+**Phase to address:**
+Suggestion-engine backend phase, alongside the poll-data parsing work. The algorithm should be unit-tested with fixtures before the redesigned "Pick a Game" UI is wired up.
+
+---
+
+### Pitfall 5: Group Detail Page N+1 Queries and Pagination
+
+**What goes wrong:**
+The new Group Detail surface loads a group header, upcoming sessions, the shared collection spotlight, and a members panel. Without careful eager loading, the page triggers N+1 queries: 1 query for the group, 1 per session host, 1 per session attendee, 1 per member avatar, 1 per collection item owner, plus queries for sync status per member. On a group with 10 members and 50 shared games, this can be 100+ queries per page load, causing the GraphQL resolver to time out or the UI to show skeleton loaders for seconds.
+
+**Why it happens:**
+The existing `GroupType` resolver already shows the pattern:
+```ruby
+field :members, [Types::UserType], null: false
+field :collection, Types::MergedCollectionType, null: false
+
+def collection
+  {
+    items: BggThing.merged_for_users(object.member_ids),
+    sync_statuses: object.members.map { |user| sync_status_for(user) } # members may not be loaded
+  }
+end
+```
+`BggThing.merged_for_users` performs a `JOIN` but does not eager load `bgg_collections` or `users` for each item. The `sync_statuses` call iterates `object.members` without ensuring they are loaded. The `memberships` field uses `includes(:user)`, but `members` does not. Any new Group Detail query that adds `night_sessions` with `attendees` and `host` will multiply these problems.
+
+**How to avoid:**
+1. **Eager load the entire Group Detail graph in one query object.** Build a `GroupDetailQuery` object (or service) that returns the group with `includes(:owner, { group_memberships: :user }, { night_sessions: [:host, { attendances: :user }] })`. Do not rely on GraphQL field resolvers to load associations on demand.
+2. **Use `preload`/`eager_load` consistently for collection items.** When returning the merged collection for the group, eager load the owners through `bgg_collections`: `BggThing.merged_for_users(member_ids).includes(bgg_collections: :user)` or `preload` if the query has no conditions on the joined tables. Measure with `Bullet` in development/test.
+3. **Paginate the shared collection spotlight.** The full merged collection may be hundreds of games. The Group Detail page should show only a curated subset (e.g., "Top 12 owned by most members") and link to the full Collection view. Use a database query with `LIMIT 12` and `ORDER BY` ownership count, not an in-memory sort after loading everything.
+4. **Avoid loading full collection owner lists for every card in the spotlight.** For the Group Detail preview, show only the count of owners and the top 3 avatars, computed in SQL with `COUNT` and a window function if needed. Load full owner lists only on the Collection page.
+5. **Precompute member sync status.** The existing `sync_status_for` method calls `user.bgg_collections.any?` and `user.bgg_collections.count`. These should be batched with a `UsersLoader` (`GraphQL::Dataloader`) or preloaded with `includes(:bgg_collections)`. Better: store a `last_synced_at` and `sync_status` column on `users` that is updated by the import job, so the resolver doesn't query the collection table at all.
+6. **Set a query timeout.** Configure the GraphQL controller to abort queries that run longer than 5 seconds in production, returning a partial result with a "slow query" warning. This prevents the whole page from hanging when an N+1 slips through.
+
+**Warning signs:**
+- Bullet logs "N+1 Query" warnings for `GroupType`.
+- Group Detail load time increases linearly with the number of members or games.
+- The Rails log shows 100+ SQL queries for a single Group Detail GraphQL request.
+- The shared collection spotlight renders all 200+ games before the user can interact with the page.
+- Member avatars load one by one after the page skeleton appears.
+
+**Phase to address:**
+Group Detail phase. Eager loading and pagination should be designed into the `GroupType` resolver and the new `GroupDetail` component, not retrofitted after performance complaints.
+
+---
+
+### Pitfall 6: Apollo Cache Invalidation and Pinia Store Conflicts
+
+**What goes wrong:**
+After the redesign, users create a group or pick a game, but the UI still shows the old state: the new group doesn't appear in the sidebar, the picked game isn't reflected on the session page, the attendee count doesn't update after an RSVP, or the collection filter state persists across sessions. The team added `refetchQueries` to every mutation but some queries are inactive, so nothing refreshes; or they duplicated server data in Pinia and now the Apollo cache and Pinia store disagree.
+
+**Why it happens:**
+Apollo Client's normalized cache is the single source of truth for server data, but mutations don't automatically update every list that should contain the new/modified object. The app already uses `useRefreshCollection` and watches `syncStatuses` to sync Pinia with Apollo, but this pattern is fragile. `refetchQueries` only works if the target query is active (currently mounted). Adding data to a list requires either returning the new object in the mutation response and using an `update` callback with `cache.modify`, or refetching the parent query. Pinia is intended for UI-only state (filters, sidebar open/close, draft session), but it's tempting to store server-derived data (like the list of groups) there for easy access, creating two sources of truth.
+
+**How to avoid:**
+1. **Server data lives in Apollo; Pinia holds UI-only state.** The existing `useCollectorsStore`, `useFilterStore`, and `useUiStore` follow this pattern. Extend it strictly: do not add group lists, session lists, or user profiles to Pinia. Use Apollo `useQuery`/`useMutation` directly or wrap them in lightweight composables.
+2. **Return modified objects in mutation responses.** Every mutation that creates or updates a group, session, attendance, or game pick should return the affected object(s) with `__typename` and `id`. Apollo will normalize and update the cache automatically for those objects.
+3. **Use `update` callbacks to append to list fields.** For mutations that add items to a list (e.g., `createGroup`), provide an `update` function that uses `cache.modify` to add the new `Group` reference to the cached list of groups. Example:
+   ```ts
+   update(cache, { data: { createGroup } }) {
+     cache.modify({
+       fields: {
+         groups(existing = []) {
+           const newRef = cache.writeFragment({ data: createGroup, fragment: GroupFragment });
+           return [...existing, newRef];
+         }
+       }
+     });
+   }
+   ```
+4. **Use `refetchQueries` as a fallback, not the primary strategy.** Refetching is fine for low-frequency mutations (e.g., deleting a group) but wasteful for common actions. Prefer surgical cache updates. When you do refetch, use active query names and consider `awaitRefetchQueries: true` for user-facing actions.
+5. **Evict or invalidate stale queries when necessary.** If a mutation changes data that is hard to update surgically (e.g., recalculating a suggestion shortlist), use `cache.evict` or `INVALIDATE` to force affected queries to refetch. Be careful: evicting a list can cause a loading flash.
+6. **Choose fetch policies deliberately.** For the Group Detail page, use `cache-and-network` for the first load (fast response + freshness) and `cache-first` for subsequent navigation. For the "Pick a Game" shortlist, use `network-only` or `cache-first` with a short TTL because the score depends on live session state. Use `nextFetchPolicy` to demote `network-only` to `cache-first` after the first fetch.
+7. **Pinia and Apollo sync only at the UI boundary.** If a component needs both Apollo data and Pinia UI state, derive it in the component with `computed`, not by copying Apollo data into Pinia. The existing `Sidebar.vue` watching `syncStatuses` to update `useRefreshCollection` is acceptable because it is a one-way, ephemeral sync; do not store the collection itself in Pinia.
+
+**Warning signs:**
+- After creating a group, the user must refresh the page to see it in the sidebar.
+- After picking a game, the session page still shows "Picking" instead of "Completed".
+- RSVP count in the UI doesn't match the server state until the page is refreshed.
+- The same data appears in both a Pinia store and an Apollo query, and they get out of sync.
+- `refetchQueries` works on one screen but not another because the query name is inactive.
+
+**Phase to address:**
+GraphQL/frontend integration phase. Define the cache strategy (mutation `update` callbacks, fetch policies, Pinia boundaries) when the redesigned components are first wired to the API, not after user-reported stale-data bugs pile up.
+
+---
+
+### Pitfall 7: GraphQL Schema Evolution Breaking the Existing Frontend
+
+**What goes wrong:**
+The redesign adds new fields and types to the GraphQL schema (e.g., `SuggestionScore`, `PollResult`, `GroupDetail`, dark-mode/theme fields, `MaterialIcon` enums). A minor mistake in the schema change causes the existing Vue frontend to break: a previously non-null field is now nullable, an enum value is renamed, a mutation returns a new type without the old fields, or the generated TypeScript types drift from the actual schema. The monorepo's codegen CI check fails, but someone bypasses it.
+
+**Why it happens:**
+GraphQL is versionless, but that only works if you add fields and never remove or rename them without deprecation. The existing app already has a stable schema and uses `@graphql-codegen` to generate types. The redesign adds features that require schema changes. If the team treats the schema as an afterthought, they will introduce breaking changes (e.g., changing `Thing.average` from `Float` to `Float!` to fix a null issue, which can break queries that didn't request it). Also, the existing frontend's generated types and composables must be regenerated after every schema change; the monorepo's contract depends on this.
+
+**How to avoid:**
+1. **Follow the GraphQL schema evolution rule: add only, deprecate before removing.** All new fields should be optional/nullable unless you are absolutely certain every client will request them. If you must change a field type, add the new field with a different name and mark the old one `@deprecated`.
+2. **Use `@deprecated` with a reason and planned removal date.** Example:
+   ```graphql
+   type Thing {
+     average: Float @deprecated(reason: "Use rating.average instead. Removed in v1.3")
+   }
+   ```
+3. **Regenerate types as part of the build.** Keep `schema.graphql` committed and run `graphql-codegen` in CI. Fail the build if the committed schema and the generated types are out of sync. The existing monorepo already has this contract; enforce it.
+4. **Add new types for redesign-specific concerns rather than overloading existing types.** Create `SuggestionScore` and `SuggestionReason` types instead of bolting fields onto `Thing`. This keeps the existing `Thing` contract stable and lets the new UI evolve independently.
+5. **Version internal feature flags, not the schema.** If the redesign needs to ship incrementally, use nullable fields that the new UI checks for, or use a `featureFlags` query. Do not introduce a `/graphql/v2` endpoint.
+6. **Test schema changes against the existing frontend.** Before merging a schema change, run the existing frontend tests and Playwright E2E suite to catch broken queries. The existing app has 11 E2E tests; don't let them bit-rot during the redesign.
+7. **Document breaking changes.** If a truly breaking change is unavoidable, document it in `docs/adr/` and update the frontend in the same commit/PR.
+
+**Warning signs:**
+- `graphql-codegen` produces TypeScript errors after pulling main.
+- The Vue app crashes with "Cannot read properties of undefined" because a field is now nullable.
+- A query that worked yesterday now returns a GraphQL validation error.
+- The committed `schema.graphql` no longer matches the Rails-generated schema.
+- Two frontend components request the same entity with different field sets, causing cache normalization issues.
+
+**Phase to address:**
+GraphQL schema design phase, at the start of each redesign feature. Schema changes should be planned before implementation, not added ad hoc during component development.
+
+---
+
+### Pitfall 8: Dark Mode Implementation Drift and Responsive Regressions
+
+**What goes wrong:**
+The redesign ships dark mode, but it's inconsistent: some cards invert correctly while others keep a light background; text becomes unreadable on a custom status badge; the sidebar is always light even when the rest of the app is dark; the mobile drawer uses a different dark surface than the desktop sidebar; or switching themes causes a full-page flash because the theme class is set in JavaScript after hydration. On mobile, the 280px sidebar doesn't collapse, causing horizontal scroll or clipped content; the collection grid uses 4 columns on small screens; filter badges wrap awkwardly.
+
+**Why it happens:**
+Dark mode is not just "invert colors"; it requires a complete set of surface/on-surface/variant/outline tokens. Tailwind v4's default `dark:` variant uses `prefers-color-scheme`, but a manual toggle requires `@custom-variant dark (&:where(.dark, .dark *))`. If the team mixes both strategies, the class-based manual toggle and the OS preference fight. Responsive regressions happen because the redesign changes the sidebar width, card grid, and filter layout without re-testing every breakpoint. The existing `Sidebar.vue` and `MobileDrawer.vue` components need to be updated together.
+
+**How to avoid:**
+1. **Pick one dark-mode strategy and commit to it.** For a manual toggle, define:
+   ```css
+   @custom-variant dark (&:where(.dark, .dark *));
+   ```
+   in `theme.css` and apply the `.dark` class to `document.documentElement` based on localStorage + `matchMedia`. Do not rely on `prefers-color-scheme` unless the app has no manual toggle.
+2. **Use the Material 3 surface color roles everywhere.** Every background should be `bg-surface`, `bg-surface-container`, or `bg-surface-container-high`; every text should be `text-on-surface` or `text-on-surface-variant`. Status badges should use `bg-primary-container text-on-primary-container`. If a component ever uses `bg-white` or `text-black`, it is a bug in dark mode.
+3. **Design the dark palette in the same `@theme` block as the light palette.** Define each color role twice, once outside a media query for light and once inside `.dark` or `@media (prefers-color-scheme: dark)`. Do not create a separate `dark.css` file that engineers forget to import.
+4. **Update the sidebar and mobile drawer together.** Both should share the same surface container color, width tokens (e.g., `--sidebar-width: 280px`), and collapse behavior. The mobile drawer should be an overlay, not a persistent 280px column.
+5. **Test responsive breakpoints with actual device widths.** The collection grid should use `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`, not a fixed `grid-cols-4`. The filter sidebar should become a collapsible panel on `md:` and below.
+6. **Avoid theme flashing on load.** Set the `.dark` class in a small script in the Rails SPA shell before the Vue app mounts, reading from `localStorage` and `matchMedia`. This prevents a white-to-dark flash.
+
+**Warning signs:**
+- Toggling dark mode leaves a white rectangle around the sidebar.
+- Text on a custom badge is low-contrast in one theme.
+- The mobile layout looks broken after the redesign but desktop looks fine.
+- The app flashes light then dark on initial load.
+- `dark:` utilities don't work because the `.dark` class is missing from the root element.
+
+**Phase to address:**
+UI redesign phase, integrated with the design-system foundation. Test dark mode and responsiveness on every redesigned screen before marking it complete.
 
 ---
 
 ## Technical Debt Patterns
 
+Shortcuts that seem reasonable during the redesign but create long-term problems.
+
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Fetching BGG collections synchronously in GraphQL resolvers | Simpler code, no job infrastructure needed | 50-second query times, rate limit storms, terrible UX | Never for production. Acceptable for spike/prototype only. |
-| Skipping BGG expansion workaround (just use `subtype=boardgame`) | One API call instead of two, faster | Expansions miscategorized as base games, broken core feature | Never. This is a documented BGG bug with a known workaround. |
-| Using strong_params alongside dry-validation contracts | Familiar to Rails devs, no new learning | Two validation systems, conflicting errors, maintenance confusion | Never. Pick one (dry-validation) and use it consistently. |
-| Not setting GraphQL `max_depth` / `max_complexity` | No configuration needed, all queries work | Malicious or accidental deep queries causing cascading BGG API calls | Never. Set from day one, even if limits are generous initially. |
-| Caching BGG responses in memory only (no Redis/Solid Cache) | No external dependency, simpler setup | Cache lost on restart, no cross-process sharing, rate limit hits on every boot | MVP only. Must move to Solid Cache or Redis before multi-user. |
-| Hardcoding user count (like old app's 2-user limit in `useMultiUserCollections`) | Quick to implement, no dynamic logic needed | Can't scale beyond 2 users, requires rewrite for group features | MVP with explicit "2-user limit" documentation. Must refactor for groups. |
-| Serving Vue SPA and Rails API from different origins in production | Simpler deployment (static hosting + API server) | CORS configuration complexity, cookie/auth issues, CSP headaches | Acceptable if using separate CDNs, but same-origin is strongly preferred. |
-| Not generating GraphQL types from Rails schema | No codegen step in CI | Frontend/backend schema drift, runtime errors on mismatched queries | Never for a monorepo. Codegen is the whole point of the monorepo. |
+| Load the full Material Symbols variable font without subsetting | Works on first prototype, no need to maintain an icon list | 3 MB+ font payload, slow first paint, FOUT | Never for production. Only for a design-system spike. |
+| Hardcode hex colors in components instead of theme variables | Faster styling, no need to learn token names | Light/dark drift, inconsistent palette, painful redesigns | Never. All colors must come from `@theme` variables. |
+| Store server data (groups, sessions) in Pinia for "convenience" | Easy access from any component | Cache/server state divergence, stale data bugs | Never. Use Apollo's normalized cache. |
+| Fetch BGG poll data on demand in the suggestion resolver | No schema migration needed | Rate-limit storms, 5+ second suggestion loads | Never. Persist poll scores during thing import. |
+| Use raw vote counts for player-count fit | Simple to implement | Over-ranks niche games with few voters | Never. Normalize by total votes and apply a minimum threshold. |
+| Return the entire scored collection to the frontend | Simple GraphQL type, no pagination | Slow UI, large payloads, poor UX | Never. Cap the shortlist at 20-30 and paginate. |
+| Add new GraphQL fields as non-null because "they're always present" | Simpler types | Breaks existing queries when the field is missing or nullable | Never for new fields; keep new fields nullable. |
+| Skip E2E tests during redesign because "we'll fix them later" | Faster iteration | Regressions go unnoticed, existing flows break | Never. Keep the E2E suite green or mark known failures explicitly. |
+| Recompute the suggestion shortlist in the resolver | No new DB table or cache | Unbounded latency as collections grow | Prototype only. Ship with precomputed/cache-backed shortlist. |
+| Leave `@layer utilities` custom classes in place after v4 migration | Avoids rewriting utility code | Custom utilities don't work with variants in v4 | Only during migration spike. Replace with `@utility` before merge. |
 
 ## Integration Gotchas
 
+Common mistakes when connecting the new redesign features to the existing Rails + Vue system.
+
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| BGG XML API | Treating 202 as a normal response and parsing the (empty) body | Check HTTP status first. On 202, retry with delay (up to 5 times). Return a "preparing" status to the frontend. |
-| BGG XML API | Using `subtype=boardgame` and assuming expansions are excluded | Use the two-call workaround: `excludesubtype=boardgameexpansion` + `subtype=boardgameexpansion`, then merge. |
-| BGG XML API | Fetching thing details one ID at a time | Use comma-separated IDs: `GET /thing?id=1,2,3,4,5&stats=1`. Batch up to ~20-50 IDs per call (test URL length limits). |
-| BGG XML API | Assuming XML fields are always present | Normalize every field with nil-safety. Port test fixtures from the old proxy. `yearpublished` can be missing, `image` can be empty, `name` can be string/object/array. |
-| BGG XML API | Not sending a User-Agent header | BGG may reject requests without a User-Agent. The old proxy sends `User-Agent: BGG-GraphQL-Proxy/1.0.0`. Include a descriptive UA. |
-| graphql-ruby | Authorizing at the controller level | Controller-level auth is impossible with GraphQL (the query string determines permissions, not the endpoint). Authorize in resolvers via `context[:current_user]` or use Pundit/CanCan integration. |
-| graphql-ruby | Not handling Apollo batched queries | Apollo sends batched queries as `params[:_json]` (an array). Check for this in the GraphqlController and use `Schema.multiplex` instead of `Schema.execute`. |
-| graphql-ruby | Resolving N+1 without batching | Use `GraphQL::Batch` (Shopify gem) with custom `Loader` classes. Register `use GraphQL::Batch` on the schema. The loader cache is auto-cleared between mutations. |
-| Solid Queue | Assuming jobs auto-retry like Sidekiq | Declare `retry_on` explicitly on every job class. Without it, jobs fail once and stop. |
-| Solid Queue | Using a single database for app + queue | For any real load, use a separate database for Solid Queue (Rails multi-DB support). Queue tables have high churn (INSERT/DELETE) that triggers autovacuum storms on shared tables. |
-| dry-validation | Using `Dry::Schema::JSON` for HTTP form params | Use `Dry::Schema::Params` — it handles stringified keys and string-to-type coercion. `JSON` schema expects native types. |
-| dry-validation | Confusing `Schema` with `Contract` | `Schema` = validation only (type checking + predicates). `Contract` = schema + custom rules + business logic. Use `Contract` when you need cross-field rules. |
-| Vite Ruby | Leaving `skipProxy: false` and suffering slow HMR | Set `skipProxy: true` in development for faster HMR. Or use Caddy/nginx to proxy `/vite-dev/*` directly to Vite. |
-| Nokogiri | Parsing BGG XML with regex or string splitting | Use Nokogiri's CSS selectors or XPath. BGG XML has namespaces, attributes, and mixed content that regex can't handle reliably. |
+| Material Symbols + Vite | Loading the font via a CSS `@import` without preloading | Use `<link rel="preload">` in the SPA shell + `display=block` in the Google Fonts URL. |
+| Tailwind v4 + Vue SFC styles | Using `@apply` with theme variables that aren't visible | Use `@reference` to import the theme file, or better, use CSS variables directly (`color: var(--color-primary)`). |
+| Tailwind v4 + custom utilities | Defining utilities with `@layer utilities` | Use `@utility` so variants (`hover`, `dark`, `md`) work. |
+| BGG thing XML + polls | Treating `polls` as always present and well-shaped | Use Nokogiri nil-safe access; handle missing polls, zero total votes, and range strings like `3-4` and `4+`. |
+| BGG poll backfill | Running backfill jobs without `limits_concurrency` | Enqueue one job per thing with `limits_concurrency to: 1, key: "bgg_api"` and `retry_on`. |
+| Apollo mutations + lists | Adding `refetchQueries` and hoping it updates the sidebar | Return modified objects + use `update` with `cache.modify` for list fields. |
+| Apollo + Pinia | Copying query results into a store to share data | Derive UI state from Apollo in components; keep Pinia for UI-only state. |
+| GraphQL schema evolution | Renaming or changing a field type without `@deprecated` | Add new fields, deprecate old ones, regenerate types, run existing tests. |
+| Group Detail resolver | Returning `members` and `collection` without eager loading | Use `includes`/`preload` for the full graph; measure with Bullet. |
+| Dark mode | Mixing `prefers-color-scheme` and a manual `.dark` class | Choose one strategy; for manual toggle, define `@custom-variant dark` and set `.dark` class before hydration. |
+| Suggestion engine | Summing raw poll votes without normalization | Precompute `best_score` and `recommend_score` per player count, normalized by total votes, with a minimum threshold. |
+| Responsive layout | Hardcoding the 280px sidebar on all breakpoints | Use a collapsible drawer on mobile; reserve the fixed sidebar for `lg` and up. |
 
 ## Performance Traps
 
+Patterns that work for small collections or fast connections but fail at scale.
+
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Synchronous BGG collection fetching in GraphQL resolver | Query takes 30-60 seconds for multi-user collections | Move to background jobs (Solid Queue) with caching. Serve from cache, refresh in background. | 2+ users with 50+ games each |
-| GraphQL expansion resolution without batching | 75 games × 4 batches × 5s = 25 minutes for expansion data | Use `GraphQL::Batch` with a `BGGThingLoader` that batches all expansion IDs into one BGG `/thing?id=` call. | Any query requesting nested expansions for a full collection |
-| Solid Queue polling on shared Postgres database | Postgres CPU spikes, connection pool exhaustion, autovacuum falling behind | Use a separate database for Solid Queue. Tune autovacuum for queue tables. Use PgBouncer in transaction mode. | 1000+ jobs/hour sustained |
-| In-memory BGG caching only | Every server restart hits BGG for all cached data, causing rate limit storms | Use Solid Cache (Rails 8 default, DB-backed) or Redis for cross-process caching. | Any multi-process deployment (Puma workers > 1) |
-| Client-side fuzzy search on full collection (Fuse.js) | UI freezes when searching 500+ games | The old app uses Fuse.js client-side. For large collections, index in the backend (Postgres full-text search or pg_trgm) and search via GraphQL. | 300+ games in a shared collection |
-| Vue re-rendering entire game list on filter change | Sluggish UI, 100ms+ render times | Use `v-memo` or `computed` with shallow refs. Virtualize the list (`vue-virtual-scroller`) for 100+ items. | 100+ visible game cards |
-| Apollo Client cache growing unbounded | Browser memory climbing over time, especially with multiple collection loads | Use `fetchPolicy: 'cache-and-network'` with `nextFetchPolicy: 'cache-first'`. Evict collection queries on unmount. Set `ApolloClient` `connectToDevTools: false` in production. | Multiple user sessions without page reload |
-
-## Security Mistakes
-
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Exposing BGG API credentials in the Vue frontend | BGG requires authentication for some endpoints (bearer token). If the token is in frontend code, anyone can extract it. | Keep BGG credentials server-side only. The Vue app talks to your Rails GraphQL API; Rails talks to BGG. Never expose BGG tokens to the browser. |
-| No GraphQL query depth/complexity limits | Malicious clients can send deeply nested queries that cascade into hundreds of BGG API calls, effectively DDoSing BGG through your server. | Set `max_depth 10` and `max_complexity 200` on the schema. Test with GraphiQL to ensure legitimate queries still work. |
-| No rate limiting on the GraphQL endpoint | A single user can trigger hundreds of BGG API calls by rapidly querying different usernames. BGG rate-limits your server IP, affecting all users. | Implement Rack::Attack or Rails rate limiting on the GraphQL endpoint. Limit per-IP and per-user query frequency. |
-| Trusting BGG XML data as safe HTML | BGG `description` fields contain user-generated HTML. If rendered with `v-html`, this is an XSS vector. | Sanitize BGG descriptions server-side (sanitize gem) before returning via GraphQL. Or render as text in Vue (use `{{ }}` not `v-html`). |
-| GraphQL introspection enabled in production | Exposes the entire API schema to attackers, revealing internal types and fields. | Disable introspection in production: `GraphQL::Schema.disable_introspection_entry_points` or check `Rails.env.production?`. The old proxy has `introspection: true` — don't copy this. |
-| No authentication on the GraphQL endpoint | Anyone can query any BGG username's collection. While BGG data is public, your server becomes an open proxy for BGG scraping. | Add authentication (even simple API key or session-based). Rate-limit per authenticated user. |
+| Full Material Symbols variable font | Largest Contentful Paint (LCP) > 2.5s on mobile, font warnings in Lighthouse | Subset to used icons, pin axes, preload | Any production user, especially on slow 3G |
+| Synchronous suggestion scoring in resolver | "Pick a Game" page takes 5-10s to load for large groups | Precompute shortlist in a service/cache keyed by session + attendees | 5+ attendees or 100+ shared games |
+| Loading full collection owner lists for every card | Large JSON payloads, slow render of collection grid | Limit owners to count + top 3 avatars on previews; load full owners on demand | Group Detail preview or large collections |
+| N+1 on Group Detail | 100+ SQL queries per page load, slow TTFB | Eager load associations; use Dataloader for per-user fields; precompute sync status | 5+ members or 5+ sessions |
+| Recomputing suggestion scores on every render | UI freezes when toggling attendees | Memoize scores in Vue `computed` or fetch precomputed shortlist from server | Real-time attendee toggling |
+| Apollo `refetchQueries` on every mutation | Extra network requests, cascading loading states | Use surgical `update` callbacks; refetch only when necessary | Common actions like RSVP, pick game |
+| Client-side Fuse.js on the full merged collection | UI jank when searching 300+ games | Move search indexing to backend (Postgres `pg_trgm` or full-text search) via GraphQL | 300+ shared games |
+| No pagination on shared collection spotlight | Group Detail renders all games before interactive | Use `LIMIT`/offset or cursor pagination; show only curated subset | 50+ shared games |
+| Loading thing images without lazy loading | All thumbnails load at once, data usage spikes | Use `loading="lazy"` or a virtual scroller for long lists | 50+ game cards |
 
 ## UX Pitfalls
 
+Common user experience mistakes specific to the redesign and suggestion engine.
+
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Showing a blank screen during 50-second BGG collection fetch | Users think the app is broken and leave | Show a loading state with progress ("Fetching 3 of 5 collections..."). Fetch collections in parallel via background jobs and show partial results as they arrive. |
-| No feedback when BGG returns 202 (queued) | User sees "no games found" when their collection is being prepared | Show a "BGG is preparing your collection, this may take a moment" message. Auto-retry in the background and update the UI when data arrives. |
-| Failing silently when one user's collection fails | Multi-user shared list shows incomplete data without explanation | Show per-user status indicators: "✓ Loaded (75 games)", "⚠ Failed to load (retry)", "⏳ Loading..." |
-| No "refresh collection" button | Users can't force a re-fetch when BGG data is stale | Add a refresh button with a cooldown (15 min minimum). Enqueue a high-priority background job that bypasses cache. |
-| Hard 2-user limit (like the old app) | Groups of 3+ friends can't use the app together | Design for N users from the start. The old app hardcodes `user1` and `user2` in `useMultiUserCollections.ts` — this is a known limitation to fix in the rewrite. |
-| Best-player-count heuristic is wrong | The old app uses `minPlayers + ceil(range * 0.67)` as a "best players" heuristic (see `grouping.ts` lines 120-134). This is arbitrary and often wrong — many games are best at lower player counts. | Use BGG's "Suggested Number of Players" poll data if available. Fall back to the heuristic only when poll data is missing. This is a feature gap, not a bug to replicate. |
-| Fuzzy search only on loaded games | If a collection hasn't been loaded, search returns nothing. Users don't know they need to load collections first. | Search across all cached/cached collections. Show a hint: "Load more collections to expand search results." |
+| Icon font not loaded before first paint | Users see broken ligature text or blank squares | Preload + `font-display: block` + subset. |
+| Dark mode toggle flashes the old theme | Jarring white-to-dark transition | Set `.dark` class in the SPA shell before Vue hydration. |
+| Suggestion scores are opaque | Users don't trust or understand why a game is recommended | Return per-factor reasons (player fit, time, complexity, ownership) and display them as badges. |
+| Cold-start group gets empty suggestions | New users think the app is broken | Fall back to "Hot Items", most-owned games, or a starter-night list. |
+| Expansions suggested without base game | Users click an expansion they can't play | Filter expansions out unless the base game is in the merged pool. |
+| Filter state persists across sessions | A user returns to a new session and sees old filters | Scope filter state to the route/session; reset on navigation. |
+| Group Detail shows too much at once | Cognitive overload, slow to load | Show a curated spotlight (top 12) and link to full Collection. |
+| Member sync status hidden | Users don't know whose collection is stale | Show per-member sync status in the members panel; disable refresh when on cooldown. |
+| Picking a game doesn't update the session UI | Users think the pick didn't save | Use Apollo `update` callback + optimistic UI so the status changes immediately. |
+| Responsive sidebar always open | Mobile users can't see content | Use a collapsible drawer on mobile; persist open/closed in Pinia UI state. |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **BGG Collection Fetch:** Often missing the expansion workaround — verify that `subtype=boardgameexpansion` items appear in results with correct subtype labels. Test with a user who owns both games and expansions.
-- [ ] **BGG Collection Fetch:** Often missing 202 retry handling — verify that a 202 response triggers a retry, not an empty collection return. Test by checking HTTP logs for 202 → retry → 200 sequence.
-- [ ] **BGG Rate Limiting:** Often missing cross-thread rate limiting — verify that concurrent requests (e.g., from multiple Solid Queue workers) don't exceed 1 request per 5 seconds. Test with 5 simultaneous collection fetches.
-- [ ] **BGG XML Parsing:** Often missing nil-safety on optional fields — verify that games with missing `image`, `thumbnail`, `description`, or `yearpublished` don't crash the normalizer. Test with fixture XML that has missing fields.
-- [ ] **GraphQL Schema:** Often missing `max_depth` and `max_complexity` — verify these are set. Test with a deeply nested query (5+ levels of thing → expansion → baseGame → expansion → ...) and confirm it's rejected.
-- [ ] **GraphQL N+1:** Often missing batching on expansion resolution — verify that resolving expansions for 10 games doesn't make 10 separate BGG API calls. Test with `GraphQL::Batch` and check BGG request count in logs.
-- [ ] **Solid Queue Jobs:** Often missing `retry_on` declarations — verify that every BGG job class has explicit retry logic. Check Mission Control dashboard for jobs that failed without retry.
-- [ ] **dry-validation Contracts:** Often missing the `:params` schema type — verify that contracts use `params do ... end` (not `json do ... end`) for HTTP input. Test with string input `"25"` and verify it coerces to integer `25`.
-- [ ] **Vue + Rails Dev Server:** Often missing CORS configuration — verify that GraphQL requests from `localhost:5173` (Vite) to `localhost:3000` (Rails) don't get CORS errors. Check browser console.
-- [ ] **Vue + Rails Production:** Often missing the Vue build output in Rails `public/` — verify that `vite build` output is copied/served correctly. Test production build locally with `RAILS_ENV=production rails server`.
-- [ ] **Multi-user Collections:** Often missing per-user error handling — verify that if user A's collection fails, user B's collection still displays. Test by simulating a BGG error for one user.
-- [ ] **Cache Invalidation:** Often missing user-triggered refresh — verify that a "refresh" button bypasses cache and re-fetches from BGG. Test by adding a game on BGG, clicking refresh, and confirming it appears.
-- [ ] **GraphQL Introspection:** Often left enabled in production — verify `GraphQL::Schema` has introspection disabled in production. The old proxy has `introspection: true` — don't copy this blindly.
+Things that appear complete but are missing critical pieces.
+
+- [ ] **Material Symbols:** Font is subsetted to used icons and axes are pinned; `display=block` and preload are configured. Verify in Lighthouse that font payload is under 50 KB.
+- [ ] **Material Symbols:** A single `<MaterialIcon>` component enforces `opsz`/`wght`/`GRAD`/`FILL` values. Verify no raw `material-symbols-outlined` spans exist.
+- [ ] **Theme tokens:** All colors, shadows, and radii are defined in `@theme` and no hex values are hardcoded in components. Verify with a grep for `#` outside the theme file.
+- [ ] **Dark mode:** Theme class is set before hydration and every surface uses `bg-surface`/`text-on-surface`. Verify by toggling and checking all redesigned screens.
+- [ ] **Tailwind v4:** All old `@layer utilities` are replaced with `@utility`; all renamed utilities are updated. Verify with a project-wide search for `@layer utilities` and `outline-none`.
+- [ ] **BGG polls:** `Bgg::ThingNormalizer` parses `suggested_numplayers` and persists normalized `player_poll_scores`. Verify with a fixture XML that includes a poll.
+- [ ] **BGG polls:** Missing or low-vote polls fall back to min/max player heuristic, not zero. Verify with a game that has `totalvotes="0"`.
+- [ ] **Suggestion engine:** Scores are computed in a service/cache, not the GraphQL resolver. Verify that the resolver reads from a cached/precomputed shortlist.
+- [ ] **Suggestion engine:** Recommendations are explainable (player fit, time, complexity, ownership). Verify the UI shows human-readable reasons.
+- [ ] **Suggestion engine:** Expansions are filtered out unless the base game is owned. Verify with an expansion in the test fixtures.
+- [ ] **Group Detail:** The resolver eager loads members, sessions, attendances, and collection owners. Verify with Bullet that no N+1 warnings are logged.
+- [ ] **Group Detail:** Shared collection spotlight is paginated or limited to a curated subset. Verify it does not load the full merged collection.
+- [ ] **Apollo cache:** Mutations for create group, pick game, and RSVP use `update` callbacks to update relevant lists. Verify list UIs update without a refresh.
+- [ ] **Pinia boundaries:** No server-derived data (groups, sessions, collection) is stored in Pinia. Verify with a review of store definitions.
+- [ ] **GraphQL schema:** New fields are nullable and old fields are deprecated before removal. Verify `schema.graphql` and generated types are in sync.
+- [ ] **Responsive:** Sidebar collapses on mobile; collection grid uses responsive columns. Verify at 320px, 768px, and 1440px widths.
+- [ ] **E2E:** Existing E2E tests pass or have explicit failures documented. Verify in CI.
 
 ## Recovery Strategies
 
+If a pitfall slips through, how to recover.
+
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Lost the expansion workaround | MEDIUM | Re-implement the two-call pattern. Port test fixtures from old proxy. Verify with a real BGG user who owns expansions. ~2-4 hours. |
-| No rate limiting on BGG client | HIGH | BGG may have IP-banned your server. Implement rate limiting, wait for ban to lift (unknown duration, could be hours). Implement background job queue with concurrency control. ~1 day. |
-| No 202 retry handling | LOW | Add status code check before XML parsing. Add retry loop for 202. ~2-3 hours. |
-| GraphQL N+1 on expansions | MEDIUM | Implement `GraphQL::Batch` with a `BGGThingLoader`. Refactor resolvers to use `Loader.for.load(id)` pattern. Test with batched queries. ~4-8 hours. |
-| Solid Queue jobs not retrying | LOW | Add `retry_on` declarations to each job class. Redeploy. Existing failed jobs won't auto-retry — manually re-enqueue or accept data loss. ~1-2 hours. |
-| dry-validation / strong_params conflict | MEDIUM | Audit all controllers for mixed validation. Standardize on dry-validation `safe_params`. Remove `strong_params` usage. Test all endpoints. ~4-8 hours. |
-| Vue + Rails deployment mismatch | HIGH | Redesign deployment to be atomic (single Docker image). Rebuild CI/CD pipeline. May require infrastructure changes. ~1-2 days. |
-| No caching layer | HIGH | Add Solid Cache or Redis. Implement cache keys and TTLs. Backfill cache for existing users. ~1-2 days. |
-| GraphQL introspection exposed in production | LOW | Add `disable_introspection_entry_points` in production config. Redeploy. ~30 minutes. |
-| BGG IP ban from rate limit violations | HIGH | Implement rate limiting. Contact BGG (no formal process — may need to wait it out). Use a different IP temporarily. Duration unknown. Prevention is the only reliable strategy. |
+| Material Symbols loaded full font | LOW | Add `icon_names` and pin axes; update the preload link. ~1-2 hours. |
+| Tailwind v4 `@layer utilities` not migrated | LOW | Replace with `@utility` and update any `@apply` references. ~2-4 hours. |
+| Color token drift / hardcoded hex | MEDIUM | Audit components, replace hex with theme variables, add lint rule. ~4-8 hours. |
+| BGG polls not parsed | MEDIUM | Extend `Bgg::ThingNormalizer`, add migration, backfill via job. ~1-2 days. |
+| Suggestion engine scoring in resolver | MEDIUM | Extract service, add cache table, update resolver. ~1-2 days. |
+| Group Detail N+1 | LOW to MEDIUM | Add eager loading to `GroupType`, measure with Bullet. ~2-6 hours. |
+| Apollo cache stale after mutations | MEDIUM | Add `update` callbacks to mutations, audit fetch policies. ~4-8 hours. |
+| Pinia store duplicated server data | MEDIUM | Refactor store to UI-only state, remove server-derived fields. ~1 day. |
+| GraphQL breaking change shipped | MEDIUM to HIGH | Revert or add compatibility fields, regenerate types, notify frontend. ~1-2 days. |
+| Dark mode inconsistent | LOW | Audit surfaces, replace literals with theme tokens, fix toggle script. ~2-4 hours. |
+| Responsive regressions | LOW | Audit breakpoints, fix sidebar/grid/filter layout. ~2-4 hours per screen. |
+| Suggestion engine over-fits to ownership | MEDIUM | Add normalization, cold-start fallback, and ownership breadth factor. ~4-8 hours. |
 
 ## Pitfall-to-Phase Mapping
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| BGG expansion subtype workaround | BGG API Integration Phase | Test with fixture XML: verify 62 base games + 13 expansions = 75 items with correct subtypes |
-| BGG rate limiting (5s rule) | BGG API Integration Phase | Test concurrent requests: verify no more than 1 BGG call per 5 seconds across all threads/workers |
-| BGG 202 queued response handling | BGG API Integration Phase | Test: mock 202 response, verify retry logic triggers and eventually returns data or "preparing" status |
-| BGG XML parsing inconsistencies | BGG API Integration Phase | Test with real fixture XML from old proxy: verify all fields parse without errors, nils handled |
-| BGG caching strategy | Caching Phase | Test: fetch collection, modify cache TTL, verify stale-while-revalidate pattern works |
-| GraphQL N+1 on expansions | GraphQL Schema Phase | Test: query 10 things with expansions, verify BGG API call count ≤ 2 (one batched call for all expansion IDs) |
-| GraphQL depth/complexity limits | GraphQL Schema Phase | Test: submit a depth-20 query, verify it's rejected with a clear error |
-| GraphQL authorization in resolvers | GraphQL Schema Phase | Test: query without authentication, verify sensitive fields return errors |
-| Solid Queue no auto-retry | Background Jobs Phase | Test: trigger a BGG 503 error in a job, verify it retries per `retry_on` config |
-| Solid Queue concurrency control | Background Jobs Phase | Test: enqueue 5 BGG jobs simultaneously, verify only 1 runs at a time (rate limit respect) |
-| dry-validation / strong_params conflict | Foundation Phase | Test: submit form data, verify dry-validation contract processes it correctly without strong_params interference |
-| Vue + Rails dev server proxy | Project Setup Phase | Test: start both servers, make GraphQL request from Vue, verify no CORS errors and HMR works |
-| Monorepo deployment coupling | Deployment Phase | Test: `bin/deploy` builds Vue, copies to Rails public/, deploys single container, verify both serve correctly |
-| Rewrite scope creep | Planning Phase (pre-roadmap) | Review roadmap: verify each phase maps to a specific old-app feature, no "while we're at it" additions |
-| Game suggestion algorithm cold start | Game Suggestion Phase (if built) | Test: new user with no collection/play history, verify algorithm falls back to BGG "hot items" or general recommendations |
-| Multi-user collection (N users, not hardcoded 2) | Multi-user Collection Phase | Test: load 5+ users, verify all collections merge correctly with per-user owner tracking |
-
-## Rewrite-Specific Pitfalls
-
-### Pitfall R1: Over-Engineering Based on the Old App
-
-**What goes wrong:**
-The old app is a Next.js + Apollo + Chakra UI app with a separate Apollo Server proxy. The rewrite team sees the architecture and replicates every component, even parts that were workarounds for Node.js/Apollo limitations. The result is a Rails app that fights the framework — using Apollo-style data sources when Rails service objects would be simpler, or replicating the Redis keepalive cron job when Solid Cache doesn't need it.
-
-**Why it happens:**
-The old proxy has a Redis keepalive cron job (`/api/keepalive` endpoint in `index.ts` lines 114-201) because Vercel serverless functions spin down and Redis connections drop. Rails with Puma doesn't have this problem. The old app uses Apollo `RESTDataSource` with its own caching — Rails has built-in caching and Faraday with middleware. Each workaround in the old codebase solved a Node.js/serverless-specific problem that doesn't exist in Rails.
-
-**How to avoid:**
-1. Catalog every workaround in the old codebase. For each, ask: "Is this solving a Rails problem or a Node.js problem?"
-2. Don't replicate the Redis keepalive cron — Solid Cache uses the database, no keepalive needed.
-3. Don't replicate Apollo `RESTDataSource` caching — use Rails caching (`Rails.cache.fetch`) with Solid Cache.
-4. Don't replicate the Apollo response cache plugin — use graphql-ruby's built-in caching or HTTP-level caching.
-5. **Do replicate**: the BGG rate limiter, the expansion workaround, the XML normalizer, the retry logic. These solve BGG-specific problems that exist regardless of backend.
-
-**Warning signs:**
-- Rails code that looks like JavaScript (callback-heavy, promise-like patterns).
-- Infrastructure for problems Rails doesn't have (Redis keepalive, serverless cold start mitigation).
-- Service objects that wrap single method calls (over-abstraction).
-- "We need Redis because the old app had Redis" — Solid Cache + Solid Queue may eliminate the Redis dependency entirely.
-
-**Phase to address:**
-Planning phase (before roadmap). The architecture decision of what to port vs. what to redesign must happen before implementation.
-
----
-
-### Pitfall R2: Not Learning from the Old App's Mistakes
-
-**What goes wrong:**
-The old app has a hardcoded 2-user limit in `useMultiUserCollections.ts` (lines 13-29 — explicitly `user1Validation` and `user2Validation`). The old app fetches collections sequentially in `useCollections.ts` (lines 126-143) with no parallelism. The old app has no error recovery for individual user failures — if one user's collection fails, the entire merge fails. The rewrite replicates these limitations because nobody analyzed the old code for weaknesses.
-
-**Why it happens:**
-The rewrite is framed as "port to Rails + Vue" not "improve the architecture." Developers focus on translating code, not critiquing it. The old code works (mostly), so there's a bias toward preserving behavior rather than fixing design flaws.
-
-**How to avoid:**
-1. **Document the old app's known limitations before writing the roadmap:**
-   - Hardcoded 2-user limit → Design for N users from the start.
-   - Sequential collection fetching → Use background jobs with parallel fetching (respecting BGG rate limits).
-   - No per-user error isolation → Each user's collection fetch should succeed or fail independently.
-   - `bestPlayers` heuristic is arbitrary (line 120-134 of `grouping.ts`) → Use BGG poll data when available.
-   - Fuzzy search is client-side only (Fuse.js) → Move to backend for scalability.
-   - No "refresh collection" capability → Add user-triggered refresh.
-   - No persistent state (URL doesn't preserve user list) → Use URL params or localStorage.
-2. **Create a "limitations to fix" list** and incorporate each into the roadmap as a phase deliverable.
-3. **Don't replicate the old GraphQL schema blindly.** The old schema has fields like `baseGame: null` and `expansionFor: []` initialized in the normalizer (lines 420-421 of `bggDataSource.ts`) with "Will be resolved by resolvers" comments. This is a code smell — these should be lazy-loaded via GraphQL field resolvers, not pre-initialized.
-
-**Warning signs:**
-- The rewrite has the same hardcoded limits as the old app.
-- The roadmap says "port feature X" without mentioning "and improve Y."
-- No one has read the old app's test files for clues about what was hard to test.
-- The old app's e2e tests (there are 11 `.spec.ts` files in `tests/e2e/`) are not reviewed for what they test — they reveal what was fragile.
-
-**Phase to address:**
-Planning phase. The "limitations to fix" analysis must happen before the roadmap is written.
-
----
-
-### Pitfall R3: Scope Creep from "While We're At It"
-
-**What goes wrong:**
-The rewrite starts as "port the shared collection viewer to Rails + Vue" but expands to include: game suggestion algorithm, play tracking analytics, wishlist management, trade matching, collection comparison charts, social features. Each addition seems small in isolation but together they turn a 4-week project into a 4-month project that never ships.
-
-**Why it happens:**
-A rewrite is the natural time to add features — "we're already touching all the code, might as well add X." The new stack (Rails 8, GraphQL, Vue 3) feels powerful, and developers want to leverage it. The old app's limitations (Pitfall R2) create a backlog of "should-haves" that all feel urgent during a rewrite.
-
-**How to avoid:**
-1. **Define the MVP scope explicitly**: "Port the existing shared collection viewer with these specific improvements: N-user support, per-user error handling, background fetching, URL state persistence. Nothing else."
-2. **Create a "not in scope" list** and put it in the PROJECT.md. Items: game suggestions, play analytics, wishlist management, trade matching, social features.
-3. **Each phase must map to an existing old-app feature.** If a phase doesn't correspond to something the old app did, it's scope creep. Put it in the backlog.
-4. **The game suggestion algorithm is explicitly a post-MVP feature.** It's mentioned in the milestone context but should be a separate milestone, not a phase in the rewrite.
-
-**Warning signs:**
-- Roadmap phases that don't correspond to any old-app feature.
-- "It would be easy to also add..." conversations during planning.
-- The rewrite timeline exceeds 2× the original app's development time.
-- Features being designed that the old app's users never asked for.
-
-**Phase to address:**
-Planning phase (before roadmap). Scope boundaries must be set before phases are defined.
-
----
-
-### Pitfall R4: Game Suggestion Algorithm Pitfalls (If Built)
-
-**What goes wrong:**
-The game suggestion feature (if included) produces bad recommendations: suggesting 4-player heavy games to a solo player, recommending games nobody in the group owns, suggesting expansions without the base game, or showing the same 5 popular games to every user regardless of their collection.
-
-**Why it happens:**
-Game recommendation is a hard problem. Common mistakes:
-- **Cold start**: New users with no collection or play history get random or empty suggestions.
-- **Ignoring player count**: Recommending a 2-player game for a 6-person game night.
-- **Ignoring complexity**: The old app has `averageWeight` data (BGG's complexity rating, 1-5). Suggesting a weight-4.5 game to someone whose collection averages weight-2 is a mismatch.
-- **Ignoring ownership**: Suggesting a game that nobody in the group owns (unless it's a "games to try" feature).
-- **Expansion without base**: Suggesting an expansion when the base game isn't in anyone's collection.
-- **Popularity bias**: Sorting by BGG average rating always suggests the same top-100 games.
-
-**How to avoid:**
-1. **Start simple**: Filter the shared collection by player count, playing time, and complexity range. Let the user pick constraints, then filter. This is 80% of the value with 10% of the complexity.
-2. **Use BGG's "Suggested Number of Players" poll data** (available in the thing endpoint) instead of the arbitrary `minPlayers + ceil(range * 0.67)` heuristic from the old app.
-3. **Handle cold start**: For users with no collection, fall back to BGG "Hot Items" filtered by the group's player count. For users with a small collection, use category/mechanic overlap with their existing games.
-4. **Exclude expansions** unless the base game is in the collection.
-5. **Respect weight preferences**: Calculate the group's average `averageWeight` from their collections. Suggest games within ±1.0 of that average.
-6. **Don't build a ML-based recommender for MVP.** Rule-based filtering is sufficient and debuggable.
-
-**Warning signs:**
-- Every user gets the same top-10 BGG games as suggestions.
-- Suggestions include games the group already owns (they want new game ideas, not games they have).
-- Suggestions include expansions without base games.
-- Solo users get multiplayer-only game suggestions.
-- The algorithm requires training data or ML infrastructure (scope creep).
-
-**Phase to address:**
-Only if the game suggestion feature is in scope. It should be a separate milestone after the core collection viewer is stable.
-
----
+| Material Symbols subsetting/font loading | Design-system foundation | Lighthouse font payload < 50 KB; no ligature text flash |
+| Tailwind v4 CSS-first config conflicts | Design-system foundation | Build passes; no `@layer utilities`; all renamed utilities updated |
+| Color token drift / dark mode | Design-system foundation | Grep finds no hex values outside theme file; dark mode tested on all screens |
+| BGG poll parsing | Suggestion engine backend | Fixture test with poll XML; missing/low-vote polls fallback correctly |
+| BGG poll backfill rate limiting | Suggestion engine backend | 5 simultaneous jobs show only 1 running at a time; no 503s |
+| Suggestion engine scoring | Suggestion engine backend | Unit tests for player fit, time, complexity, ownership; resolver reads cache |
+| Suggestion engine explainability | Suggestion engine backend | UI shows per-factor badges; no opaque numeric-only score |
+| Suggestion engine cold start | Suggestion engine backend | New group sees fallback suggestions; no empty state |
+| Group Detail N+1 | Group Detail | Bullet reports zero N+1 warnings; log shows ≤ 10 queries |
+| Group Detail pagination | Group Detail | Spotlight loads ≤ 12 items; full collection uses Collection view |
+| Apollo cache invalidation | GraphQL/frontend integration | Mutations update lists without refresh; E2E covers create/pick/RSVP flows |
+| Pinia store boundaries | GraphQL/frontend integration | Stores contain no server-derived data; audit passes |
+| GraphQL schema evolution | GraphQL/frontend integration | CI `schema.graphql` + codegen diff is empty; existing tests pass |
+| Dark mode/responsive | UI redesign | Manual QA at 320/768/1440px and dark/light toggles |
+| Existing E2E suite | Tech-debt cleanup | E2E runs in CI with zero unexpected failures |
 
 ## Sources
 
-- **BGG XML API2 Official Wiki**: https://boardgamegeek.com/wiki/page/BGG_XML_API2 — Rate limit (5s), 202 queued responses, expansion subtype bug, collection parameters. (HIGH confidence — official BGG documentation)
-- **bgg-graphql-proxy source code** (`/Users/estvmachine/Projects/personal/bgg-graphql-proxy`): `bggDataSource.ts` (rate limiting, retry logic, expansion workaround, XML normalization), `resolvers/index.ts` (expansion resolution batching, base game resolution), `index.ts` (Redis keepalive, Apollo response cache), test files (fixture-based testing patterns). (HIGH confidence — first-hand code analysis)
-- **bggeek-shared-list source code** (`/Users/estvmachine/Projects/personal/bggeek-shared-list`): `useCollections.ts` (sequential fetching, merge logic), `useMultiUserCollections.ts` (hardcoded 2-user limit), `grouping.ts` (best-player heuristic), `useFuzzySearch.ts` (client-side search), `sorting.ts`, `queries.ts` (GraphQL query patterns). (HIGH confidence — first-hand code analysis)
-- **Rails 8 Guides** (Context7 `/websites/guides_rubyonrails_v8_0`): Solid Queue, Solid Cache, Propshaft, API-only mode. (HIGH confidence — official Rails docs)
-- **graphql-ruby docs** (Context7 `/rmosolgo/graphql-ruby`): Authorization in resolvers, max_depth/max_complexity, Apollo batched query handling, Pundit/CanCan integration. (HIGH confidence — official gem docs)
-- **GraphQL::Batch docs** (Context7 `/shopify/graphql-batch`): Loader pattern, `perform(keys)`, `fulfill(key, value)`, schema setup with `use GraphQL::Batch`. (HIGH confidence — official gem docs)
-- **dry-validation + dry-rails docs** (Context7 `/dry-rb/dry-validation`, `/dry-rb/dry-rails`): ApplicationContract, safe_params macro, Schema::Form vs Schema::JSON, type coercion with form types. (HIGH confidence — official gem docs)
-- **Vite Ruby docs** (Context7 `/elmassimo/vite_ruby`): vite-plugin-ruby, vite-plugin-rails, skipProxy configuration, dev server proxy troubleshooting. (HIGH confidence — official gem docs)
-- **Solid Queue migration guides** (web search, MEDIUM confidence — practitioner blog posts, cross-referenced across 4 sources): nsinenko.com (2025-10-25), ttb.software (2026-05-11), caio.ca, dev.to (2026-06-03). All confirm: no auto-retry, recurring.yml migration, autovacuum tuning, connection pool pressure, separate database recommended.
-- **bgg-api-ts** (GitHub, MEDIUM confidence): Third-party TS wrapper documenting 202 retry handling, 5s rate limiting, BggTimeoutError for 202-queued responses.
-- **BGG forum thread** (2025-11-04, MEDIUM confidence): Documents BGG's server-side cache lag for collection updates — users waiting hours for changes to appear via API.
+- **Tailwind CSS v4 Docs (HIGH):** Theme variables (`@theme`), CSS-first configuration, `@utility`, `@reference`, dark mode `@custom-variant`, upgrade guide. https://tailwindcss.com/docs/theme, https://tailwindcss.com/docs/dark-mode, https://tailwindcss.com/docs/upgrade-guide
+- **Google Fonts Material Symbols Guide (HIGH):** Variable axes (FILL, wght, GRAD, opsz), subsetting with `icon_names`, font-display, self-hosting. https://developers.google.com/fonts/docs/material_symbols
+- **Material 3 Design Docs (HIGH):** Color system, surface roles, dark theme guidance. https://m3.material.io/styles/color/system/overview
+- **Apollo Client 3 Docs (HIGH):** Mutation `update` callbacks, `cache.modify`, `refetchQueries`, `onQueryUpdated`, fetch policies (`cache-and-network`, `nextFetchPolicy`), normalized cache. https://www.apollographql.com/docs/react/data/mutations, https://www.apollographql.com/docs/react/data/queries, https://www.apollographql.com/docs/react/caching/cache-interaction
+- **GraphQL.org Schema Design (HIGH):** Versionless schema evolution, deprecation, nullability best practices. https://graphql.org/learn/schema-design/
+- **Rails Active Record Querying Guide (HIGH):** Eager loading, `includes`, `preload`, `eager_load`, N+1 prevention. https://guides.rubyonrails.org/active_record_querying.html
+- **web.dev Optimize WebFont Loading (HIGH):** Preload, `font-display`, Font Loading API, critical rendering path. https://web.dev/articles/optimize-webfont-loading
+- **Google Machine Learning Recommendation Systems (MEDIUM):** Candidate generation, content-based filtering, cold start, retrieval/scoring/re-ranking, explainability trade-offs. https://developers.google.com/machine-learning/recommendation
+- **BGG XML API2 Official Wiki (MEDIUM):** `/thing` endpoint poll structure (`suggested_numplayers`, `suggested_playerage`, `language_dependence`), rate-limit guidance (5s between requests). https://boardgamegeek.com/wiki/page/BGG_XML_API2
+- **Project source code (HIGH):** `app/models/bgg_thing.rb`, `app/graphql/types/group_type.rb`, `app/frontend/entrypoints/styles.css`, `app/frontend/components/layout/Sidebar.vue`, `app/frontend/components/collection/GameCard.vue`, `app/services/bgg.rb`, `bgg-graphql-proxy/src/datasources/bggDataSource.ts`.
+- **Reference apps (HIGH):** `bgg-graphql-proxy` (XML normalization, rate limiting, expansion workaround), `bggeek-shared-list` (legacy UI patterns, Fuse.js search, grouping/sorting logic).
 
 ---
-*Pitfalls research for: Rails 8 + Vue 3 + GraphQL + dry-validation monorepo with BGG API integration*
-*Researched: 2026-06-30*
+*Pitfalls research for: v1.1 UI Redesign + Suggestion Engine*
+*Researched: 2026-07-13*
+
+
