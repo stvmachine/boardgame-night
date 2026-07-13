@@ -16,16 +16,14 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 
 ### Active
 
-- [ ] Fetch and merge multiple BGG users' collections into a single deduplicated view
-- [ ] Validate that entered BGG usernames exist before fetching
-- [ ] Search, filter (players, play time), sort, and group the merged collection
-- [ ] Create groups of friends to pool multiple BGG collections together
-- [ ] Create a boardgame night session and invite group members
-- [ ] Get game suggestions for a session based on attendees and player counts
-- [ ] Rails communicates with BoardGameGeek's API using credentials from `.env.bggeek`
-- [ ] Hot/trending BGG games showcase on the landing page
-- [ ] Shareable permalink URLs for a set of usernames
-- [ ] Responsive layout (mobile drawer + desktop sidebar)
+- [ ] Migrate UI to "Tabletop Social" design system (Inter, indigo, Material 3 tonal palette, Material Symbols icons, 280px sidebar, rounded-xl cards, status badges, skeleton loaders)
+- [ ] Redesign app shell with new sidebar navigation (Home/Collection/Hot/Groups/Account + Settings/Logout + "New Session" primary button)
+- [ ] Redesign Home as a dashboard (hero with BGG merge input + personal stats card + trending games)
+- [ ] Redesign Collection view (structured filter sidebar with range slider, checkbox groups, segmented buttons + rich game cards + sort + grid/list toggle + skeleton loaders)
+- [ ] Build Group Detail surface (group header + upcoming sessions list + shared collection spotlight + members panel with roles + invite link with copy)
+- [ ] Redesign Picking a Game screen (session header with status badge + attendee-aware filtered game suggestions + "Pick this game" cards)
+- [ ] Build full poll-based suggestion engine (SUGG-01/02: session-scoped weighted scoring with BGG best-player-count poll data, explainable shortlist)
+- [ ] Address v1.0 tech debt (E2E suite in CI, Action Cable dev config, cleanup legacy BGG classes, update REQUIREMENTS checkboxes)
 
 ### Out of Scope
 
@@ -72,8 +70,25 @@ For this rewrite:
 | Rails owns BGG communication (not Vue) | Keeps BGG credentials server-side; centralizes rate limiting & caching | ✅ Phase 1 — dotenvx-encrypted .env.bggeek loaded server-side, never exposed to frontend |
 | rbenv for Ruby version management | User requirement; modern Ruby toolchain | ✅ Phase 1 — .ruby-version at 3.4.9, rbenv shims prioritized in PATH |
 | `.env.bggeek` for BGG credentials | Keeps secrets out of git; user-specified location | ✅ Phase 1 — dotenvx-encrypted, .env.bggeek.keys gitignored, decrypted via DOTENV_PRIVATE_KEY_BGGEEK at runtime |
-| v1 = shared-list parity + boardgame night sessions | v1 rewrites bggeek-shared-list AND adds the night-session features that the project name implies | — In progress |
+| v1 = shared-list parity + boardgame night sessions | v1 rewrites bggeek-shared-list AND adds the night-session features that the project name implies | ✅ Complete — v1.0 shipped 2026-07-09 |
+| v1.1 = UI redesign + suggestion engine | Reskin with Stitch "Tabletop Social" design, build Group Detail surface, ship poll-based suggestion engine | — In progress |
 | Vue 3.5 SPA with Apollo 3.13 + @vue/apollo-composable 4.2.2 | Apollo 4 + composable v5 still in beta (incompatible) | ✅ Phase 1 — Apollo BatchHttpLink, vue-router, Pinia, Tailwind v4, HealthView E2E verified via Playwright |
+
+## Current Milestone: v1.1 UI Redesign + Suggestion Engine
+
+**Goal:** Reskin the entire app with the "Tabletop Social" Stitch design system, build the new Group Detail surface, and ship the full poll-based suggestion engine.
+
+**Target features:**
+- Design system migration (Inter, indigo, Material 3 tonal palette, Material Symbols icons, 280px sidebar, rounded-xl cards, status badges, skeleton loaders)
+- App shell redesign (sidebar nav: Home/Collection/Hot/Groups/Account + Settings/Logout + "New Session" button)
+- Home redesign (dashboard: hero + personal stats + trending games)
+- Collection redesign (structured filter sidebar + rich game cards + sort + grid/list toggle + skeleton loaders)
+- Group Detail (new surface: sessions list + shared collection spotlight + members panel + invite link)
+- Picking a Game redesign (session header + attendee-aware filtered suggestions + "Pick this game" cards)
+- Suggestion engine (SUGG-01/02: poll-based weighted scoring, explainable shortlist)
+- Tech debt cleanup (E2E in CI, Action Cable dev config, legacy BGG class cleanup, REQUIREMENTS checkboxes)
+
+**Design reference:** Stitch project "BoardGame Night UI Redesign" (projects/2288729336915094585) — "Tabletop Social" design system
 
 ## Evolution
 
@@ -93,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-03 after Phase 1 (Foundation & Monorepo Shell)*
+*Last updated: 2026-07-13 after Milestone v1.0 complete; starting v1.1 (UI Redesign + Suggestion Engine)*
