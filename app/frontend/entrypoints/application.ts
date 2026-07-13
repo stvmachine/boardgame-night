@@ -1,3 +1,5 @@
+import '@fontsource-variable/inter/wght.css'
+
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { DefaultApolloClient } from '@vue/apollo-composable'
