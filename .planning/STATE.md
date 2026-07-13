@@ -5,16 +5,16 @@ milestone_name: UI Redesign + Suggestion Engine
 current_phase: 05
 current_phase_name: design-system-foundation
 status: executing
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-07-13T07:34:24.316Z"
+stopped_at: Completed 05-03-PLAN.md
+last_updated: "2026-07-13T14:14:15.707Z"
 last_activity: 2026-07-13
 last_activity_desc: Phase 05 execution started
 progress:
   total_phases: 11
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 25
-  completed_plans: 23
-  percent: 36
+  completed_plans: 25
+  percent: 45
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 05 (design-system-foundation) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-07-13 — Phase 05 execution started
 
@@ -66,6 +66,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (v1.
 
 | Phase 05 P01 | 45min | 8 tasks | 8 files |
 | Phase 05 P04 | 15min | 1 tasks | 90 files |
+| Phase 05 P03 | 15min | 2 tasks | 18 files |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Follow the plan's explicit Button/Badge sizes and variants rather than shadcn defaults; use only default, sm, lg, icon sizes and primary/secondary/outline/ghost/destructive + default/draft/invited/picking/completed variants
 - [Phase ?]: Use explicit M3 Tailwind utility classes (bg-primary, bg-surface-container, border-outline) in primitive class strings rather than relying solely on shadcn CSS variables like bg-card
 - [Phase ?]: Replace all shadcn-generated @lucide/vue icon imports with the project's Iconify wrapper (Icon) to maintain the single Material Symbols icon dependency from Plan 05-01
+- [Phase 05]: Replaced the hardcoded 15-slot avatar palette with M3 token classes and made useMemberColor return a single class string for AvatarFallback.
+- [Phase 05]: Migrated GameCard from a custom article to Card/CardContent/Badge primitives using semantic badge variants (invited, draft).
+- [Phase 05]: Removed obsolete Sidebar.spec.ts and updated AppShell.spec.ts to test the new NavSidebar/NavDrawer shell.
 
 ### Pending Todos
 
@@ -109,6 +113,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-13T07:34:24.309Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-07-13T14:14:15.700Z
+Stopped at: Completed 05-03-PLAN.md
 Resume file: None

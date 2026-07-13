@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: BGG Integration Layer + Persistence** - BGG XML client, rate limiting, 202 retry, expansion workaround, persisted collections
 - [x] **Phase 3: GraphQL API + Collection Surface (v1 Parity)** - Full collection UI: N-user merge, search/filter/sort/group, hot games, permalinks, responsive layout
 - [x] **Phase 4: Auth + Friend Groups + Session Lifecycle** - Accounts, BGG username binding, friend groups, magic-link sessions, RSVP, manual game pick
-- [ ] **Phase 5: Design System Foundation** - Tailwind v4/Material 3 tokens, Stitch primitives, app shell redesign
+- [x] **Phase 5: Design System Foundation** - Tailwind v4/Material 3 tokens, Stitch primitives, app shell redesign (completed 2026-07-13)
 - [ ] **Phase 6: BGG Poll Data Layer** - Poll migrations, parser, enrichment job, one-time backfill
 - [ ] **Phase 7: Suggestion Engine Backend** - Deterministic scoring service, explainable shortlist, GraphQL types
 - [ ] **Phase 8: Group Detail Surface** - Group hub with sessions, members, spotlight, invite link
@@ -147,7 +147,7 @@ Plans:
   4. User sees circular avatars with deterministic per-username colored backgrounds and white centered initials.
   5. User sees skeleton loading placeholders matching the game card layout while data is loading.
 
-**Plans:** 2/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 **Wave 1**
 
@@ -159,11 +159,11 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 05-02-PLAN.md — App shell redesign with new navigation (280px NavSidebar, Sheet-based NavDrawer, AppNav, New Session CTA)
+- [x] 05-02-PLAN.md — App shell redesign with new navigation (280px NavSidebar, Sheet-based NavDrawer, AppNav, New Session CTA)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 05-03-PLAN.md — Component migration & old shell cleanup (MemberAvatar→Avatar, ResultsSkeleton→Skeleton, inline SVG→Icon, delete old shell)
+- [x] 05-03-PLAN.md — Component migration & old shell cleanup (MemberAvatar→Avatar, ResultsSkeleton→Skeleton, inline SVG→Icon, delete old shell)
 
 **UI hint**: yes
 
@@ -275,7 +275,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. BGG Integration Layer + Persistence | 3/3 | Complete | 2026-07-04 |
 | 3. GraphQL API + Collection Surface (v1 Parity) | 11/11 | Complete | 2026-07-08 |
 | 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete | 2026-07-09 |
-| 5. Design System Foundation | 2/4 | In Progress|  |
+| 5. Design System Foundation | 4/4 | Complete   | 2026-07-13 |
 | 6. BGG Poll Data Layer | 0/TBD | Not started | - |
 | 7. Suggestion Engine Backend | 0/TBD | Not started | - |
 | 8. Group Detail Surface | 0/TBD | Not started | - |
