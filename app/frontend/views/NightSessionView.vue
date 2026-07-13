@@ -9,6 +9,7 @@ import RsvpDashboard from '@/components/session/RsvpDashboard.vue'
 import GamePicker from '@/components/session/GamePicker.vue'
 import SessionSummary from '@/components/session/SessionSummary.vue'
 import EmptyState from '@/components/collection/EmptyState.vue'
+import { Badge } from '@/components/ui/badge'
 
 const route = useRoute()
 const draft = useSessionDraftStore()
@@ -26,20 +27,20 @@ const currentUser = computed(() => currentUserResult.value?.currentUser)
 const isHost = computed(() => session.value?.host?.id === currentUser.value?.id)
 const showCancelConfirm = ref(false)
 
-const stateBadge = computed(() => {
+const stateBadgeVariant = computed(() => {
   switch (session.value?.state) {
     case 'DRAFT':
-      return 'bg-neutral-100 text-neutral-700'
+      return 'draft'
     case 'INVITED':
-      return 'bg-indigo-100 text-indigo-800'
+      return 'invited'
     case 'PICKING':
-      return 'bg-amber-100 text-amber-800'
+      return 'picking'
     case 'COMPLETED':
-      return 'bg-green-100 text-green-800'
+      return 'completed'
     case 'CANCELLED':
-      return 'bg-red-100 text-red-800'
+      return 'default'
     default:
-      return 'bg-neutral-100 text-neutral-700'
+      return 'default'
   }
 })
 
@@ -137,12 +138,9 @@ const isActiveState = computed(() => {
             >
               Cancel
             </button>
-            <span
-              class="rounded-full px-3 py-1 text-xs font-medium"
-              :class="stateBadge"
-            >
+            <Badge :variant="stateBadgeVariant">
               {{ session.state }}
-            </span>
+            </Badge>
           </div>
         </div>
 

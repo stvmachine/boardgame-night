@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import MemberAvatar from '@/components/common/MemberAvatar.vue'
+import { Badge } from '@/components/ui/badge'
 import type { AttendanceFragment } from '@/generated/types'
 
 interface Props {
@@ -12,11 +13,11 @@ defineProps<Props>()
 const goingCount = (attendances: readonly AttendanceFragment[]) =>
   attendances.filter(a => a.response === 'going').length
 
-const responseBadge = (response: string) => {
+const responseBadgeVariant = (response: string) => {
   if (response === 'going') {
-    return 'bg-green-100 text-green-800'
+    return 'completed'
   }
-  return 'bg-neutral-100 text-neutral-700'
+  return 'default'
 }
 </script>
 
@@ -35,12 +36,9 @@ const responseBadge = (response: string) => {
             <MemberAvatar :username="attendance.user.username" />
             <span class="text-sm text-neutral-900">{{ attendance.user.displayName }}</span>
           </div>
-          <span
-            class="rounded-full px-2 py-0.5 text-xs font-medium"
-            :class="responseBadge(attendance.response)"
-          >
+          <Badge :variant="responseBadgeVariant(attendance.response)">
             {{ attendance.response === 'going' ? 'Going' : 'Not going' }}
-          </span>
+          </Badge>
         </li>
       </ul>
       <p v-else class="text-sm text-neutral-500">No responses yet.</p>

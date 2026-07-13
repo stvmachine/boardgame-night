@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import GameCard from '@/components/collection/GameCard.vue'
 import MemberAvatar from '@/components/common/MemberAvatar.vue'
+import { Badge } from '@/components/ui/badge'
 import type { NightSession } from '@/generated/operations'
 
 interface Props {
@@ -28,10 +29,8 @@ const dateDisplay = computed(() => {
 
 const pickedGame = computed(() => props.session.pickedGame)
 
-function responseClass(response: string): string {
-  return response === 'going'
-    ? 'bg-green-100 text-green-800'
-    : 'bg-neutral-100 text-neutral-700'
+function responseBadgeVariant(response: string): string {
+  return response === 'going' ? 'completed' : 'default'
 }
 
 function responseLabel(response: string): string {
@@ -97,12 +96,9 @@ function responseLabel(response: string): string {
                 />
                 <span class="text-sm text-neutral-900">{{ attendance.user.displayName || attendance.user.username }}</span>
               </div>
-              <span
-                class="rounded-full px-2 py-0.5 text-xs font-medium"
-                :class="responseClass(attendance.response)"
-              >
+              <Badge :variant="responseBadgeVariant(attendance.response)">
                 {{ responseLabel(attendance.response) }}
-              </span>
+              </Badge>
             </li>
           </ul>
         </div>
@@ -122,12 +118,9 @@ function responseLabel(response: string): string {
                 />
                 <span class="text-sm text-neutral-900">{{ attendance.user.displayName || attendance.user.username }}</span>
               </div>
-              <span
-                class="rounded-full px-2 py-0.5 text-xs font-medium"
-                :class="responseClass(attendance.response)"
-              >
+              <Badge :variant="responseBadgeVariant(attendance.response)">
                 {{ responseLabel(attendance.response) }}
-              </span>
+              </Badge>
             </li>
           </ul>
         </div>
