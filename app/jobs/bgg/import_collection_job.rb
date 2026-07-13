@@ -60,6 +60,8 @@ class Bgg::ImportCollectionJob < ApplicationJob
 
     user.update!(last_synced_at: Time.current)
 
+    Bgg::EnrichThingPollsJob.perform_later(username)
+
     broadcast(username, "READY", game_count: result[:added] + result[:updated])
   rescue Bgg::InvalidUsernameError, Bgg::ResourceNotFound => e
     broadcast(username, "ERROR", error: e.message)
