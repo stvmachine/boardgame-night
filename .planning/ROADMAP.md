@@ -147,7 +147,12 @@ Plans:
   4. User sees circular avatars with deterministic per-username colored backgrounds and white centered initials.
   5. User sees skeleton loading placeholders matching the game card layout while data is loading.
 
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Design tokens, infrastructure & primitive library (M3 tonal palette, shadcn-vue/reka-ui primitives, Inter font, Iconify icons)
+- [ ] 05-02-PLAN.md — App shell redesign with new navigation (280px NavSidebar, Sheet-based NavDrawer, AppNav, New Session CTA)
+- [ ] 05-03-PLAN.md — Component migration & old shell cleanup (MemberAvatar→Avatar, ResultsSkeleton→Skeleton, inline SVG→Icon, delete old shell)
+
 **UI hint**: yes
 
 ### Phase 6: BGG Poll Data Layer
