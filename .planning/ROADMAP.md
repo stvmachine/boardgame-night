@@ -285,7 +285,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 3. GraphQL API + Collection Surface (v1 Parity) | 11/11 | Complete | 2026-07-08 |
 | 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete | 2026-07-09 |
 | 5. Design System Foundation | 4/4 | Complete   | 2026-07-13 |
-| 6. BGG Poll Data Layer | 3/3 | Complete   | 2026-07-13 |
+| 6. BGG Poll Data Layer | 3/3 | Complete    | 2026-07-13 |
 | 7. Suggestion Engine Backend | 0/TBD | Not started | - |
 | 8. Group Detail Surface | 0/TBD | Not started | - |
 | 9. Home & Collection Redesign | 0/TBD | Not started | - |
