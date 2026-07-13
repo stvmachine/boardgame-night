@@ -182,8 +182,12 @@ Plans:
 
 **Plans:** 3 plans
 Plans:
+**Wave 1**
 
 - [ ] 06-01-PLAN.md — Parse + persist: poll tables migration, BggPoll/BggPollResult models, Normalizer.normalize_polls, Bgg::PollPersister (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 06-02-PLAN.md — Fetch + jobs: Bgg::Client#thing per-thing caching + 20-ID batching + XXE hardening, EnrichThingPollsJob, BackfillPollDataJob, ImportCollectionJob hook, bgg:backfill_polls rake task (Wave 2)
 - [ ] 06-03-PLAN.md — GraphQL exposure: PollType, PollResultType, PollsLoader, ThingFields polls/bestPlayerCount, schema dump + codegen (Wave 2)
 
