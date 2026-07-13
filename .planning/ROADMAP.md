@@ -149,9 +149,20 @@ Plans:
 
 **Plans:** 4 plans
 Plans:
+**Wave 1**
+
 - [ ] 05-01-PLAN.md — Design tokens & infrastructure (M3 tonal palette, Inter font, Iconify icons, shadcn-vue init, cn() utility)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 05-04-PLAN.md — Primitive library scaffolding (15 shadcn-vue/reka-ui primitives with M3 token overrides)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 05-02-PLAN.md — App shell redesign with new navigation (280px NavSidebar, Sheet-based NavDrawer, AppNav, New Session CTA)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 05-03-PLAN.md — Component migration & old shell cleanup (MemberAvatar→Avatar, ResultsSkeleton→Skeleton, inline SVG→Icon, delete old shell)
 
 **UI hint**: yes
