@@ -162,3 +162,12 @@ None - no external service configuration required.
 ---
 *Phase: 06-bgg-poll-data-layer*
 *Completed: 2026-07-13*
+
+## Self-Check: PASSED
+
+- [x] Created files exist on disk (migration, models, persister, specs, SUMMARY.md)
+- [x] All task commits present in git log (`c97b00f`, `8751717`, `7d81841`, `3c5c44d`)
+- [x] `bin/rails db:migrate` succeeded
+- [x] `bundle exec rspec` for all 4 spec files exits 0 (35 examples, 0 failures)
+- [x] `bundle exec rubocop` for modified service/model files exits 0 (no offenses)
+- [x] STATE.md and ROADMAP.md updated via gsd-tools state handlers
