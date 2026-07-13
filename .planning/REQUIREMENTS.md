@@ -52,7 +52,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 ### Suggestion Engine (SUGG)
 
-- [ ] **SUGG-01**: Rails parses BGG `suggested_numplayers` poll data (Best/Recommended/Not Recommended votes per player count) and persists it to the database
+- [x] **SUGG-01**: Rails parses BGG `suggested_numplayers` poll data (Best/Recommended/Not Recommended votes per player count) and persists it to the database
 - [ ] **SUGG-02**: Suggestion engine produces a ranked shortlist using weighted scoring (player-count fit 40%, time fit 20%, complexity fit 20%, rating 10%, ownership diversity 10%)
 - [ ] **SUGG-03**: Each suggestion includes explainable reason chips (player-count fit, time fit, complexity, ownership) and a confidence indicator for thin poll data
 - [ ] **SUGG-04**: Suggestion engine uses BGG community poll "best player count" data instead of the v1 range heuristic for grouping/filtering
@@ -121,7 +121,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 | PICK-01 | Phase 10 | Pending |
 | PICK-02 | Phase 10 | Pending |
 | PICK-03 | Phase 10 | Pending |
-| SUGG-01 | Phase 6 | Pending |
+| SUGG-01 | Phase 6 | Complete |
 | SUGG-02 | Phase 7 | Pending |
 | SUGG-03 | Phase 7 | Pending |
 | SUGG-04 | Phase 7 | Pending |

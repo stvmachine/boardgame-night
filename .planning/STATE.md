@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
-current_phase: 05
+current_phase: 06
+current_phase_name: bgg-poll-data-layer
 status: executing
-stopped_at: Phase 6 context gathered
-last_updated: "2026-07-13T18:41:58.600Z"
+stopped_at: Completed 06-bgg-poll-data-layer-01-PLAN.md
+last_updated: "2026-07-13T20:59:01.382Z"
 last_activity: 2026-07-13
-last_activity_desc: Phase 05 marked complete
+last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 11
   completed_phases: 5
-  total_plans: 25
-  completed_plans: 25
+  total_plans: 28
+  completed_plans: 26
   percent: 45
-current_phase_name: design-system-foundation
 ---
 
 # Project State
@@ -24,14 +24,14 @@ current_phase_name: design-system-foundation
 See: .planning/PROJECT.md (updated 2026-07-13)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 05 — design-system-foundation
+**Current focus:** Phase 06 — bgg-poll-data-layer
 
 ## Current Position
 
-Phase: 05 — COMPLETE
-Plan: 4 of 4
+Phase: 06 (bgg-poll-data-layer) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-07-13 — Phase 05 marked complete
+Last activity: 2026-07-13 — Phase 06 execution started
 
 Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (v1.1 planning; 4 of 11 phases from v1.0 complete, v1.1 plans TBD)
 
@@ -67,6 +67,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (v1.
 | Phase 05 P01 | 45min | 8 tasks | 8 files |
 | Phase 05 P04 | 15min | 1 tasks | 90 files |
 | Phase 05 P03 | 15min | 2 tasks | 18 files |
+| Phase 06-bgg-poll-data-layer P01 | 7min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -87,6 +88,10 @@ Recent decisions affecting current work:
 - [Phase 05]: Replaced the hardcoded 15-slot avatar palette with M3 token classes and made useMemberColor return a single class string for AvatarFallback.
 - [Phase 05]: Migrated GameCard from a custom article to Card/CardContent/Badge primitives using semantic badge variants (invited, draft).
 - [Phase 05]: Removed obsolete Sidebar.spec.ts and updated AppShell.spec.ts to test the new NavSidebar/NavDrawer shell.
+- [Phase 06-bgg-poll-data-layer]: Schema stores generic poll name so future poll types can reuse tables; only suggested_numplayers parsed for v1 — Keeps schema forward-compatible while limiting v1 scope to the only poll type needed by the suggestion engine
+- [Phase 06-bgg-poll-data-layer]: Added nullable level column to bgg_poll_results for forward compatibility — Avoids a future migration if language_dependence or other polls need a level field
+- [Phase 06-bgg-poll-data-layer]: poll_data_fetched_at is stamped even when a thing has no suggested_numplayers poll — Prevents infinite backfill loops for games that genuinely lack poll data
+- [Phase 06-bgg-poll-data-layer]: PollPersister implemented as class methods matching Bgg::PollPersister.persist_from_thing_xml behavior — Simpler caller API with no instance state needed; aligns with plan specification
 
 ### Pending Todos
 
@@ -113,6 +118,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-13T16:27:17.203Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-bgg-poll-data-layer/06-CONTEXT.md
+Last session: 2026-07-13T20:59:01.375Z
+Stopped at: Completed 06-bgg-poll-data-layer-01-PLAN.md
+Resume file: None
