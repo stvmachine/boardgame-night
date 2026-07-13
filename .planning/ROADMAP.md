@@ -2,7 +2,13 @@
 
 ## Overview
 
-A Rails 8 API-only + Vue 3 SPA monorepo that rewrites `bggeek-shared-list` and collapses `bgg-graphql-proxy` into one Kamal 2 deploy. v1 delivers shared-list collection parity (merge N BGG collections, browse/search/filter/sort/group/share in a responsive UI) plus a minimal night-organizing surface (accounts, friend groups, magic-link sessions, binary RSVP, host picks a game). The journey runs foundation → BGG data layer → collection surface → night-organizing surface — each phase a vertical slice that builds on the last. The headline game-suggestion engine is deferred to a future milestone (SUGG-01/02 are v2); v1 ships manual game picking.
+Boardgame-night is a Rails 8 API-only + Vue 3 SPA monorepo that rewrites `bggeek-shared-list` and collapses `bgg-graphql-proxy` into a single Kamal 2 deploy. v1.0 shipped the foundation (Rails + Vue monorepo shell), BGG integration, collection parity, and auth/friend groups with session lifecycle. v1.1 reskins the entire app with the "Tabletop Social" Stitch design system, adds the new Group Detail surface, and ships the poll-based suggestion engine so sessions can recommend games that fit the exact attendee count.
+
+## Milestones
+
+- ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-07-09)
+- 🚧 **v1.1 UI Redesign + Suggestion Engine** — Phases 5-11 (in progress)
+- 📋 **v2.0 Enhanced Game Night** — Deferred (ranked voting, 4-state RSVP, play logging, etc.)
 
 ## Phases
 
@@ -15,8 +21,15 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation & Monorepo Shell** - Rails 8 API + Vue 3 SPA skeleton, GraphQL contract, single Kamal 2 deploy
 - [x] **Phase 2: BGG Integration Layer + Persistence** - BGG XML client, rate limiting, 202 retry, expansion workaround, persisted collections
-- [x] **Phase 3: GraphQL API + Collection Surface (v1 Parity)** - Full collection UI: N-user merge, search/filter/sort/group, hot games, permalinks, responsive layout (completed 2026-07-07)
-- [ ] **Phase 4: Auth + Friend Groups + Session Lifecycle** - Accounts, BGG username binding, friend groups, magic-link sessions, RSVP, manual game pick
+- [x] **Phase 3: GraphQL API + Collection Surface (v1 Parity)** - Full collection UI: N-user merge, search/filter/sort/group, hot games, permalinks, responsive layout
+- [x] **Phase 4: Auth + Friend Groups + Session Lifecycle** - Accounts, BGG username binding, friend groups, magic-link sessions, RSVP, manual game pick
+- [ ] **Phase 5: Design System Foundation** - Tailwind v4/Material 3 tokens, Stitch primitives, app shell redesign
+- [ ] **Phase 6: BGG Poll Data Layer** - Poll migrations, parser, enrichment job, one-time backfill
+- [ ] **Phase 7: Suggestion Engine Backend** - Deterministic scoring service, explainable shortlist, GraphQL types
+- [ ] **Phase 8: Group Detail Surface** - Group hub with sessions, members, spotlight, invite link
+- [ ] **Phase 9: Home & Collection Redesign** - Dashboard hero, stats, trending, rich filters, game cards
+- [ ] **Phase 10: Picking a Game Redesign** - Session header, attendee-aware suggestions, pick cards
+- [ ] **Phase 11: Polish & E2E Hardening** - E2E in CI, solid_cable dev config, legacy cleanup, dark mode/responsive QA
 
 ## Phase Details
 
@@ -82,35 +95,17 @@ Plans:
 
 Plans:
 
-- [x] 03-11-PLAN.md
-
-**Wave 1**
-
 - [x] 03-01-PLAN.md — Backend foundation: statistics migration, BggThing/BggCollectionItem models, normalizer/persister, GraphQL types/loaders, UserType, UserSyncStatusType, SyncStatusEnum
-- [x] 03-05-PLAN.md — Architecture Decision Records: ADR-003..007 and RESEARCH.md Open Questions resolved
-
-**Wave 2** *(blocked on Wave 1 completion)*
-
 - [x] 03-02-PLAN.md — GraphQL query wiring: mergedCollection, user, minimal CollectionView + GameCard/GameGrid, schema codegen
-- [x] 03-06-PLAN.md — Utilities + shell: Tailwind v4 CSS-first, AppShell/AppHeader/MobileDrawer, Sidebar, filter composables, Fuse.js wrapper
-
-**Wave 3** *(blocked on Wave 2 completion)*
-
 - [x] 03-03-PLAN.md — Import/sync API: Solid Cable, collectionSynced subscription, ImportCollection mutation, Bgg::Client#hot
 - [x] 03-04-PLAN.md — Landing + discovery: hotItems, search, validateBggUsername, HomeView, UsernameForm, HotList
-
-**Wave 4** *(blocked on Wave 3 completion)*
-
+- [x] 03-05-PLAN.md — Architecture Decision Records: ADR-003..007 and RESEARCH.md Open Questions resolved
+- [x] 03-06-PLAN.md — Utilities + shell: Tailwind v4 CSS-first, AppShell/AppHeader/MobileDrawer, Sidebar, filter composables, Fuse.js wrapper
 - [x] 03-07-PLAN.md — CollectionView polish: filters/sort/group-by, owner select/deselect, usePermalink, e2e tests
-
-**Wave 5** *(gap closure — blocked on Wave 4 completion)*
-
 - [x] 03-08-PLAN.md — Collapsible game groups + grouping sort fix + e2e stability (COLL-08)
 - [x] 03-09-PLAN.md — Move filters to sidebar + collapsible sidebar sections (COLL-14)
-
-**Wave 6** *(gap closure — blocked on Wave 5 completion)*
-
 - [x] 03-10-PLAN.md — Manual refresh + 15-min cooldown + stale-while-revalidate (COLL-18)
+- [x] 03-11-PLAN.md — Final schema/codegen diff check + e2e stability
 
 **UI hint**: yes
 
@@ -128,7 +123,7 @@ Plans:
   4. Group owner/admin can create a boardgame night session, send magic-link invitations, and see RSVP attendee count/status; invitees can RSVP (Going / Not Going) via magic link without creating an account (SESS-01, SESS-02, SESS-03, SESS-04)
   5. Session owner can manually pick a game from the group's merged collection, the session transitions through its lifecycle states (draft → scheduled → rsvp_open → picking → completed), and every mutation is validated via dry-validation contracts (SESS-05, SESS-06, GQL-03)
 
-**Plans:** 4/4 plans executed
+**Plans:** 4/4 plans complete
 Plans:
 
 - [x] 04-01-PLAN.md — Auth foundation: Rails 8 Bearer token auth, signUp/signIn/signOut/bindBggUsername mutations + contracts, Apollo auth link, Vue auth forms, protected routes (Wave 1)
@@ -138,20 +133,140 @@ Plans:
 
 **UI hint**: yes
 
+### Phase 5: Design System Foundation
+
+**Goal**: The app renders with the "Tabletop Social" design system and a shared set of primitives so all redesigned surfaces can be built consistently.
+**Mode:** mvp
+**Depends on**: Phase 4 (v1.0 foundation)
+**Requirements**: DS-01, DS-02, DS-03, DS-04, DS-05, DS-06
+**Success Criteria** (what must be TRUE):
+
+  1. User sees the app shell with the new Tabletop Social styling (Inter font, indigo primary, M3 tonal palette, Material Symbols Outlined icons) and a 280px fixed sidebar containing Home/Collection/Hot/Groups/Account navigation, Settings/Logout, and a "New Session" primary button; on mobile the sidebar becomes a drawer.
+  2. User sees rounded-xl cards with soft shadows and M3 surface tonal layering (Level 0 background, Level 1 cards with 1px border).
+  3. User sees status badges with semantic colors (Draft gray, Invited indigo, Picking amber, Completed green) and small-caps label-sm typography.
+  4. User sees circular avatars with deterministic per-username colored backgrounds and white centered initials.
+  5. User sees skeleton loading placeholders matching the game card layout while data is loading.
+
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 6: BGG Poll Data Layer
+
+**Goal**: BGG player-count poll data is parsed, persisted, and backfilled so the suggestion engine can use it.
+**Mode:** mvp
+**Depends on**: Phase 2 (BGG integration); can run in parallel with Phase 5 (design system), but must finish before Phase 7 (suggestion engine)
+**Requirements**: SUGG-01, SUGG-05
+**Success Criteria** (what must be TRUE):
+
+  1. Rails parses BGG `suggested_numplayers` poll data (Best/Recommended/Not Recommended votes per player count) and persists normalized rows to `bgg_polls` / `bgg_poll_results`.
+  2. New BGG imports automatically extract and persist poll data alongside thing details.
+  3. Existing `BggThing` records are backfilled with poll data via a rate-limited background job that respects the BGG 1 req/5s limit.
+  4. GraphQL exposes poll data per thing so the frontend can display per-player-count vote breakdowns.
+
+**Plans**: TBD
+
+### Phase 7: Suggestion Engine Backend
+
+**Goal**: The backend produces an explainable, ranked shortlist of games for a session using BGG poll data.
+**Mode:** mvp
+**Depends on**: Phase 6 (poll data layer)
+**Requirements**: SUGG-02, SUGG-03, SUGG-04
+**Success Criteria** (what must be TRUE):
+
+  1. For a given session, the suggestion engine returns a ranked shortlist using weighted scoring (player-count fit 40%, time fit 20%, complexity fit 20%, rating 10%, ownership diversity 10%).
+  2. Each suggestion includes explainable reason chips (player-count fit, time fit, complexity, ownership) and a confidence indicator when poll data is thin.
+  3. The engine uses BGG community "best player count" poll data instead of the v1 min/max range heuristic for player-count fit.
+  4. Suggestions are callable via GraphQL without synchronous BGG calls.
+
+**Plans**: TBD
+
+### Phase 8: Group Detail Surface
+
+**Goal**: Users can view a group hub with its sessions, members, shared collection spotlight, and invite link.
+**Mode:** mvp
+**Depends on**: Phase 4 (friend groups) and Phase 5 (design system)
+**Requirements**: GROUP-07, GROUP-08, GROUP-09, GROUP-10, GROUP-11
+**Success Criteria** (what must be TRUE):
+
+  1. User can view a Group Detail page with a header showing name, member count badge, description, and a "Create a night" button.
+  2. User sees upcoming sessions in a list with date blocks, status badges, session titles, time, and attendee counts.
+  3. User sees a shared collection spotlight with a 4-game preview grid and owner attribution, plus a "Browse Library" link to the full collection.
+  4. User sees a members panel with avatars, names, roles, and a per-member action menu.
+  5. User can copy the group's invite link to the clipboard from the Group Detail page.
+
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 9: Home & Collection Redesign
+
+**Goal**: Users experience the redesigned Home dashboard and Collection views with the new design system and richer filtering.
+**Mode:** mvp
+**Depends on**: Phase 3 (collection surface) and Phase 5 (design system)
+**Requirements**: HOME-01, HOME-02, HOME-03, COLL-19, COLL-20, COLL-21, COLL-22, COLL-23
+**Success Criteria** (what must be TRUE):
+
+  1. User sees a Home dashboard with a hero section for BGG username merge input, a "Merge collections" button, a personal stats card (collection size, group count, session count), and a "Trending on BGG" section.
+  2. User sees a Collection view with a structured filter sidebar (search, owner toggles, player count range slider, play-time checkbox groups, complexity segmented buttons).
+  3. User sees rich game cards with thumbnail, rating badge, name, owner avatars, description, and a 3-column stats footer (players, time, complexity).
+  4. User can sort the collection by Name A-Z, Rating High-Low, Weight Light-Heavy, or Recently Played, and toggle between grid and list views.
+  5. User sees skeleton loaders during collection data fetching.
+
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 10: Picking a Game Redesign
+
+**Goal**: Users can pick a game for a session using the redesigned UI with attendee-aware suggestions.
+**Mode:** mvp
+**Depends on**: Phase 7 (suggestion engine) and Phase 9 (collection redesign patterns)
+**Requirements**: PICK-01, PICK-02, PICK-03
+**Success Criteria** (what must be TRUE):
+
+  1. User sees a session header with title, status badge, date/time, attendee avatars with count, and an "Edit Details" button on the Picking screen.
+  2. User sees a "Game Suggestions (Filtered for N Players)" heading with suggestions filtered by confirmed attendees.
+  3. User sees game suggestion cards with thumbnail, title, duration, description, player count, and a "Pick this game" button.
+  4. User can pick a game from the suggestion list and the session updates to the selected game state.
+
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 11: Polish & E2E Hardening
+
+**Goal**: v1.1 is hardened with E2E tests in CI, dev infrastructure fixes, and cleanup of legacy code.
+**Mode:** mvp
+**Depends on**: Phases 8, 9, 10 (all redesigned surfaces)
+**Requirements**: DEBT-01, DEBT-02, DEBT-03, DEBT-04
+**Success Criteria** (what must be TRUE):
+
+  1. E2E test suite runs in CI on every PR (Playwright tests execute).
+  2. Action Cable dev config uses the solid_cable adapter and Vite proxies `/cable` so real-time subscriptions work locally.
+  3. Legacy duplicate BGG classes are removed (e.g., duplicate `ImportCollectionJob`, unsafe `Bgg::CollectionPersister#fetch_and_persist!`).
+  4. REQUIREMENTS.md checkboxes are updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05).
+  5. Dark mode and responsive layouts are verified across all redesigned surfaces.
+
+**Plans**: TBD
+**UI hint**: yes
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Monorepo Shell | 3/3 | Complete    | 2026-07-02 |
-| 2. BGG Integration Layer + Persistence | 3/3 | Complete    | 2026-07-04 |
-| 3. GraphQL API + Collection Surface (v1 Parity) | 11/11 | Complete   | 2026-07-08 |
-| 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete   | 2026-07-09 |
+| 1. Foundation & Monorepo Shell | 3/3 | Complete | 2026-07-02 |
+| 2. BGG Integration Layer + Persistence | 3/3 | Complete | 2026-07-04 |
+| 3. GraphQL API + Collection Surface (v1 Parity) | 11/11 | Complete | 2026-07-08 |
+| 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete | 2026-07-09 |
+| 5. Design System Foundation | 0/TBD | Not started | - |
+| 6. BGG Poll Data Layer | 0/TBD | Not started | - |
+| 7. Suggestion Engine Backend | 0/TBD | Not started | - |
+| 8. Group Detail Surface | 0/TBD | Not started | - |
+| 9. Home & Collection Redesign | 0/TBD | Not started | - |
+| 10. Picking a Game Redesign | 0/TBD | Not started | - |
+| 11. Polish & E2E Hardening | 0/TBD | Not started | - |
 
 ---
 
-*Roadmap created: 2026-07-01*
-*Granularity: coarse (4 phases) | Mode: mvp | Coverage: 51/51 v1 requirements mapped*
-*Note: The game-suggestion engine (SUGG-01/02) and voting (VOTE-01/02) are v2-deferred per REQUIREMENTS.md and are not part of this v1 roadmap. v1 ships manual game picking (SESS-05); the suggestion engine is a future milestone.*
+*Roadmap created: 2026-07-01; updated for v1.1 on 2026-07-13*
+*Granularity: coarse (4 v1.0 + 7 v1.1 phases) | Mode: mvp | Coverage: 31/31 v1.1 requirements mapped*

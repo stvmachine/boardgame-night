@@ -99,42 +99,42 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| DS-01 | TBD | Pending |
-| DS-02 | TBD | Pending |
-| DS-03 | TBD | Pending |
-| DS-04 | TBD | Pending |
-| DS-05 | TBD | Pending |
-| DS-06 | TBD | Pending |
-| HOME-01 | TBD | Pending |
-| HOME-02 | TBD | Pending |
-| HOME-03 | TBD | Pending |
-| COLL-19 | TBD | Pending |
-| COLL-20 | TBD | Pending |
-| COLL-21 | TBD | Pending |
-| COLL-22 | TBD | Pending |
-| COLL-23 | TBD | Pending |
-| GROUP-07 | TBD | Pending |
-| GROUP-08 | TBD | Pending |
-| GROUP-09 | TBD | Pending |
-| GROUP-10 | TBD | Pending |
-| GROUP-11 | TBD | Pending |
-| PICK-01 | TBD | Pending |
-| PICK-02 | TBD | Pending |
-| PICK-03 | TBD | Pending |
-| SUGG-01 | TBD | Pending |
-| SUGG-02 | TBD | Pending |
-| SUGG-03 | TBD | Pending |
-| SUGG-04 | TBD | Pending |
-| SUGG-05 | TBD | Pending |
-| DEBT-01 | TBD | Pending |
-| DEBT-02 | TBD | Pending |
-| DEBT-03 | TBD | Pending |
-| DEBT-04 | TBD | Pending |
+| DS-01 | Phase 5 | Pending |
+| DS-02 | Phase 5 | Pending |
+| DS-03 | Phase 5 | Pending |
+| DS-04 | Phase 5 | Pending |
+| DS-05 | Phase 5 | Pending |
+| DS-06 | Phase 5 | Pending |
+| HOME-01 | Phase 9 | Pending |
+| HOME-02 | Phase 9 | Pending |
+| HOME-03 | Phase 9 | Pending |
+| COLL-19 | Phase 9 | Pending |
+| COLL-20 | Phase 9 | Pending |
+| COLL-21 | Phase 9 | Pending |
+| COLL-22 | Phase 9 | Pending |
+| COLL-23 | Phase 9 | Pending |
+| GROUP-07 | Phase 8 | Pending |
+| GROUP-08 | Phase 8 | Pending |
+| GROUP-09 | Phase 8 | Pending |
+| GROUP-10 | Phase 8 | Pending |
+| GROUP-11 | Phase 8 | Pending |
+| PICK-01 | Phase 10 | Pending |
+| PICK-02 | Phase 10 | Pending |
+| PICK-03 | Phase 10 | Pending |
+| SUGG-01 | Phase 6 | Pending |
+| SUGG-02 | Phase 7 | Pending |
+| SUGG-03 | Phase 7 | Pending |
+| SUGG-04 | Phase 7 | Pending |
+| SUGG-05 | Phase 6 | Pending |
+| DEBT-01 | Phase 11 | Pending |
+| DEBT-02 | Phase 11 | Pending |
+| DEBT-03 | Phase 11 | Pending |
+| DEBT-04 | Phase 11 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 31 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 31 ⚠️
+- Mapped to phases: 31 ✓
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-07-13*
