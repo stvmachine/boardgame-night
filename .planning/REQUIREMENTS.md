@@ -56,7 +56,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 - [ ] **SUGG-02**: Suggestion engine produces a ranked shortlist using weighted scoring (player-count fit 40%, time fit 20%, complexity fit 20%, rating 10%, ownership diversity 10%)
 - [ ] **SUGG-03**: Each suggestion includes explainable reason chips (player-count fit, time fit, complexity, ownership) and a confidence indicator for thin poll data
 - [ ] **SUGG-04**: Suggestion engine uses BGG community poll "best player count" data instead of the v1 range heuristic for grouping/filtering
-- [ ] **SUGG-05**: BGG poll data is backfilled for existing BggThing records via a rate-limited background job
+- [x] **SUGG-05**: BGG poll data is backfilled for existing BggThing records via a rate-limited background job
 
 ### Tech Debt (DEBT)
 
@@ -125,7 +125,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 | SUGG-02 | Phase 7 | Pending |
 | SUGG-03 | Phase 7 | Pending |
 | SUGG-04 | Phase 7 | Pending |
-| SUGG-05 | Phase 6 | Pending |
+| SUGG-05 | Phase 6 | Complete |
 | DEBT-01 | Phase 11 | Pending |
 | DEBT-02 | Phase 11 | Pending |
 | DEBT-03 | Phase 11 | Pending |

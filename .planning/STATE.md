@@ -6,14 +6,14 @@ current_phase: 06
 current_phase_name: bgg-poll-data-layer
 status: executing
 stopped_at: Completed 06-bgg-poll-data-layer-01-PLAN.md
-last_updated: "2026-07-13T20:59:01.382Z"
+last_updated: "2026-07-13T21:12:33.197Z"
 last_activity: 2026-07-13
 last_activity_desc: Phase 06 execution started
 progress:
   total_phases: 11
   completed_phases: 5
   total_plans: 28
-  completed_plans: 26
+  completed_plans: 27
   percent: 45
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-13)
 ## Current Position
 
 Phase: 06 (bgg-poll-data-layer) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-07-13 — Phase 06 execution started
 
@@ -68,6 +68,7 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (v1.
 | Phase 05 P04 | 15min | 1 tasks | 90 files |
 | Phase 05 P03 | 15min | 2 tasks | 18 files |
 | Phase 06-bgg-poll-data-layer P01 | 7min | 2 tasks | 10 files |
+| Phase 06 P02 | 8min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -92,6 +93,8 @@ Recent decisions affecting current work:
 - [Phase 06-bgg-poll-data-layer]: Added nullable level column to bgg_poll_results for forward compatibility — Avoids a future migration if language_dependence or other polls need a level field
 - [Phase 06-bgg-poll-data-layer]: poll_data_fetched_at is stamped even when a thing has no suggested_numplayers poll — Prevents infinite backfill loops for games that genuinely lack poll data
 - [Phase 06-bgg-poll-data-layer]: PollPersister implemented as class methods matching Bgg::PollPersister.persist_from_thing_xml behavior — Simpler caller API with no instance state needed; aligns with plan specification
+- [Phase ?]: Rescued Bgg::ResourceNotFound at batch level in enrichment/backfill jobs so a single missing batch does not discard the entire job. — Follows D-08 skip-and-continue pattern and keeps partial backfill progress even when one batch returns 404.
+- [Phase ?]: Backfill logs missing IDs and leaves poll_data_fetched_at nil, allowing retry on the next backfill run. — Matches Open Question 2 resolution: do not mark missing IDs as fetched so a subsequent backfill can retry them.
 
 ### Pending Todos
 
@@ -118,6 +121,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-13T20:59:01.375Z
+Last session: 2026-07-13T21:11:32.984Z
 Stopped at: Completed 06-bgg-poll-data-layer-01-PLAN.md
 Resume file: None
