@@ -148,6 +148,7 @@ type MergedThing {
   average: Float
   averageWeight: Float
   bayesAverage: Float
+  bestPlayerCount: Int
   description: String
   id: ID!
   image: String
@@ -159,6 +160,7 @@ type MergedThing {
   minPlaytime: Int
   name: String!
   owners: [Owner!]!
+  polls: [Poll!]!
   thumbnail: String
   usersRated: Int
   yearPublished: Int
@@ -325,6 +327,21 @@ type PickGamePayload {
   The updated session
   """
   session: NightSession!
+}
+
+type Poll {
+  id: ID!
+  name: String!
+  results: [PollResult!]!
+  title: String
+  totalVotes: Int
+}
+
+type PollResult {
+  id: ID!
+  numVotes: Int!
+  playerCount: Int
+  value: String!
 }
 
 type Query {

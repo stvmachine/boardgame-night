@@ -128,6 +128,7 @@ export type MergedThing = {
   average?: Maybe<Scalars['Float']['output']>;
   averageWeight?: Maybe<Scalars['Float']['output']>;
   bayesAverage?: Maybe<Scalars['Float']['output']>;
+  bestPlayerCount?: Maybe<Scalars['Int']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   image?: Maybe<Scalars['String']['output']>;
@@ -139,6 +140,7 @@ export type MergedThing = {
   minPlaytime?: Maybe<Scalars['Int']['output']>;
   name: Scalars['String']['output'];
   owners: Array<Owner>;
+  polls: Array<Poll>;
   thumbnail?: Maybe<Scalars['String']['output']>;
   usersRated?: Maybe<Scalars['Int']['output']>;
   yearPublished?: Maybe<Scalars['Int']['output']>;
@@ -326,6 +328,23 @@ export type PickGamePayload = {
   __typename?: 'PickGamePayload';
   /** The updated session */
   session: NightSession;
+};
+
+export type Poll = {
+  __typename?: 'Poll';
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  results: Array<PollResult>;
+  title?: Maybe<Scalars['String']['output']>;
+  totalVotes?: Maybe<Scalars['Int']['output']>;
+};
+
+export type PollResult = {
+  __typename?: 'PollResult';
+  id: Scalars['ID']['output'];
+  numVotes: Scalars['Int']['output'];
+  playerCount?: Maybe<Scalars['Int']['output']>;
+  value: Scalars['String']['output'];
 };
 
 export type Query = {
