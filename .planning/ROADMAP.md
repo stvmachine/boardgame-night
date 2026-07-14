@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Auth + Friend Groups + Session Lifecycle** - Accounts, BGG username binding, friend groups, magic-link sessions, RSVP, manual game pick
 - [x] **Phase 5: Design System Foundation** - Tailwind v4/Material 3 tokens, Stitch primitives, app shell redesign (completed 2026-07-13)
 - [x] **Phase 6: BGG Poll Data Layer** - Poll migrations, parser, enrichment job, one-time backfill (completed 2026-07-13)
-- [ ] **Phase 7: Suggestion Engine Backend** - Deterministic scoring service, explainable shortlist, GraphQL types
+- [x] **Phase 7: Suggestion Engine Backend** - Deterministic scoring service, explainable shortlist, GraphQL types (completed 2026-07-14)
 - [ ] **Phase 8: Group Detail Surface** - Group hub with sessions, members, spotlight, invite link
 - [ ] **Phase 9: Home & Collection Redesign** - Dashboard hero, stats, trending, rich filters, game cards
 - [ ] **Phase 10: Picking a Game Redesign** - Session header, attendee-aware suggestions, pick cards
@@ -204,7 +204,7 @@ Plans:
   3. The engine uses BGG community "best player count" poll data instead of the v1 min/max range heuristic for player-count fit.
   4. Suggestions are callable via GraphQL without synchronous BGG calls.
 
-**Plans:** 3/4 plans complete
+**Plans:** 4/4 plans complete
 Plans:
 **Wave 1**
 
@@ -217,7 +217,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 07-04-PLAN.md — Runtime schema contract, schema/codegen publication, and integrated Phase 7 verification
+- [x] 07-04-PLAN.md — Runtime schema contract, schema/codegen publication, and integrated Phase 7 verification
 
 ### Phase 8: Group Detail Surface
 
@@ -299,7 +299,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete | 2026-07-09 |
 | 5. Design System Foundation | 4/4 | Complete   | 2026-07-13 |
 | 6. BGG Poll Data Layer | 3/3 | Complete    | 2026-07-13 |
-| 7. Suggestion Engine Backend | 3/4 | In Progress|  |
+| 7. Suggestion Engine Backend | 4/4 | Complete   | 2026-07-14 |
 | 8. Group Detail Surface | 0/TBD | Not started | - |
 | 9. Home & Collection Redesign | 0/TBD | Not started | - |
 | 10. Picking a Game Redesign | 0/TBD | Not started | - |
