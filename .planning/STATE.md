@@ -5,16 +5,16 @@ milestone_name: UI Redesign + Suggestion Engine
 current_phase: 07
 current_phase_name: suggestion-engine-backend
 status: executing
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-07-14T14:06:58.584Z"
-last_activity: 2026-07-14
-last_activity_desc: Phase 07 execution started
+stopped_at: Completed 07-02-PLAN.md
+last_updated: "2026-07-15T14:56:54.701Z"
+last_activity: 2026-07-15
+last_activity_desc: Completed 07-02-PLAN.md
 progress:
   total_phases: 11
   completed_phases: 6
   total_plans: 32
-  completed_plans: 29
-  percent: 55
+  completed_plans: 30
+  percent: 94
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 ## Current Position
 
 Phase: 07 (suggestion-engine-backend) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-07-14 — Phase 07 execution started
 
-Progress: [████████████████████] 100% of planned plans (6 of 11 phases complete; 28/28 plans done)
+Progress: [█████████░] 94% of planned plans (6 of 11 phases complete; 30/32 plans done)
 
 ## Performance Metrics
 
@@ -72,6 +72,7 @@ Progress: [████████████████████] 100% of
 | Phase 06 P02 | 8min | 2 tasks | 9 files |
 | Phase 06-bgg-poll-data-layer P03 | 4 min | 2 tasks | 11 files |
 | Phase 07 P01 | 40min | 3 tasks | 11 files |
+| Phase 07-suggestion-engine-backend P02 | 40min | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -103,6 +104,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Kept Suggestions::Engine pure: no ActiveRecord queries and no BGG calls inside the service
 - [Phase ?]: Used existing Loaders::PollsLoader and Loaders::OwnersLoader with load_all in the resolver for O(1) batching
 - [Phase ?]: Adopted the locked A1/A2 smoothing and fallback interpretations: +1 smoothing on 20-49 votes with denominator total+2, and linear 0-60 midpoint fallback
+- [Phase 07]: Preference edits are restricted to the session host only (not group admins), per D-06
+- [Phase 07]: Omitted optional inputs retain DB defaults or current values via filtered contract payload, never overwritten with nil
+- [Phase 07]: Complexity preference stays a plain String column validated by contract/model, not a GraphQL enum
 
 ### Pending Todos
 
@@ -129,6 +133,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-14T14:06:58.577Z
-Stopped at: Completed 07-01-PLAN.md
+Last session: 2026-07-14T14:56:27.889Z
+Stopped at: Completed 07-02-PLAN.md
 Resume file: None
