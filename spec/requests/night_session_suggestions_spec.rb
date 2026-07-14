@@ -95,9 +95,9 @@ RSpec.describe "NightSession suggestions query", type: :request do
       bayes_average: 8.0
     )
     create_poll_with_results(perfect_game, [
-      { player_count: 4, value: "Best", num_votes: 80 },
-      { player_count: 4, value: "Recommended", num_votes: 15 },
-      { player_count: 4, value: "Not Recommended", num_votes: 5 }
+      { player_count: 2, value: "Best", num_votes: 80 },
+      { player_count: 2, value: "Recommended", num_votes: 15 },
+      { player_count: 2, value: "Not Recommended", num_votes: 5 }
     ])
     BggCollection.create!(user: host, bgg_thing: perfect_game, quantity: 1)
     BggCollection.create!(user: member, bgg_thing: perfect_game, quantity: 1)
@@ -115,9 +115,9 @@ RSpec.describe "NightSession suggestions query", type: :request do
       bayes_average: 7.0
     )
     create_poll_with_results(weaker_game, [
-      { player_count: 4, value: "Best", num_votes: 30 },
-      { player_count: 4, value: "Recommended", num_votes: 15 },
-      { player_count: 4, value: "Not Recommended", num_votes: 5 }
+      { player_count: 2, value: "Best", num_votes: 30 },
+      { player_count: 2, value: "Recommended", num_votes: 15 },
+      { player_count: 2, value: "Not Recommended", num_votes: 5 }
     ])
     BggCollection.create!(user: host, bgg_thing: weaker_game, quantity: 1)
 
