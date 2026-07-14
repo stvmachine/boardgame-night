@@ -5,8 +5,8 @@ require "rails_helper"
 RSpec.describe "createNightSession mutation" do
   let(:mutation) do
     <<~GRAPHQL
-      mutation CreateNightSession($title: String!, $groupId: ID!, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int) {
-        createNightSession(title: $title, groupId: $groupId, scheduledAt: $scheduledAt, location: $location, capacity: $capacity) {
+      mutation CreateNightSession($title: String!, $groupId: ID!, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int, $timeBudgetMinutes: Int, $complexityPreference: String) {
+        createNightSession(title: $title, groupId: $groupId, scheduledAt: $scheduledAt, location: $location, capacity: $capacity, timeBudgetMinutes: $timeBudgetMinutes, complexityPreference: $complexityPreference) {
           session {
             id
             title
@@ -14,6 +14,8 @@ RSpec.describe "createNightSession mutation" do
             scheduledAt
             location
             capacity
+            timeBudgetMinutes
+            complexityPreference
             host {
               id
               username
@@ -52,8 +54,29 @@ RSpec.describe "createNightSession mutation" do
       expect(data["scheduledAt"]).to eq("2026-07-15T19:00:00Z")
       expect(data["location"]).to eq("Alice's place")
       expect(data["capacity"]).to eq(6)
+      expect(data["timeBudgetMinutes"]).to eq(120)
+      expect(data["complexityPreference"]).to eq("Any")
       expect(data["host"]["username"]).to eq("alice")
       expect(data["group"]["name"]).to eq("Night Owls")
+    }.to change(NightSession, :count).by(1)
+  end
+
+  it "creates a session with preference inputs" do
+    expect {
+      result = BoardgameNightSchema.execute(
+        mutation,
+        variables: {
+          title: "Friday Games",
+          groupId: group.id.to_s,
+          timeBudgetMinutes: 90,
+          complexityPreference: "Medium"
+        },
+        context: context
+      )
+      expect(result["errors"]).to be_nil
+      data = result.dig("data", "createNightSession", "session")
+      expect(data["timeBudgetMinutes"]).to eq(90)
+      expect(data["complexityPreference"]).to eq("Medium")
     }.to change(NightSession, :count).by(1)
   end
 
@@ -102,5 +125,29 @@ RSpec.describe "createNightSession mutation" do
     expect(data["scheduledAt"]).to be_nil
     expect(data["location"]).to be_nil
     expect(data["capacity"]).to be_nil
+    expect(data["timeBudgetMinutes"]).to eq(120)
+    expect(data["complexityPreference"]).to eq("Any")
+  end
+
+  it "rejects a non-positive time budget" do
+    result = BoardgameNightSchema.execute(
+      mutation,
+      variables: { title: "Bad Budget", groupId: group.id.to_s, timeBudgetMinutes: 0 },
+      context: context
+    )
+    expect(result["errors"]).to be_present
+    expect(result["errors"].first["message"]).to match(/time_budget_minutes/i)
+    expect(NightSession.find_by(title: "Bad Budget")).to be_nil
+  end
+
+  it "rejects an unrecognized complexity preference" do
+    result = BoardgameNightSchema.execute(
+      mutation,
+      variables: { title: "Bad Complexity", groupId: group.id.to_s, complexityPreference: "Hard" },
+      context: context
+    )
+    expect(result["errors"]).to be_present
+    expect(result["errors"].first["message"]).to match(/complexity_preference/i)
+    expect(NightSession.find_by(title: "Bad Complexity")).to be_nil
   end
 end
