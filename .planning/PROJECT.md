@@ -13,6 +13,7 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 ### Validated
 
 - ✓ Rails API exposes a GraphQL endpoint consumed by the Vue frontend — Phase 1
+- ✓ Full poll-based suggestion engine parses and persists BGG poll data, ranks attendee-owned games with explainable scoring, and exposes the shortlist through GraphQL — Phases 6–7
 
 ### Active
 
@@ -22,7 +23,6 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 - [ ] Redesign Collection view (structured filter sidebar with range slider, checkbox groups, segmented buttons + rich game cards + sort + grid/list toggle + skeleton loaders)
 - [ ] Build Group Detail surface (group header + upcoming sessions list + shared collection spotlight + members panel with roles + invite link with copy)
 - [ ] Redesign Picking a Game screen (session header with status badge + attendee-aware filtered game suggestions + "Pick this game" cards)
-- [~] Build full poll-based suggestion engine (SUGG-01/05 ✓ Phase 6: poll data parsed, persisted, backfilled; SUGG-02/03/04 pending Phase 7: scoring + explainable shortlist)
 - [ ] Address v1.0 tech debt (E2E suite in CI, Action Cable dev config, cleanup legacy BGG classes, update REQUIREMENTS checkboxes)
 
 ### Out of Scope
@@ -73,6 +73,7 @@ For this rewrite:
 | v1 = shared-list parity + boardgame night sessions | v1 rewrites bggeek-shared-list AND adds the night-session features that the project name implies | ✅ Complete — v1.0 shipped 2026-07-09 |
 | v1.1 = UI redesign + suggestion engine | Reskin with Stitch "Tabletop Social" design, build Group Detail surface, ship poll-based suggestion engine | — In progress |
 | Vue 3.5 SPA with Apollo 3.13 + @vue/apollo-composable 4.2.2 | Apollo 4 + composable v5 still in beta (incompatible) | ✅ Phase 1 — Apollo BatchHttpLink, vue-router, Pinia, Tailwind v4, HealthView E2E verified via Playwright |
+| Deterministic poll-based suggestion scoring | Keep rankings reproducible and explainable with fixed player/time/complexity/rating/ownership weights | ✅ Phase 7 — GraphQL exposes an authenticated, attendee-aware top-eight shortlist from persisted BGG data with no live BGG calls |
 
 ## Current Milestone: v1.1 UI Redesign + Suggestion Engine
 
@@ -108,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-14 after Phase 6 complete (BGG Poll Data Layer); Milestone v1.1 in progress*
+*Last updated: 2026-07-15 after Phase 7 complete (Suggestion Engine Backend); Milestone v1.1 in progress*
