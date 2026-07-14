@@ -8,10 +8,14 @@ class NightSession < ApplicationRecord
   has_many :attendees, through: :attendances, source: :user
   has_many :invite_tokens, dependent: :destroy
 
+  VALID_COMPLEXITY_PREFERENCES = %w[Light Medium Medium-Heavy Heavy Any].freeze
+
   validates :title, presence: true
   validates :state, presence: true, inclusion: { in: %w[draft invited picking completed cancelled] }
   validates :group, presence: true
   validates :host, presence: true
+  validates :complexity_preference, inclusion: { in: VALID_COMPLEXITY_PREFERENCES }
+  validates :time_budget_minutes, numericality: { greater_than: 0 }
 
   def can_schedule?
     state == "draft"

@@ -9,21 +9,28 @@ module Mutations
     argument :location, String, required: false
     argument :capacity, Integer, required: false
 
+    argument :time_budget_minutes, Integer, required: false
+    argument :complexity_preference, String, required: false
+
     field :session, Types::NightSessionType, null: false
 
-    def resolve(title:, group_id:, description: nil, scheduled_at: nil, location: nil, capacity: nil)
+    def resolve(title:, group_id:, description: nil, scheduled_at: nil, location: nil, capacity: nil, time_budget_minutes: nil, complexity_preference: nil)
       raise GraphQL::ExecutionError, "Authentication required" unless context[:current_user]
 
       scheduled_at = parse_datetime(scheduled_at)
 
-      contract = CreateNightSessionContract.new.call(
+      contract_payload = {
         title: title,
         group_id: group_id,
         description: description,
         scheduled_at: scheduled_at,
         location: location,
         capacity: capacity
-      )
+      }
+      contract_payload[:time_budget_minutes] = time_budget_minutes unless time_budget_minutes.nil?
+      contract_payload[:complexity_preference] = complexity_preference unless complexity_preference.nil?
+
+      contract = CreateNightSessionContract.new.call(contract_payload)
       raise GraphQL::ExecutionError, contract.errors.to_h.to_json if contract.failure?
 
       group = Group.find_by(id: group_id)
@@ -34,7 +41,7 @@ module Mutations
         raise GraphQL::ExecutionError, "You must be an owner or admin of the group to create a session"
       end
 
-      session = NightSession.create!(
+      session_attrs = {
         title: contract[:title],
         description: contract[:description],
         group: group,
@@ -43,7 +50,11 @@ module Mutations
         location: contract[:location],
         capacity: contract[:capacity],
         state: "draft"
-      )
+      }
+      session_attrs[:time_budget_minutes] = contract[:time_budget_minutes] unless contract[:time_budget_minutes].nil?
+      session_attrs[:complexity_preference] = contract[:complexity_preference] unless contract[:complexity_preference].nil?
+
+      session = NightSession.create!(session_attrs)
 
       { session: session }
     end
