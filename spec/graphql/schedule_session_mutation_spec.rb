@@ -5,8 +5,8 @@ require "rails_helper"
 RSpec.describe "scheduleSession mutation" do
   let(:mutation) do
     <<~GRAPHQL
-      mutation ScheduleSession($sessionId: ID!, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int) {
-        scheduleSession(sessionId: $sessionId, scheduledAt: $scheduledAt, location: $location, capacity: $capacity) {
+      mutation ScheduleSession($sessionId: ID!, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int, $timeBudgetMinutes: Int, $complexityPreference: String) {
+        scheduleSession(sessionId: $sessionId, scheduledAt: $scheduledAt, location: $location, capacity: $capacity, timeBudgetMinutes: $timeBudgetMinutes, complexityPreference: $complexityPreference) {
           session {
             id
             title
@@ -14,6 +14,8 @@ RSpec.describe "scheduleSession mutation" do
             scheduledAt
             location
             capacity
+            timeBudgetMinutes
+            complexityPreference
           }
           invitesSent
         }
@@ -50,6 +52,8 @@ RSpec.describe "scheduleSession mutation" do
       expect(data["session"]["scheduledAt"]).to eq("2026-07-15T19:00:00Z")
       expect(data["session"]["location"]).to eq("Alice's place")
       expect(data["session"]["capacity"]).to eq(6)
+      expect(data["session"]["timeBudgetMinutes"]).to eq(120)
+      expect(data["session"]["complexityPreference"]).to eq("Any")
       expect(data["invitesSent"]).to eq(1)
     }.to change(InviteToken, :count).by(1)
       .and change { session.reload.state }.from("draft").to("invited")
@@ -63,6 +67,61 @@ RSpec.describe "scheduleSession mutation" do
         context: context
       )
     }.to have_enqueued_job(InviteMailerJob).exactly(:once)
+  end
+
+  it "sets preferences when scheduling" do
+    result = BoardgameNightSchema.execute(
+      mutation,
+      variables: {
+        sessionId: session.id.to_s,
+        scheduledAt: "2026-07-15T19:00:00Z",
+        timeBudgetMinutes: 90,
+        complexityPreference: "Medium"
+      },
+      context: context
+    )
+    expect(result["errors"]).to be_nil
+    data = result.dig("data", "scheduleSession")
+    expect(data["session"]["timeBudgetMinutes"]).to eq(90)
+    expect(data["session"]["complexityPreference"]).to eq("Medium")
+    expect(session.reload.state).to eq("invited")
+  end
+
+  it "preserves existing preferences when scheduling without preference arguments" do
+    session.update!(time_budget_minutes: 90, complexity_preference: "Medium")
+
+    result = BoardgameNightSchema.execute(
+      mutation,
+      variables: {
+        sessionId: session.id.to_s,
+        scheduledAt: "2026-07-15T19:00:00Z",
+        location: "Alice's place"
+      },
+      context: context
+    )
+    expect(result["errors"]).to be_nil
+    data = result.dig("data", "scheduleSession")
+    expect(data["session"]["timeBudgetMinutes"]).to eq(90)
+    expect(data["session"]["complexityPreference"]).to eq("Medium")
+    expect(data["session"]["location"]).to eq("Alice's place")
+    expect(session.reload.state).to eq("invited")
+  end
+
+  it "rejects invalid preferences without transitioning or sending invites" do
+    expect {
+      result = BoardgameNightSchema.execute(
+        mutation,
+        variables: {
+          sessionId: session.id.to_s,
+          scheduledAt: "2026-07-15T19:00:00Z",
+          timeBudgetMinutes: 0
+        },
+        context: context
+      )
+      expect(result["errors"]).to be_present
+      expect(result["errors"].first["message"]).to match(/time_budget_minutes/i)
+    }.not_to change(InviteToken, :count)
+    expect(session.reload.state).to eq("draft")
   end
 
   it "requires authentication" do
