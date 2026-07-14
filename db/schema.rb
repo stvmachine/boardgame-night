@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_14_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_14_000002) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -128,6 +128,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_14_000001) do
 
   create_table "night_sessions", force: :cascade do |t|
     t.integer "capacity"
+    t.string "complexity_preference", default: "Any", null: false
     t.datetime "created_at", null: false
     t.text "description"
     t.integer "group_id", null: false
@@ -137,6 +138,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_14_000001) do
     t.string "previous_state"
     t.datetime "scheduled_at"
     t.string "state", default: "draft", null: false
+    t.integer "time_budget_minutes", default: 120, null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.index ["group_id"], name: "index_night_sessions_on_group_id"
