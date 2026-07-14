@@ -15,6 +15,7 @@ module Types
     field :update_group_member_role, mutation: Mutations::UpdateGroupMemberRole, description: "Change a member's role between admin and member."
     field :create_night_session, mutation: Mutations::CreateNightSession, description: "Create a new night session in draft state."
     field :schedule_session, mutation: Mutations::ScheduleSession, description: "Schedule a draft session and send invitations."
+    field :update_session_preferences, mutation: Mutations::UpdateSessionPreferences, description: "Edit a session's time budget and complexity preference before picking starts."
     field :start_picking, mutation: Mutations::StartPicking, description: "Transition an invited session to the picking state."
     field :pick_game, mutation: Mutations::PickGame, description: "Pick a game from the group's collection and complete the session."
     field :cancel_session, mutation: Mutations::CancelSession, description: "Cancel an active session."
