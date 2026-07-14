@@ -193,7 +193,7 @@ Plans:
 
 ### Phase 7: Suggestion Engine Backend
 
-**Goal**: The backend produces an explainable, ranked shortlist of games for a session using BGG poll data.
+**Goal:** As a session host, I want to see ranked game suggestions, so that I can choose a game that fits the attendees.
 **Mode:** mvp
 **Depends on**: Phase 6 (poll data layer)
 **Requirements**: SUGG-02, SUGG-03, SUGG-04
@@ -204,7 +204,13 @@ Plans:
   3. The engine uses BGG community "best player count" poll data instead of the v1 min/max range heuristic for player-count fit.
   4. Suggestions are callable via GraphQL without synchronous BGG calls.
 
-**Plans**: TBD
+**Plans:** 4 plans
+Plans:
+
+- [ ] 07-01-PLAN.md — Authenticated GraphQL happy path: persisted session context, deterministic scoring engine, and typed suggestions
+- [ ] 07-02-PLAN.md — Host-controlled time/complexity preferences across create, schedule, and pre-picking update flows
+- [ ] 07-03-PLAN.md — Poll helpers plus confidence, fallback, authorization, candidate-isolation, and batching hardening
+- [ ] 07-04-PLAN.md — Runtime schema contract, schema/codegen publication, and integrated Phase 7 verification
 
 ### Phase 8: Group Detail Surface
 
@@ -286,7 +292,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete | 2026-07-09 |
 | 5. Design System Foundation | 4/4 | Complete   | 2026-07-13 |
 | 6. BGG Poll Data Layer | 3/3 | Complete    | 2026-07-13 |
-| 7. Suggestion Engine Backend | 0/TBD | Not started | - |
+| 7. Suggestion Engine Backend | 0/4 | Planned | - |
 | 8. Group Detail Surface | 0/TBD | Not started | - |
 | 9. Home & Collection Redesign | 0/TBD | Not started | - |
 | 10. Picking a Game Redesign | 0/TBD | Not started | - |
