@@ -29,16 +29,15 @@ module Types
 
     def suggestions
       require_authentication!
+      raise GraphQL::ExecutionError, "Unauthorized" unless group_member?(context[:current_user])
       return nil unless object.state == "picking"
-      return nil unless group_member?(context[:current_user])
 
-      attendances = object.attendances.where(response: "going").includes(:user)
-      attendee_ids = attendances.pluck(:user_id).uniq
-      attendee_count = attendee_ids.size
-
-      return [] if attendee_count.zero?
+      attendee_ids = object.attendances.where(response: "going").pluck(:user_id).uniq
+      return [] if attendee_ids.empty?
 
       things = BggThing.merged_for_users(attendee_ids).to_a
+      return [] if things.empty?
+
       thing_ids = things.map(&:id)
 
       polls = dataloader.with(Loaders::PollsLoader).load_all(thing_ids)
@@ -48,7 +47,7 @@ module Types
         session: object,
         things: things,
         attendee_user_ids: attendee_ids,
-        attendee_count: attendee_count,
+        attendee_count: attendee_ids.size,
         polls_by_thing: thing_ids.zip(polls).to_h,
         owners_by_thing: thing_ids.zip(owners).to_h
       )
