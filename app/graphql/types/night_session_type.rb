@@ -11,13 +11,13 @@ module Types
     field :scheduled_at, GraphQL::Types::ISO8601DateTime, null: true
     field :location, String, null: true
     field :capacity, Int, null: true
-    field :attendances, [Types::AttendanceType], null: false
+    field :attendances, [ Types::AttendanceType ], null: false
     field :picked_game, Types::MergedThingType, null: true
     field :attendee_count, Int, null: false
     field :previous_state, Types::SessionStateEnum, null: true
     field :time_budget_minutes, Int, null: false
     field :complexity_preference, String, null: false
-    field :suggestions, [Types::SuggestionType], null: true
+    field :suggestions, [ Types::SuggestionType ], null: true
 
     def attendances
       object.attendances.includes(:user).to_a

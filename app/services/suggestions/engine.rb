@@ -50,7 +50,7 @@ module Suggestions
       things
         .map { |thing| score_thing(thing) }
         .compact
-        .sort_by { |r| [-r.score, r.thing.objectid] }
+        .sort_by { |r| [ -r.score, r.thing.objectid ] }
         .first(8)
     end
 
@@ -139,7 +139,7 @@ module Suggestions
       half_range = (max - min) / 2.0
       distance = (attendee_count - midpoint).abs
 
-      60.0 * (1 - [distance / half_range, 1.0].min)
+      60.0 * (1 - [ distance / half_range, 1.0 ].min)
     end
 
     def attendee_count_out_of_range?(thing)
@@ -191,7 +191,7 @@ module Suggestions
     end
 
     def clamp(value)
-      [0.0, value, 100.0].sort[1]
+      [ 0.0, value, 100.0 ].sort[1]
     end
 
     # D-12

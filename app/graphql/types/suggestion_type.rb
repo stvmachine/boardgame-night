@@ -6,6 +6,6 @@ module Types
     field :score, Float, null: false
     field :breakdown, Types::SuggestionBreakdownType, null: false
     field :confidence, Types::ConfidenceLevelEnum, null: false
-    field :reasons, [String], null: false
+    field :reasons, [ String ], null: false
   end
 end
