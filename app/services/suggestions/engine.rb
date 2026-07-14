@@ -95,30 +95,32 @@ module Suggestions
       return 0 if attendee_count_out_of_range?(thing)
 
       poll = suggested_numplayers_poll(thing)
-      return low_confidence_fallback(thing) if poll.nil? || thing.poll_data_fetched_at.nil?
+      return clamp(low_confidence_fallback(thing)) if poll.nil? || thing.poll_data_fetched_at.nil?
 
-      results = poll.bgg_poll_results.select { |r| r.player_count == attendee_count }
+      results = poll.results_for_player_count(attendee_count)
       total = results.sum(&:num_votes)
 
-      if total < 20
+      value = if total < 20
         low_confidence_fallback(thing)
       elsif total < 50
         smoothed_suitability(results, total)
       else
         raw_suitability(results, total)
       end
+
+      clamp(value)
     end
 
     def raw_suitability(results, total)
-      best = results.find { |r| r.value == "Best" }&.num_votes || 0
-      rec = results.find { |r| r.value == "Recommended" }&.num_votes || 0
+      best = results.select(&:best?).sum(&:num_votes)
+      rec = results.select(&:recommended?).sum(&:num_votes)
 
       100.0 * (best.to_f / total + 0.6 * rec.to_f / total)
     end
 
     def smoothed_suitability(results, total)
-      best = results.find { |r| r.value == "Best" }&.num_votes || 0
-      rec = results.find { |r| r.value == "Recommended" }&.num_votes || 0
+      best = results.select(&:best?).sum(&:num_votes)
+      rec = results.select(&:recommended?).sum(&:num_votes)
 
       denominator = total + 2.0
       best_pct = best.to_f / denominator
@@ -170,13 +172,13 @@ module Suggestions
       weight = thing.average_weight || 0.0
       distance = (weight - target).abs
 
-      [0.0, 100.0 - (distance * 30)].max
+      clamp(100.0 - (distance * 30))
     end
 
     # D-04
     def community_rating_for(thing)
       rating = thing.bayes_average || thing.average || 0.0
-      100.0 * (rating / 10.0)
+      clamp(100.0 * (rating / 10.0))
     end
 
     # D-05
@@ -185,7 +187,11 @@ module Suggestions
 
       owners = owners_by_thing[thing.id] || []
       attending_owners = owners.count { |owner| attendee_user_ids.include?(owner.user_id) }
-      [100.0, (100.0 * attending_owners / attendee_count)].min
+      clamp(100.0 * attending_owners / attendee_count)
+    end
+
+    def clamp(value)
+      [0.0, value, 100.0].sort[1]
     end
 
     # D-12
@@ -193,9 +199,7 @@ module Suggestions
       poll = suggested_numplayers_poll(thing)
       return "LOW" if poll.nil? || thing.poll_data_fetched_at.nil?
 
-      total = poll.bgg_poll_results
-                   .select { |r| r.player_count == attendee_count }
-                   .sum(&:num_votes)
+      total = poll.results_for_player_count(attendee_count).sum(&:num_votes)
 
       case total
       when 50.. then "HIGH"
@@ -207,22 +211,22 @@ module Suggestions
     # D-15
     def reason_chips(thing, player_fit, time_fit, complexity_fit, ownership_bonus)
       chips = []
-      chips << player_count_reason(thing, player_fit)
+      chips << player_count_reason(thing)
       chips << time_reason(thing)
       chips << complexity_reason(thing)
       chips << ownership_reason(thing) if ownership_bonus.positive?
       chips.compact
     end
 
-    def player_count_reason(thing, player_fit)
+    def player_count_reason(thing)
       poll = suggested_numplayers_poll(thing)
-      return nil if poll.nil? || thing.poll_data_fetched_at.nil?
+      return "#{attendee_count} players may fit (limited community data)" if poll.nil? || thing.poll_data_fetched_at.nil?
 
-      results = poll.bgg_poll_results.select { |r| r.player_count == attendee_count }
+      results = poll.results_for_player_count(attendee_count)
       total = results.sum(&:num_votes)
-      return "#{attendee_count} players may fit (thin poll data)" if total < 20
+      return "#{attendee_count} players may fit (limited community data)" if total < 20
 
-      best = results.find { |r| r.value == "Best" }&.num_votes || 0
+      best = results.select(&:best?).sum(&:num_votes)
       best_pct = total.zero? ? 0 : (100.0 * best / total).round
       "Best at #{attendee_count} players (#{best_pct}% Best votes)"
     end
@@ -231,14 +235,14 @@ module Suggestions
       budget = session.time_budget_minutes || 120
       max = thing.max_playtime || thing.playing_time
       min = thing.min_playtime || thing.playing_time
-      return nil if max.nil?
+      return "Playtime not listed" if max.nil?
 
       if max <= budget
         "#{max} min fits your #{budget} min budget"
       elsif min && min <= budget
         "#{min}–#{max} min may fit your #{budget} min budget"
       else
-        nil
+        "#{max} min exceeds your #{budget} min budget"
       end
     end
 
@@ -250,7 +254,7 @@ module Suggestions
     def ownership_reason(thing)
       owners = owners_by_thing[thing.id] || []
       attending_owners = owners.select { |owner| attendee_user_ids.include?(owner.user_id) }
-      names = attending_owners.map { |owner| owner.user.bgg_username || owner.user.username }
+      names = attending_owners.map { |owner| owner.user.display_name }.sort
 
       case names.size
       when 1 then "Owned by #{names.first}"
