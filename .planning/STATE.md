@@ -5,16 +5,16 @@ milestone_name: UI Redesign + Suggestion Engine
 current_phase: 07
 current_phase_name: suggestion-engine-backend
 status: executing
-stopped_at: Completed 07-02-PLAN.md
-last_updated: "2026-07-15T14:56:54.701Z"
-last_activity: 2026-07-15
-last_activity_desc: Completed 07-02-PLAN.md
+stopped_at: Completed 07-03-PLAN.md
+last_updated: "2026-07-14T15:16:23Z"
+last_activity: 2026-07-14
+last_activity_desc: Completed 07-03-PLAN.md
 progress:
   total_phases: 11
   completed_phases: 6
   total_plans: 32
-  completed_plans: 30
-  percent: 94
+  completed_plans: 31
+  percent: 97
 ---
 
 # Project State
@@ -29,11 +29,11 @@ See: .planning/PROJECT.md (updated 2026-07-14)
 ## Current Position
 
 Phase: 07 (suggestion-engine-backend) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 Status: Ready to execute
 Last activity: 2026-07-14 — Phase 07 execution started
 
-Progress: [█████████░] 94% of planned plans (6 of 11 phases complete; 30/32 plans done)
+Progress: [██████████░] 97% of planned plans (6 of 11 phases complete; 31/32 plans done)
 
 ## Performance Metrics
 
@@ -73,6 +73,7 @@ Progress: [█████████░] 94% of planned plans (6 of 11 phases 
 | Phase 06-bgg-poll-data-layer P03 | 4 min | 2 tasks | 11 files |
 | Phase 07 P01 | 40min | 3 tasks | 11 files |
 | Phase 07-suggestion-engine-backend P02 | 40min | 3 tasks | 14 files |
+| Phase 07-suggestion-engine-backend P03 | 15min | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,11 @@ Recent decisions affecting current work:
 - [Phase 07]: Preference edits are restricted to the session host only (not group admins), per D-06
 - [Phase 07]: Omitted optional inputs retain DB defaults or current values via filtered contract payload, never overwritten with nil
 - [Phase 07]: Complexity preference stays a plain String column validated by contract/model, not a GraphQL enum
+- [Phase 07-03]: Centralized BGG poll category comparisons in BggPollResult predicates keeps the engine free of string matching
+- [Phase 07-03]: All score components are clamped to 0..100 before entering the weighted total
+- [Phase 07-03]: Outsiders now receive a GraphQL ExecutionError instead of a silent null, satisfying the authorization threat model
+- [Phase 07-03]: Ownership reasons use display_name sorted alphabetically so they remain stable across identical scores
+- [Phase 07-03]: Thin/missing poll data generates a LOW-confidence reason with consistent limited-community-data wording
 
 ### Pending Todos
 
@@ -133,6 +139,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-14T14:56:27.889Z
+Last session: 2026-07-14T15:17:12.388Z
 Stopped at: Completed 07-02-PLAN.md
 Resume file: None

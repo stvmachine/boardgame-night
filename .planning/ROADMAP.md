@@ -204,7 +204,7 @@ Plans:
   3. The engine uses BGG community "best player count" poll data instead of the v1 min/max range heuristic for player-count fit.
   4. Suggestions are callable via GraphQL without synchronous BGG calls.
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans complete
 Plans:
 **Wave 1**
 
@@ -213,7 +213,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 07-02-PLAN.md — Host-controlled time/complexity preferences across create, schedule, and pre-picking update flows
-- [ ] 07-03-PLAN.md — Poll helpers plus confidence, fallback, authorization, candidate-isolation, and batching hardening
+- [x] 07-03-PLAN.md — Poll helpers plus confidence, fallback, authorization, candidate-isolation, and batching hardening
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -299,7 +299,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Auth + Friend Groups + Session Lifecycle | 4/4 | Complete | 2026-07-09 |
 | 5. Design System Foundation | 4/4 | Complete   | 2026-07-13 |
 | 6. BGG Poll Data Layer | 3/3 | Complete    | 2026-07-13 |
-| 7. Suggestion Engine Backend | 2/4 | In Progress|  |
+| 7. Suggestion Engine Backend | 3/4 | In Progress|  |
 | 8. Group Detail Surface | 0/TBD | Not started | - |
 | 9. Home & Collection Redesign | 0/TBD | Not started | - |
 | 10. Picking a Game Redesign | 0/TBD | Not started | - |
