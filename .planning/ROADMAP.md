@@ -206,10 +206,17 @@ Plans:
 
 **Plans:** 4 plans
 Plans:
+**Wave 1**
 
 - [ ] 07-01-PLAN.md — Authenticated GraphQL happy path: persisted session context, deterministic scoring engine, and typed suggestions
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 07-02-PLAN.md — Host-controlled time/complexity preferences across create, schedule, and pre-picking update flows
 - [ ] 07-03-PLAN.md — Poll helpers plus confidence, fallback, authorization, candidate-isolation, and batching hardening
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 07-04-PLAN.md — Runtime schema contract, schema/codegen publication, and integrated Phase 7 verification
 
 ### Phase 8: Group Detail Surface
