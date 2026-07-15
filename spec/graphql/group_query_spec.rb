@@ -251,6 +251,7 @@ RSpec.describe "group query" do
             id
             collectionSpotlight(limit: $limit) {
               id
+              objectid
               name
               thumbnail
               average
@@ -354,6 +355,17 @@ RSpec.describe "group query" do
       result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: outsider })
       expect(result["errors"]).to be_nil
       expect(spotlight(result)).to eq([])
+    end
+
+    it "returns objectid (BGG numeric id) distinct from DB auto-increment id" do
+      game = BggThing.create!(objectid: 99_999, name: "BGG Game", average: 7.0)
+      BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      entry = spotlight(result).first
+      expect(entry["objectid"]).to eq("99999")
+      expect(entry["id"]).not_to eq("99999")
     end
 
     it "excludes out-of-group owners from spotlight attribution" do

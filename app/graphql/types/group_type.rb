@@ -7,12 +7,12 @@ module Types
     field :description, String, null: true
     field :invite_code, String, null: true
     field :owner, Types::UserType, null: false
-    field :members, [Types::UserType], null: false
-    field :memberships, [Types::GroupMembershipType], null: false
+    field :members, [ Types::UserType ], null: false
+    field :memberships, [ Types::GroupMembershipType ], null: false
     field :collection, Types::MergedCollectionType, null: false
     field :my_role, Types::GroupRoleEnum, null: true
-    field :sessions, [Types::NightSessionType], null: false
-    field :collection_spotlight, [Types::GroupSpotlightThingType], null: false do
+    field :sessions, [ Types::NightSessionType ], null: false
+    field :collection_spotlight, [ Types::GroupSpotlightThingType ], null: false do
       argument :limit, Integer, required: false, default_value: 4
     end
 
@@ -61,17 +61,17 @@ module Types
         .select { |s| visible.include?(s.state) }
         .sort_by do |s|
           state_order = case s.state
-                        when "picking" then 0
-                        when "invited" then 1
-                        when "draft"   then 2
-                        else 3
-                        end
+          when "picking" then 0
+          when "invited" then 1
+          when "draft"   then 2
+          else 3
+          end
           date_key = if s.state == "draft" && s.scheduled_at.nil?
                        Float::INFINITY
-                     else
+          else
                        (s.scheduled_at || Time.at(0)).to_i
-                     end
-          [state_order, date_key, s.created_at, s.id]
+          end
+          [ state_order, date_key, s.created_at, s.id ]
         end
     end
 

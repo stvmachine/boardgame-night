@@ -42,6 +42,7 @@ query Group($token: String!) {
     }
     collectionSpotlight(limit: 4) {
       id
+      objectid
       name
       thumbnail
       average

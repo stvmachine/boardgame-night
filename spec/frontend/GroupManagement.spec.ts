@@ -8,12 +8,14 @@ import { useAuthStore } from '@/stores/auth'
 import * as operations from '@/generated/operations'
 import GroupMembersPanel from '@/components/group/GroupMembersPanel.vue'
 import InviteCard from '@/components/group/InviteCard.vue'
+import GroupDetail from '@/components/group/GroupDetail.vue'
 
 vi.mock('@/generated/operations')
 
 const removeMutate = vi.fn()
 const updateRoleMutate = vi.fn()
 const inviteMutate = vi.fn()
+const createSessionMutate = vi.fn()
 
 const removeLoading = ref(false)
 const removeError = ref<Error | null>(null)
@@ -416,6 +418,12 @@ describe('InviteCard', () => {
     inviteError.value = null
     wrapper = null
     vi.unstubAllGlobals()
+
+    vi.mocked(operations.useCreateNightSessionMutation).mockReturnValue({
+      mutate: createSessionMutate,
+      loading: ref(false),
+      error: ref(null)
+    } as any)
   })
 
   afterEach(() => {
@@ -436,8 +444,50 @@ describe('InviteCard', () => {
     expect(wrapper.text()).toContain('Invite people')
   })
 
-  it('MEMBER sees no InviteCard', async () => {
-    expect(InviteCard).toBeDefined()
+function createGroupDetailGroup(myRole: 'OWNER' | 'ADMIN' | 'MEMBER' = 'OWNER') {
+  return {
+    id: 'g1',
+    name: 'Night Owls',
+    description: 'A group',
+    inviteCode: 'NIGHTOWLS',
+    myRole,
+    owner: { id: 'owner' },
+    members: [],
+    memberships: [],
+    sessions: [],
+    collectionSpotlight: [],
+    collection: { items: [], syncStatuses: [] }
+  }
+}
+
+it('MEMBER role in GroupDetail renders no invite card markup', async () => {
+    const { createRouter, createWebHistory } = await import('vue-router')
+    const router = createRouter({
+      history: createWebHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/s/:id', component: { template: '<div />' } },
+        { path: '/collection', component: { template: '<div />' } }
+      ]
+    })
+    await router.push('/')
+    await router.isReady()
+
+    setActivePinia(createPinia())
+    provideApolloClient(new ApolloClient({
+      link: { request: vi.fn() } as any,
+      cache: new InMemoryCache()
+    }))
+    const w = mount(GroupDetail, {
+      props: { group: createGroupDetailGroup('MEMBER') as any },
+      global: { plugins: [router] }
+    })
+    expect(w.find('input[readonly]').exists()).toBe(false)
+    expect(w.find('button[aria-label="Copy"]').exists()).toBe(false)
+    expect(w.find('[data-slot="select-trigger"]').exists()).toBe(false)
+    expect(w.find('input[type="email"]').exists()).toBe(false)
+    expect(w.text()).not.toContain('Invite people')
+    w.unmount()
   })
 
   it('displays the invite URL from origin and inviteCode', async () => {
@@ -500,26 +550,30 @@ describe('InviteCard', () => {
   })
 
   it('owner sees Member and Admin role options', async () => {
-    const w = await mountInviteCard('OWNER')
+    // Stub hasPointerCapture so reka-ui Select can open in jsdom
+    const originalHasPointerCapture = Element.prototype.hasPointerCapture
+    Element.prototype.hasPointerCapture = vi.fn().mockReturnValue(false)
 
-    // The Select trigger shows the selected value ("Member" by default)
+    const w = await mountInviteCard('OWNER')
     expect(w.text()).toContain('Member')
 
-    // Find the trigger button and dispatch pointerdown to open select
     const trigger = w.find('[data-slot="select-trigger"]')
     expect(trigger.exists()).toBe(true)
     trigger.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
     await nextTick()
 
-    // The select-content is portaled to document.body when open
     const content = document.body.querySelector('[data-slot="select-content"]')
-    if (content) {
-      expect(content.textContent).toContain('Admin')
-      expect(content.textContent).toContain('Member')
-    }
+    expect(content).not.toBeNull()
+    expect(content!.textContent).toContain('Admin')
+    expect(content!.textContent).toContain('Member')
+
+    Element.prototype.hasPointerCapture = originalHasPointerCapture
   })
 
   it('admin sees only Member role option', async () => {
+    const originalHasPointerCapture = Element.prototype.hasPointerCapture
+    Element.prototype.hasPointerCapture = vi.fn().mockReturnValue(false)
+
     const w = await mountInviteCard('ADMIN')
 
     const trigger = w.find('[data-slot="select-trigger"]')
@@ -528,10 +582,11 @@ describe('InviteCard', () => {
     await nextTick()
 
     const content = document.body.querySelector('[data-slot="select-content"]')
-    if (content) {
-      expect(content.textContent).toContain('Member')
-      expect(content.textContent).not.toContain('Admin')
-    }
+    expect(content).not.toBeNull()
+    expect(content!.textContent).toContain('Member')
+    expect(content!.textContent).not.toContain('Admin')
+
+    Element.prototype.hasPointerCapture = originalHasPointerCapture
   })
 
   it('calls invite mutation with correct variables on send', async () => {

@@ -10,14 +10,19 @@ module Types
     end
 
     delegate :id, :name, :thumbnail, :average, to: :thing
+
+    def objectid
+      thing.objectid
+    end
   end
 
   class GroupSpotlightThingType < Types::BaseObject
     field :id, ID, null: false
+    field :objectid, ID, null: false
     field :name, String, null: false
     field :thumbnail, String, null: true
     field :average, GraphQL::Types::Float, null: true
-    field :owners, [Types::OwnerType], null: false
+    field :owners, [ Types::OwnerType ], null: false
 
     def owners
       dataloader.with(Loaders::OwnersLoader, object.member_ids).load(object.thing.id)

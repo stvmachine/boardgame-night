@@ -62,6 +62,7 @@ const baseSessions: NightSession[] = [
 const baseSpotlight: GroupSpotlightThing[] = [
   {
     id: '100',
+    objectid: '20001',
     name: 'Shared Game',
     thumbnail: 'https://example.com/shared.jpg',
     average: 8.5,
@@ -75,6 +76,7 @@ const baseSpotlight: GroupSpotlightThing[] = [
   },
   {
     id: '101',
+    objectid: '20002',
     name: 'Solo Game',
     thumbnail: null,
     average: 7.0,
@@ -84,6 +86,7 @@ const baseSpotlight: GroupSpotlightThing[] = [
   },
   {
     id: '102',
+    objectid: '20003',
     name: 'Rated Game',
     thumbnail: 'https://example.com/rated.jpg',
     average: 9.0,
@@ -311,27 +314,29 @@ describe('GroupCollectionSpotlight', () => {
     expect(card.text()).not.toContain('+')
   })
 
-  it('opens the BGG thing URL in a new tab with opener isolation', async () => {
+  it('opens the BGG thing URL using objectid (not DB id)', async () => {
     const wrapper = mountSpotlight(baseSpotlight)
 
     const card = wrapper.find('[data-testid="spotlight-card"]')
     await card.trigger('click')
 
     expect(window.open).toHaveBeenCalledWith(
-      'https://boardgamegeek.com/boardgame/100',
+      'https://boardgamegeek.com/boardgame/20001',
       '_blank',
       'noopener,noreferrer'
     )
+    // Verify the DB id ('100') and objectid ('20001') differ
+    expect('20001').not.toEqual(baseSpotlight[0].id)
   })
 
-  it('is keyboard activatable', async () => {
+  it('is keyboard activatable using objectid', async () => {
     const wrapper = mountSpotlight(baseSpotlight)
 
     const card = wrapper.find('[data-testid="spotlight-card"]')
     await card.trigger('keydown', { key: 'Enter' })
 
     expect(window.open).toHaveBeenCalledWith(
-      'https://boardgamegeek.com/boardgame/100',
+      'https://boardgamegeek.com/boardgame/20001',
       '_blank',
       'noopener,noreferrer'
     )
@@ -428,19 +433,19 @@ describe('GroupDetail', () => {
     expect(aside.classes()).toContain('lg:self-start')
   })
 
-  it('uses correct heading hierarchy (h1 for group name, card-title for sections)', () => {
+  it('uses correct semantic heading hierarchy (h1 for group name, h2 for section card titles)', () => {
     const wrapper = mount(GroupDetail, {
       props: { group: buildGroup('OWNER') },
       global: { plugins: [createTestRouter()] }
     })
 
     expect(wrapper.find('h1').text()).toBe('Night Owls')
-    const titles = wrapper.findAll('[data-slot="card-title"]')
-    const titleTexts = titles.map(t => t.text())
-    expect(titleTexts).toContain('Upcoming sessions')
-    expect(titleTexts).toContain('Shared collection spotlight')
-    expect(titleTexts).toContain('Members')
-    expect(titleTexts).toContain('Invite people')
+    const h2s = wrapper.findAll('h2')
+    const h2Texts = h2s.map(h => h.text())
+    expect(h2Texts).toContain('Upcoming sessions')
+    expect(h2Texts).toContain('Shared collection spotlight')
+    expect(h2Texts).toContain('Members')
+    expect(h2Texts).toContain('Invite people')
   })
 
   it('does not render legacy InviteLink component', () => {

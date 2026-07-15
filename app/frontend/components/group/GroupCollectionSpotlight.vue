@@ -30,7 +30,7 @@ function hasAverage(game: GroupSpotlightThing) {
 
 function openGame(game: GroupSpotlightThing) {
   window.open(
-    `https://boardgamegeek.com/boardgame/${game.id}`,
+    `https://boardgamegeek.com/boardgame/${game.objectid}`,
     '_blank',
     'noopener,noreferrer'
   )

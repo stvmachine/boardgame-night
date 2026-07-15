@@ -111,6 +111,7 @@ export type GroupSpotlightThing = {
   average?: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  objectid: Scalars['ID']['output'];
   owners: Array<Owner>;
   thumbnail?: Maybe<Scalars['String']['output']>;
 };

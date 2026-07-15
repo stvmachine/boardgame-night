@@ -8,22 +8,22 @@ module Types
     field :health, String, null: false, description: "Health check — proves the GraphQL endpoint is alive."
 
     field :merged_collection, Types::MergedCollectionType, null: false, description: "Merge and deduplicate the BGG collections for the given usernames." do
-      argument :usernames, [String], required: true, description: "BGG usernames whose collections should be merged."
+      argument :usernames, [ String ], required: true, description: "BGG usernames whose collections should be merged."
     end
 
     field :user, Types::UserType, null: true, description: "Look up a local user by their BGG username." do
       argument :username, String, required: true, description: "BGG username to look up."
     end
 
-    field :hot_items, [Types::HotItemType], null: false, description: "The current BoardGameGeek hotness list."
+    field :hot_items, [ Types::HotItemType ], null: false, description: "The current BoardGameGeek hotness list."
 
-    field :search, [Types::SearchResultType], null: false, description: "Search BoardGameGeek for games matching the query." do
+    field :search, [ Types::SearchResultType ], null: false, description: "Search BoardGameGeek for games matching the query." do
       argument :query, String, required: true, description: "Search term."
     end
 
     field :current_user, Types::UserType, null: true, description: "The currently authenticated user, or null."
 
-    field :my_groups, [Types::GroupType], null: false, description: "All groups the current user belongs to."
+    field :my_groups, [ Types::GroupType ], null: false, description: "All groups the current user belongs to."
 
     field :group, Types::GroupType, null: true, description: "Look up a group by its invite code, or by id if the current user is a member." do
       argument :token, String, required: true, description: "Invite code or group id."
@@ -111,7 +111,7 @@ module Types
       scope.includes(
         :owner,
         { group_memberships: :user },
-        { night_sessions: [:host, { attendances: :user }] }
+        { night_sessions: [ :host, { attendances: :user } ] }
       )
     end
 
