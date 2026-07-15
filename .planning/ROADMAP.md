@@ -221,7 +221,7 @@ Plans:
 
 ### Phase 8: Group Detail Surface
 
-**Goal**: Users can view a group hub with its sessions, members, shared collection spotlight, and invite link.
+**Goal**: As a group member, I want to view the group's sessions, members, shared collection spotlight, and invite controls in one hub, so that group members can coordinate upcoming nights and shared games from one place.
 **Mode:** mvp
 **Depends on**: Phase 4 (friend groups) and Phase 5 (design system)
 **Requirements**: GROUP-07, GROUP-08, GROUP-09, GROUP-10, GROUP-11
@@ -233,7 +233,13 @@ Plans:
   4. User sees a members panel with avatars, names, roles, and a per-member action menu.
   5. User can copy the group's invite link to the clipboard from the Group Detail page.
 
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+
+- [ ] 08-01-PLAN.md — Responsive group header and role-aware upcoming sessions vertical slice
+- [ ] 08-02-PLAN.md — Deterministic collection spotlight and group-scoped Browse Library contract
+- [ ] 08-03-PLAN.md — Authorized members/invite side rail and integrated responsive hardening
+
 **UI hint**: yes
 
 ### Phase 9: Home & Collection Redesign
@@ -300,7 +306,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. Design System Foundation | 4/4 | Complete   | 2026-07-13 |
 | 6. BGG Poll Data Layer | 3/3 | Complete    | 2026-07-13 |
 | 7. Suggestion Engine Backend | 4/4 | Complete    | 2026-07-14 |
-| 8. Group Detail Surface | 0/TBD | Not started | - |
+| 8. Group Detail Surface | 0/3 | Planned | - |
 | 9. Home & Collection Redesign | 0/TBD | Not started | - |
 | 10. Picking a Game Redesign | 0/TBD | Not started | - |
 | 11. Polish & E2E Hardening | 0/TBD | Not started | - |
