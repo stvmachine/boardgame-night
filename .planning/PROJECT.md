@@ -14,6 +14,7 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 
 - ✓ Rails API exposes a GraphQL endpoint consumed by the Vue frontend — Phase 1
 - ✓ Full poll-based suggestion engine parses and persists BGG poll data, ranks attendee-owned games with explainable scoring, and exposes the shortlist through GraphQL — Phases 6–7
+- ✓ Group Detail provides one responsive hub for sessions, shared-game spotlight, authorized member management, and invitation controls — Phase 8
 
 ### Active
 
@@ -21,7 +22,6 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 - [ ] Redesign app shell with new sidebar navigation (Home/Collection/Hot/Groups/Account + Settings/Logout + "New Session" primary button)
 - [ ] Redesign Home as a dashboard (hero with BGG merge input + personal stats card + trending games)
 - [ ] Redesign Collection view (structured filter sidebar with range slider, checkbox groups, segmented buttons + rich game cards + sort + grid/list toggle + skeleton loaders)
-- [ ] Build Group Detail surface (group header + upcoming sessions list + shared collection spotlight + members panel with roles + invite link with copy)
 - [ ] Redesign Picking a Game screen (session header with status badge + attendee-aware filtered game suggestions + "Pick this game" cards)
 - [ ] Address v1.0 tech debt (E2E suite in CI, Action Cable dev config, cleanup legacy BGG classes, update REQUIREMENTS checkboxes)
 
@@ -109,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-15 after Phase 7 complete (Suggestion Engine Backend); Milestone v1.1 in progress*
+*Last updated: 2026-07-15 after Phase 8 complete (Group Detail Surface); Milestone v1.1 in progress*
