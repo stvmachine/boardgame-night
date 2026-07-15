@@ -50,9 +50,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 3/3 plans complete
 Plans:
 
-- [x] 01-01-PLAN.md — Rails backend + dotenvx + GraphQL schema/multiplex + dev orchestration (PlanTasks 01..03; Wave 1)
-- [x] 01-02-PLAN.md — Vue + Apollo frontend + codegen + Playwright e2e proving bin/dev round-trips health end-to-end
-- [x] 01-03-PLAN.md — Single Docker image (multi-stage Node build → Ruby runtime) + Kamal 2 deploy.yml placeholders + docker build . verification (Wave 3)
+- [x] 01-01-PLAN.md — Local dev vertical slice: Rails 8 API + Vue 3 SPA + GraphQL health query + encrypted BGG credentials + Playwright e2e (Wave 1)
+- [x] 01-02-PLAN.md — GraphQL contract vertical slice: Apollo BatchHttpLink + Rails Schema.multiplex + security regression checks (Wave 2)
+- [x] 01-03-PLAN.md — Deploy vertical slice: multi-stage Dockerfile + Kamal 2 deploy.yml scaffold + docker build verification (Wave 3)
 
 **UI hint**: yes
 
