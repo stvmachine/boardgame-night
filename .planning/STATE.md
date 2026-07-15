@@ -2,18 +2,17 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
-current_phase: 8
+current_phase: 08
 current_phase_name: Group Detail Surface
 status: executing
 stopped_at: Phase 08 UI-SPEC approved
-last_updated: "2026-07-15T02:20:29.329Z"
-last_activity: 2026-07-14
-last_activity_desc: Phase 07 complete, transitioned to Phase 8
+last_updated: "2026-07-15T02:50:06.923Z"
+last_activity: 2026-07-15
 progress:
   total_phases: 11
   completed_phases: 7
-  total_plans: 32
-  completed_plans: 32
+  total_plans: 38
+  completed_plans: 33
   percent: 64
 ---
 
@@ -24,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-15)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 08 — group-detail-surface
+**Current focus:** Phase 08 — Group Detail Surface
 
 ## Current Position
 
-Phase: 8 — Group Detail Surface
-Plan: Not started
+Phase: 08 (Group Detail Surface) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-07-14 — Phase 07 complete, transitioned to Phase 8
+Last activity: 2026-07-15
 
-Progress: [█████████████░░░░░░░] 64% of milestone phases (7 of 11 phases complete; 32/32 planned plans done)
+Progress: [██████░░░░] 64%
 
 ## Performance Metrics
 
@@ -75,6 +74,7 @@ Progress: [█████████████░░░░░░░] 64% of 
 | Phase 07-suggestion-engine-backend P02 | 40min | 3 tasks | 14 files |
 | Phase 07-suggestion-engine-backend P03 | 15min | 3 tasks | 8 files |
 | Phase 07 P04 | 15min | 2 tasks | 7 files |
+| Phase 08-group-detail-surface P01 | 35min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -117,6 +117,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Kept Suggestion, SuggestionBreakdown, and ConfidenceLevel out of orphan_types because they are reachable through NightSession.suggestions; the new schema spec provides test-backed proof — Avoids redundant orphan_type registration that would mask broken field connections; runtime reachability tests are the canonical proof
 - [Phase ?]: Regenerated schema.graphql/schema.json via bin/rails graphql:schema:dump and client types via npm run codegen without hand-editing generated artifacts — Keeps SDL/JSON and TypeScript as generated, source-derived artifacts; eliminates hand-authored divergence risk
 - [Phase ?]: Fixed RuboCop Layout/SpaceInsideArrayLiteralBrackets offenses in Phase 7 production files discovered by the integrated gate — Required for the RuboCop acceptance gate to exit 0; changes are whitespace-only and limited to Phase 7 files
+- [Phase ?]: Use Float::INFINITY as the sort sentinel for undated drafts so they correctly sort after dated drafts; use raw epoch integers for all other date keys.
+- [Phase ?]: Keep the loaded-association fallback in NightSessionType so standalone session queries continue to work without eager loads.
+- [Phase ?]: Migrate GamePicker to useGroupCollectionQuery to preserve the full collection consumer without changing filtering or pick behavior.
 
 ### Pending Todos
 
@@ -147,6 +150,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-15T00:52:27.252Z
+Last session: 2026-07-15T02:45:38.417Z
 Stopped at: Phase 08 UI-SPEC approved
 Resume file: .planning/phases/08-group-detail-surface/08-UI-SPEC.md
