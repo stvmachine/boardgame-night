@@ -81,6 +81,7 @@ type Group {
   myRole: GroupRole
   name: String!
   owner: User!
+  sessions: [NightSession!]!
 }
 
 type GroupMembership {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useGroupQuery, usePickGameMutation } from '@/generated/operations'
+import { useGroupCollectionQuery, usePickGameMutation } from '@/generated/operations'
 import { useCollectionFilters } from '@/composables/useCollectionFilters'
 import { useFilterStore } from '@/stores/filters'
 import GameGrid from '@/components/collection/GameGrid.vue'
@@ -23,7 +23,7 @@ const { query } = storeToRefs(filterStore)
 const groupToken = computed(() => props.session.group.inviteCode ?? '')
 const attendeeCount = computed(() => props.session.attendeeCount)
 
-const { result, loading } = useGroupQuery(
+const { result, loading } = useGroupCollectionQuery(
   () => ({ token: groupToken.value }),
   () => ({ fetchPolicy: 'cache-and-network' })
 )

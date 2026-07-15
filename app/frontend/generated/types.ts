@@ -80,6 +80,7 @@ export type Group = {
   myRole?: Maybe<GroupRole>;
   name: Scalars['String']['output'];
   owner: User;
+  sessions: Array<NightSession>;
 };
 
 export type GroupMembership = {
