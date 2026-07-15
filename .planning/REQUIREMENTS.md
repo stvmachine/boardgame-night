@@ -40,7 +40,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 - [x] **GROUP-07**: Group Detail page displays group header (name, member count badge, description, "Create a night" button)
 - [x] **GROUP-08**: Group Detail page displays upcoming sessions list (date blocks, status badges, session titles, time, attendee counts)
-- [ ] **GROUP-09**: Group Detail page displays a shared collection spotlight (4-game preview grid with owner attribution + "Browse Library" link)
+- [x] **GROUP-09**: Group Detail page displays a shared collection spotlight (4-game preview grid with owner attribution + "Browse Library" link)
 - [ ] **GROUP-10**: Group Detail page displays a members panel with avatars, names, roles, and a per-member action menu
 - [ ] **GROUP-11**: Group Detail page displays an invite link with copy-to-clipboard button
 
@@ -115,7 +115,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 | COLL-23 | Phase 9 | Pending |
 | GROUP-07 | Phase 8 | Complete |
 | GROUP-08 | Phase 8 | Complete |
-| GROUP-09 | Phase 8 | Pending |
+| GROUP-09 | Phase 8 | Complete |
 | GROUP-10 | Phase 8 | Pending |
 | GROUP-11 | Phase 8 | Pending |
 | PICK-01 | Phase 10 | Pending |

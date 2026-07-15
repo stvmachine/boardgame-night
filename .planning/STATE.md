@@ -6,13 +6,13 @@ current_phase: 08
 current_phase_name: Group Detail Surface
 status: executing
 stopped_at: Phase 08 UI-SPEC approved
-last_updated: "2026-07-15T03:35:10.443Z"
+last_updated: "2026-07-15T03:59:54.039Z"
 last_activity: 2026-07-15
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 38
-  completed_plans: 34
+  completed_plans: 35
   percent: 64
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 ## Current Position
 
 Phase: 08 (Group Detail Surface) — EXECUTING
-Plan: 3 of 6
+Plan: 4 of 6
 Status: Ready to execute
 Last activity: 2026-07-15
 
@@ -76,6 +76,7 @@ Progress: [██████░░░░] 64%
 | Phase 07 P04 | 15min | 2 tasks | 7 files |
 | Phase 08-group-detail-surface P01 | 35min | 3 tasks | 11 files |
 | Phase 08 P02 | 17min | 2 tasks | 7 files |
+| Phase 08-group-detail-surface P03 | 14min | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -125,6 +126,11 @@ Recent decisions affecting current work:
 - [Phase 08]: Keep session rows compact with title/time/badge/CTA rather than full cards to match UI-SPEC density. — Matches the approved UI-SPEC list density.
 - [Phase 08]: Create a night persists via existing mutation, updates Apollo Group cache, and navigates to /s/:id. — Reuses existing backend mutation and avoids refetching the group query.
 - [Phase 08]: E2E seed pins E2ENIGHTOWLS group and deterministic sessions for stable browser assertions. — Deterministic fixtures make browser tests repeatable across runs.
+- [Phase ?]: Use a dedicated GroupSpotlightThing wrapper to carry immutable group-member ids for scoped owner loading, keeping the type independent of MergedThingType. — Isolates spotlight owner scope from the global MergedThingType/OwnersLoader contract.
+- [Phase ?]: Extend OwnersLoader with an optional immutable user-id scope while preserving exact unscoped behavior for existing consumers. — Avoids breaking collection and suggestion surfaces that rely on the existing unscoped loader.
+- [Phase ?]: Apply viewer_role guard to both collection_spotlight and collection resolvers to prevent outsider shelf disclosure. — Closes the path where a known invite code could leak the full merged collection.
+- [Phase ?]: Clamp collectionSpotlight(limit:) to 1..12 at the resolver boundary with a database LIMIT. — Mitigates DoS from an unbounded GraphQL argument.
+- [Phase ?]: Use RouterLink for Browse Library and window.open with noopener,noreferrer for spotlight card BGG activation. — Matches UI-SPEC link behavior while keeping external navigation isolated.
 
 ### Pending Todos
 
@@ -155,6 +161,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-15T03:19:54.465Z
+Last session: 2026-07-15T03:57:29.872Z
 Stopped at: Phase 08 UI-SPEC approved
 Resume file: .planning/phases/08-group-detail-surface/08-UI-SPEC.md
