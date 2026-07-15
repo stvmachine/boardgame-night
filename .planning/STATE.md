@@ -4,9 +4,9 @@ milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
 current_phase: 9
 current_phase_name: Home & Collection Redesign
-status: executing
-stopped_at: Completed 08-04-PLAN.md
-last_updated: "2026-07-15T06:22:16.425Z"
+status: ready_to_plan
+stopped_at: Phase 08 complete, ready to discuss Phase 09
+last_updated: "2026-07-15T06:24:40Z"
 last_activity: 2026-07-15
 last_activity_desc: Phase 08 complete, transitioned to Phase 9
 progress:
@@ -24,22 +24,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-15)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 08 — Group Detail Surface
+**Current focus:** Phase 09 — Home & Collection Redesign
 
 ## Current Position
 
 Phase: 9 — Home & Collection Redesign
 Plan: Not started
-Status: Ready to execute
+Status: Ready to discuss and plan
 Last activity: 2026-07-15 — Phase 08 complete, transitioned to Phase 9
 
-Progress: [██████░░░░] 64%
+Progress: [███████░░░] 73%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 37
+- Total plans completed: 38
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -54,12 +54,11 @@ Progress: [██████░░░░] 64%
 | 5. Design System Foundation | TBD | — | — |
 | 6. BGG Poll Data Layer | 3 | ~19m | ~6 min |
 | 7. Suggestion Engine Backend | 4 | ~1h 50m | ~28 min |
-| 8. Group Detail Surface | TBD | — | — |
+| 8. Group Detail Surface | 6 | — | — |
 | 9. Home & Collection Redesign | TBD | — | — |
 | 10. Picking a Game Redesign | TBD | — | — |
 | 11. Polish & E2E Hardening | TBD | — | — |
 | 06 | 3 | - | - |
-| 08 | 6 | - | - |
 
 **Recent Trend:**
 
@@ -145,10 +144,7 @@ None yet.
 
 ### Blockers/Concerns
 
-None. Two research flags to watch during Phase 1/5 planning:
-
-- Vite 8 (Rolldown) compatibility with Vitest and graphql-codegen; fallback path ready.
-- Live BGG `suggested_numplayers` poll XML validation; parser must be tested against real responses.
+None.
 
 ### Roadmap Evolution
 
@@ -168,6 +164,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-15T04:27:55.329Z
-Stopped at: Completed 08-04-PLAN.md
+Last session: 2026-07-15T06:24:40Z
+Stopped at: Phase 08 complete, ready to discuss Phase 09
 Resume file: None
