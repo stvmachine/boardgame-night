@@ -12,16 +12,39 @@ module Types
     field :collection, Types::MergedCollectionType, null: false
     field :my_role, Types::GroupRoleEnum, null: true
     field :sessions, [Types::NightSessionType], null: false
+    field :collection_spotlight, [Types::GroupSpotlightThingType], null: false do
+      argument :limit, Integer, required: false, default_value: 4
+    end
 
     def memberships
       object.group_memberships.includes(:user).to_a
     end
 
     def collection
+      return { items: [], sync_statuses: [] } unless viewer_role
+
       {
         items: BggThing.merged_for_users(object.member_ids),
         sync_statuses: object.members.map { |user| sync_status_for(user) }
       }
+    end
+
+    def collection_spotlight(limit: 4)
+      return [] unless viewer_role
+
+      clamped = limit.clamp(1, 12)
+      member_ids = object.group_memberships.map(&:user_id)
+      return [] if member_ids.empty?
+
+      things = BggThing
+        .select("bgg_things.*, COUNT(DISTINCT bgg_collections.user_id) AS owner_count")
+        .joins(:bgg_collections)
+        .where(bgg_collections: { user_id: member_ids })
+        .group("bgg_things.id")
+        .order(Arel.sql("owner_count DESC, bgg_things.average DESC, LOWER(bgg_things.name) ASC, bgg_things.id ASC"))
+        .limit(clamped)
+
+      things.map { |thing| Types::GroupSpotlightThing.new(thing, member_ids) }
     end
 
     def my_role
