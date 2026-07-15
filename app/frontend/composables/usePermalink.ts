@@ -4,6 +4,8 @@ import { useCollectorsStore } from '@/stores/collectors'
 import type { SortOption } from '@/utils/sorting'
 import type { GroupOption } from '@/utils/grouping'
 
+const LEGACY_GROUP_OPTIONS: GroupOption[] = ['players', 'rating', 'bestPlayers', 'owner']
+
 function getParams() {
   if (typeof window === 'undefined') return new URLSearchParams()
   return new URLSearchParams(window.location.search)
@@ -14,6 +16,10 @@ function replaceUrl(params: URLSearchParams) {
   const queryString = params.toString()
   const newUrl = `${window.location.pathname}${queryString ? '?' + queryString : ''}`
   window.history.replaceState(null, '', newUrl)
+}
+
+function isLegacyGroup(value: string): value is GroupOption {
+  return LEGACY_GROUP_OPTIONS.includes(value as GroupOption)
 }
 
 export function usePermalink() {
@@ -47,8 +53,13 @@ export function usePermalink() {
   const sort = params.get('sort')
   if (sort) filterStore.sort = sort as SortOption
 
+  const groupBy = params.get('groupBy')
   const group = params.get('group')
-  if (group) filterStore.groupBy = group as GroupOption
+  if (groupBy) {
+    filterStore.groupBy = groupBy as GroupOption
+  } else if (group && isLegacyGroup(group)) {
+    filterStore.groupBy = group
+  }
 
   // Initialize selectedOwners to all collectors when no owner filter is present
   if (filterStore.selectedOwners.size === 0 && collectorsStore.usernames.length > 0) {
@@ -114,10 +125,16 @@ export function usePermalink() {
         params.delete('sort')
       }
 
-      if (filterStore.groupBy !== 'none') {
-        params.set('group', filterStore.groupBy)
-      } else {
+      // Migrate legacy grouping values from `group` to `groupBy`, preserving real group tokens.
+      const groupParam = params.get('group')
+      if (groupParam && isLegacyGroup(groupParam)) {
         params.delete('group')
+      }
+
+      if (filterStore.groupBy !== 'none') {
+        params.set('groupBy', filterStore.groupBy)
+      } else {
+        params.delete('groupBy')
       }
 
       replaceUrl(params)
