@@ -32,14 +32,15 @@ test.describe('group detail', () => {
     await expect(page.getByText('2 members')).toBeVisible()
     await expect(page.getByRole('button', { name: 'Create a night' })).toBeVisible()
 
-    const rows = page.getByRole('listitem')
+    const rows = page.getByTestId('session-row')
     await expect(rows).toHaveCount(3)
     await expect(rows.nth(0).getByText('e2e Picking Night')).toBeVisible()
     await expect(rows.nth(0).getByRole('button', { name: 'Choose a game' })).toBeVisible()
     await expect(rows.nth(1).getByText('e2e Friday Games')).toBeVisible()
     await expect(rows.nth(1).getByRole('button', { name: 'View details' })).toBeVisible()
     await expect(rows.nth(2).getByText('e2e Draft Night')).toBeVisible()
-    await expect(rows.nth(2).getByText('Date TBD')).toBeVisible()
+    await expect(rows.nth(2).getByText('Date')).toBeVisible()
+    await expect(rows.nth(2).getByText('TBD')).toBeVisible()
     await expect(rows.nth(2).getByRole('button', { name: 'View details' })).toBeVisible()
 
     await expect(page.getByText('e2e Completed Night')).not.toBeVisible()
@@ -58,7 +59,7 @@ test.describe('group detail', () => {
     await expect(page.getByRole('heading', { name: 'e2e Night Owls' })).toBeVisible({ timeout: 10_000 })
     await expect(page.getByRole('button', { name: 'Create a night' })).not.toBeVisible()
 
-    const rows = page.getByRole('listitem')
+    const rows = page.getByTestId('session-row')
     await expect(rows).toHaveCount(2)
     await expect(rows.nth(0).getByText('e2e Picking Night')).toBeVisible()
     await expect(rows.nth(1).getByText('e2e Friday Games')).toBeVisible()

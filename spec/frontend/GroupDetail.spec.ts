@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount, flushPromises, VueWrapper, DOMWrapper } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { provideApolloClient } from '@vue/apollo-composable'
 import { ApolloClient, InMemoryCache } from '@apollo/client/core'
@@ -30,14 +30,6 @@ function createTestRouter() {
 
 const baseSessions: NightSession[] = [
   {
-    id: '20',
-    title: 'Draft Night',
-    state: 'DRAFT',
-    scheduledAt: null,
-    attendeeCount: 0,
-    attendances: []
-  },
-  {
     id: '10',
     title: 'Picking Night',
     state: 'PICKING',
@@ -53,6 +45,14 @@ const baseSessions: NightSession[] = [
     state: 'INVITED',
     scheduledAt: '2026-07-17T19:00:00Z',
     attendeeCount: 1,
+    attendances: []
+  },
+  {
+    id: '20',
+    title: 'Draft Night',
+    state: 'DRAFT',
+    scheduledAt: null,
+    attendeeCount: 0,
     attendances: []
   }
 ] as NightSession[]
@@ -85,7 +85,7 @@ function buildGroup(role: 'OWNER' | 'ADMIN' | 'MEMBER', sessions: NightSession[]
   } as Group
 }
 
-function findButtonByText(wrapper: ReturnType<typeof mount>, text: string) {
+function findButtonByText(wrapper: VueWrapper<any> | DOMWrapper<any>, text: string) {
   const buttons = wrapper.findAll('button')
   return buttons.find(b => b.text() === text)
 }
@@ -148,7 +148,9 @@ describe('GroupSessionsList', () => {
       props: { sessions: baseSessions, group: buildGroup('OWNER') }
     })
 
-    expect(wrapper.text()).toContain('Date TBD')
+    const dateTbdBlock = wrapper.find('[aria-label="Open session Draft Night"]')
+    expect(dateTbdBlock.text()).toContain('Date')
+    expect(dateTbdBlock.text()).toContain('TBD')
   })
 
   it('maps state to the correct CTA label', () => {
