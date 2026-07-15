@@ -5,14 +5,14 @@ milestone_name: UI Redesign + Suggestion Engine
 current_phase: 08
 current_phase_name: Group Detail Surface
 status: executing
-stopped_at: Phase 08 UI-SPEC approved
-last_updated: "2026-07-15T03:59:54.039Z"
+stopped_at: Completed 08-04-PLAN.md
+last_updated: "2026-07-15T04:27:55.336Z"
 last_activity: 2026-07-15
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 38
-  completed_plans: 35
+  completed_plans: 36
   percent: 64
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 ## Current Position
 
 Phase: 08 (Group Detail Surface) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-07-15
 
@@ -77,6 +77,7 @@ Progress: [██████░░░░] 64%
 | Phase 08-group-detail-surface P01 | 35min | 3 tasks | 11 files |
 | Phase 08 P02 | 17min | 2 tasks | 7 files |
 | Phase 08-group-detail-surface P03 | 14min | 3 tasks | 11 files |
+| Phase 08 P04 | 14min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -131,6 +132,10 @@ Recent decisions affecting current work:
 - [Phase ?]: Apply viewer_role guard to both collection_spotlight and collection resolvers to prevent outsider shelf disclosure. — Closes the path where a known invite code could leak the full merged collection.
 - [Phase ?]: Clamp collectionSpotlight(limit:) to 1..12 at the resolver boundary with a database LIMIT. — Mitigates DoS from an unbounded GraphQL argument.
 - [Phase ?]: Use RouterLink for Browse Library and window.open with noopener,noreferrer for spotlight card BGG activation. — Matches UI-SPEC link behavior while keeping external navigation isolated.
+- [Phase 08]: Used an exact allowlist (players, rating, bestPlayers, owner) to identify legacy grouping values, so any other group value is preserved as an invite token. — Narrows the legacy grouping migration to known values only and prevents real group tokens from being misinterpreted as grouping state.
+- [Phase 08]: Normalized group collection items into MergedThing by adding missing optional fields rather than duplicating the collection pipeline. — Keeps the existing filter, sort, grouping, and grid components unchanged while supporting the group query shape.
+- [Phase 08]: Used Apollo's reactive enabled option so merged and group queries are mutually exclusive. — Prevents both queries from running simultaneously, avoiding duplicate network requests and DoS risk.
+- [Phase 08]: Added a minimal error EmptyState to expose server query errors through the existing collection surface. — Surfaces GraphQL failures to users without adding a new route or collection component.
 
 ### Pending Todos
 
@@ -161,6 +166,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-15T03:57:29.872Z
-Stopped at: Phase 08 UI-SPEC approved
-Resume file: .planning/phases/08-group-detail-surface/08-UI-SPEC.md
+Last session: 2026-07-15T04:27:55.329Z
+Stopped at: Completed 08-04-PLAN.md
+Resume file: None
