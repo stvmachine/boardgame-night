@@ -1,10 +1,11 @@
 ---
 phase: 8
 slug: group-detail-surface
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-07-15
+reviewed_at: 2026-07-15T00:00:00Z
 ---
 
 # Phase 8 — Group Detail Surface UI Design Contract
@@ -50,7 +51,7 @@ Declared values (multiples of 4):
 - Session row padding: `p-4`.
 - Date block: `h-14 w-14` (56px).
 - Spotlight thumbnail: `aspect-[4/3]` with `rounded-lg`.
-- Compact owner avatars: `size-5` (20px) with `text-[10px]` fallback.
+- Compact owner avatars: `size-5` (20px) with `avatar-fallback-micro` (10px) fallback.
 
 ---
 
@@ -63,6 +64,8 @@ Declared values (multiples of 4):
 | Heading | 20px | 600 | 1.2 |
 | Display | 28px | 600 | 1.2 |
 
+**Micro-token exception:** `avatar-fallback-micro` — 10px / 600 / 1.0. Reserved exclusively for centered single-character fallback text inside avatars ≤ 20px (`size="xs"` or `size="sm"`). Not for body text, labels, badges, or any other UI copy.
+
 **Type usage in this phase:**
 - Group name: `Display` (28px/600/1.2).
 - Section card titles: `Heading` (20px/600/1.2).
@@ -70,6 +73,7 @@ Declared values (multiples of 4):
 - Date block month, status badges, role labels, CTA labels, attendee count, owner overflow: `Label` (14px/600/1.25).
 - Description, empty-state body, helper text, time strings, placeholder text: `Body`/`Label` (14px/400) with `text-on-surface-variant`.
 - Badge labels use `Label` (14px/600), uppercase, tracking-wider, small-caps, per the Phase 5 badge contract.
+- Avatar fallback text for `size="xs"`/`size="sm"` owner stacks: `avatar-fallback-micro` (10px/600/1.0).
 
 ---
 
@@ -77,12 +81,14 @@ Declared values (multiples of 4):
 
 | Role | Value | Usage |
 |------|-------|-------|
-| Dominant (60%) | `surface` / `background`: `#fcf8ff` (light) / `#131318` (dark) | Page background, main content area |
-| Secondary (30%) | `surface-container`: `#f0ecf4` (light) / `#201f25` (dark) | Cards, sidebar, nav, session rows, invite card |
-| Accent (10%) | `primary`: `#5a5892` (light) / `#c3c0ff` (dark) | Primary CTA, active nav, text links, focus rings, Invited badge, "Browse Library" link, copy-success text |
+| Dominant (60%) | `surface` / `background`: `#fffbff` (light) / `#1c1b1f` (dark) | Page background, main content area |
+| Secondary (30%) | `surface-container`: `#f0edf1` (light) / `#201f23` (dark) | Cards, sidebar, nav, session rows, invite card |
+| Accent (10%) | `primary`: `#4d44e3` (light) / `#c3c0ff` (dark) | Primary CTA, active nav, text links, focus rings, Invited badge, "Browse Library" link, copy-success text |
 | Destructive | `error`: `#ba1a1a` (light) / `#ffb4ab` (dark) | Remove member confirmation and destructive menu item |
 
 **Accent reserved for:** "Create a night" button, "Browse Library" link, active focus rings, copy-to-clipboard success text, `Invited` status badge, and primary action buttons. **Not** for general body text, inactive icons, or secondary labels.
+
+Component descriptions below use the semantic M3 token classes/custom properties (e.g., `bg-surface-container`, `text-on-surface-variant`) rather than hard-coded hex values.
 
 **Semantic status badge aliases** (reuse Phase 5 tokens exactly):
 
@@ -235,7 +241,7 @@ This phase reuses source-owned primitives from `app/frontend/components/ui/`. No
 - **Grid:** `grid grid-cols-2 md:grid-cols-4 gap-4` inside `CardContent`.
 - **Compact card:**
   - Thumbnail: `aspect-[4/3] rounded-lg bg-surface-variant overflow-hidden` with `object-cover` image. Fallback shows "No image" centered in `text-on-surface-variant`.
-  - Title: `text-sm font-medium line-clamp-2 text-on-surface`.
+  - Title: `Label` (14px/600), `line-clamp-2`, `text-on-surface`.
   - Rating: `Badge variant="invited"` with `average.toFixed(1)`.
   - Owner stack: `AvatarGroup` capped at 3 avatars (`size="sm"`) + `AvatarGroupCount` `+N` overflow.
 - **Selection:** exactly four games, deterministically ordered by backend: owner count descending, then `average` descending, then name ascending. If fewer than 4 multi-owner games exist, single-owner games fill remaining slots by the same tie-breakers. Empty state only when the group collection has zero games.
@@ -248,7 +254,7 @@ This phase reuses source-owned primitives from `app/frontend/components/ui/`. No
 - **List:** `space-y-2` of member rows. Each row is a flex container:
   - `Avatar` (`size="md"`) with `AvatarFallback` using `useMemberColor(user.username)`.
   - Display name: `text-sm font-medium text-on-surface`.
-  - Role label: `text-xs uppercase tracking-wide text-on-surface-variant` (Owner/Admin/Member).
+  - Role label: `Label` (14px/600), uppercase tracking-wide, `text-on-surface-variant` (Owner/Admin/Member).
   - Action menu trigger: icon-only `Button variant="ghost" size="icon"` with `material-symbols:more_vert` and `aria-label="Actions for {displayName}"`. Only rendered when the current user has an authorized action for that row.
 - **Action menu authorization:**
   - Owners: see role-change and remove options for every non-owner member (including admins). No menu on their own row or other owners.
