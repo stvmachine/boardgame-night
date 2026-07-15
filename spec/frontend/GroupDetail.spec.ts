@@ -24,7 +24,8 @@ function createTestRouter() {
     routes: [
       { path: '/', component: { template: '<div />' } },
       { path: '/g/:token', component: GroupView },
-      { path: '/s/:id', name: 'session', component: { template: '<div>Session</div>' } }
+      { path: '/s/:id', name: 'session', component: { template: '<div>Session</div>' } },
+      { path: '/collection', component: { template: '<div>Collection</div>' } }
     ]
   })
 }
@@ -250,19 +251,22 @@ describe('GroupCollectionSpotlight', () => {
     vi.unstubAllGlobals()
   })
 
-  it('renders section title and Browse Library link', () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: baseSpotlight, group: buildGroup('OWNER') }
+  function mountSpotlight(games: GroupSpotlightThing[], role: 'OWNER' | 'ADMIN' | 'MEMBER' = 'OWNER') {
+    return mount(GroupCollectionSpotlight, {
+      props: { games, group: buildGroup(role) },
+      global: { plugins: [createTestRouter()] }
     })
+  }
+
+  it('renders section title and Browse Library link', () => {
+    const wrapper = mountSpotlight(baseSpotlight)
 
     expect(wrapper.text()).toContain('Shared collection spotlight')
     expect(wrapper.text()).toContain('Browse Library')
   })
 
   it('renders cards in server order with grid layout', () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: baseSpotlight, group: buildGroup('OWNER') }
-    })
+    const wrapper = mountSpotlight(baseSpotlight)
 
     const cards = wrapper.findAll('[data-testid="spotlight-card"]')
     expect(cards.length).toBe(3)
@@ -272,9 +276,7 @@ describe('GroupCollectionSpotlight', () => {
   })
 
   it('shows thumbnail image when present and fallback when absent', () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: baseSpotlight, group: buildGroup('OWNER') }
-    })
+    const wrapper = mountSpotlight(baseSpotlight)
 
     const cards = wrapper.findAll('[data-testid="spotlight-card"]')
     expect(cards[0].find('img')?.exists()).toBe(true)
@@ -282,18 +284,14 @@ describe('GroupCollectionSpotlight', () => {
   })
 
   it('shows one-decimal rating badge when present', () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: baseSpotlight, group: buildGroup('OWNER') }
-    })
+    const wrapper = mountSpotlight(baseSpotlight)
 
     expect(wrapper.text()).toContain('8.5')
     expect(wrapper.text()).toContain('9.0')
   })
 
   it('caps owner avatars at three and shows exact +N overflow', () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: baseSpotlight, group: buildGroup('OWNER') }
-    })
+    const wrapper = mountSpotlight(baseSpotlight)
 
     const firstCard = wrapper.findAll('[data-testid="spotlight-card"]')[0]
     const avatars = firstCard.findAll('[data-slot="avatar"]')
@@ -302,9 +300,7 @@ describe('GroupCollectionSpotlight', () => {
   })
 
   it('renders a single owner without overflow', () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: [baseSpotlight[1]], group: buildGroup('OWNER') }
-    })
+    const wrapper = mountSpotlight([baseSpotlight[1]])
 
     const card = wrapper.find('[data-testid="spotlight-card"]')
     const avatars = card.findAll('[data-slot="avatar"]')
@@ -313,9 +309,7 @@ describe('GroupCollectionSpotlight', () => {
   })
 
   it('opens the BGG thing URL in a new tab with opener isolation', async () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: baseSpotlight, group: buildGroup('OWNER') }
-    })
+    const wrapper = mountSpotlight(baseSpotlight)
 
     const card = wrapper.find('[data-testid="spotlight-card"]')
     await card.trigger('click')
@@ -328,9 +322,7 @@ describe('GroupCollectionSpotlight', () => {
   })
 
   it('is keyboard activatable', async () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: baseSpotlight, group: buildGroup('OWNER') }
-    })
+    const wrapper = mountSpotlight(baseSpotlight)
 
     const card = wrapper.find('[data-testid="spotlight-card"]')
     await card.trigger('keydown', { key: 'Enter' })
@@ -343,9 +335,7 @@ describe('GroupCollectionSpotlight', () => {
   })
 
   it('shows the approved empty state when the shelf is empty', () => {
-    const wrapper = mount(GroupCollectionSpotlight, {
-      props: { games: [], group: buildGroup('OWNER') }
-    })
+    const wrapper = mountSpotlight([])
 
     expect(wrapper.text()).toContain('The shared library is empty')
     expect(wrapper.text()).toContain('Members’ collections will appear once they bind their BGG usernames.')
@@ -360,7 +350,8 @@ describe('GroupDetail', () => {
 
   it('composes header and sessions list', () => {
     const wrapper = mount(GroupDetail, {
-      props: { group: buildGroup('OWNER') }
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
     })
 
     expect(wrapper.find('h1').text()).toBe('Night Owls')
@@ -368,19 +359,28 @@ describe('GroupDetail', () => {
   })
 
   it('shows Create a night for owner', () => {
-    const wrapper = mount(GroupDetail, { props: { group: buildGroup('OWNER') } })
+    const wrapper = mount(GroupDetail, {
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
+    })
     expect(findButtonByText(wrapper, 'Create a night')).toBeDefined()
   })
 
   it('composes spotlight beneath sessions', () => {
-    const wrapper = mount(GroupDetail, { props: { group: buildGroup('OWNER') } })
+    const wrapper = mount(GroupDetail, {
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
+    })
 
     expect(wrapper.text()).toContain('Shared collection spotlight')
     expect(wrapper.text()).toContain('Shared Game')
   })
 
   it('places spotlight after sessions in source order', () => {
-    const wrapper = mount(GroupDetail, { props: { group: buildGroup('OWNER') } })
+    const wrapper = mount(GroupDetail, {
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
+    })
 
     const html = wrapper.html()
     const sessionsIndex = html.indexOf('Upcoming sessions')

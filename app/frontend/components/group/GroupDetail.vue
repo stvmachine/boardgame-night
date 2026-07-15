@@ -2,10 +2,11 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { gql } from '@apollo/client/core'
-import type { Group, MergedThing } from '@/generated/types'
+import type { Group } from '@/generated/types'
 import { useCreateNightSessionMutation, useRemoveGroupMemberMutation, useUpdateGroupMemberRoleMutation } from '@/generated/operations'
 import GroupHeader from './GroupHeader.vue'
 import GroupSessionsList from './GroupSessionsList.vue'
+import GroupCollectionSpotlight from './GroupCollectionSpotlight.vue'
 import MemberList from './MemberList.vue'
 import InviteLink from './InviteLink.vue'
 
@@ -69,7 +70,6 @@ const { mutate: createSession } = useCreateNightSessionMutation({
 const { mutate: removeMember } = useRemoveGroupMemberMutation()
 const { mutate: updateRole } = useUpdateGroupMemberRoleMutation()
 
-const allGames = computed(() => (props.group.collection?.items ?? []) as MergedThing[])
 const memberships = computed(() => props.group.memberships ?? [])
 
 async function handleCreate() {
@@ -108,6 +108,7 @@ async function handleUpdateRole(membership: { id: string; user: { id: string } }
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div class="lg:col-span-8 space-y-6">
         <GroupSessionsList :sessions="group.sessions" :group="group" @create="handleCreate" />
+        <GroupCollectionSpotlight :games="group.collectionSpotlight" :group="group" />
       </div>
 
       <aside class="lg:col-span-4 space-y-6">
