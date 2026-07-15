@@ -4,9 +4,9 @@ milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
 current_phase: 8
 current_phase_name: Group Detail Surface
-status: verifying
-stopped_at: Phase 08 context gathered
-last_updated: "2026-07-15T00:28:27.353Z"
+status: executing
+stopped_at: Phase 08 UI-SPEC approved
+last_updated: "2026-07-15T02:20:29.329Z"
 last_activity: 2026-07-14
 last_activity_desc: Phase 07 complete, transitioned to Phase 8
 progress:
@@ -30,7 +30,7 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 
 Phase: 8 — Group Detail Surface
 Plan: Not started
-Status: Ready to discuss
+Status: Ready to execute
 Last activity: 2026-07-14 — Phase 07 complete, transitioned to Phase 8
 
 Progress: [█████████████░░░░░░░] 64% of milestone phases (7 of 11 phases complete; 32/32 planned plans done)
@@ -129,6 +129,10 @@ None. Two research flags to watch during Phase 1/5 planning:
 - Vite 8 (Rolldown) compatibility with Vitest and graphql-codegen; fallback path ready.
 - Live BGG `suggested_numplayers` poll XML validation; parser must be tested against real responses.
 
+### Roadmap Evolution
+
+- Phase 08 edited: edited fields: goal
+
 ## Deferred Items
 
 Items acknowledged and carried forward from v1.1 scoping to v2.0:
@@ -143,6 +147,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-15T00:28:27.346Z
-Stopped at: Phase 08 context gathered
-Resume file: .planning/phases/08-group-detail-surface/08-CONTEXT.md
+Last session: 2026-07-15T00:52:27.252Z
+Stopped at: Phase 08 UI-SPEC approved
+Resume file: .planning/phases/08-group-detail-surface/08-UI-SPEC.md

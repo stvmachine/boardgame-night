@@ -235,12 +235,25 @@ Plans:
 
 **Plans:** 6 plans
 Plans:
+**Wave 1**
 
 - [ ] 08-01-PLAN.md — Role-aware Group sessions API, bounded/full query split, and schema/codegen publication
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 08-02-PLAN.md — Responsive group header and upcoming-sessions user experience
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 08-03-PLAN.md — Authorized deterministic collection spotlight API and compact cards
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
 - [ ] 08-04-PLAN.md — Group-scoped `/collection?group=<inviteCode>` routing and query mode
 - [ ] 08-05-PLAN.md — Authorized member actions with inline removal confirmation
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
 - [ ] 08-06-PLAN.md — Combined invite card and integrated responsive/security hardening
 
 **UI hint**: yes

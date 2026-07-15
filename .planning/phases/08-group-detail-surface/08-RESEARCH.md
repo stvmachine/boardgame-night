@@ -703,27 +703,27 @@ const { mutate: createSession } = useCreateNightSessionMutation({
 
 **If this table is empty:** Not applicable — assumptions are listed above.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Spotlight rating tie-breaker**
+1. **Spotlight rating tie-breaker — RESOLVED**
    - What we know: D-09 says sort by owner count descending, then BGG rating descending, then name ascending. The codebase exposes both `average` and `bayes_average` on `MergedThing`.
    - What's unclear: Whether "BGG rating" in D-09 means `average` (raw community average) or `bayes_average` (BGG's Bayesian average).
-   - Recommendation: Use `average` to match the existing `GameCard` rating badge. If the product wants `bayes_average`, change the SQL order and the spotlight card badge source.
+   - Resolution: `08-02-PLAN.md`, Task 1, uses `average` for the rating tie-breaker in `app/graphql/types/group_type.rb` and for the badge in `app/frontend/components/group/GroupCollectionSpotlight.vue`.
 
-2. **Session CTA wording for invited members**
+2. **Session CTA wording for invited members — RESOLVED**
    - What we know: D-07 says "Choose a game" for `picking` and "View details" for other visible states.
    - What's unclear: Whether invited sessions should show "RSVP" or "View details" for members who have not yet responded.
-   - Recommendation: Use "View details" for all non-`picking` visible states; the session detail page handles RSVP. This keeps the row CTA simple and avoids duplicating RSVP state logic.
+   - Resolution: `08-01-PLAN.md`, Task 2, assigns **View details** to invited and draft rows in `app/frontend/components/group/GroupSessionsList.vue`; the existing session detail page continues to handle RSVP.
 
-3. **Spotlight card click behavior**
+3. **Spotlight card click behavior — RESOLVED**
    - What we know: The agent has discretion over this per CONTEXT.md.
    - What's unclear: Whether clicking a spotlight card should open the BGG page (like `GameCard`) or navigate to the game's entry in the group collection.
-   - Recommendation: Open the BGG page in a new tab to match the existing `GameCard` behavior, and let the "Browse Library" link handle collection navigation. Document this decision in the plan if the product prefers collection navigation.
+   - Resolution: `08-02-PLAN.md`, Task 1, makes each card in `app/frontend/components/group/GroupCollectionSpotlight.vue` open its BGG page in a new tab with opener isolation; **Browse Library** remains the collection-navigation action.
 
-4. **Cache update for `removeGroupMember`**
+4. **Cache update for `removeGroupMember` — RESOLVED**
    - What we know: The mutation currently returns only `{ success: true }`.
    - What's unclear: Whether to extend the mutation payload to return the removed membership id (cleanest) or rely on `refetchQueries: ['Group']` (simpler).
-   - Recommendation: Extend the payload to return `membership: GroupMembership` or `removedMembershipId: ID` so the frontend can use `cache.modify` to filter the list. This aligns with the project's anti-`refetchQueries` pitfall guidance.
+   - Resolution: `08-03-PLAN.md`, Task 1, extends `app/graphql/mutations/remove_group_member.rb` and `app/frontend/apollo/mutations/remove_group_member.graphql` with the `removedMembershipId` payload used to reconcile `Group.memberships`.
 
 ## Environment Availability
 
