@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { gql } from '@apollo/client/core'
 import type { Group } from '@/generated/types'
-import { useCreateNightSessionMutation, useRemoveGroupMemberMutation, useUpdateGroupMemberRoleMutation } from '@/generated/operations'
+import { useCreateNightSessionMutation } from '@/generated/operations'
 import GroupHeader from './GroupHeader.vue'
 import GroupSessionsList from './GroupSessionsList.vue'
 import GroupCollectionSpotlight from './GroupCollectionSpotlight.vue'
-import MemberList from './MemberList.vue'
+import GroupMembersPanel from './GroupMembersPanel.vue'
 import InviteLink from './InviteLink.vue'
 
 interface Props {
@@ -67,11 +67,6 @@ const { mutate: createSession } = useCreateNightSessionMutation({
   }
 })
 
-const { mutate: removeMember } = useRemoveGroupMemberMutation()
-const { mutate: updateRole } = useUpdateGroupMemberRoleMutation()
-
-const memberships = computed(() => props.group.memberships ?? [])
-
 async function handleCreate() {
   createError.value = null
   try {
@@ -91,14 +86,6 @@ async function handleCreate() {
     createError.value = err instanceof Error ? err : new Error(String(err))
   }
 }
-
-async function handleRemove(membership: { id: string; user: { id: string } }) {
-  await removeMember({ groupId: props.group.id, userId: membership.user.id })
-}
-
-async function handleUpdateRole(membership: { id: string; user: { id: string } }, role: string) {
-  await updateRole({ groupId: props.group.id, userId: membership.user.id, role })
-}
 </script>
 
 <template>
@@ -112,12 +99,7 @@ async function handleUpdateRole(membership: { id: string; user: { id: string } }
       </div>
 
       <aside class="lg:col-span-4 space-y-6">
-        <MemberList
-          :memberships="memberships"
-          :group="group"
-          @remove="handleRemove"
-          @updateRole="handleUpdateRole"
-        />
+        <GroupMembersPanel :memberships="group.memberships ?? []" :group="group" />
         <InviteLink v-if="group.myRole === 'OWNER' || group.myRole === 'ADMIN'" :group="group" />
       </aside>
     </div>
