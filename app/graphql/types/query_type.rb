@@ -62,7 +62,8 @@ module Types
     end
 
     def group(token:)
-      Group.find_by(invite_code: token) || context[:current_user]&.groups&.find_by(id: token)
+      with_eager_load(Group).find_by(invite_code: token) ||
+        context[:current_user]&.groups&.then { |scope| with_eager_load(scope) }&.find_by(id: token)
     end
 
     def night_session(id:)
@@ -105,6 +106,14 @@ module Types
     end
 
     private
+
+    def with_eager_load(scope)
+      scope.includes(
+        :owner,
+        { group_memberships: :user },
+        { night_sessions: [:host, { attendances: :user }] }
+      )
+    end
 
     def sync_status_for(username, users)
       user = users.find { |u| u.bgg_username == username }

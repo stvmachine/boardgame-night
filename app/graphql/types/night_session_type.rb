@@ -20,11 +20,19 @@ module Types
     field :suggestions, [ Types::SuggestionType ], null: true
 
     def attendances
-      object.attendances.includes(:user).to_a
+      if object.association(:attendances).loaded?
+        object.attendances
+      else
+        object.attendances.includes(:user).to_a
+      end
     end
 
     def attendee_count
-      object.attendances.where(response: "going").count
+      if object.association(:attendances).loaded?
+        object.attendances.count { |a| a.response == "going" }
+      else
+        object.attendances.where(response: "going").count
+      end
     end
 
     def suggestions

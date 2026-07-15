@@ -127,11 +127,11 @@ RSpec.describe "group query" do
       result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: owner })
       expect(result["errors"]).to be_nil
       expect(session_ids(result)).to eq([
-        picking_session.to_global_id.to_s,
-        invited_earlier.to_global_id.to_s,
-        invited_later.to_global_id.to_s,
-        dated_draft.to_global_id.to_s,
-        undated_draft.to_global_id.to_s
+        picking_session.id.to_s,
+        invited_earlier.id.to_s,
+        invited_later.id.to_s,
+        dated_draft.id.to_s,
+        undated_draft.id.to_s
       ])
     end
 
@@ -139,11 +139,11 @@ RSpec.describe "group query" do
       result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: admin })
       expect(result["errors"]).to be_nil
       expect(session_ids(result)).to eq([
-        picking_session.to_global_id.to_s,
-        invited_earlier.to_global_id.to_s,
-        invited_later.to_global_id.to_s,
-        dated_draft.to_global_id.to_s,
-        undated_draft.to_global_id.to_s
+        picking_session.id.to_s,
+        invited_earlier.id.to_s,
+        invited_later.id.to_s,
+        dated_draft.id.to_s,
+        undated_draft.id.to_s
       ])
     end
 
@@ -151,9 +151,9 @@ RSpec.describe "group query" do
       result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: member })
       expect(result["errors"]).to be_nil
       expect(session_ids(result)).to eq([
-        picking_session.to_global_id.to_s,
-        invited_earlier.to_global_id.to_s,
-        invited_later.to_global_id.to_s
+        picking_session.id.to_s,
+        invited_earlier.id.to_s,
+        invited_later.id.to_s
       ])
     end
 
@@ -166,13 +166,13 @@ RSpec.describe "group query" do
     it "excludes completed and cancelled sessions from everyone" do
       result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: owner })
       returned_ids = session_ids(result)
-      expect(returned_ids).not_to include(completed_session.to_global_id.to_s)
-      expect(returned_ids).not_to include(cancelled_session.to_global_id.to_s)
+      expect(returned_ids).not_to include(completed_session.id.to_s)
+      expect(returned_ids).not_to include(cancelled_session.id.to_s)
     end
 
     it "preserves nil scheduledAt for undated drafts" do
       result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: owner })
-      undated = result.dig("data", "group", "sessions").find { |s| s["id"] == undated_draft.to_global_id.to_s }
+      undated = result.dig("data", "group", "sessions").find { |s| s["id"] == undated_draft.id.to_s }
       expect(undated["scheduledAt"]).to be_nil
     end
 
@@ -186,11 +186,32 @@ RSpec.describe "group query" do
       Attendance.create!(night_session: picking_session, user: not_going_user, response: "not_going")
 
       result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: owner })
-      session = result.dig("data", "group", "sessions").find { |s| s["id"] == picking_session.to_global_id.to_s }
+      session = result.dig("data", "group", "sessions").find { |s| s["id"] == picking_session.id.to_s }
       expect(session["attendeeCount"]).to eq(1)
     end
 
     it "does not produce N+1 queries for sessions and attendances" do
+      sessions_query = <<~GRAPHQL
+        query Group($token: String!) {
+          group(token: $token) {
+            id
+            myRole
+            sessions {
+              id
+              title
+              state
+              scheduledAt
+              attendeeCount
+              attendances {
+                id
+                response
+                user { id }
+              }
+            }
+          }
+        }
+      GRAPHQL
+
       3.times do |i|
         user = User.create!(username: "attendee#{i}", email: "attendee#{i}@example.com", password: "password")
         GroupMembership.create!(user: user, group: group, role: "member")
@@ -201,7 +222,7 @@ RSpec.describe "group query" do
       queries = 0
       subscriber = ActiveSupport::Notifications.subscribe("sql.active_record") { |*args| queries += 1 }
 
-      result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: owner })
+      result = BoardgameNightSchema.execute(sessions_query, variables: { token: group.invite_code }, context: { current_user: owner })
 
       ActiveSupport::Notifications.unsubscribe(subscriber)
 

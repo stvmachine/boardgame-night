@@ -11,6 +11,7 @@ module Types
     field :memberships, [Types::GroupMembershipType], null: false
     field :collection, Types::MergedCollectionType, null: false
     field :my_role, Types::GroupRoleEnum, null: true
+    field :sessions, [Types::NightSessionType], null: false
 
     def memberships
       object.group_memberships.includes(:user).to_a
@@ -24,11 +25,45 @@ module Types
     end
 
     def my_role
-      membership = object.group_memberships.find_by(user_id: context[:current_user]&.id)
-      membership&.role&.upcase
+      viewer_role
+    end
+
+    def sessions
+      return [] unless viewer_role
+
+      visible = %w[invited picking]
+      visible << "draft" if viewer_role.in?(%w[OWNER ADMIN])
+
+      object.night_sessions
+        .select { |s| visible.include?(s.state) }
+        .sort_by do |s|
+          state_order = case s.state
+                        when "picking" then 0
+                        when "invited" then 1
+                        when "draft"   then 2
+                        else 3
+                        end
+          date_key = if s.state == "draft" && s.scheduled_at.nil?
+                       Float::INFINITY
+                     else
+                       (s.scheduled_at || Time.at(0)).to_i
+                     end
+          [state_order, date_key, s.created_at, s.id]
+        end
     end
 
     private
+
+    def viewer_role
+      @viewer_role ||= begin
+        if object.owner_id == context[:current_user]&.id
+          "OWNER"
+        else
+          membership = object.group_memberships.find { |m| m.user_id == context[:current_user]&.id }
+          membership&.role&.upcase
+        end
+      end
+    end
 
     def sync_status_for(user)
       SyncStatus.new(
