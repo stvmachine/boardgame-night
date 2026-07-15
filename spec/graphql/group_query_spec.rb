@@ -85,6 +85,17 @@ RSpec.describe "group query" do
     expect(data["collection"]["syncStatuses"]).to be_present
   end
 
+  it "returns no collection for outsiders" do
+    thing = BggThing.create!(objectid: "12345", name: "Catan")
+    BggCollection.create!(user: owner, bgg_thing: thing, quantity: 1)
+
+    result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: outsider })
+    expect(result["errors"]).to be_nil
+    data = result.dig("data", "group")
+    expect(data["collection"]["items"]).to eq([])
+    expect(data["collection"]["syncStatuses"]).to eq([])
+  end
+
   it "returns myRole for a member" do
     result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: owner })
     expect(result.dig("data", "group", "myRole")).to eq("OWNER")
@@ -229,6 +240,133 @@ RSpec.describe "group query" do
       expect(result["errors"]).to be_nil
       expect(result.dig("data", "group", "sessions").size).to be >= 3
       expect(queries).to be <= 10
+    end
+  end
+
+  describe "collectionSpotlight" do
+    let(:spotlight_query) do
+      <<~GRAPHQL
+        query GroupSpotlight($token: String!, $limit: Int) {
+          group(token: $token) {
+            id
+            collectionSpotlight(limit: $limit) {
+              id
+              name
+              thumbnail
+              average
+              owners { bggUsername }
+            }
+          }
+        }
+      GRAPHQL
+    end
+
+    def spotlight(result)
+      result.dig("data", "group", "collectionSpotlight")
+    end
+
+    it "orders multi-owner games before single-owner games" do
+      multi = BggThing.create!(objectid: "100", name: "Shared Game", average: 7.0)
+      single = BggThing.create!(objectid: "101", name: "Solo Game", average: 8.5)
+      BggCollection.create!(user: owner, bgg_thing: multi, quantity: 1)
+      BggCollection.create!(user: admin, bgg_thing: multi, quantity: 1)
+      BggCollection.create!(user: owner, bgg_thing: single, quantity: 1)
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      names = spotlight(result).map { |g| g["name"] }
+      expect(names).to eq(["Shared Game", "Solo Game"])
+    end
+
+    it "breaks ties by average descending, then name case-insensitive ascending, then id ascending" do
+      game_a = BggThing.create!(objectid: "200", name: "Alpha", average: 8.5)
+      game_b = BggThing.create!(objectid: "201", name: "beta", average: 8.5)
+      game_c = BggThing.create!(objectid: "202", name: "Gamma", average: 7.0)
+      BggCollection.create!(user: owner, bgg_thing: game_a, quantity: 1)
+      BggCollection.create!(user: owner, bgg_thing: game_b, quantity: 1)
+      BggCollection.create!(user: owner, bgg_thing: game_c, quantity: 1)
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      names = spotlight(result).map { |g| g["name"] }
+      expect(names).to eq(["Alpha", "beta", "Gamma"])
+    end
+
+    it "returns at most four items" do
+      5.times do |i|
+        game = BggThing.create!(objectid: "300#{i}", name: "Game #{i}", average: 8.0 - i)
+        BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
+      end
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      expect(spotlight(result).size).to eq(4)
+    end
+
+    it "fills remaining slots with single-owner games when fewer than four multi-owner games exist" do
+      multi = BggThing.create!(objectid: "400", name: "Multi Owner", average: 9.0)
+      single_a = BggThing.create!(objectid: "401", name: "Single A", average: 8.0)
+      single_b = BggThing.create!(objectid: "402", name: "Single B", average: 7.0)
+      single_c = BggThing.create!(objectid: "403", name: "Single C", average: 6.0)
+      BggCollection.create!(user: owner, bgg_thing: multi, quantity: 1)
+      BggCollection.create!(user: admin, bgg_thing: multi, quantity: 1)
+      [single_a, single_b, single_c].each do |game|
+        BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
+      end
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      names = spotlight(result).map { |g| g["name"] }
+      expect(names).to eq(["Multi Owner", "Single A", "Single B", "Single C"])
+    end
+
+    it "returns an empty array when the group collection is empty" do
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      expect(spotlight(result)).to eq([])
+    end
+
+    it "clamps limits below 1 to 1" do
+      game = BggThing.create!(objectid: "500", name: "Only Game", average: 8.0)
+      BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 0 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      expect(spotlight(result).size).to eq(1)
+      expect(spotlight(result).first["name"]).to eq("Only Game")
+    end
+
+    it "clamps limits above 12 to 12" do
+      15.times do |i|
+        game = BggThing.create!(objectid: "600#{i}", name: "Filler #{i}", average: 8.0 - (i / 100.0))
+        BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
+      end
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 100 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      expect(spotlight(result).size).to eq(12)
+    end
+
+    it "returns no spotlight for outsiders" do
+      game = BggThing.create!(objectid: "700", name: "Secret Game", average: 8.0)
+      BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: outsider })
+      expect(result["errors"]).to be_nil
+      expect(spotlight(result)).to eq([])
+    end
+
+    it "excludes out-of-group owners from spotlight attribution" do
+      out_group_user = User.create!(username: "outsider_owner", email: "outsider_owner@example.com", password: "password")
+      game = BggThing.create!(objectid: "800", name: "Cross-Group Game", average: 8.0)
+      BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
+      BggCollection.create!(user: out_group_user, bgg_thing: game, quantity: 1)
+
+      result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
+      expect(result["errors"]).to be_nil
+      owners = spotlight(result).first["owners"].map { |o| o["bggUsername"] }
+      expect(owners).to contain_exactly("owner")
+      expect(owners).not_to include("outsider_owner")
     end
   end
 end
