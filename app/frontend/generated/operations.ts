@@ -80,7 +80,7 @@ export type RemoveGroupMemberMutationVariables = Exact<{
 }>;
 
 
-export type RemoveGroupMemberMutation = { removeGroupMember: { success: boolean } | null };
+export type RemoveGroupMemberMutation = { removeGroupMember: { success: boolean, removedMembershipId: string | null } | null };
 
 export type ReopenSessionMutationVariables = Exact<{
   sessionId: string | number;
@@ -656,6 +656,7 @@ export const RemoveGroupMemberDocument = gql`
     mutation RemoveGroupMember($groupId: ID!, $userId: ID!) {
   removeGroupMember(groupId: $groupId, userId: $userId) {
     success
+    removedMembershipId
   }
 }
     `;
