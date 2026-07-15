@@ -98,7 +98,7 @@ async function handleCreate() {
         <GroupCollectionSpotlight :games="group.collectionSpotlight" :group="group" />
       </div>
 
-      <aside class="lg:col-span-4 space-y-6">
+      <aside class="lg:col-span-4 space-y-6 lg:sticky lg:top-6 lg:self-start">
         <GroupMembersPanel :memberships="group.memberships ?? []" :group="group" />
         <InviteCard v-if="group.myRole === 'OWNER' || group.myRole === 'ADMIN'" :group="group" />
       </aside>

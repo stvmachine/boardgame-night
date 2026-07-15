@@ -65,4 +65,52 @@ test.describe('group detail', () => {
     await expect(rows.nth(1).getByText('e2e Friday Games')).toBeVisible()
     await expect(page.getByText('e2e Draft Night')).not.toBeVisible()
   })
+
+  test('owner sees Members card and manager-only Invite people card', async ({ page }) => {
+    const { invite_code: inviteCode, owner_email: ownerEmail } = fixture
+
+    await signIn(page, ownerEmail, 'password')
+    await page.goto(`/g/${inviteCode}`)
+
+    // Card titles are <div data-slot="card-title">, not heading elements
+    await expect(page.getByText('Members').first()).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('Invite people').first()).toBeVisible()
+
+    // Spotlight and Browse Library link are visible
+    await expect(page.getByText('Shared collection spotlight').first()).toBeVisible()
+    await expect(page.getByText('Browse Library')).toBeVisible()
+  })
+
+  test('owner can copy invite link and see Copied! feedback', async ({ page }) => {
+    const { invite_code: inviteCode, owner_email: ownerEmail } = fixture
+
+    // Grant clipboard write permission
+    await page.context().grantPermissions(['clipboard-write'])
+
+    await signIn(page, ownerEmail, 'password')
+    await page.goto(`/g/${inviteCode}`)
+
+    const copyButton = page.getByRole('button', { name: 'Copy' })
+    await expect(copyButton).toBeVisible()
+
+    await copyButton.click()
+
+    // Copied! should appear in the live region
+    await expect(page.getByText('Copied!')).toBeVisible({ timeout: 5_000 })
+  })
+
+  test('mobile viewport shows Create a night and five sections', async ({ page }) => {
+    const { invite_code: inviteCode, owner_email: ownerEmail } = fixture
+
+    await signIn(page, ownerEmail, 'password')
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto(`/g/${inviteCode}`)
+
+    await expect(page.getByRole('button', { name: 'Create a night' })).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('e2e Night Owls')).toBeVisible()
+    await expect(page.getByText('Upcoming sessions')).toBeVisible()
+    await expect(page.getByText('Shared collection spotlight')).toBeVisible()
+    await expect(page.getByText('Members').first()).toBeVisible()
+    await expect(page.getByText('Invite people').first()).toBeVisible()
+  })
 })

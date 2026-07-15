@@ -391,6 +391,80 @@ describe('GroupDetail', () => {
     expect(sessionsIndex).toBeGreaterThan(-1)
     expect(spotlightIndex).toBeGreaterThan(sessionsIndex)
   })
+
+  it('renders Members and Invite people after spotlight in source order for owner', () => {
+    const wrapper = mount(GroupDetail, {
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
+    })
+
+    const html = wrapper.html()
+    const spotlightIndex = html.indexOf('Shared collection spotlight')
+    const membersIndex = html.indexOf('Members')
+    const inviteIndex = html.indexOf('Invite people')
+    expect(spotlightIndex).toBeGreaterThan(-1)
+    expect(membersIndex).toBeGreaterThan(spotlightIndex)
+    expect(inviteIndex).toBeGreaterThan(membersIndex)
+  })
+
+  it('has the 8/4 grid layout with lg grid-cols-12', () => {
+    const wrapper = mount(GroupDetail, {
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
+    })
+
+    const grid = wrapper.find('.grid')
+    expect(grid.classes()).toContain('lg:grid-cols-12')
+    expect(grid.classes()).toContain('grid-cols-1')
+    expect(grid.classes()).toContain('gap-6')
+
+    const main = grid.find('.lg\\:col-span-8')
+    expect(main.exists()).toBe(true)
+
+    const aside = grid.find('.lg\\:col-span-4')
+    expect(aside.exists()).toBe(true)
+    expect(aside.classes()).toContain('lg:sticky')
+    expect(aside.classes()).toContain('lg:top-6')
+    expect(aside.classes()).toContain('lg:self-start')
+  })
+
+  it('uses correct heading hierarchy (h1 for group name, card-title for sections)', () => {
+    const wrapper = mount(GroupDetail, {
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
+    })
+
+    expect(wrapper.find('h1').text()).toBe('Night Owls')
+    const titles = wrapper.findAll('[data-slot="card-title"]')
+    const titleTexts = titles.map(t => t.text())
+    expect(titleTexts).toContain('Upcoming sessions')
+    expect(titleTexts).toContain('Shared collection spotlight')
+    expect(titleTexts).toContain('Members')
+    expect(titleTexts).toContain('Invite people')
+  })
+
+  it('does not render legacy InviteLink component', () => {
+    const wrapper = mount(GroupDetail, {
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
+    })
+
+    const html = wrapper.html()
+    expect(html).not.toContain('InviteLink')
+  })
+
+  it('header sits outside the grid', () => {
+    const wrapper = mount(GroupDetail, {
+      props: { group: buildGroup('OWNER') },
+      global: { plugins: [createTestRouter()] }
+    })
+
+    const html = wrapper.html()
+    const headerIndex = html.indexOf('Night Owls')
+    const gridOpenIndex = html.indexOf('<div class="grid')
+    expect(headerIndex).toBeGreaterThan(-1)
+    expect(gridOpenIndex).toBeGreaterThan(headerIndex)
+  })
 })
 
 describe('GroupView', () => {
