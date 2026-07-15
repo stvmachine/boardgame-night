@@ -22,7 +22,7 @@ The phase may extend GraphQL read shapes and existing collection filter/permalin
 
 ### Personal Stats
 - **D-04:** Add one authenticated dashboard-stats GraphQL read instead of issuing another full merged-collection query from Home. Apollo remains the source of server data; do not mirror stats in Pinia or derive them from a possibly cold client cache.
-- **D-05:** Define the three stats as: distinct base games in the signed-in user's bound BGG collection; distinct groups they own or belong to; and distinct non-cancelled night sessions they host or attend. Counts must be database-backed and authorization-scoped.
+- **D-05:** Define the three stats as: all distinct games in the signed-in user's bound BGG collection, including both base games and expansions and matching the UI label **Games in your collection**; distinct groups they own or belong to; and distinct non-cancelled night sessions they host or attend. Counts must be database-backed and authorization-scoped. Do not add subtype persistence, migration, or backfill work for this stat.
 - **D-06:** For signed-out visitors, keep the stats card position but show a concise sign-in prompt instead of zeroes or protected data. The merge hero and trending preview remain usable without authentication.
 
 ### Trending Cards

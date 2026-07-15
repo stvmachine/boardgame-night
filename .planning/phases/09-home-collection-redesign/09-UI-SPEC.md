@@ -2,7 +2,7 @@
 phase: 9
 slug: home-collection-redesign
 status: approved
-reviewed_at: 2026-07-15T12:51:53Z
+reviewed_at: 2026-07-16T00:00:00Z
 shadcn_initialized: true
 preset: reka-nova
 style: reka-nova
@@ -128,7 +128,7 @@ Tokens are generated from the indigo seed `#4f46e5` using `@material/material-co
 | Username input placeholder | Add a BGG username |
 | Username validation error | We couldn't find a BGG user named `{username}`. |
 | Stats card title (signed in) | Your game nights |
-| Stats card collection label | Games in collection |
+| Stats card collection label | Games in your collection |
 | Stats card group label | Groups |
 | Stats card session label | Nights |
 | Stats card sign-in prompt heading | Sign in to see your stats |
@@ -493,14 +493,14 @@ Use these exact Tailwind v4 classes (all map to Phase 5 M3 tokens) in the new co
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved
 
 ---
 

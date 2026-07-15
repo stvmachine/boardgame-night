@@ -272,7 +272,39 @@ Plans:
   4. User can sort the collection by Name A-Z, Rating High-Low, Weight Light-Heavy, or Recently Played, and toggle between grid and list views.
   5. User sees skeleton loaders during collection data fetching.
 
-**Plans**: TBD
+**Plans:** 8 plans
+Plans:
+**Wave 1**
+
+- [ ] 09-01-PLAN.md — Home merge hero and dedicated authorization-scoped personal stats
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 09-02-PLAN.md — Persisted Trending enrichment and shared Home/Hot cards with preserved `/hot`
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 09-03-PLAN.md — Immutable authorization-scoped Recently Played metadata and true BGG object identity
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 09-04-PLAN.md — Exact four-sort frontend, legacy URL migration, and scoped Recently Played flow
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 09-05-PLAN.md — Compact token, source-owned Slider, player-range behavior, and legacy-safe filter state
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 09-06-PLAN.md — Source-owned ToggleGroup and accessible time, complexity, owner, and ordered panel controls
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 09-07-PLAN.md — Responsive Collection-local filter panel, active chips, Sheet integration, and safe legacy-filter deletion
+
+**Wave 8** *(blocked on Wave 7 completion)*
+
+- [ ] 09-08-PLAN.md — Rich grid/list cards, view-matched skeletons, production build, and integrated browser gate
 **UI hint**: yes
 
 ### Phase 10: Picking a Game Redesign
@@ -323,7 +355,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. BGG Poll Data Layer | 3/3 | Complete    | 2026-07-13 |
 | 7. Suggestion Engine Backend | 4/4 | Complete    | 2026-07-14 |
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
-| 9. Home & Collection Redesign | 0/TBD | Not started | - |
+| 9. Home & Collection Redesign | 0/8 | Not started | - |
 | 10. Picking a Game Redesign | 0/TBD | Not started | - |
 | 11. Polish & E2E Hardening | 0/TBD | Not started | - |
 
