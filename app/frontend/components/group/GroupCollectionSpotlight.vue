@@ -50,7 +50,7 @@ function handleKeydown(event: KeyboardEvent, game: GroupSpotlightThing) {
       <div class="flex items-center justify-between">
         <CardTitle>Shared collection spotlight</CardTitle>
         <RouterLink
-          :to="`/collection?group=${group.inviteCode}`"
+          :to="{ path: '/collection', query: { group: group.inviteCode } }"
           class="text-sm font-medium text-primary hover:underline"
         >
           Browse Library
