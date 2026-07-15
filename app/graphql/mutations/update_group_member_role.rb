@@ -11,14 +11,14 @@ module Mutations
     def resolve(group_id:, user_id:, role:)
       raise GraphQL::ExecutionError, "Authentication required" unless context[:current_user]
 
-      contract = UpdateGroupMemberRoleContract.new.call(group_id: group_id, user_id: user_id, role: role)
+      normalized_role = role.to_s.downcase
+      contract = UpdateGroupMemberRoleContract.new.call(group_id: group_id, user_id: user_id, role: normalized_role)
       raise GraphQL::ExecutionError, contract.errors.to_h.to_json if contract.failure?
 
       group = Group.find_by(id: contract[:group_id])
       raise GraphQL::ExecutionError, "Group not found" unless group
 
-      caller_membership = group.group_memberships.find_by(user_id: context[:current_user].id)
-      unless caller_membership&.role == "owner"
+      unless authorized_as_owner?(group)
         raise GraphQL::ExecutionError, "Only the group owner can change roles"
       end
 
@@ -29,13 +29,18 @@ module Mutations
         raise GraphQL::ExecutionError, "Cannot change the owner's role"
       end
 
-      unless contract[:role].in?(%w[admin member])
-        raise GraphQL::ExecutionError, "Role must be admin or member"
-      end
-
       target_membership.update!(role: contract[:role])
 
       { membership: target_membership }
+    end
+
+    private
+
+    def authorized_as_owner?(group)
+      return true if group.owner_id == context[:current_user].id
+
+      caller_membership = group.group_memberships.find_by(user_id: context[:current_user].id)
+      caller_membership&.role == "owner"
     end
   end
 end

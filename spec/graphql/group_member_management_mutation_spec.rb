@@ -125,10 +125,11 @@ RSpec.describe "group member management mutations" do
     end
 
     it "rejects a target outside the supplied group" do
+      cross_group_user = User.create!(username: "cross", email: "cross@example.com", password: "password")
       other_group = Group.create!(name: "Other Group", owner: outsider)
-      other_group_membership = GroupMembership.create!(user: other_member, group: other_group, role: "member")
+      other_group_membership = GroupMembership.create!(user: cross_group_user, group: other_group, role: "member")
 
-      result = execute_remove(caller: owner, target_user: other_member, group_id: group.id)
+      result = execute_remove(caller: owner, target_user: cross_group_user, group_id: group.id)
 
       expect(result["errors"]).to be_present
       expect(GroupMembership.exists?(other_group_membership.id)).to be true
