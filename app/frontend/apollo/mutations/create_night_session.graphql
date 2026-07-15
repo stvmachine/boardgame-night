@@ -8,6 +8,16 @@ mutation CreateNightSession($title: String!, $description: String, $groupId: ID!
       scheduledAt
       location
       capacity
+      attendeeCount
+      attendances {
+        id
+        response
+        user {
+          id
+          username
+          displayName
+        }
+      }
       host {
         id
         username

@@ -24,28 +24,20 @@ query Group($token: String!) {
         displayName
       }
     }
-    collection {
-      items {
+    sessions {
+      id
+      title
+      state
+      scheduledAt
+      attendeeCount
+      attendances {
         id
-        name
-        thumbnail
-        yearPublished
-        minPlayers
-        maxPlayers
-        minPlaytime
-        maxPlaytime
-        average
-        averageWeight
-        owners {
-          bggUsername
-          avatar
+        response
+        user {
+          id
+          username
+          displayName
         }
-      }
-      syncStatuses {
-        username
-        status
-        lastSyncedAt
-        gameCount
       }
     }
   }
