@@ -258,11 +258,14 @@ describe('GroupCollectionSpotlight', () => {
     })
   }
 
-  it('renders section title and Browse Library link', () => {
+  it('renders section title and Browse Library link with group-scoped href', () => {
     const wrapper = mountSpotlight(baseSpotlight)
 
     expect(wrapper.text()).toContain('Shared collection spotlight')
     expect(wrapper.text()).toContain('Browse Library')
+
+    const link = wrapper.find('a')
+    expect(link.attributes('href')).toBe('/collection?group=NIGHTOWLS')
   })
 
   it('renders cards in server order with grid layout', () => {
