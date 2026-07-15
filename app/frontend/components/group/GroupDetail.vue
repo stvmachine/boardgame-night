@@ -8,7 +8,7 @@ import GroupHeader from './GroupHeader.vue'
 import GroupSessionsList from './GroupSessionsList.vue'
 import GroupCollectionSpotlight from './GroupCollectionSpotlight.vue'
 import GroupMembersPanel from './GroupMembersPanel.vue'
-import InviteLink from './InviteLink.vue'
+import InviteCard from './InviteCard.vue'
 
 interface Props {
   group: Group
@@ -100,7 +100,7 @@ async function handleCreate() {
 
       <aside class="lg:col-span-4 space-y-6">
         <GroupMembersPanel :memberships="group.memberships ?? []" :group="group" />
-        <InviteLink v-if="group.myRole === 'OWNER' || group.myRole === 'ADMIN'" :group="group" />
+        <InviteCard v-if="group.myRole === 'OWNER' || group.myRole === 'ADMIN'" :group="group" />
       </aside>
     </div>
 

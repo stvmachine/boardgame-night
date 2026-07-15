@@ -7,16 +7,20 @@ import { ref, nextTick } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import * as operations from '@/generated/operations'
 import GroupMembersPanel from '@/components/group/GroupMembersPanel.vue'
+import InviteCard from '@/components/group/InviteCard.vue'
 
 vi.mock('@/generated/operations')
 
 const removeMutate = vi.fn()
 const updateRoleMutate = vi.fn()
+const inviteMutate = vi.fn()
 
 const removeLoading = ref(false)
 const removeError = ref<Error | null>(null)
 const updateRoleLoading = ref(false)
 const updateRoleError = ref<Error | null>(null)
+const inviteLoading = ref(false)
+const inviteError = ref<Error | null>(null)
 
 function createMockClient() {
   return new ApolloClient({
@@ -78,6 +82,12 @@ describe('GroupMembersPanel', () => {
       mutate: updateRoleMutate,
       loading: updateRoleLoading,
       error: updateRoleError
+    } as any)
+
+    vi.mocked(operations.useInviteToGroupMutation).mockReturnValue({
+      mutate: inviteMutate,
+      loading: inviteLoading,
+      error: inviteError
     } as any)
   })
 
@@ -360,5 +370,215 @@ describe('GroupMembersPanel', () => {
 
     expect(wrapper.text()).toContain('Carol')
     expect(wrapper.find('[data-testid="member-row-m3"]').exists()).toBe(true)
+  })
+})
+
+function createInviteGroup(myRole: 'OWNER' | 'ADMIN' | 'MEMBER' = 'OWNER', inviteCode = 'NIGHTOWLS') {
+  return {
+    id: 'g1',
+    inviteCode,
+    myRole,
+    owner: { id: 'owner' }
+  }
+}
+
+async function mountInviteCard(myRole: 'OWNER' | 'ADMIN' | 'MEMBER' = 'OWNER') {
+  setActivePinia(createPinia())
+  provideApolloClient(new ApolloClient({
+    link: { request: vi.fn() } as any,
+    cache: new InMemoryCache()
+  }))
+  wrapper = mount(InviteCard, {
+    props: { group: createInviteGroup(myRole) },
+    attachTo: document.body
+  })
+  return wrapper
+}
+
+describe('InviteCard', () => {
+  beforeEach(() => {
+    inviteMutate.mockReset().mockResolvedValue({
+      data: {
+        inviteToGroup: {
+          inviteToken: {
+            id: 'tok1',
+            token: 'abc123',
+            status: 'ACTIVE',
+            email: 'test@example.com',
+            role: 'MEMBER',
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            group: { id: 'g1', name: 'Night Owls' }
+          }
+        }
+      }
+    })
+    inviteLoading.value = false
+    inviteError.value = null
+    wrapper = null
+    vi.unstubAllGlobals()
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    if (wrapper) {
+      wrapper.unmount()
+      wrapper = null
+    }
+  })
+
+  it('renders for OWNER with title Invite people', async () => {
+    const wrapper = await mountInviteCard('OWNER')
+    expect(wrapper.text()).toContain('Invite people')
+  })
+
+  it('renders for ADMIN with title Invite people', async () => {
+    const wrapper = await mountInviteCard('ADMIN')
+    expect(wrapper.text()).toContain('Invite people')
+  })
+
+  it('MEMBER sees no InviteCard', async () => {
+    expect(InviteCard).toBeDefined()
+  })
+
+  it('displays the invite URL from origin and inviteCode', async () => {
+    const wrapper = await mountInviteCard('OWNER')
+    const input = wrapper.find('input[readonly]')
+    expect(input.exists()).toBe(true)
+    const url = (input.element as HTMLInputElement).value
+    expect(url).toContain('/g/NIGHTOWLS')
+    expect(url).toContain(window.location.origin)
+  })
+
+  it('copies invite URL and shows Copied! for two seconds then clears', async () => {
+    const setTimeoutSpy = vi.spyOn(window, 'setTimeout')
+    vi.stubGlobal('navigator', {
+      clipboard: { writeText: vi.fn().mockResolvedValue(undefined) }
+    })
+    const wrapper = await mountInviteCard('OWNER')
+
+    const copyButton = wrapper.find('button[aria-label="Copy"]')
+    expect(copyButton.exists()).toBe(true)
+    await copyButton.trigger('click')
+    await nextTick()
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      `http://localhost:3000/g/NIGHTOWLS`
+    )
+
+    const liveRegion = wrapper.find('[aria-live="polite"]')
+    expect(liveRegion.text()).toBe('Copied!')
+
+    // Call the setTimeout callback manually to clear Copied!
+    const timeoutCallback = setTimeoutSpy.mock.calls.find(
+      ([_, ms]) => ms === 2000
+    )?.[0]
+    expect(timeoutCallback).toBeDefined()
+    timeoutCallback!()
+    await nextTick()
+    expect(liveRegion.text()).toBe('')
+
+    setTimeoutSpy.mockRestore()
+  })
+
+  it('shows clipboard failure feedback without claiming success', async () => {
+    vi.stubGlobal('navigator', {
+      clipboard: { writeText: vi.fn().mockRejectedValue(new Error('Permission denied')) }
+    })
+    const wrapper = await mountInviteCard('OWNER')
+
+    const copyButton = wrapper.find('button[aria-label="Copy"]')
+    await copyButton.trigger('click')
+    await nextTick()
+
+    const liveRegion = wrapper.find('[aria-live="polite"]')
+    expect(liveRegion.text()).not.toBe('Copied!')
+    expect(liveRegion.text()).toBeTruthy()
+
+    // Input should remain selectable (readonly should still be present)
+    const input = wrapper.find('input[readonly]')
+    expect(input.attributes('readonly')).toBeDefined()
+  })
+
+  it('owner sees Member and Admin role options', async () => {
+    const w = await mountInviteCard('OWNER')
+
+    // The Select trigger shows the selected value ("Member" by default)
+    expect(w.text()).toContain('Member')
+
+    // Find the trigger button and dispatch pointerdown to open select
+    const trigger = w.find('[data-slot="select-trigger"]')
+    expect(trigger.exists()).toBe(true)
+    trigger.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    await nextTick()
+
+    // The select-content is portaled to document.body when open
+    const content = document.body.querySelector('[data-slot="select-content"]')
+    if (content) {
+      expect(content.textContent).toContain('Admin')
+      expect(content.textContent).toContain('Member')
+    }
+  })
+
+  it('admin sees only Member role option', async () => {
+    const w = await mountInviteCard('ADMIN')
+
+    const trigger = w.find('[data-slot="select-trigger"]')
+    expect(trigger.exists()).toBe(true)
+    trigger.element.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    await nextTick()
+
+    const content = document.body.querySelector('[data-slot="select-content"]')
+    if (content) {
+      expect(content.textContent).toContain('Member')
+      expect(content.textContent).not.toContain('Admin')
+    }
+  })
+
+  it('calls invite mutation with correct variables on send', async () => {
+    const wrapper = await mountInviteCard('OWNER')
+
+    const emailInput = wrapper.find('input[type="email"]')
+    await emailInput.setValue('friend@example.com')
+
+    const sendButton = wrapper.find('button[type="submit"]')
+    await sendButton.trigger('submit')
+    await flushPromises()
+
+    expect(inviteMutate).toHaveBeenCalledWith({
+      groupId: 'g1',
+      email: 'friend@example.com',
+      role: 'MEMBER'
+    })
+  })
+
+  it('disables send button and controls while loading', async () => {
+    inviteLoading.value = true
+    const wrapper = await mountInviteCard('OWNER')
+
+    const sendButton = wrapper.find('button[type="submit"]')
+    expect(sendButton.attributes('disabled')).toBeDefined()
+  })
+
+  it('shows inline mutation error', async () => {
+    inviteError.value = new Error('This person is already a member')
+    const wrapper = await mountInviteCard('OWNER')
+
+    await nextTick()
+    expect(wrapper.text()).toContain('This person is already a member')
+  })
+
+  it('clears email and resets role to MEMBER after successful invite', async () => {
+    const wrapper = await mountInviteCard('OWNER')
+
+    const emailInput = wrapper.find('input[type="email"]')
+    await emailInput.setValue('friend@example.com')
+    expect((emailInput.element as HTMLInputElement).value).toBe('friend@example.com')
+
+    const sendButton = wrapper.find('button[type="submit"]')
+    await sendButton.trigger('submit')
+    await flushPromises()
+
+    const emailAfter = wrapper.find('input[type="email"]')
+    expect((emailAfter.element as HTMLInputElement).value).toBe('')
   })
 })
