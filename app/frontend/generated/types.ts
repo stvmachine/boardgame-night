@@ -72,6 +72,7 @@ export type CreateNightSessionPayload = {
 export type Group = {
   __typename?: 'Group';
   collection: MergedCollection;
+  collectionSpotlight: Array<GroupSpotlightThing>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inviteCode?: Maybe<Scalars['String']['output']>;
@@ -81,6 +82,11 @@ export type Group = {
   name: Scalars['String']['output'];
   owner: User;
   sessions: Array<NightSession>;
+};
+
+
+export type GroupCollectionSpotlightArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type GroupMembership = {
@@ -99,6 +105,15 @@ export enum GroupRole {
   /** Group owner with full control */
   Owner = 'OWNER'
 }
+
+export type GroupSpotlightThing = {
+  __typename?: 'GroupSpotlightThing';
+  average?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  owners: Array<Owner>;
+  thumbnail?: Maybe<Scalars['String']['output']>;
+};
 
 export type HotItem = {
   __typename?: 'HotItem';

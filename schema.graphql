@@ -73,6 +73,7 @@ type CreateNightSessionPayload {
 
 type Group {
   collection: MergedCollection!
+  collectionSpotlight(limit: Int = 4): [GroupSpotlightThing!]!
   description: String
   id: ID!
   inviteCode: String
@@ -106,6 +107,14 @@ enum GroupRole {
   Group owner with full control
   """
   OWNER
+}
+
+type GroupSpotlightThing {
+  average: Float
+  id: ID!
+  name: String!
+  owners: [Owner!]!
+  thumbnail: String
 }
 
 type HotItem {

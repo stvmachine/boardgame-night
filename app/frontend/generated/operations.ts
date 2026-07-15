@@ -172,7 +172,7 @@ export type GroupQueryVariables = Exact<{
 }>;
 
 
-export type GroupQuery = { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }>, memberships: Array<{ id: string, role: Types.GroupRole, user: { id: string, username: string, displayName: string } }>, sessions: Array<{ id: string, title: string, state: Types.SessionState, scheduledAt: unknown, attendeeCount: number, attendances: Array<{ id: string, response: string, user: { id: string, username: string, displayName: string } }> }> } | null };
+export type GroupQuery = { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string }>, memberships: Array<{ id: string, role: Types.GroupRole, user: { id: string, username: string, displayName: string } }>, sessions: Array<{ id: string, title: string, state: Types.SessionState, scheduledAt: unknown, attendeeCount: number, attendances: Array<{ id: string, response: string, user: { id: string, username: string, displayName: string } }> }>, collectionSpotlight: Array<{ id: string, name: string, thumbnail: string | null, average: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> }> } | null };
 
 export type GroupCollectionQueryVariables = Exact<{
   token: string;
@@ -1191,6 +1191,16 @@ export const GroupDocument = gql`
           username
           displayName
         }
+      }
+    }
+    collectionSpotlight(limit: 4) {
+      id
+      name
+      thumbnail
+      average
+      owners {
+        bggUsername
+        avatar
       }
     }
   }

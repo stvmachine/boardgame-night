@@ -40,5 +40,15 @@ query Group($token: String!) {
         }
       }
     }
+    collectionSpotlight(limit: 4) {
+      id
+      name
+      thumbnail
+      average
+      owners {
+        bggUsername
+        avatar
+      }
+    }
   }
 }
