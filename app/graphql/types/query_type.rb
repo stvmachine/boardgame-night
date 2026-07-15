@@ -25,6 +25,8 @@ module Types
 
     field :my_groups, [ Types::GroupType ], null: false, description: "All groups the current user belongs to."
 
+    field :dashboard_stats, Types::DashboardStatsType, null: true, description: "Dashboard counts for the signed-in user, or null when signed out."
+
     field :group, Types::GroupType, null: true, description: "Look up a group by its invite code, or by id if the current user is a member." do
       argument :token, String, required: true, description: "Invite code or group id."
     end
@@ -55,6 +57,17 @@ module Types
 
     def current_user
       context[:current_user]
+    end
+
+    def dashboard_stats
+      return nil unless context[:current_user]
+
+      user = context[:current_user]
+      {
+        collection_count: user.bgg_things.distinct.count,
+        group_count: distinct_group_count_for(user),
+        session_count: distinct_session_count_for(user)
+      }
     end
 
     def my_groups
@@ -106,6 +119,21 @@ module Types
     end
 
     private
+
+    def distinct_group_count_for(user)
+      Group
+        .where("id IN (SELECT group_id FROM group_memberships WHERE user_id = ?) OR id IN (SELECT id FROM groups WHERE owner_id = ?)", user.id, user.id)
+        .distinct
+        .count
+    end
+
+    def distinct_session_count_for(user)
+      NightSession
+        .where("host_id = ? OR id IN (SELECT night_session_id FROM attendances WHERE user_id = ? AND response = ?)", user.id, user.id, "going")
+        .where.not(state: "cancelled")
+        .distinct
+        .count
+    end
 
     def with_eager_load(scope)
       scope.includes(

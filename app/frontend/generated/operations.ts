@@ -167,6 +167,11 @@ export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type CurrentUserQuery = { currentUser: { id: string, username: string, displayName: string, email: string | null, isProvisional: boolean, bggUsername: string | null } | null };
 
+export type DashboardStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DashboardStatsQuery = { dashboardStats: { collectionCount: number, groupCount: number, sessionCount: number } | null };
+
 export type GroupQueryVariables = Exact<{
   token: string;
 }>;
@@ -1151,6 +1156,35 @@ export function useCurrentUserLazyQuery(options: VueApolloComposable.UseQueryOpt
   return VueApolloComposable.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, {}, options);
 }
 export type CurrentUserQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<CurrentUserQuery, CurrentUserQueryVariables>;
+export const DashboardStatsDocument = gql`
+    query DashboardStats {
+  dashboardStats {
+    collectionCount
+    groupCount
+    sessionCount
+  }
+}
+    `;
+
+/**
+ * __useDashboardStatsQuery__
+ *
+ * To run a query within a Vue component, call `useDashboardStatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useDashboardStatsQuery` returns an object from Apollo Client that contains result, loading and error properties
+ * you can use to render your UI.
+ *
+ * @param options that will be passed into the query, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/query.html#options;
+ *
+ * @example
+ * const { result, loading, error } = useDashboardStatsQuery();
+ */
+export function useDashboardStatsQuery(options: VueApolloComposable.UseQueryOptions<DashboardStatsQuery, DashboardStatsQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<DashboardStatsQuery, DashboardStatsQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<DashboardStatsQuery, DashboardStatsQueryVariables>> = {}) {
+  return VueApolloComposable.useQuery<DashboardStatsQuery, DashboardStatsQueryVariables>(DashboardStatsDocument, {}, options);
+}
+export function useDashboardStatsLazyQuery(options: VueApolloComposable.UseQueryOptions<DashboardStatsQuery, DashboardStatsQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<DashboardStatsQuery, DashboardStatsQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<DashboardStatsQuery, DashboardStatsQueryVariables>> = {}) {
+  return VueApolloComposable.useLazyQuery<DashboardStatsQuery, DashboardStatsQueryVariables>(DashboardStatsDocument, {}, options);
+}
+export type DashboardStatsQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<DashboardStatsQuery, DashboardStatsQueryVariables>;
 export const GroupDocument = gql`
     query Group($token: String!) {
   group(token: $token) {

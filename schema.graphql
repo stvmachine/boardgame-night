@@ -71,6 +71,23 @@ type CreateNightSessionPayload {
   session: NightSession!
 }
 
+type DashboardStats {
+  """
+  Distinct games in the signed-in user's bound BGG collection.
+  """
+  collectionCount: Int!
+
+  """
+  Distinct groups the user owns or belongs to.
+  """
+  groupCount: Int!
+
+  """
+  Distinct non-cancelled sessions the user hosts or is going to.
+  """
+  sessionCount: Int!
+}
+
 type Group {
   collection: MergedCollection!
   collectionSpotlight(limit: Int = 4): [GroupSpotlightThing!]!
@@ -385,6 +402,11 @@ type Query {
   The currently authenticated user, or null.
   """
   currentUser: User
+
+  """
+  Dashboard counts for the signed-in user, or null when signed out.
+  """
+  dashboardStats: DashboardStats
 
   """
   Look up a group by its invite code, or by id if the current user is a member.

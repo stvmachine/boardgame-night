@@ -69,6 +69,16 @@ export type CreateNightSessionPayload = {
   session: NightSession;
 };
 
+export type DashboardStats = {
+  __typename?: 'DashboardStats';
+  /** Distinct games in the signed-in user's bound BGG collection. */
+  collectionCount: Scalars['Int']['output'];
+  /** Distinct groups the user owns or belongs to. */
+  groupCount: Scalars['Int']['output'];
+  /** Distinct non-cancelled sessions the user hosts or is going to. */
+  sessionCount: Scalars['Int']['output'];
+};
+
 export type Group = {
   __typename?: 'Group';
   collection: MergedCollection;
@@ -393,6 +403,8 @@ export type Query = {
   __typename?: 'Query';
   /** The currently authenticated user, or null. */
   currentUser?: Maybe<User>;
+  /** Dashboard counts for the signed-in user, or null when signed out. */
+  dashboardStats?: Maybe<DashboardStats>;
   /** Look up a group by its invite code, or by id if the current user is a member. */
   group?: Maybe<Group>;
   /** Health check — proves the GraphQL endpoint is alive. */
