@@ -31,64 +31,179 @@ RSpec.describe "inviteToGroup mutation" do
     GroupMembership.create!(user: member, group: group, role: "member")
   end
 
-  it "creates an invite token and enqueues a mailer job" do
-    expect {
+  describe "record owner without membership" do
+    let(:owner_only) { User.create!(username: "owner_only", email: "owner_only@example.com", password: "password") }
+    let(:group_owned) { Group.create!(name: "Solo", owner: owner_only) }
+
+    # No owner membership — legacy record owner path
+
+    it "can invite as MEMBER" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group_owned.id, email: "friend@example.com", role: "member" },
+          context: { current_user: owner_only }
+        )
+        expect(result["errors"]).to be_nil
+        data = result.dig("data", "inviteToGroup", "inviteToken")
+        expect(data["role"]).to eq("MEMBER")
+      }.to change(InviteToken, :count).by(1).and have_enqueued_job(InviteMailerJob)
+    end
+
+    it "can invite as ADMIN" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group_owned.id, email: "friend@example.com", role: "admin" },
+          context: { current_user: owner_only }
+        )
+        expect(result["errors"]).to be_nil
+        data = result.dig("data", "inviteToGroup", "inviteToken")
+        expect(data["role"]).to eq("ADMIN")
+      }.to change(InviteToken, :count).by(1).and have_enqueued_job(InviteMailerJob)
+    end
+  end
+
+  describe "owner with membership" do
+    it "creates an invite token and enqueues a mailer job" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "friend@example.com", role: "admin" },
+          context: { current_user: owner }
+        )
+        expect(result["errors"]).to be_nil
+        data = result.dig("data", "inviteToGroup", "inviteToken")
+        expect(data["status"]).to eq("pending")
+        expect(data["email"]).to eq("friend@example.com")
+        expect(data["role"]).to eq("ADMIN")
+        expect(data["token"]).to be_present
+      }.to change(InviteToken, :count).by(1).and have_enqueued_job(InviteMailerJob)
+    end
+
+    it "defaults role to member" do
       result = BoardgameNightSchema.execute(
         mutation,
-        variables: { groupId: group.id, email: "friend@example.com", role: "admin" },
+        variables: { groupId: group.id, email: "friend@example.com" },
         context: { current_user: owner }
       )
-      expect(result["errors"]).to be_nil
-      data = result.dig("data", "inviteToGroup", "inviteToken")
-      expect(data["status"]).to eq("pending")
-      expect(data["email"]).to eq("friend@example.com")
-      expect(data["role"]).to eq("ADMIN")
-      expect(data["token"]).to be_present
-    }.to change(InviteToken, :count).by(1).and have_enqueued_job(InviteMailerJob)
+      expect(result.dig("data", "inviteToGroup", "inviteToken", "role")).to eq("MEMBER")
+    end
+
+    it "can invite as ADMIN" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "admin_invite@example.com", role: "admin" },
+          context: { current_user: owner }
+        )
+        expect(result["errors"]).to be_nil
+        expect(result.dig("data", "inviteToGroup", "inviteToken", "role")).to eq("ADMIN")
+      }.to change(InviteToken, :count).by(1).and have_enqueued_job(InviteMailerJob)
+    end
+
+    it "can invite as MEMBER" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "member_invite@example.com", role: "member" },
+          context: { current_user: owner }
+        )
+        expect(result["errors"]).to be_nil
+        expect(result.dig("data", "inviteToGroup", "inviteToken", "role")).to eq("MEMBER")
+      }.to change(InviteToken, :count).by(1).and have_enqueued_job(InviteMailerJob)
+    end
   end
 
-  it "allows admins to invite" do
-    result = BoardgameNightSchema.execute(
-      mutation,
-      variables: { groupId: group.id, email: "friend@example.com" },
-      context: { current_user: admin }
-    )
-    expect(result["errors"]).to be_nil
+  describe "admin" do
+    it "can invite as MEMBER" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "friend@example.com", role: "member" },
+          context: { current_user: admin }
+        )
+        expect(result["errors"]).to be_nil
+        expect(result.dig("data", "inviteToGroup", "inviteToken", "role")).to eq("MEMBER")
+      }.to change(InviteToken, :count).by(1).and have_enqueued_job(InviteMailerJob)
+    end
+
+    it "allows admins to invite with default role (member)" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "friend@example.com" },
+          context: { current_user: admin }
+        )
+        expect(result["errors"]).to be_nil
+      }.to change(InviteToken, :count).by(1).and have_enqueued_job(InviteMailerJob)
+    end
+
+    it "rejects admin escalation - cannot invite with ADMIN role" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "friend@example.com", role: "admin" },
+          context: { current_user: admin }
+        )
+        expect(result["errors"]).to be_present
+        expect(result["errors"].first["message"]).to match(/admin/i)
+      }.to change(InviteToken, :count).by(0)
+       .and have_enqueued_job(InviteMailerJob).exactly(0).times
+    end
   end
 
-  it "requires authentication" do
-    result = BoardgameNightSchema.execute(
-      mutation,
-      variables: { groupId: group.id, email: "friend@example.com" },
-      context: {}
-    )
-    expect(result["errors"]).to be_present
+  describe "ordinary member" do
+    it "is rejected from inviting" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "friend@example.com" },
+          context: { current_user: member }
+        )
+        expect(result["errors"]).to be_present
+      }.to change(InviteToken, :count).by(0)
+       .and have_enqueued_job(InviteMailerJob).exactly(0).times
+    end
   end
 
-  it "rejects members from inviting" do
-    result = BoardgameNightSchema.execute(
-      mutation,
-      variables: { groupId: group.id, email: "friend@example.com" },
-      context: { current_user: member }
-    )
-    expect(result["errors"]).to be_present
+  describe "unauthenticated" do
+    it "requires authentication" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "friend@example.com" },
+          context: {}
+        )
+        expect(result["errors"]).to be_present
+      }.to change(InviteToken, :count).by(0)
+       .and have_enqueued_job(InviteMailerJob).exactly(0).times
+    end
   end
 
-  it "validates email format" do
-    result = BoardgameNightSchema.execute(
-      mutation,
-      variables: { groupId: group.id, email: "not-an-email" },
-      context: { current_user: owner }
-    )
-    expect(result["errors"]).to be_present
-  end
+  describe "invalid input" do
+    it "validates email format - creates no token or job" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "not-an-email" },
+          context: { current_user: owner }
+        )
+        expect(result["errors"]).to be_present
+      }.to change(InviteToken, :count).by(0)
+       .and have_enqueued_job(InviteMailerJob).exactly(0).times
+    end
 
-  it "defaults role to member" do
-    result = BoardgameNightSchema.execute(
-      mutation,
-      variables: { groupId: group.id, email: "friend@example.com" },
-      context: { current_user: owner }
-    )
-    expect(result.dig("data", "inviteToGroup", "inviteToken", "role")).to eq("MEMBER")
+    it "rejects invalid role - creates no token or job" do
+      expect {
+        result = BoardgameNightSchema.execute(
+          mutation,
+          variables: { groupId: group.id, email: "friend@example.com", role: "superadmin" },
+          context: { current_user: owner }
+        )
+        expect(result["errors"]).to be_present
+      }.to change(InviteToken, :count).by(0)
+       .and have_enqueued_job(InviteMailerJob).exactly(0).times
+    end
   end
 end

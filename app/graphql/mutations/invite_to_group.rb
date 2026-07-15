@@ -17,15 +17,21 @@ module Mutations
       group = Group.find_by(id: contract[:group_id])
       raise GraphQL::ExecutionError, "Group not found" unless group
 
-      membership = group.group_memberships.find_by(user_id: context[:current_user].id)
-      unless membership&.role.in?(%w[owner admin])
+      current_user = context[:current_user]
+      effective_role = group.owner_id == current_user.id ? "owner" : group.group_memberships.find_by(user_id: current_user.id)&.role
+
+      unless effective_role.in?(%w[owner admin])
         raise GraphQL::ExecutionError, "Only group owners or admins can invite members"
+      end
+
+      if effective_role == "admin" && contract[:role] == "admin"
+        raise GraphQL::ExecutionError, "Admins cannot invite with the admin role"
       end
 
       raw_token, digest = InviteToken.generate_raw_token
       invite_token = InviteToken.create!(
         group: group,
-        inviter: context[:current_user],
+        inviter: current_user,
         email: contract[:email],
         role: contract[:role] || "member",
         token_digest: digest,
