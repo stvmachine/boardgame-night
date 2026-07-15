@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises, VueWrapper, DOMWrapper } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { provideApolloClient } from '@vue/apollo-composable'
@@ -6,9 +6,10 @@ import { ApolloClient, InMemoryCache } from '@apollo/client/core'
 import { createRouter, createWebHistory } from 'vue-router'
 import GroupHeader from '@/components/group/GroupHeader.vue'
 import GroupSessionsList from '@/components/group/GroupSessionsList.vue'
+import GroupCollectionSpotlight from '@/components/group/GroupCollectionSpotlight.vue'
 import GroupDetail from '@/components/group/GroupDetail.vue'
 import GroupView from '@/views/GroupView.vue'
-import type { Group, GroupMembership, NightSession } from '@/generated/types'
+import type { Group, GroupMembership, GroupSpotlightThing, NightSession } from '@/generated/types'
 
 function createMockClient() {
   return new ApolloClient({
@@ -57,7 +58,41 @@ const baseSessions: NightSession[] = [
   }
 ] as NightSession[]
 
-function buildGroup(role: 'OWNER' | 'ADMIN' | 'MEMBER', sessions: NightSession[] = baseSessions): Group {
+const baseSpotlight: GroupSpotlightThing[] = [
+  {
+    id: '100',
+    name: 'Shared Game',
+    thumbnail: 'https://example.com/shared.jpg',
+    average: 8.5,
+    owners: [
+      { bggUsername: 'alice_bgg', avatar: null },
+      { bggUsername: 'bob_bgg', avatar: null },
+      { bggUsername: 'charlie_bgg', avatar: null },
+      { bggUsername: 'dave_bgg', avatar: null },
+      { bggUsername: 'eve_bgg', avatar: null }
+    ]
+  },
+  {
+    id: '101',
+    name: 'Solo Game',
+    thumbnail: null,
+    average: 7.0,
+    owners: [
+      { bggUsername: 'alice_bgg', avatar: null }
+    ]
+  },
+  {
+    id: '102',
+    name: 'Rated Game',
+    thumbnail: 'https://example.com/rated.jpg',
+    average: 9.0,
+    owners: [
+      { bggUsername: 'bob_bgg', avatar: null }
+    ]
+  }
+]
+
+function buildGroup(role: 'OWNER' | 'ADMIN' | 'MEMBER', sessions: NightSession[] = baseSessions, spotlight: GroupSpotlightThing[] = baseSpotlight): Group {
   const memberships: GroupMembership[] = [
     {
       id: 'm1',
@@ -81,6 +116,7 @@ function buildGroup(role: 'OWNER' | 'ADMIN' | 'MEMBER', sessions: NightSession[]
     members: memberships.map(m => m.user),
     memberships,
     sessions,
+    collectionSpotlight: spotlight,
     collection: { items: [], syncStatuses: [] }
   } as Group
 }
@@ -203,6 +239,119 @@ describe('GroupSessionsList', () => {
   })
 })
 
+describe('GroupCollectionSpotlight', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    provideApolloClient(createMockClient())
+    vi.stubGlobal('open', vi.fn())
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('renders section title and Browse Library link', () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: baseSpotlight, group: buildGroup('OWNER') }
+    })
+
+    expect(wrapper.text()).toContain('Shared collection spotlight')
+    expect(wrapper.text()).toContain('Browse Library')
+  })
+
+  it('renders cards in server order with grid layout', () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: baseSpotlight, group: buildGroup('OWNER') }
+    })
+
+    const cards = wrapper.findAll('[data-testid="spotlight-card"]')
+    expect(cards.length).toBe(3)
+    expect(cards[0].text()).toContain('Shared Game')
+    expect(cards[1].text()).toContain('Solo Game')
+    expect(cards[2].text()).toContain('Rated Game')
+  })
+
+  it('shows thumbnail image when present and fallback when absent', () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: baseSpotlight, group: buildGroup('OWNER') }
+    })
+
+    const cards = wrapper.findAll('[data-testid="spotlight-card"]')
+    expect(cards[0].find('img')?.exists()).toBe(true)
+    expect(cards[1].text()).toContain('No image')
+  })
+
+  it('shows one-decimal rating badge when present', () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: baseSpotlight, group: buildGroup('OWNER') }
+    })
+
+    expect(wrapper.text()).toContain('8.5')
+    expect(wrapper.text()).toContain('9.0')
+  })
+
+  it('caps owner avatars at three and shows exact +N overflow', () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: baseSpotlight, group: buildGroup('OWNER') }
+    })
+
+    const firstCard = wrapper.findAll('[data-testid="spotlight-card"]')[0]
+    const avatars = firstCard.findAll('[data-slot="avatar"]')
+    expect(avatars.length).toBe(3)
+    expect(firstCard.text()).toContain('+2')
+  })
+
+  it('renders a single owner without overflow', () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: [baseSpotlight[1]], group: buildGroup('OWNER') }
+    })
+
+    const card = wrapper.find('[data-testid="spotlight-card"]')
+    const avatars = card.findAll('[data-slot="avatar"]')
+    expect(avatars.length).toBe(1)
+    expect(card.text()).not.toContain('+')
+  })
+
+  it('opens the BGG thing URL in a new tab with opener isolation', async () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: baseSpotlight, group: buildGroup('OWNER') }
+    })
+
+    const card = wrapper.find('[data-testid="spotlight-card"]')
+    await card.trigger('click')
+
+    expect(window.open).toHaveBeenCalledWith(
+      'https://boardgamegeek.com/boardgame/100',
+      '_blank',
+      'noopener,noreferrer'
+    )
+  })
+
+  it('is keyboard activatable', async () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: baseSpotlight, group: buildGroup('OWNER') }
+    })
+
+    const card = wrapper.find('[data-testid="spotlight-card"]')
+    await card.trigger('keydown', { key: 'Enter' })
+
+    expect(window.open).toHaveBeenCalledWith(
+      'https://boardgamegeek.com/boardgame/100',
+      '_blank',
+      'noopener,noreferrer'
+    )
+  })
+
+  it('shows the approved empty state when the shelf is empty', () => {
+    const wrapper = mount(GroupCollectionSpotlight, {
+      props: { games: [], group: buildGroup('OWNER') }
+    })
+
+    expect(wrapper.text()).toContain('The shared library is empty')
+    expect(wrapper.text()).toContain('Members’ collections will appear once they bind their BGG usernames.')
+  })
+})
+
 describe('GroupDetail', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -221,6 +370,23 @@ describe('GroupDetail', () => {
   it('shows Create a night for owner', () => {
     const wrapper = mount(GroupDetail, { props: { group: buildGroup('OWNER') } })
     expect(findButtonByText(wrapper, 'Create a night')).toBeDefined()
+  })
+
+  it('composes spotlight beneath sessions', () => {
+    const wrapper = mount(GroupDetail, { props: { group: buildGroup('OWNER') } })
+
+    expect(wrapper.text()).toContain('Shared collection spotlight')
+    expect(wrapper.text()).toContain('Shared Game')
+  })
+
+  it('places spotlight after sessions in source order', () => {
+    const wrapper = mount(GroupDetail, { props: { group: buildGroup('OWNER') } })
+
+    const html = wrapper.html()
+    const sessionsIndex = html.indexOf('Upcoming sessions')
+    const spotlightIndex = html.indexOf('Shared collection spotlight')
+    expect(sessionsIndex).toBeGreaterThan(-1)
+    expect(spotlightIndex).toBeGreaterThan(sessionsIndex)
   })
 })
 
