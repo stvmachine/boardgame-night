@@ -233,12 +233,15 @@ Plans:
   4. User sees a members panel with avatars, names, roles, and a per-member action menu.
   5. User can copy the group's invite link to the clipboard from the Group Detail page.
 
-**Plans:** 3 plans
+**Plans:** 6 plans
 Plans:
 
-- [ ] 08-01-PLAN.md — Responsive group header and role-aware upcoming sessions vertical slice
-- [ ] 08-02-PLAN.md — Deterministic collection spotlight and group-scoped Browse Library contract
-- [ ] 08-03-PLAN.md — Authorized members/invite side rail and integrated responsive hardening
+- [ ] 08-01-PLAN.md — Role-aware Group sessions API, bounded/full query split, and schema/codegen publication
+- [ ] 08-02-PLAN.md — Responsive group header and upcoming-sessions user experience
+- [ ] 08-03-PLAN.md — Authorized deterministic collection spotlight API and compact cards
+- [ ] 08-04-PLAN.md — Group-scoped `/collection?group=<inviteCode>` routing and query mode
+- [ ] 08-05-PLAN.md — Authorized member actions with inline removal confirmation
+- [ ] 08-06-PLAN.md — Combined invite card and integrated responsive/security hardening
 
 **UI hint**: yes
 
@@ -306,7 +309,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. Design System Foundation | 4/4 | Complete   | 2026-07-13 |
 | 6. BGG Poll Data Layer | 3/3 | Complete    | 2026-07-13 |
 | 7. Suggestion Engine Backend | 4/4 | Complete    | 2026-07-14 |
-| 8. Group Detail Surface | 0/3 | Planned | - |
+| 8. Group Detail Surface | 0/6 | Planned | - |
 | 9. Home & Collection Redesign | 0/TBD | Not started | - |
 | 10. Picking a Game Redesign | 0/TBD | Not started | - |
 | 11. Polish & E2E Hardening | 0/TBD | Not started | - |
