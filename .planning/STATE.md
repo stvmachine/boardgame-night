@@ -6,13 +6,13 @@ current_phase: 08
 current_phase_name: Group Detail Surface
 status: executing
 stopped_at: Phase 08 UI-SPEC approved
-last_updated: "2026-07-15T02:50:06.923Z"
+last_updated: "2026-07-15T03:35:10.443Z"
 last_activity: 2026-07-15
 progress:
   total_phases: 11
   completed_phases: 7
   total_plans: 38
-  completed_plans: 33
+  completed_plans: 34
   percent: 64
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 ## Current Position
 
 Phase: 08 (Group Detail Surface) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-07-15
 
@@ -75,6 +75,7 @@ Progress: [██████░░░░] 64%
 | Phase 07-suggestion-engine-backend P03 | 15min | 3 tasks | 8 files |
 | Phase 07 P04 | 15min | 2 tasks | 7 files |
 | Phase 08-group-detail-surface P01 | 35min | 3 tasks | 11 files |
+| Phase 08 P02 | 17min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -120,6 +121,10 @@ Recent decisions affecting current work:
 - [Phase ?]: Use Float::INFINITY as the sort sentinel for undated drafts so they correctly sort after dated drafts; use raw epoch integers for all other date keys.
 - [Phase ?]: Keep the loaded-association fallback in NightSessionType so standalone session queries continue to work without eager loads.
 - [Phase ?]: Migrate GamePicker to useGroupCollectionQuery to preserve the full collection consumer without changing filtering or pick behavior.
+- [Phase 08]: Use a single GroupDetail container so GroupView only owns route-level loading/error/not-found states. — Keeps route view thin and state isolated.
+- [Phase 08]: Keep session rows compact with title/time/badge/CTA rather than full cards to match UI-SPEC density. — Matches the approved UI-SPEC list density.
+- [Phase 08]: Create a night persists via existing mutation, updates Apollo Group cache, and navigates to /s/:id. — Reuses existing backend mutation and avoids refetching the group query.
+- [Phase 08]: E2E seed pins E2ENIGHTOWLS group and deterministic sessions for stable browser assertions. — Deterministic fixtures make browser tests repeatable across runs.
 
 ### Pending Todos
 
@@ -150,6 +155,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-15T02:45:38.417Z
+Last session: 2026-07-15T03:19:54.465Z
 Stopped at: Phase 08 UI-SPEC approved
 Resume file: .planning/phases/08-group-detail-surface/08-UI-SPEC.md
