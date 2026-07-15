@@ -52,7 +52,7 @@ describe('usePermalink', () => {
   })
 
   it('hydrates filter state from query params', () => {
-    setUrl('?q=wingspan&players=4&time=2&complexity=3&ratingMin=7&sort=rating_desc&group=player_count')
+    setUrl('?q=wingspan&players=4&time=2&complexity=3&ratingMin=7&sort=rating_desc&groupBy=players')
 
     mount(TestComponent)
 
@@ -63,7 +63,42 @@ describe('usePermalink', () => {
     expect(filterStore.complexityBucket).toBe(3)
     expect(filterStore.ratingMin).toBe(7)
     expect(filterStore.sort).toBe('rating_desc')
-    expect(filterStore.groupBy).toBe('player_count')
+    expect(filterStore.groupBy).toBe('players')
+  })
+
+  it.each(['players', 'rating', 'bestPlayers', 'owner'] as const)(
+    'hydrates legacy grouping value %s from group param and maps to groupBy',
+    (value) => {
+      setUrl(`?group=${value}`)
+
+      mount(TestComponent)
+
+      const filterStore = useFilterStore()
+      expect(filterStore.groupBy).toBe(value)
+    }
+  )
+
+  it('treats non-legacy group value as a reserved group token, not grouping', () => {
+    setUrl('?group=NIGHTOWLS')
+
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    expect(filterStore.groupBy).toBe('none')
+  })
+
+  it('serializes grouping to groupBy, not group', async () => {
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    filterStore.groupBy = 'players'
+
+    await nextTick()
+
+    const calls = vi.mocked(window.history.replaceState).mock.calls
+    const lastUrl = String(calls[calls.length - 1]?.[2])
+    expect(lastUrl).toContain('groupBy=players')
+    expect(lastUrl).not.toContain('group=')
   })
 
   it('serializes selected owners to URL when subset is selected', async () => {
@@ -114,10 +149,11 @@ describe('usePermalink', () => {
     expect(lastUrl).toContain('q=azul')
     expect(lastUrl).toContain('players=3')
     expect(lastUrl).toContain('sort=rating_desc')
-    expect(lastUrl).toContain('group=complexity')
+    expect(lastUrl).toContain('groupBy=complexity')
+    expect(lastUrl).not.toContain('group=')
   })
 
-  it('omits default sort and group values from URL', async () => {
+  it('omits default sort and groupBy values from URL', async () => {
     mount(TestComponent)
 
     const filterStore = useFilterStore()
@@ -129,6 +165,84 @@ describe('usePermalink', () => {
     const calls = vi.mocked(window.history.replaceState).mock.calls
     const lastUrl = String(calls[calls.length - 1]?.[2])
     expect(lastUrl).not.toContain('sort=')
+    expect(lastUrl).not.toContain('groupBy=')
     expect(lastUrl).not.toContain('group=')
+  })
+
+  it('preserves a real group token while writing every filter family', async () => {
+    const collectorsStore = useCollectorsStore()
+    collectorsStore.set(['alice', 'bob', 'carol'])
+
+    setUrl('?group=NIGHTOWLS')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    const writes = [
+      () => { filterStore.query = 'catan' },
+      () => { filterStore.playerCount = 4 },
+      () => { filterStore.timeBucket = 2 },
+      () => { filterStore.complexityBucket = 3 },
+      () => { filterStore.ratingMin = 7 },
+      () => { filterStore.sort = 'rating_desc' },
+      () => { filterStore.groupBy = 'players' },
+      () => { filterStore.selectedOwners = new Set(['alice']) },
+      () => { filterStore.clearFilters() }
+    ]
+
+    for (const write of writes) {
+      write()
+      await nextTick()
+      const calls = vi.mocked(window.history.replaceState).mock.calls
+      const lastUrl = String(calls[calls.length - 1]?.[2])
+      expect(lastUrl).toContain('group=NIGHTOWLS')
+    }
+  })
+
+  it('migrates legacy group param to groupBy on the next write', async () => {
+    setUrl('?group=players')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    filterStore.query = 'azul'
+    await nextTick()
+
+    const calls = vi.mocked(window.history.replaceState).mock.calls
+    const lastUrl = String(calls[calls.length - 1]?.[2])
+    expect(lastUrl).toContain('groupBy=players')
+    expect(lastUrl).not.toContain('group=players')
+    expect(lastUrl).not.toContain('group=owner')
+    expect(lastUrl).toContain('q=azul')
+  })
+
+  it('does not remove a real group token when defaulting filters', async () => {
+    setUrl('?group=NIGHTOWLS&players=4')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    filterStore.playerCount = null
+    await nextTick()
+
+    const calls = vi.mocked(window.history.replaceState).mock.calls
+    const lastUrl = String(calls[calls.length - 1]?.[2])
+    expect(lastUrl).toContain('group=NIGHTOWLS')
+    expect(lastUrl).not.toContain('players=')
+  })
+
+  it('keeps collector-owner synchronization from discarding the group token', async () => {
+    const collectorsStore = useCollectorsStore()
+    collectorsStore.set(['alice', 'bob'])
+
+    setUrl('?group=NIGHTOWLS')
+    mount(TestComponent)
+
+    collectorsStore.set(['alice', 'bob', 'dave'])
+    await nextTick()
+
+    const filterStore = useFilterStore()
+    expect(filterStore.selectedOwners).toEqual(new Set(['alice', 'bob']))
+
+    const calls = vi.mocked(window.history.replaceState).mock.calls
+    const lastUrl = String(calls[calls.length - 1]?.[2])
+    expect(lastUrl).toContain('group=NIGHTOWLS')
   })
 })
