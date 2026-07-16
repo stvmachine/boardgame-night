@@ -6,6 +6,19 @@ import type { GroupOption } from '@/utils/grouping'
 
 const LEGACY_GROUP_OPTIONS: GroupOption[] = ['players', 'rating', 'bestPlayers', 'owner']
 
+const LEGACY_SORT_MAP: Record<string, SortOption> = {
+  name_asc: 'name_asc',
+  name_desc: 'name_asc',
+  rating_asc: 'rating_desc',
+  rating_desc: 'rating_desc',
+  year_asc: 'name_asc',
+  year_desc: 'name_asc',
+  weight_asc: 'weight_asc',
+  weight_desc: 'weight_asc',
+  complexity_asc: 'weight_asc',
+  complexity_desc: 'weight_asc'
+}
+
 function getParams() {
   if (typeof window === 'undefined') return new URLSearchParams()
   return new URLSearchParams(window.location.search)
@@ -51,7 +64,9 @@ export function usePermalink() {
   if (ratingMin) filterStore.ratingMin = Number(ratingMin)
 
   const sort = params.get('sort')
-  if (sort) filterStore.sort = sort as SortOption
+  if (sort) {
+    filterStore.sort = LEGACY_SORT_MAP[sort] ?? 'name_asc'
+  }
 
   const groupBy = params.get('groupBy')
   const group = params.get('group')

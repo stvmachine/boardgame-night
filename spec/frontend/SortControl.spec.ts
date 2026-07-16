@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import SortControl from '@/components/collection/SortControl.vue'
 
@@ -9,13 +9,22 @@ function getSelectItemLabels(): string[] {
 }
 
 describe('SortControl', () => {
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
+
   it('renders exactly the four approved sort options', async () => {
     const wrapper = mount(SortControl, {
       props: { modelValue: 'name_asc' },
       attachTo: document.body
     })
 
-    await wrapper.find('[data-slot="select-trigger"]').trigger('click')
+    const trigger = wrapper.find('[data-slot="select-trigger"]')
+    await trigger.trigger('keydown', { key: 'Enter' })
     await flushPromises()
 
     expect(getSelectItemLabels()).toEqual([
@@ -45,14 +54,15 @@ describe('SortControl', () => {
       attachTo: document.body
     })
 
-    await wrapper.find('[data-slot="select-trigger"]').trigger('click')
+    const trigger = wrapper.find('[data-slot="select-trigger"]')
+    await trigger.trigger('keydown', { key: 'Enter' })
     await flushPromises()
 
     const item = Array.from(document.querySelectorAll('[data-slot="select-item"]')).find(
       el => el.textContent?.trim() === 'Rating High–Low'
     )
     expect(item).toBeTruthy()
-    await item!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    await item!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
     await flushPromises()
 
     expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['rating_desc'])
