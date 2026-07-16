@@ -12,18 +12,18 @@ interface Stats {
   sessionCount: number
 }
 
-function createMockLink(stats: Stats | null = null) {
+function createMockLink(stats: Stats | null = null, hotItems: unknown[] = []) {
   return new ApolloLink((operation) => {
     const data = operation.operationName === 'DashboardStats'
       ? { dashboardStats: stats }
-      : { hotItems: [] }
+      : { hotItems }
     return Observable.of({ data })
   })
 }
 
-function createMockClient(stats?: Stats) {
+function createMockClient(stats?: Stats | null, hotItems?: unknown[]) {
   return new ApolloClient({
-    link: createMockLink(stats ?? null),
+    link: createMockLink(stats ?? null, hotItems ?? []),
     cache: new InMemoryCache()
   })
 }
@@ -38,9 +38,9 @@ const mockRouter = createRouter({
   ]
 })
 
-async function mountHomeView(stats?: Stats) {
+async function mountHomeView(stats?: Stats | null, hotItems: unknown[] = []) {
   setActivePinia(createPinia())
-  provideApolloClient(createMockClient(stats))
+  provideApolloClient(createMockClient(stats, hotItems))
   const wrapper = mount(HomeView, {
     global: {
       plugins: [mockRouter]
@@ -75,5 +75,30 @@ describe('Home dashboard', () => {
     expect(wrapper.text()).toContain('42')
     expect(wrapper.text()).toContain('3')
     expect(wrapper.text()).toContain('7')
+  })
+
+  it('renders six enriched Trending on BGG cards with View all', async () => {
+    const hotItems = Array.from({ length: 6 }, (_, i) => ({
+      id: String(i + 1),
+      rank: i + 1,
+      name: `Trending Game ${i + 1}`,
+      yearPublished: 2020 + i,
+      thumbnail: null,
+      average: 8.0 - i * 0.1,
+      averageWeight: 2.5 + i * 0.1,
+      minPlayers: 1,
+      maxPlayers: 4,
+      minPlaytime: 30,
+      maxPlaytime: 120
+    }))
+
+    const wrapper = await mountHomeView(null, hotItems)
+
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Trending on BGG')
+    const cards = wrapper.findAll('[data-testid="trending-card"]')
+    expect(cards.length).toBe(6)
+    expect(wrapper.find('a[href="/hot"]').exists()).toBe(true)
   })
 })
