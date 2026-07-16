@@ -12,6 +12,7 @@ import { sortGames } from '@/utils/sorting'
 import CollectionView from '@/views/CollectionView.vue'
 import CollectionFilterPanel from '@/components/collection/CollectionFilterPanel.vue'
 import ActiveFilterChips from '@/components/collection/ActiveFilterChips.vue'
+import { existsSync } from 'node:fs'
 
 beforeAll(() => {
   class ResizeObserverMock {
@@ -479,5 +480,10 @@ describe('CollectionView', () => {
     const clearButton = wrapper.findAll('button').find(b => b.text().includes('Clear filters'))
     expect(clearButton).toBeDefined()
     expect(clearButton!.text()).toContain('Clear filters')
+  })
+
+  it('has deleted the legacy CollectionFilters component and spec', () => {
+    expect(existsSync('app/frontend/components/collection/CollectionFilters.vue')).toBe(false)
+    expect(existsSync('spec/frontend/CollectionFilters.spec.ts')).toBe(false)
   })
 })
