@@ -29,6 +29,7 @@ query GroupCollection($token: String!) {
     collection {
       items {
         id
+        objectid
         name
         thumbnail
         yearPublished
@@ -38,6 +39,8 @@ query GroupCollection($token: String!) {
         maxPlaytime
         average
         averageWeight
+        description
+        lastPlayedAt
         owners {
           bggUsername
           avatar

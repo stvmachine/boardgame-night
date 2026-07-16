@@ -184,7 +184,7 @@ export type GroupCollectionQueryVariables = Exact<{
 }>;
 
 
-export type GroupCollectionQuery = { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string, bggUsername: string | null }>, memberships: Array<{ id: string, role: Types.GroupRole, user: { id: string, username: string, displayName: string, bggUsername: string | null } }>, collection: { items: Array<{ id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, gameCount: number | null }> } } | null };
+export type GroupCollectionQuery = { group: { id: string, name: string, description: string | null, inviteCode: string | null, myRole: Types.GroupRole | null, owner: { id: string, username: string, displayName: string }, members: Array<{ id: string, username: string, displayName: string, bggUsername: string | null }>, memberships: Array<{ id: string, role: Types.GroupRole, user: { id: string, username: string, displayName: string, bggUsername: string | null } }>, collection: { items: Array<{ id: string, objectid: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, description: string | null, lastPlayedAt: unknown, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, gameCount: number | null }> } } | null };
 
 export type HealthQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -201,7 +201,7 @@ export type MergedCollectionQueryVariables = Exact<{
 }>;
 
 
-export type MergedCollectionQuery = { mergedCollection: { items: Array<{ id: string, name: string, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, minAge: number | null, image: string | null, thumbnail: string | null, description: string | null, average: number | null, bayesAverage: number | null, usersRated: number | null, averageWeight: number | null, isExpansion: boolean, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null }> } };
+export type MergedCollectionQuery = { mergedCollection: { items: Array<{ id: string, objectid: string, name: string, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, minAge: number | null, image: string | null, thumbnail: string | null, description: string | null, average: number | null, bayesAverage: number | null, usersRated: number | null, averageWeight: number | null, isExpansion: boolean, lastPlayedAt: unknown, owners: Array<{ bggUsername: string, avatar: string | null }> }>, syncStatuses: Array<{ username: string, status: Types.SyncStatus, lastSyncedAt: unknown, error: string | null, gameCount: number | null }> } };
 
 export type MyGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1297,6 +1297,7 @@ export const GroupCollectionDocument = gql`
     collection {
       items {
         id
+        objectid
         name
         thumbnail
         yearPublished
@@ -1306,6 +1307,8 @@ export const GroupCollectionDocument = gql`
         maxPlaytime
         average
         averageWeight
+        description
+        lastPlayedAt
         owners {
           bggUsername
           avatar
@@ -1411,6 +1414,7 @@ export const MergedCollectionDocument = gql`
   mergedCollection(usernames: $usernames) {
     items {
       id
+      objectid
       name
       yearPublished
       minPlayers
@@ -1426,6 +1430,7 @@ export const MergedCollectionDocument = gql`
       usersRated
       averageWeight
       isExpansion
+      lastPlayedAt
       owners {
         bggUsername
         avatar

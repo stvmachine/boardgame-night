@@ -1243,6 +1243,18 @@
               "deprecationReason": null
             },
             {
+              "name": "lastPlayedAt",
+              "description": "Latest non-cancelled night session for this game within the authorized scope.",
+              "args": [],
+              "type": {
+                "kind": "SCALAR",
+                "name": "ISO8601DateTime",
+                "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "maxPlayers",
               "description": null,
               "args": [],
@@ -1312,6 +1324,22 @@
                 "ofType": {
                   "kind": "SCALAR",
                   "name": "String",
+                  "ofType": null
+                }
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "objectid",
+              "description": "Persisted BoardGameGeek numeric identifier.",
+              "args": [],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "ID",
                   "ofType": null
                 }
               },

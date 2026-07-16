@@ -228,12 +228,22 @@ type MergedThing {
   id: ID!
   image: String
   isExpansion: Boolean!
+
+  """
+  Latest non-cancelled night session for this game within the authorized scope.
+  """
+  lastPlayedAt: ISO8601DateTime
   maxPlayers: Int
   maxPlaytime: Int
   minAge: Int
   minPlayers: Int
   minPlaytime: Int
   name: String!
+
+  """
+  Persisted BoardGameGeek numeric identifier.
+  """
+  objectid: ID!
   owners: [Owner!]!
   polls: [Poll!]!
   thumbnail: String

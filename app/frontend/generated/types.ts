@@ -181,12 +181,16 @@ export type MergedThing = {
   id: Scalars['ID']['output'];
   image?: Maybe<Scalars['String']['output']>;
   isExpansion: Scalars['Boolean']['output'];
+  /** Latest non-cancelled night session for this game within the authorized scope. */
+  lastPlayedAt?: Maybe<Scalars['ISO8601DateTime']['output']>;
   maxPlayers?: Maybe<Scalars['Int']['output']>;
   maxPlaytime?: Maybe<Scalars['Int']['output']>;
   minAge?: Maybe<Scalars['Int']['output']>;
   minPlayers?: Maybe<Scalars['Int']['output']>;
   minPlaytime?: Maybe<Scalars['Int']['output']>;
   name: Scalars['String']['output'];
+  /** Persisted BoardGameGeek numeric identifier. */
+  objectid: Scalars['ID']['output'];
   owners: Array<Owner>;
   polls: Array<Poll>;
   thumbnail?: Maybe<Scalars['String']['output']>;
