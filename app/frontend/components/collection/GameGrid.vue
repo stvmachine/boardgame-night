@@ -44,7 +44,10 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
 <template>
   <div class="space-y-6">
     <template v-if="loading">
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+      <div v-if="view === 'list'" class="space-y-3">
+        <ResultsSkeleton v-for="i in 12" :key="i" :variant="view" />
+      </div>
+      <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
         <ResultsSkeleton v-for="i in 12" :key="i" :variant="view" />
       </div>
     </template>
@@ -53,20 +56,57 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
       <div class="flex gap-2">
         <button
           type="button"
-          class="px-3 py-1.5 text-sm font-medium text-indigo-700 bg-indigo-50 rounded hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          class="px-3 py-1.5 text-sm font-medium text-primary bg-primary-container rounded hover:bg-primary-container/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           @click="expandAll(groupNames)"
         >
           Expand All
         </button>
         <button
           type="button"
-          class="px-3 py-1.5 text-sm font-medium text-neutral-700 bg-neutral-100 rounded hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+          class="px-3 py-1.5 text-sm font-medium text-on-surface-variant bg-surface-container-high rounded hover:bg-surface-container-high/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           @click="collapseAll(groupNames)"
         >
           Collapse All
         </button>
       </div>
 
+      <div v-if="view === 'list'" class="space-y-3">
+        <CollapsibleGroup
+          v-for="group in groups"
+          :key="group.name"
+          :group-name="group.name"
+          :count="group.games.length"
+          :initially-open="!isCollapsed(group.name)"
+          @toggle="toggle(group.name)"
+        >
+          <div class="space-y-3">
+            <GameCard
+              v-for="game in group.games"
+              :key="game.id"
+              :id="game.id"
+              :objectid="game.objectid"
+              :name="game.name"
+              :thumbnail="game.thumbnail"
+              :year-published="game.yearPublished"
+              :min-players="game.minPlayers"
+              :max-players="game.maxPlayers"
+              :min-playtime="game.minPlaytime"
+              :max-playtime="game.maxPlaytime"
+              :average="game.average"
+              :average-weight="game.averageWeight"
+              :description="game.description"
+              :owners="game.owners"
+              :variant="view"
+            >
+              <template #action>
+                <slot name="game-action" :game="game" />
+              </template>
+            </GameCard>
+          </div>
+        </CollapsibleGroup>
+      </div>
+
+      <div v-else class="space-y-6">
         <CollapsibleGroup
           v-for="group in groups"
           :key="group.name"
@@ -80,6 +120,7 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
               v-for="game in group.games"
               :key="game.id"
               :id="game.id"
+              :objectid="game.objectid"
               :name="game.name"
               :thumbnail="game.thumbnail"
               :year-published="game.yearPublished"
@@ -89,7 +130,9 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
               :max-playtime="game.maxPlaytime"
               :average="game.average"
               :average-weight="game.averageWeight"
+              :description="game.description"
               :owners="game.owners"
+              :variant="view"
             >
               <template #action>
                 <slot name="game-action" :game="game" />
@@ -97,14 +140,16 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
             </GameCard>
           </div>
         </CollapsibleGroup>
+      </div>
     </template>
 
     <template v-else>
-      <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+      <div v-if="view === 'list'" class="space-y-3">
         <GameCard
           v-for="game in ungroupedGames"
           :key="game.id"
           :id="game.id"
+          :objectid="game.objectid"
           :name="game.name"
           :thumbnail="game.thumbnail"
           :year-published="game.yearPublished"
@@ -114,7 +159,34 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
           :max-playtime="game.maxPlaytime"
           :average="game.average"
           :average-weight="game.averageWeight"
+          :description="game.description"
           :owners="game.owners"
+          :variant="view"
+        >
+          <template #action>
+            <slot name="game-action" :game="game" />
+          </template>
+        </GameCard>
+      </div>
+
+      <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+        <GameCard
+          v-for="game in ungroupedGames"
+          :key="game.id"
+          :id="game.id"
+          :objectid="game.objectid"
+          :name="game.name"
+          :thumbnail="game.thumbnail"
+          :year-published="game.yearPublished"
+          :min-players="game.minPlayers"
+          :max-players="game.maxPlayers"
+          :min-playtime="game.minPlaytime"
+          :max-playtime="game.maxPlaytime"
+          :average="game.average"
+          :average-weight="game.averageWeight"
+          :description="game.description"
+          :owners="game.owners"
+          :variant="view"
         >
           <template #action>
             <slot name="game-action" :game="game" />

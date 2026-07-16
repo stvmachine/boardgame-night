@@ -37,7 +37,7 @@ function buildGame(overrides: Record<string, any> = {}) {
 
 function mountCard(props: Record<string, any> = {}) {
   const game = props.game ?? buildGame()
-  const { game: _, ...rest } = props
+  const { game: _, slots, ...rest } = props
   return mount(GameCard, {
     props: {
       id: game.id,
@@ -54,7 +54,8 @@ function mountCard(props: Record<string, any> = {}) {
       description: game.description,
       owners: game.owners,
       ...rest
-    }
+    },
+    ...(slots ? { slots } : {})
   })
 }
 
