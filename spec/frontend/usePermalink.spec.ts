@@ -164,7 +164,7 @@ describe('usePermalink', () => {
     await nextTick()
 
     const calls = vi.mocked(window.history.replaceState).mock.calls
-    const lastUrl = String(calls[calls.length - 1]?.[2])
+    const lastUrl = decodeURIComponent(String(calls[calls.length - 1]?.[2]))
     expect(lastUrl).toContain('q=azul')
     expect(lastUrl).toContain('players=2-5')
     expect(lastUrl).toContain('time=2,4')

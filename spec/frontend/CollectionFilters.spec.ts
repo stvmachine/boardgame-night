@@ -40,7 +40,7 @@ describe('CollectionFilters', () => {
   it('renders complexity bucket options', () => {
     const wrapper = mountFilters()
     const options = wrapper.find('select#filter-complexity').findAll('option')
-    expect(options.length).toBe(5) // Any + 4 buckets
+    expect(options.length).toBe(4) // Any + 3 buckets
   })
 
   it('renders rating min options', () => {

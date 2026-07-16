@@ -1,8 +1,9 @@
 import { ref, computed, type Ref } from 'vue'
 import { useDebounce } from '@vueuse/core'
 import { createFuseIndex, searchFuse, type FuseSearchableGame } from '@/utils/fuseSearch'
-import { playerCountFilter, playtimeFilter, complexityFilter, ratingFilter } from '@/utils/filters'
+import { playerRangeFilter, playtimeFilter, complexityFilter, ratingFilter } from '@/utils/filters'
 import type { MergedThing } from '@/generated/operations'
+import type { PlayerRange } from '@/stores/filters'
 
 export interface TimeBucket {
   value: number
@@ -30,18 +31,18 @@ export const TIME_BUCKETS: TimeBucket[] = [
 export const COMPLEXITY_BUCKETS: ComplexityBucket[] = [
   { value: 1, label: 'Light', min: 0, max: 2 },
   { value: 2, label: 'Medium', min: 2, max: 3 },
-  { value: 3, label: 'Medium-Heavy', min: 3, max: 4 },
-  { value: 4, label: 'Heavy', min: 4, max: Infinity }
+  { value: 3, label: 'Heavy', min: 3, max: Infinity }
 ]
 
 export interface UseCollectionFiltersOptions {
   initialSelectedOwners?: Set<string> | string[]
-  initialTimeBucket?: number | null
+  initialPlayerRange?: PlayerRange | null
+  initialSelectedTimeBuckets?: Set<number> | number[]
   initialComplexityBucket?: number | null
   initialRatingMin?: number | null
   query?: Ref<string>
-  playerCount?: Ref<number | null>
-  timeBucket?: Ref<number | null>
+  playerRange?: Ref<PlayerRange | null>
+  selectedTimeBuckets?: Ref<Set<number>>
   complexityBucket?: Ref<number | null>
   ratingMin?: Ref<number | null>
   selectedOwners?: Ref<Set<string>>
@@ -51,8 +52,10 @@ export function useCollectionFilters(
   games: Ref<MergedThing[]>,
   options: UseCollectionFiltersOptions = {}
 ) {
-  const playerCount = options.playerCount ?? ref<number | null>(null)
-  const timeBucket = options.timeBucket ?? ref<number | null>(options.initialTimeBucket ?? null)
+  const playerRange = options.playerRange ?? ref<PlayerRange | null>(options.initialPlayerRange ?? null)
+  const selectedTimeBuckets = options.selectedTimeBuckets ?? ref<Set<number>>(
+    new Set(options.initialSelectedTimeBuckets ?? [])
+  )
   const complexityBucket = options.complexityBucket ?? ref<number | null>(options.initialComplexityBucket ?? null)
   const ratingMin = options.ratingMin ?? ref<number | null>(options.initialRatingMin ?? null)
   const query = options.query ?? ref('')
@@ -74,15 +77,17 @@ export function useCollectionFilters(
       result = searchFuse(fuseIndex.value, q) as MergedThing[]
     }
 
-    if (playerCount.value != null) {
-      result = result.filter(game => playerCountFilter(game, playerCount.value!))
+    if (playerRange.value != null) {
+      result = result.filter(game => playerRangeFilter(game, playerRange.value))
     }
 
-    if (timeBucket.value != null) {
-      const bucket = TIME_BUCKETS.find(b => b.value === timeBucket.value)
-      if (bucket) {
-        result = result.filter(game => playtimeFilter(game, { min: bucket.min, max: bucket.max }))
-      }
+    if (selectedTimeBuckets.value.size > 0) {
+      result = result.filter(game =>
+        Array.from(selectedTimeBuckets.value).some(value => {
+          const bucket = TIME_BUCKETS.find(b => b.value === value)
+          return bucket ? playtimeFilter(game, { min: bucket.min, max: bucket.max }) : false
+        })
+      )
     }
 
     if (complexityBucket.value != null) {
@@ -106,8 +111,8 @@ export function useCollectionFilters(
   })
 
   function clearFilters() {
-    playerCount.value = null
-    timeBucket.value = null
+    playerRange.value = null
+    selectedTimeBuckets.value = new Set()
     complexityBucket.value = null
     ratingMin.value = null
     query.value = ''
@@ -122,8 +127,8 @@ export function useCollectionFilters(
   }
 
   return {
-    playerCount,
-    timeBucket,
+    playerRange,
+    selectedTimeBuckets,
     complexityBucket,
     ratingMin,
     query,

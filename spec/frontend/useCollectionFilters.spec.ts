@@ -76,7 +76,7 @@ describe('useCollectionFilters', () => {
   it('filters by multiple time buckets with OR semantics', () => {
     const games = ref([
       makeGame({ id: '1', minPlaytime: 15, maxPlaytime: 30 }),
-      makeGame({ id: '2', minPlaytime: 45, maxPlaytime: 60 }),
+      makeGame({ id: '2', minPlaytime: 31, maxPlaytime: 45 }),
       makeGame({ id: '3', minPlaytime: 90, maxPlaytime: 120 })
     ])
     const { selectedTimeBuckets, filteredGames } = useCollectionFilters(games)

@@ -5,6 +5,21 @@ export function playerCountFilter(game: MergedThing, count: number): boolean {
   return game.minPlayers <= count && count <= game.maxPlayers
 }
 
+export interface PlayerRange {
+  min: number
+  max: number
+}
+
+export function playerRangeFilter(game: MergedThing, range: PlayerRange | null): boolean {
+  if (range == null) return true
+  if (game.minPlayers == null || game.maxPlayers == null) return false
+
+  const min = Math.min(range.min, range.max)
+  const max = Math.max(range.min, range.max)
+
+  return game.minPlayers <= min && game.maxPlayers >= max
+}
+
 export function playtimeFilter(
   game: MergedThing,
   { min, max }: { min: number; max: number }

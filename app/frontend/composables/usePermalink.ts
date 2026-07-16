@@ -3,6 +3,7 @@ import { useFilterStore } from '@/stores/filters'
 import { useCollectorsStore } from '@/stores/collectors'
 import type { SortOption } from '@/utils/sorting'
 import type { GroupOption } from '@/utils/grouping'
+import type { PlayerRange } from '@/stores/filters'
 
 const LEGACY_GROUP_OPTIONS: GroupOption[] = ['players', 'rating', 'bestPlayers', 'owner']
 
@@ -35,6 +36,31 @@ function isLegacyGroup(value: string): value is GroupOption {
   return LEGACY_GROUP_OPTIONS.includes(value as GroupOption)
 }
 
+function normalizePlayerRange(value: string): PlayerRange | null {
+  const parts = value.split('-').map(Number).filter(n => !Number.isNaN(n) && n > 0)
+  if (parts.length === 0) return null
+  if (parts.length === 1) return { min: parts[0], max: parts[0] }
+  const [a, b] = parts.slice(0, 2)
+  return { min: Math.min(a, b), max: Math.max(a, b) }
+}
+
+function normalizeTimeBuckets(value: string): Set<number> {
+  const values = value.split(',').map(Number).filter(n => !Number.isNaN(n) && n > 0)
+  return new Set(values)
+}
+
+function normalizeComplexity(value: string): number | null {
+  const num = Number(value)
+  if (Number.isNaN(num)) return null
+  if (num >= 4) return 3
+  if (num < 1) return null
+  return num
+}
+
+function normalizeView(value: string): 'grid' | 'list' {
+  return value === 'list' ? 'list' : 'grid'
+}
+
 export function usePermalink() {
   const filterStore = useFilterStore()
   const collectorsStore = useCollectorsStore()
@@ -52,13 +78,13 @@ export function usePermalink() {
   if (q) filterStore.query = q
 
   const players = params.get('players')
-  if (players) filterStore.playerCount = Number(players)
+  if (players) filterStore.playerRange = normalizePlayerRange(players)
 
   const time = params.get('time')
-  if (time) filterStore.timeBucket = Number(time)
+  if (time) filterStore.selectedTimeBuckets = normalizeTimeBuckets(time)
 
   const complexity = params.get('complexity')
-  if (complexity) filterStore.complexityBucket = Number(complexity)
+  if (complexity) filterStore.complexityBucket = normalizeComplexity(complexity)
 
   const ratingMin = params.get('ratingMin')
   if (ratingMin) filterStore.ratingMin = Number(ratingMin)
@@ -76,6 +102,9 @@ export function usePermalink() {
       replaceUrl(params)
     }
   }
+
+  const view = params.get('view')
+  filterStore.view = normalizeView(view ?? 'grid')
 
   const groupBy = params.get('groupBy')
   const group = params.get('group')
@@ -95,12 +124,13 @@ export function usePermalink() {
     () => [
       Array.from(filterStore.selectedOwners),
       filterStore.query,
-      filterStore.playerCount,
-      filterStore.timeBucket,
+      filterStore.playerRange,
+      Array.from(filterStore.selectedTimeBuckets),
       filterStore.complexityBucket,
       filterStore.ratingMin,
       filterStore.sort,
-      filterStore.groupBy
+      filterStore.groupBy,
+      filterStore.view
     ],
     () => {
       const params = getParams()
@@ -119,14 +149,15 @@ export function usePermalink() {
         params.delete('q')
       }
 
-      if (filterStore.playerCount != null) {
-        params.set('players', String(filterStore.playerCount))
+      if (filterStore.playerRange) {
+        const { min, max } = filterStore.playerRange
+        params.set('players', min === max ? String(min) : `${min}-${max}`)
       } else {
         params.delete('players')
       }
 
-      if (filterStore.timeBucket != null) {
-        params.set('time', String(filterStore.timeBucket))
+      if (filterStore.selectedTimeBuckets.size > 0) {
+        params.set('time', Array.from(filterStore.selectedTimeBuckets).join(','))
       } else {
         params.delete('time')
       }
@@ -147,6 +178,12 @@ export function usePermalink() {
         params.set('sort', filterStore.sort)
       } else {
         params.delete('sort')
+      }
+
+      if (filterStore.view !== 'grid') {
+        params.set('view', filterStore.view)
+      } else {
+        params.delete('view')
       }
 
       // Migrate legacy grouping values from `group` to `groupBy`, preserving real group tokens.
