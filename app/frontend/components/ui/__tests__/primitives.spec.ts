@@ -111,6 +111,15 @@ describe('Primitive M3 token styling', () => {
     expect(html).toContain('bg-surface-container')
   })
 
+  it('Slider passes aria-labels to each thumb', () => {
+    const wrapper = mount(Slider, {
+      props: { modelValue: [2, 7], min: 1, max: 10, step: 1, thumbLabels: ['Minimum players', 'Maximum players'] }
+    })
+    const thumbs = wrapper.findAll('[data-slot="slider-thumb"]')
+    expect(thumbs[0].attributes('aria-label')).toBe('Minimum players')
+    expect(thumbs[1].attributes('aria-label')).toBe('Maximum players')
+  })
+
   it('Slider does not import icons from a second icon library', () => {
     const source = `
 import { Slider } from '@/components/ui/slider'
