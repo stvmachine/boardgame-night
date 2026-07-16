@@ -137,9 +137,39 @@ type GroupSpotlightThing {
 
 type HotItem {
   """
+  BGG average rating from persisted thing data.
+  """
+  average: Float
+
+  """
+  BGG average weight from persisted thing data.
+  """
+  averageWeight: Float
+
+  """
   BGG thing ID for this hot item.
   """
   id: ID!
+
+  """
+  Maximum players from persisted thing data.
+  """
+  maxPlayers: Int
+
+  """
+  Maximum playtime in minutes from persisted thing data.
+  """
+  maxPlaytime: Int
+
+  """
+  Minimum players from persisted thing data.
+  """
+  minPlayers: Int
+
+  """
+  Minimum playtime in minutes from persisted thing data.
+  """
+  minPlaytime: Int
 
   """
   Primary name of the game.

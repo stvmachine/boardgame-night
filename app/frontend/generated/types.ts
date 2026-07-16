@@ -128,8 +128,20 @@ export type GroupSpotlightThing = {
 
 export type HotItem = {
   __typename?: 'HotItem';
+  /** BGG average rating from persisted thing data. */
+  average?: Maybe<Scalars['Float']['output']>;
+  /** BGG average weight from persisted thing data. */
+  averageWeight?: Maybe<Scalars['Float']['output']>;
   /** BGG thing ID for this hot item. */
   id: Scalars['ID']['output'];
+  /** Maximum players from persisted thing data. */
+  maxPlayers?: Maybe<Scalars['Int']['output']>;
+  /** Maximum playtime in minutes from persisted thing data. */
+  maxPlaytime?: Maybe<Scalars['Int']['output']>;
+  /** Minimum players from persisted thing data. */
+  minPlayers?: Maybe<Scalars['Int']['output']>;
+  /** Minimum playtime in minutes from persisted thing data. */
+  minPlaytime?: Maybe<Scalars['Int']['output']>;
   /** Primary name of the game. */
   name: Scalars['String']['output'];
   /** Rank on the BGG hotness list. */

@@ -194,7 +194,7 @@ export type HealthQuery = { health: string };
 export type HotItemsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HotItemsQuery = { hotItems: Array<{ id: string, rank: number, name: string, yearPublished: number | null, thumbnail: string | null }> };
+export type HotItemsQuery = { hotItems: Array<{ id: string, rank: number, name: string, yearPublished: number | null, thumbnail: string | null, average: number | null, averageWeight: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null }> };
 
 export type MergedCollectionQueryVariables = Exact<{
   usernames: Array<string> | string;
@@ -1377,6 +1377,12 @@ export const HotItemsDocument = gql`
     name
     yearPublished
     thumbnail
+    average
+    averageWeight
+    minPlayers
+    maxPlayers
+    minPlaytime
+    maxPlaytime
   }
 }
     `;
