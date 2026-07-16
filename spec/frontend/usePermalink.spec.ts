@@ -58,12 +58,28 @@ describe('usePermalink', () => {
 
     const filterStore = useFilterStore()
     expect(filterStore.query).toBe('wingspan')
-    expect(filterStore.playerCount).toBe(4)
-    expect(filterStore.timeBucket).toBe(2)
+    expect(filterStore.playerRange).toEqual({ min: 4, max: 4 })
+    expect(filterStore.selectedTimeBuckets).toEqual(new Set([2]))
     expect(filterStore.complexityBucket).toBe(3)
     expect(filterStore.ratingMin).toBe(7)
     expect(filterStore.sort).toBe('rating_desc')
     expect(filterStore.groupBy).toBe('players')
+  })
+
+  it('hydrates a true player range from N-M', () => {
+    setUrl('?players=2-5')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    expect(filterStore.playerRange).toEqual({ min: 2, max: 5 })
+  })
+
+  it('hydrates multiple time buckets from comma list', () => {
+    setUrl('?time=1,3,5')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    expect(filterStore.selectedTimeBuckets).toEqual(new Set([1, 3, 5]))
   })
 
   it.each(['players', 'rating', 'bestPlayers', 'owner'] as const)(
@@ -138,27 +154,47 @@ describe('usePermalink', () => {
 
     const filterStore = useFilterStore()
     filterStore.query = 'azul'
-    filterStore.playerCount = 3
+    filterStore.playerRange = { min: 2, max: 5 }
+    filterStore.selectedTimeBuckets = new Set([2, 4])
+    filterStore.complexityBucket = 3
     filterStore.sort = 'rating_desc'
     filterStore.groupBy = 'complexity'
+    filterStore.view = 'list'
 
     await nextTick()
 
     const calls = vi.mocked(window.history.replaceState).mock.calls
     const lastUrl = String(calls[calls.length - 1]?.[2])
     expect(lastUrl).toContain('q=azul')
-    expect(lastUrl).toContain('players=3')
+    expect(lastUrl).toContain('players=2-5')
+    expect(lastUrl).toContain('time=2,4')
+    expect(lastUrl).toContain('complexity=3')
     expect(lastUrl).toContain('sort=rating_desc')
     expect(lastUrl).toContain('groupBy=complexity')
+    expect(lastUrl).toContain('view=list')
     expect(lastUrl).not.toContain('group=')
   })
 
-  it('omits default sort and groupBy values from URL', async () => {
+  it('serializes a single-count player range as N', async () => {
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    filterStore.playerRange = { min: 4, max: 4 }
+
+    await nextTick()
+
+    const calls = vi.mocked(window.history.replaceState).mock.calls
+    const lastUrl = String(calls[calls.length - 1]?.[2])
+    expect(lastUrl).toContain('players=4')
+  })
+
+  it('omits default sort, groupBy, and view values from URL', async () => {
     mount(TestComponent)
 
     const filterStore = useFilterStore()
     filterStore.sort = 'name_asc'
     filterStore.groupBy = 'none'
+    filterStore.view = 'grid'
 
     await nextTick()
 
@@ -166,6 +202,7 @@ describe('usePermalink', () => {
     const lastUrl = String(calls[calls.length - 1]?.[2])
     expect(lastUrl).not.toContain('sort=')
     expect(lastUrl).not.toContain('groupBy=')
+    expect(lastUrl).not.toContain('view=')
     expect(lastUrl).not.toContain('group=')
   })
 
@@ -179,12 +216,13 @@ describe('usePermalink', () => {
     const filterStore = useFilterStore()
     const writes = [
       () => { filterStore.query = 'catan' },
-      () => { filterStore.playerCount = 4 },
-      () => { filterStore.timeBucket = 2 },
+      () => { filterStore.playerRange = { min: 4, max: 4 } },
+      () => { filterStore.selectedTimeBuckets = new Set([2]) },
       () => { filterStore.complexityBucket = 3 },
       () => { filterStore.ratingMin = 7 },
       () => { filterStore.sort = 'rating_desc' },
       () => { filterStore.groupBy = 'players' },
+      () => { filterStore.view = 'list' },
       () => { filterStore.selectedOwners = new Set(['alice']) },
       () => { filterStore.clearFilters() }
     ]
@@ -219,7 +257,7 @@ describe('usePermalink', () => {
     mount(TestComponent)
 
     const filterStore = useFilterStore()
-    filterStore.playerCount = null
+    filterStore.playerRange = null
     await nextTick()
 
     const calls = vi.mocked(window.history.replaceState).mock.calls
@@ -295,5 +333,35 @@ describe('usePermalink', () => {
     const calls = vi.mocked(window.history.replaceState).mock.calls
     const lastUrl = String(calls[calls.length - 1]?.[2])
     expect(lastUrl).toContain('sort=recently_played')
+  })
+
+  it('defaults view to grid and serializes only list', async () => {
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    expect(filterStore.view).toBe('grid')
+
+    filterStore.view = 'list'
+    await nextTick()
+
+    const calls = vi.mocked(window.history.replaceState).mock.calls
+    const lastUrl = String(calls[calls.length - 1]?.[2])
+    expect(lastUrl).toContain('view=list')
+  })
+
+  it('normalizes invalid view values to grid', () => {
+    setUrl('?view=invalid')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    expect(filterStore.view).toBe('grid')
+  })
+
+  it('migrates legacy complexity=4 to Heavy (3)', () => {
+    setUrl('?complexity=4')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    expect(filterStore.complexityBucket).toBe(3)
   })
 })

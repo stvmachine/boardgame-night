@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ref } from 'vue'
 import { useCollectionFilters } from '@/composables/useCollectionFilters'
 import type { MergedThing } from '@/generated/operations'
+import type { PlayerRange } from '@/stores/filters'
 
 function makeGame(overrides: Partial<MergedThing> = {}): MergedThing {
   return {
@@ -37,16 +38,86 @@ describe('useCollectionFilters', () => {
     expect(filteredGames.value).toHaveLength(2)
   })
 
-  it('filters by player count', () => {
+  it('filters by single-count player range N–N', () => {
     const games = ref([
       makeGame({ id: '1', minPlayers: 2, maxPlayers: 4 }),
       makeGame({ id: '2', minPlayers: 1, maxPlayers: 2 })
     ])
-    const { playerCount, filteredGames } = useCollectionFilters(games)
-    playerCount.value = 3
+    const { playerRange, filteredGames } = useCollectionFilters(games)
+    playerRange.value = { min: 3, max: 3 }
 
     expect(filteredGames.value).toHaveLength(1)
     expect(filteredGames.value[0].id).toBe('1')
+  })
+
+  it('filters by player range and requires the entire range to be supported', () => {
+    const games = ref([
+      makeGame({ id: '1', minPlayers: 1, maxPlayers: 6 }),
+      makeGame({ id: '2', minPlayers: 2, maxPlayers: 3 })
+    ])
+    const { playerRange, filteredGames } = useCollectionFilters(games)
+    playerRange.value = { min: 2, max: 4 }
+
+    expect(filteredGames.value).toHaveLength(1)
+    expect(filteredGames.value[0].id).toBe('1')
+  })
+
+  it('does not filter by player range when it is null', () => {
+    const games = ref([
+      makeGame({ id: '1', minPlayers: 2, maxPlayers: 4 }),
+      makeGame({ id: '2', minPlayers: 1, maxPlayers: 2 })
+    ])
+    const { playerRange, filteredGames } = useCollectionFilters(games)
+    playerRange.value = null
+
+    expect(filteredGames.value).toHaveLength(2)
+  })
+
+  it('filters by multiple time buckets with OR semantics', () => {
+    const games = ref([
+      makeGame({ id: '1', minPlaytime: 15, maxPlaytime: 30 }),
+      makeGame({ id: '2', minPlaytime: 45, maxPlaytime: 60 }),
+      makeGame({ id: '3', minPlaytime: 90, maxPlaytime: 120 })
+    ])
+    const { selectedTimeBuckets, filteredGames } = useCollectionFilters(games)
+    selectedTimeBuckets.value = new Set([1, 3]) // ≤30 min and 60–120 min
+
+    expect(filteredGames.value.map(g => g.id)).toEqual(['1', '3'])
+  })
+
+  it('does not filter by time when no buckets are selected', () => {
+    const games = ref([
+      makeGame({ id: '1', minPlaytime: 15, maxPlaytime: 30 }),
+      makeGame({ id: '2', minPlaytime: 90, maxPlaytime: 120 })
+    ])
+    const { selectedTimeBuckets, filteredGames } = useCollectionFilters(games)
+    selectedTimeBuckets.value = new Set()
+
+    expect(filteredGames.value).toHaveLength(2)
+  })
+
+  it('filters by complexity bucket', () => {
+    const games = ref([
+      makeGame({ id: '1', averageWeight: 1.5 }),
+      makeGame({ id: '2', averageWeight: 2.5 }),
+      makeGame({ id: '3', averageWeight: 3.5 })
+    ])
+    const { complexityBucket, filteredGames } = useCollectionFilters(games)
+    complexityBucket.value = 2 // Medium
+
+    expect(filteredGames.value).toHaveLength(1)
+    expect(filteredGames.value[0].id).toBe('2')
+  })
+
+  it('does not filter by complexity when bucket is null', () => {
+    const games = ref([
+      makeGame({ id: '1', averageWeight: 1.5 }),
+      makeGame({ id: '2', averageWeight: 3.5 })
+    ])
+    const { complexityBucket, filteredGames } = useCollectionFilters(games)
+    complexityBucket.value = null
+
+    expect(filteredGames.value).toHaveLength(2)
   })
 
   it('filters by search query after debounce', async () => {

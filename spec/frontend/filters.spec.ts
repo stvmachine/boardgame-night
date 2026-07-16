@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import { createFuseIndex, searchFuse } from '@/utils/fuseSearch'
-import { playerCountFilter, playtimeFilter } from '@/utils/filters'
+import { playerCountFilter, playerRangeFilter, playtimeFilter } from '@/utils/filters'
 import type { MergedThing } from '@/generated/operations'
+import type { PlayerRange } from '@/stores/filters'
 
 interface TestGame extends MergedThing {
   originalname?: string
@@ -74,6 +75,43 @@ describe('filters', () => {
     it('returns false when player data is missing', () => {
       const game = makeGame({ minPlayers: null, maxPlayers: null })
       expect(playerCountFilter(game, 3)).toBe(false)
+    })
+  })
+
+  describe('playerRangeFilter', () => {
+    it('is unrestricted when range is null', () => {
+      const game = makeGame({ minPlayers: 2, maxPlayers: 4 })
+      expect(playerRangeFilter(game, null)).toBe(true)
+    })
+
+    it('matches when the game supports the entire selected range', () => {
+      const game = makeGame({ minPlayers: 1, maxPlayers: 6 })
+      expect(playerRangeFilter(game, { min: 2, max: 4 })).toBe(true)
+    })
+
+    it('matches a single-count legacy range N–N when the game supports that count', () => {
+      const game = makeGame({ minPlayers: 2, maxPlayers: 4 })
+      expect(playerRangeFilter(game, { min: 3, max: 3 })).toBe(true)
+    })
+
+    it('returns false when the game does not reach the selected maximum', () => {
+      const game = makeGame({ minPlayers: 2, maxPlayers: 4 })
+      expect(playerRangeFilter(game, { min: 2, max: 5 })).toBe(false)
+    })
+
+    it('returns false when the game does not reach the selected minimum', () => {
+      const game = makeGame({ minPlayers: 3, maxPlayers: 5 })
+      expect(playerRangeFilter(game, { min: 1, max: 4 })).toBe(false)
+    })
+
+    it('returns false when player data is missing', () => {
+      const game = makeGame({ minPlayers: null, maxPlayers: null })
+      expect(playerRangeFilter(game, { min: 2, max: 4 })).toBe(false)
+    })
+
+    it('normalizes a reversed range by swapping the bounds', () => {
+      const game = makeGame({ minPlayers: 1, maxPlayers: 6 })
+      expect(playerRangeFilter(game, { min: 4, max: 2 })).toBe(true)
     })
   })
 
