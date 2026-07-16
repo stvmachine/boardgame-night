@@ -24,8 +24,8 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 ### Home Dashboard (HOME)
 
-- [ ] **HOME-01**: Home page displays a hero section with BGG username merge input and "Merge collections" button
-- [ ] **HOME-02**: Home page displays a personal stats card (user's collection size, group count, session count)
+- [x] **HOME-01**: Home page displays a hero section with BGG username merge input and "Merge collections" button
+- [x] **HOME-02**: Home page displays a personal stats card (user's collection size, group count, session count)
 - [ ] **HOME-03**: Home page displays a "Trending on BGG" section with game cards (thumbnail, rating badge, rank, weight, players, play time)
 
 ### Collection View Redesign (COLL)
@@ -105,8 +105,8 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 | DS-04 | Phase 5 | Complete |
 | DS-05 | Phase 5 | Complete |
 | DS-06 | Phase 5 | Complete |
-| HOME-01 | Phase 9 | Pending |
-| HOME-02 | Phase 9 | Pending |
+| HOME-01 | Phase 9 | Complete |
+| HOME-02 | Phase 9 | Complete |
 | HOME-03 | Phase 9 | Pending |
 | COLL-19 | Phase 9 | Pending |
 | COLL-20 | Phase 9 | Pending |

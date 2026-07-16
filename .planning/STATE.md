@@ -2,18 +2,18 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
-current_phase: 9
+current_phase: 09
 current_phase_name: Home & Collection Redesign
-status: ready_to_execute
+status: executing
 stopped_at: Phase 9 planning complete — 8 plans ready
-last_updated: "2026-07-16T00:00:00.000Z"
-last_activity: 2026-07-16
-last_activity_desc: Phase 9 planning complete — 8 verified plans ready
+last_updated: "2026-07-16T00:03:48.657Z"
+last_activity: 2026-07-15
+last_activity_desc: Phase 09 execution started
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 46
-  completed_plans: 38
+  completed_plans: 39
   percent: 73
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 
 ## Current Position
 
-Phase: 9 — Home & Collection Redesign
-Plan: 8 generated, 0 executed
+Phase: 09 (Home & Collection Redesign) — EXECUTING
+Plan: 2 of 8
 Status: Ready to execute
-Last activity: 2026-07-16 — Phase 9 planning complete
+Last activity: 2026-07-15 — Phase 09 execution started
 
 Progress: [███████░░░] 73%
 
@@ -79,6 +79,7 @@ Progress: [███████░░░] 73%
 | Phase 08 P02 | 17min | 2 tasks | 7 files |
 | Phase 08-group-detail-surface P03 | 14min | 3 tasks | 11 files |
 | Phase 08 P04 | 14min | 2 tasks | 5 files |
+| Phase 09 P01 | 1207 | 3 tasks | 14 files |
 
 ## Accumulated Context
 
@@ -137,6 +138,9 @@ Recent decisions affecting current work:
 - [Phase 08]: Normalized group collection items into MergedThing by adding missing optional fields rather than duplicating the collection pipeline. — Keeps the existing filter, sort, grouping, and grid components unchanged while supporting the group query shape.
 - [Phase 08]: Used Apollo's reactive enabled option so merged and group queries are mutually exclusive. — Prevents both queries from running simultaneously, avoiding duplicate network requests and DoS risk.
 - [Phase 08]: Added a minimal error EmptyState to expose server query errors through the existing collection surface. — Surfaces GraphQL failures to users without adding a new route or collection component.
+- [Phase 09]: Used await nextTick() in UsernameForm.showCollection to resolve a router navigation race after updating the Pinia collectors store. — The E2E merge flow occasionally failed to reach /collection immediately after store.set(); awaiting nextTick() ensures the reactive store state is flushed before the router push.
+- [Phase 09]: Added signed-in dashboard stats coverage to HomeDashboard.spec.ts to lock D-04/D-05/D-06 aggregation behavior. — The RED target only asserted the signed-out prompt; a second test mocks a signed-in response and verifies the Games/Groups/Nights labels and values.
+- [Phase 09]: Used the generated single-argument useDashboardStatsQuery(options) signature to align with the codegen contract. — vue-tsc rejected the two-argument form because the operation has no GraphQL variables; the generated composable accepts only an options object.
 
 ### Pending Todos
 
@@ -164,6 +168,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-15T12:52:39.363Z
+Last session: 2026-07-16T00:03:48.650Z
 Stopped at: Phase 9 UI-SPEC approved
 Resume file: .planning/phases/09-home-collection-redesign/09-UI-SPEC.md
