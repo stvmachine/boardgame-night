@@ -6,14 +6,14 @@ current_phase: 09
 current_phase_name: Home & Collection Redesign
 status: executing
 stopped_at: Completed 09-03-PLAN.md
-last_updated: "2026-07-16T04:31:32.103Z"
+last_updated: "2026-07-16T05:11:57.118Z"
 last_activity: 2026-07-15
 last_activity_desc: Phase 09 execution started
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 46
-  completed_plans: 41
+  completed_plans: 42
   percent: 73
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 ## Current Position
 
 Phase: 09 (Home & Collection Redesign) — EXECUTING
-Plan: 4 of 8
+Plan: 5 of 8
 Status: Ready to execute
 Last activity: 2026-07-15 — Phase 09 execution started
 
@@ -82,6 +82,7 @@ Progress: [███████░░░] 73%
 | Phase 09 P01 | 1207 | 3 tasks | 14 files |
 | Phase 09-home-collection-redesign P02 | 113min | 3 tasks | 10 files |
 | Phase 09-home-collection-redesign P03 | 10min | 3 tasks | 10 files |
+| Phase 09-home-collection-redesign P04 | 20 | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -148,6 +149,9 @@ Recent decisions affecting current work:
 - [Phase 09-home-collection-redesign]: Attach immutable scope to each collection item rather than storing it in mutable query context; this survives lazy field resolution and GraphQL multiplexing.
 - [Phase 09-home-collection-redesign]: Expose objectid as a first-class MergedThing field so cards and external links use the true BGG identity, not the internal database id.
 - [Phase 09-home-collection-redesign]: Return null lastPlayedAt for raw BggThing consumers (suggestions, hot enrichment) and for anonymous requests; only signed-in users or authorized group members see scoped history.
+- [Phase 09-home-collection-redesign]: Keep the sort contract narrow to four product-facing options with deterministic name/id tie-breaks and null-last missing values. — Matches D-17 and keeps the UI surface small and predictable.
+- [Phase 09-home-collection-redesign]: Use reka-ui Select primitives for Sort and Group-by so controls are keyboard/portal accessible and match the design system. — Replaces native selects with the source-owned accessible primitive required by 09-UI-SPEC.
+- [Phase 09-home-collection-redesign]: Preserve description and lastPlayedAt when normalizing group collection items rather than nulling description. — Lets the redesigned cards use both fields without an extra data pass and keeps the scoped history signal intact.
 
 ### Pending Todos
 
@@ -175,6 +179,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-16T04:31:32.096Z
+Last session: 2026-07-16T05:10:56.797Z
 Stopped at: Completed 09-03-PLAN.md
 Resume file: None
