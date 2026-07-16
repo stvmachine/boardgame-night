@@ -1,6 +1,15 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { mount } from '@vue/test-utils'
 import PlayerRangeSlider from '@/components/collection/PlayerRangeSlider.vue'
+
+beforeAll(() => {
+  class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
+})
 
 describe('PlayerRangeSlider', () => {
   function mountSlider(modelValue: { min: number; max: number } | null = null) {
