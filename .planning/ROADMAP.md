@@ -272,7 +272,7 @@ Plans:
   4. User can sort the collection by Name A-Z, Rating High-Low, Weight Light-Heavy, or Recently Played, and toggle between grid and list views.
   5. User sees skeleton loaders during collection data fetching.
 
-**Plans:** 5/8 plans executed
+**Plans:** 6/8 plans executed
 Plans:
 **Wave 1**
 
@@ -296,7 +296,7 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 09-06-PLAN.md — Source-owned ToggleGroup and accessible time, complexity, owner, and ordered panel controls
+- [x] 09-06-PLAN.md — Source-owned ToggleGroup and accessible time, complexity, owner, and ordered panel controls
 
 **Wave 7** *(blocked on Wave 6 completion)*
 
@@ -356,7 +356,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. BGG Poll Data Layer | 3/3 | Complete    | 2026-07-13 |
 | 7. Suggestion Engine Backend | 4/4 | Complete    | 2026-07-14 |
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
-| 9. Home & Collection Redesign | 5/8 | In Progress|  |
+| 9. Home & Collection Redesign | 6/8 | In Progress|  |
 | 10. Picking a Game Redesign | 0/TBD | Not started | - |
 | 11. Polish & E2E Hardening | 0/TBD | Not started | - |
 
