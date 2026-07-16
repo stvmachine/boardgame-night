@@ -21,11 +21,12 @@ module Types
     end
 
     def collection
-      return { items: [], sync_statuses: [] } unless viewer_role
+      return { items: [], sync_statuses: [], scope: nil } unless viewer_role
 
       {
         items: BggThing.merged_for_users(object.member_ids),
-        sync_statuses: object.members.map { |user| sync_status_for(user) }
+        sync_statuses: object.members.map { |user| sync_status_for(user) },
+        scope: ScopedMergedThing::Scope.new(:group, object.id)
       }
     end
 

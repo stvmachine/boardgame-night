@@ -6,6 +6,7 @@ module Types
 
     included do
       field :id, GraphQL::Types::ID, null: false
+      field :objectid, GraphQL::Types::ID, null: false, description: "Persisted BoardGameGeek numeric identifier."
       field :name, GraphQL::Types::String, null: false
       field :year_published, GraphQL::Types::Int, null: true
       field :min_players, GraphQL::Types::Int, null: true
@@ -23,10 +24,18 @@ module Types
       field :is_expansion, GraphQL::Types::Boolean, null: false
       field :polls, [ Types::PollType ], null: false
       field :best_player_count, GraphQL::Types::Int, null: true
+      field :last_played_at, GraphQL::Types::ISO8601DateTime, null: true, description: "Latest non-cancelled night session for this game within the authorized scope."
     end
 
     def polls
       dataloader.with(Loaders::PollsLoader).load(object.id)
+    end
+
+    def last_played_at
+      scope = object.is_a?(ScopedMergedThing) ? object.scope : nil
+      return nil unless scope
+
+      dataloader.with(Loaders::LastPlayedAtLoader, scope.kind, scope.id).load(object.id)
     end
 
     def best_player_count

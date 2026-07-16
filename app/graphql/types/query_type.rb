@@ -45,9 +45,11 @@ module Types
 
     def merged_collection(usernames:)
       users = User.where(bgg_username: usernames)
+      scope = context[:current_user] ? ScopedMergedThing::Scope.new(:user, context[:current_user].id) : nil
       {
         items: BggThing.merged_for_bgg_usernames(usernames),
-        sync_statuses: usernames.map { |username| sync_status_for(username, users) }
+        sync_statuses: usernames.map { |username| sync_status_for(username, users) },
+        scope: scope
       }
     end
 
