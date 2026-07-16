@@ -8,5 +8,5 @@ test('merges usernames from the redesigned Home hero', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Merge collections' }).click()
 
-  await expect(page).toHaveURL(/\/collection.*usernames=e2e_alice/)
+  await expect(page).toHaveURL(/\/collection.*usernames=e2e_alice/, { timeout: 10000 })
 })

@@ -7,6 +7,12 @@ import {
   useSearchLazyQuery
 } from '../../generated/operations'
 import { useCollectorsStore } from '@/stores/collectors'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import Icon from '@/components/ui/icon/Icon.vue'
+
+import { nextTick } from 'vue'
 
 const router = useRouter()
 const store = useCollectorsStore()
@@ -62,9 +68,10 @@ function removeUsername(username: string) {
   delete validationStatus.value[username]
 }
 
-function showCollection() {
+async function showCollection() {
   if (usernames.value.length === 0) return
   store.set(usernames.value)
+  await nextTick()
   router.push({ path: '/collection', query: { usernames: usernames.value.join(',') } })
 }
 
@@ -76,82 +83,84 @@ const canShowCollection = computed(() => usernames.value.length > 0)
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <div class="space-y-2">
-      <label for="username-input" class="text-sm font-medium text-neutral-700">
+      <label for="username-input" class="text-sm font-semibold text-on-surface">
         Enter BoardGameGeek usernames
       </label>
-      <input
-        id="username-input"
-        v-model="usernameInput"
-        type="text"
-        placeholder="Type a username and press Enter"
-        class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        @keydown="handleUsernameKeydown"
-      />
+      <div class="flex flex-col sm:flex-row gap-2">
+        <Input
+          id="username-input"
+          v-model="usernameInput"
+          type="text"
+          placeholder="Add a BGG username"
+          @keydown="handleUsernameKeydown"
+        />
+        <Button
+          type="button"
+          class="shrink-0"
+          :disabled="!canShowCollection"
+          @click="showCollection"
+        >
+          Merge collections
+        </Button>
+      </div>
 
       <div v-if="usernames.length > 0" class="flex flex-wrap gap-2 pt-2">
-        <span
+        <Badge
           v-for="username in usernames"
           :key="username"
-          class="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-sm"
+          variant="draft"
+          class="gap-1 px-2.5 py-1 text-sm"
         >
-          <span
+          <Icon
             v-if="validationStatus[username]?.loading"
-            class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-neutral-300 border-t-indigo-600"
+            name="progress_activity"
+            class="size-3.5 animate-spin"
+            aria-hidden="true"
           />
           <span
             v-else-if="validationStatus[username]?.valid && validationStatus[username]?.exists"
-            class="text-green-600"
+            class="text-success"
             title="Valid BGG user"
           >✓</span>
           <span
             v-else-if="validationStatus[username]?.valid && !validationStatus[username]?.exists"
-            class="text-amber-600"
+            class="text-warning"
             title="Format valid, but user not found on BGG"
           >?</span>
           <span
             v-else
-            class="text-red-600"
+            class="text-error"
             title="Invalid username"
           >✕</span>
-          <span class="text-neutral-700">{{ username }}</span>
+          <span class="text-on-surface">{{ username }}</span>
           <button
             type="button"
-            class="text-neutral-400 hover:text-red-600"
+            class="text-on-surface-variant hover:text-error"
             aria-label="Remove username"
             @click="removeUsername(username)"
           >
             ×
           </button>
-        </span>
+        </Badge>
       </div>
     </div>
 
-    <button
-      type="button"
-      class="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-neutral-300"
-      :disabled="!canShowCollection"
-      @click="showCollection"
-    >
-      Show collection
-    </button>
-
     <div class="space-y-2">
-      <label for="search-input" class="text-sm font-medium text-neutral-700">
+      <label for="search-input" class="text-sm font-semibold text-on-surface">
         Search BGG games
       </label>
-      <input
+      <Input
         id="search-input"
         v-model="searchInput"
         type="text"
         placeholder="Search games…"
-        class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         @input="handleSearchInput"
       />
 
-      <div v-if="searching" class="text-sm text-neutral-500">Searching…</div>
-      <ul v-else-if="searchResult?.search?.length" class="divide-y divide-neutral-100 rounded-md border border-neutral-200 bg-white">
+      <div v-if="searching" class="text-sm text-on-surface-variant">Searching…</div>
+      <ul v-else-if="searchResult?.search?.length" class="divide-y divide-outline rounded-md border border-outline bg-surface">
         <li
           v-for="game in searchResult.search"
           :key="game.id"
@@ -160,10 +169,11 @@ const canShowCollection = computed(() => usernames.value.length > 0)
           <a
             :href="`https://boardgamegeek.com/boardgame/${game.id}`"
             target="_blank"
-            class="hover:text-indigo-600"
+            rel="noopener noreferrer"
+            class="hover:text-primary"
           >
             {{ game.name }}
-            <span v-if="game.yearPublished" class="text-neutral-500">({{ game.yearPublished }})</span>
+            <span v-if="game.yearPublished" class="text-on-surface-variant">({{ game.yearPublished }})</span>
           </a>
         </li>
       </ul>
