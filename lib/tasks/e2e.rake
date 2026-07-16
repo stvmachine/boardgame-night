@@ -31,6 +31,10 @@ namespace :e2e do
         thing.average = 7.9
         thing.average_weight = 2.4
       end
+      wingspan.update!(
+        description: "Attract birds to a thriving wildlife preserve through careful card play.",
+        thumbnail: "https://example.com/wingspan.jpg"
+      )
 
       azul = BggThing.find_or_create_by!(objectid: 123_457) do |thing|
         thing.name = "Azul"

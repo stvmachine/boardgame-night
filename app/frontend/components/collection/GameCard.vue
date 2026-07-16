@@ -98,6 +98,7 @@ function handleClick(event: MouseEvent) {
 
 <template>
   <Card
+    data-testid="game-card"
     :class="[
       'cursor-pointer hover:shadow-md transition-all duration-300 p-0 gap-0 overflow-hidden motion-reduce:hover:translate-y-0',
       variant === 'list' ? 'flex-row' : 'flex-col hover:-translate-y-1'

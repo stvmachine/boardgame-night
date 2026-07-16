@@ -46,6 +46,19 @@ async function waitForUrlParam(page: Page, key: string, value: string) {
   await page.waitForURL((url) => url.searchParams.get(key) === value)
 }
 
+async function setPlayerRange(page: Page, min: number, max: number) {
+  const minimum = page.getByRole('slider', { name: 'Minimum players' })
+  const maximum = page.getByRole('slider', { name: 'Maximum players' })
+
+  await minimum.focus()
+  await minimum.press('Home')
+  for (let value = 1; value < min; value += 1) await minimum.press('ArrowRight')
+
+  await maximum.focus()
+  await maximum.press('End')
+  for (let value = 10; value > max; value -= 1) await maximum.press('ArrowLeft')
+}
+
 test('loads merged collection from seed data', async ({ page }) => {
   await page.goto('/collection?usernames=e2e_alice,e2e_bob')
 
@@ -76,13 +89,13 @@ test('deselecting a collector filters the game list', async ({ page }) => {
 test('filters by player count', async ({ page }) => {
   await page.goto('/collection?usernames=e2e_alice,e2e_bob')
 
-  await page.getByLabel('Players').selectOption('4')
+  await setPlayerRange(page, 4, 4)
 
   await expect(page.getByRole('heading', { name: 'Wingspan' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Azul' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Gloomhaven' })).toBeVisible()
 
-  await page.getByLabel('Players').selectOption('1')
+  await setPlayerRange(page, 1, 1)
 
   await expect(page.getByRole('heading', { name: 'Wingspan' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Azul' })).not.toBeVisible()
@@ -109,7 +122,7 @@ test('groups by number of players', async ({ page }) => {
 test('preserves filter state via permalink on reload', async ({ page }) => {
   await page.goto('/collection?usernames=e2e_alice,e2e_bob')
   await page.getByLabel('Search').fill('Wingspan')
-  await page.getByLabel('Players').selectOption('4')
+  await setPlayerRange(page, 4, 4)
   await collectorCheckbox(page, 'e2e_bob').uncheck()
 
   // Wait for URL serialization to settle
@@ -122,7 +135,8 @@ test('preserves filter state via permalink on reload', async ({ page }) => {
   await page.goto(url)
 
   await expect(page.getByLabel('Search')).toHaveValue('Wingspan')
-  await expect(page.getByLabel('Players')).toHaveValue('4')
+  await expect(page.getByRole('slider', { name: 'Minimum players' })).toHaveAttribute('aria-valuenow', '4')
+  await expect(page.getByRole('slider', { name: 'Maximum players' })).toHaveAttribute('aria-valuenow', '4')
   await expect(collectorCheckbox(page, 'e2e_alice')).toBeChecked()
   await expect(collectorCheckbox(page, 'e2e_bob')).not.toBeChecked()
   await expect(page.getByRole('heading', { name: 'Wingspan' })).toBeVisible()
@@ -183,15 +197,15 @@ test('shares a rich list collection permalink', async ({ page }) => {
   await setViewMode(page, 'List view')
   await waitForUrlParam(page, 'view', 'list')
 
-  const firstCard = page.locator('[data-slot="card"]').first()
-  await expect(firstCard).toBeVisible()
-  await expect(firstCard.locator('img')).toBeVisible()
-  await expect(firstCard.locator('[data-testid="game-description"]')).toBeVisible()
-  await expect(firstCard.locator('[data-testid="game-card-footer"]')).toBeVisible()
+  const wingspanCard = page.getByTestId('game-card').filter({ hasText: 'Wingspan' })
+  await expect(wingspanCard).toBeVisible()
+  await expect(wingspanCard.locator('img')).toBeVisible()
+  await expect(wingspanCard.getByTestId('game-description')).toBeVisible()
+  await expect(wingspanCard.getByTestId('game-card-footer')).toBeVisible()
 
   // BGG activation uses objectid with opener isolation
   const bggPromise = page.waitForEvent('popup')
-  await firstCard.click()
+  await wingspanCard.click()
   const popup = await bggPromise
   await expect(popup).toHaveURL(/boardgamegeek\.com\/boardgame\/\d+/)
   await popup.close()
@@ -201,10 +215,10 @@ test('shares a rich list collection permalink', async ({ page }) => {
   await page.goto(sharedUrl)
   await page.waitForLoadState('networkidle')
   await expect(page.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('[data-slot="card"]').first().locator('img')).toBeVisible()
+  await expect(page.getByTestId('game-card').filter({ hasText: 'Wingspan' }).locator('img')).toBeVisible()
 
   // Switch back to grid
   await setViewMode(page, 'Grid view')
   await expect(page.getByRole('button', { name: 'Grid view' })).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.locator('[data-slot="card"]').first().locator('img')).toBeVisible()
+  await expect(page.getByTestId('game-card').filter({ hasText: 'Wingspan' }).locator('img')).toBeVisible()
 })

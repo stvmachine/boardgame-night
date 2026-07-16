@@ -18,6 +18,7 @@ const collectorsStore = useCollectorsStore()
       <Input
         id="filter-search"
         v-model="filterStore.query"
+        aria-label="Search"
         placeholder="Search games..."
       />
     </fieldset>
