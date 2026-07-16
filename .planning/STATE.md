@@ -6,14 +6,14 @@ current_phase: 09
 current_phase_name: Home & Collection Redesign
 status: executing
 stopped_at: Completed 09-03-PLAN.md
-last_updated: "2026-07-16T05:11:57.118Z"
+last_updated: "2026-07-16T05:44:08.996Z"
 last_activity: 2026-07-15
 last_activity_desc: Phase 09 execution started
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 46
-  completed_plans: 42
+  completed_plans: 43
   percent: 73
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 ## Current Position
 
 Phase: 09 (Home & Collection Redesign) — EXECUTING
-Plan: 5 of 8
+Plan: 6 of 8
 Status: Ready to execute
 Last activity: 2026-07-15 — Phase 09 execution started
 
@@ -83,6 +83,7 @@ Progress: [███████░░░] 73%
 | Phase 09-home-collection-redesign P02 | 113min | 3 tasks | 10 files |
 | Phase 09-home-collection-redesign P03 | 10min | 3 tasks | 10 files |
 | Phase 09-home-collection-redesign P04 | 20 | 3 tasks | 10 files |
+| Phase 09-home-collection-redesign P05 | 16m 24s | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -152,6 +153,9 @@ Recent decisions affecting current work:
 - [Phase 09-home-collection-redesign]: Keep the sort contract narrow to four product-facing options with deterministic name/id tie-breaks and null-last missing values. — Matches D-17 and keeps the UI surface small and predictable.
 - [Phase 09-home-collection-redesign]: Use reka-ui Select primitives for Sort and Group-by so controls are keyboard/portal accessible and match the design system. — Replaces native selects with the source-owned accessible primitive required by 09-UI-SPEC.
 - [Phase 09-home-collection-redesign]: Preserve description and lastPlayedAt when normalizing group collection items rather than nulling description. — Lets the redesigned cards use both fields without an extra data pass and keeps the scoped history signal intact.
+- [Phase 09-home-collection-redesign]: Kept the source-owned Slider after local shadcn-vue generation because it provided the exact reka-ui two-thumb primitive and package checksum gate succeeded.
+- [Phase 09-home-collection-redesign]: Projected legacy playerCount/timeBucket as writable computed shims in the filter store to avoid rewriting unrelated CollectionFilters and CollectionView specs mid-phase.
+- [Phase 09-home-collection-redesign]: Mapped the full 1–10 slider range back to null so an untouched slider means no restriction, matching the URL omission contract.
 
 ### Pending Todos
 
@@ -179,6 +183,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-16T05:10:56.797Z
+Last session: 2026-07-16T05:41:36.216Z
 Stopped at: Completed 09-03-PLAN.md
 Resume file: None

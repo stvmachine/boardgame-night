@@ -30,7 +30,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 ### Collection View Redesign (COLL)
 
-- [ ] **COLL-19**: Collection view has a structured filter sidebar (search input, owner avatar toggles, player count range slider, play-time checkbox groups, complexity segmented buttons)
+- [x] **COLL-19**: Collection view has a structured filter sidebar (search input, owner avatar toggles, player count range slider, play-time checkbox groups, complexity segmented buttons)
 - [ ] **COLL-20**: Collection game cards display thumbnail, rating badge, name, owner avatar(s), description, and 3-column stats footer (players, time, complexity)
 - [x] **COLL-21**: Collection view has a sort dropdown (Name A-Z, Rating High-Low, Weight Light-Heavy, Recently Played)
 - [ ] **COLL-22**: Collection view has a grid/list view toggle
@@ -108,7 +108,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 | HOME-01 | Phase 9 | Complete |
 | HOME-02 | Phase 9 | Complete |
 | HOME-03 | Phase 9 | Complete |
-| COLL-19 | Phase 9 | Pending |
+| COLL-19 | Phase 9 | Complete |
 | COLL-20 | Phase 9 | Pending |
 | COLL-21 | Phase 9 | Complete |
 | COLL-22 | Phase 9 | Pending |
