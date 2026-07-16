@@ -12,4 +12,8 @@ if command -v rbenv >/dev/null 2>&1; then
   eval "$(rbenv init -)"
 fi
 
+# Use the persisted Solid Cache store during e2e runs so the seed task and the
+# running web server share a single cache (e.g. seeded BGG hot list fixtures).
+export RAILS_CACHE_STORE=solid_cache_store
+
 exec foreman start -f Procfile.dev "$@"

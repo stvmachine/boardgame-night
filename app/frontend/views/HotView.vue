@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import HotList from '../components/landing/HotList.vue'
+import TrendingGames from '../components/landing/TrendingGames.vue'
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto px-4 py-8 md:py-12">
-    <h1 class="text-3xl font-bold text-neutral-900 mb-8">Trending Games</h1>
-    <HotList />
+  <div class="p-4 md:p-6">
+    <h1 class="text-2xl font-semibold text-on-surface mb-6">Trending Games</h1>
+    <TrendingGames :show-view-all="false" />
   </div>
 </template>

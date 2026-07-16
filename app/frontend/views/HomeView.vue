@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import HomeHero from '../components/landing/HomeHero.vue'
 import StatsCard from '../components/landing/StatsCard.vue'
-import HotList from '../components/landing/HotList.vue'
+import TrendingGames from '../components/landing/TrendingGames.vue'
 </script>
 
 <template>
@@ -15,6 +15,6 @@ import HotList from '../components/landing/HotList.vue'
       </div>
     </div>
 
-    <HotList />
+    <TrendingGames :limit="6" />
   </div>
 </template>

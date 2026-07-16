@@ -180,6 +180,18 @@ namespace :e2e do
         }
       }))
 
+      # Seed the BGG hot list cache so the Home/Hot E2E preview tests do not
+      # depend on live BoardGameGeek availability or rate limiting.
+      hot_items = [
+        { id: "123456", rank: 1, name: "Wingspan", year_published: 2019, thumbnail: "https://example.com/wingspan.jpg" },
+        { id: "123457", rank: 2, name: "Azul", year_published: 2017, thumbnail: "https://example.com/azul.jpg" },
+        { id: "123458", rank: 3, name: "Gloomhaven", year_published: 2017, thumbnail: "https://example.com/gloomhaven.jpg" },
+        { id: "123459", rank: 4, name: "Cascadia", year_published: 2021, thumbnail: "https://example.com/cascadia.jpg" },
+        { id: "999001", rank: 5, name: "Mock Game Five", year_published: 2023, thumbnail: "https://example.com/mock5.jpg" },
+        { id: "999002", rank: 6, name: "Mock Game Six", year_published: 2024, thumbnail: "https://example.com/mock6.jpg" }
+      ]
+      Rails.cache.write("bgg/hot", hot_items, expires_in: 1.hour)
+
       Rails.logger.info("Seeded e2e fixtures: alice (#{alice.bgg_username}), bob (#{bob.bgg_username}), group #{group.id}, sessions #{[invited_session, picking_session, draft_session, completed_session, cancelled_session].map(&:id).join(", ")}")
     end
   end

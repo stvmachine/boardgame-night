@@ -12,6 +12,14 @@ test('merges usernames from the redesigned Home hero', async ({ page }) => {
 })
 
 test('keeps a six-card Home preview and standalone Hot route', async ({ page }) => {
+  page.on('response', async (response) => {
+    if (response.url().includes('/graphql')) {
+      try {
+        const json = await response.json()
+        console.log('GraphQL response:', JSON.stringify(json, null, 2))
+      } catch {}
+    }
+  })
   await page.goto('/')
 
   await expect(page.getByRole('heading', { name: 'Trending on BGG' })).toBeVisible({ timeout: 10000 })
@@ -19,6 +27,6 @@ test('keeps a six-card Home preview and standalone Hot route', async ({ page }) 
 
   await page.getByRole('link', { name: 'View all' }).click()
 
-  await expect(page).toHaveURL(/\/(hot|#)/, { timeout: 10000 })
-  await expect(page.getByRole('heading', { name: /Trending/i })).toBeVisible()
+  await expect(page).toHaveURL(/\/hot\/?/, { timeout: 10000 })
+  await expect(page.getByRole('heading', { name: 'Trending Games' })).toBeVisible()
 })

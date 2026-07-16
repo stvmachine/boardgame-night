@@ -23,8 +23,8 @@ Rails.application.configure do
     config.action_controller.perform_caching = false
   end
 
-  # Change to :null_store to avoid any caching.
-  config.cache_store = :memory_store
+  # Change to :null_store to avoid any caching. Override via RAILS_CACHE_STORE for e2e runs.
+  config.cache_store = ENV.fetch("RAILS_CACHE_STORE", "memory_store").to_sym
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
