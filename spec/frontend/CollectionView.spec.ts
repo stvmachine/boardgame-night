@@ -12,6 +12,7 @@ import { sortGames } from '@/utils/sorting'
 import CollectionView from '@/views/CollectionView.vue'
 import CollectionFilterPanel from '@/components/collection/CollectionFilterPanel.vue'
 import ActiveFilterChips from '@/components/collection/ActiveFilterChips.vue'
+import GameGrid from '@/components/collection/GameGrid.vue'
 import { existsSync } from 'node:fs'
 
 beforeAll(() => {
@@ -404,7 +405,7 @@ describe('CollectionView', () => {
     expect(sheetDesc!.textContent).toContain('Filter')
   })
 
-  it('renders toolbar in Filters → Sort → Group by → chips order', async () => {
+  it('renders toolbar in Filters → Sort → Group by → View → chips order', async () => {
     const wrapper = await mountCollection('/collection?usernames=alice_bgg')
     const filterStore = useFilterStore()
     filterStore.query = 'wingspan'
@@ -418,7 +419,25 @@ describe('CollectionView', () => {
     expect(children[0].getAttribute('aria-label')).toBe('Open filters')
     expect(children[1].querySelector('label')?.getAttribute('for')).toBe('sort-control')
     expect(children[2].querySelector('label')?.getAttribute('for')).toBe('group-by')
-    expect(children[3].getAttribute('data-slot')).toBe('active-filter-chips')
+    expect(children[3].getAttribute('data-slot')).toBe('toggle-group')
+    expect(children[4].getAttribute('data-slot')).toBe('active-filter-chips')
+  })
+
+  it('reproduces rich list view from the permalink', async () => {
+    const wrapper = await mountCollection('/collection?usernames=alice_bgg&view=list')
+    await nextTick()
+
+    const listButton = wrapper.find('button[aria-label="List view"]')
+    expect(listButton.exists()).toBe(true)
+    expect(listButton.attributes('aria-pressed')).toBe('true')
+
+    const gridButton = wrapper.find('button[aria-label="Grid view"]')
+    expect(gridButton.exists()).toBe(true)
+    expect(gridButton.attributes('aria-pressed')).toBe('false')
+
+    const grid = wrapper.findComponent(GameGrid)
+    expect(grid.exists()).toBe(true)
+    expect(grid.props('view')).toBe('list')
   })
 
   it('mounts only one CollectionFilterPanel when the Sheet is closed', async () => {

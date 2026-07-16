@@ -38,6 +38,14 @@ function firstGameHeading(page: Page) {
   return page.locator('[data-slot="card"] h3').first()
 }
 
+async function setViewMode(page: Page, mode: 'Grid view' | 'List view') {
+  await page.getByRole('button', { name: mode }).click()
+}
+
+async function waitForUrlParam(page: Page, key: string, value: string) {
+  await page.waitForURL((url) => url.searchParams.get(key) === value)
+}
+
 test('loads merged collection from seed data', async ({ page }) => {
   await page.goto('/collection?usernames=e2e_alice,e2e_bob')
 
@@ -166,4 +174,37 @@ test('legacy sort URL migrates to a valid sort', async ({ page }) => {
   await page.waitForLoadState('networkidle')
   await expect(page.getByRole('heading', { name: 'Wingspan' })).toBeVisible({ timeout: 30_000 })
   expect(page.url()).not.toContain('sort=year_desc')
+})
+
+test('shares a rich list collection permalink', async ({ page }) => {
+  await page.goto('/collection?usernames=e2e_alice,e2e_bob')
+  await page.waitForLoadState('networkidle')
+
+  await setViewMode(page, 'List view')
+  await waitForUrlParam(page, 'view', 'list')
+
+  const firstCard = page.locator('[data-slot="card"]').first()
+  await expect(firstCard).toBeVisible()
+  await expect(firstCard.locator('img')).toBeVisible()
+  await expect(firstCard.locator('[data-testid="game-description"]')).toBeVisible()
+  await expect(firstCard.locator('[data-testid="game-card-footer"]')).toBeVisible()
+
+  // BGG activation uses objectid with opener isolation
+  const bggPromise = page.waitForEvent('popup')
+  await firstCard.click()
+  const popup = await bggPromise
+  await expect(popup).toHaveURL(/boardgamegeek\.com\/boardgame\/\d+/)
+  await popup.close()
+
+  // Reproduce the shared URL in a fresh session
+  const sharedUrl = page.url()
+  await page.goto(sharedUrl)
+  await page.waitForLoadState('networkidle')
+  await expect(page.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-slot="card"]').first().locator('img')).toBeVisible()
+
+  // Switch back to grid
+  await setViewMode(page, 'Grid view')
+  await expect(page.getByRole('button', { name: 'Grid view' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-slot="card"]').first().locator('img')).toBeVisible()
 })
