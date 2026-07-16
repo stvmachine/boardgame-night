@@ -5,15 +5,15 @@ milestone_name: UI Redesign + Suggestion Engine
 current_phase: 09
 current_phase_name: Home & Collection Redesign
 status: executing
-stopped_at: Completed 09-02-PLAN.md
-last_updated: "2026-07-16T04:13:32.321Z"
+stopped_at: Completed 09-03-PLAN.md
+last_updated: "2026-07-16T04:31:32.103Z"
 last_activity: 2026-07-15
 last_activity_desc: Phase 09 execution started
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 46
-  completed_plans: 40
+  completed_plans: 41
   percent: 73
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 ## Current Position
 
 Phase: 09 (Home & Collection Redesign) — EXECUTING
-Plan: 3 of 8
+Plan: 4 of 8
 Status: Ready to execute
 Last activity: 2026-07-15 — Phase 09 execution started
 
@@ -81,6 +81,7 @@ Progress: [███████░░░] 73%
 | Phase 08 P04 | 14min | 2 tasks | 5 files |
 | Phase 09 P01 | 1207 | 3 tasks | 14 files |
 | Phase 09-home-collection-redesign P02 | 113min | 3 tasks | 10 files |
+| Phase 09-home-collection-redesign P03 | 10min | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -144,6 +145,9 @@ Recent decisions affecting current work:
 - [Phase 09]: Used the generated single-argument useDashboardStatsQuery(options) signature to align with the codegen contract. — vue-tsc rejected the two-argument form because the operation has no GraphQL variables; the generated composable accepts only an options object.
 - [Phase 09]: Seed BGG hot list Rails cache during e2e:seed for deterministic E2E — The Home/Hot Playwright journey failed because live BGG hot API is unreliable in test environments; seeding the cache lets the full GraphQL resolver path run without external network dependency.
 - [Phase 09]: Route dev/test Solid Cache to the cache database during e2e runs — Development default uses :memory_store, which does not persist across the e2e:seed process and the web server; using the cache database lets the seeded BGG hot list be shared by both processes.
+- [Phase 09-home-collection-redesign]: Attach immutable scope to each collection item rather than storing it in mutable query context; this survives lazy field resolution and GraphQL multiplexing.
+- [Phase 09-home-collection-redesign]: Expose objectid as a first-class MergedThing field so cards and external links use the true BGG identity, not the internal database id.
+- [Phase 09-home-collection-redesign]: Return null lastPlayedAt for raw BggThing consumers (suggestions, hot enrichment) and for anonymous requests; only signed-in users or authorized group members see scoped history.
 
 ### Pending Todos
 
@@ -171,6 +175,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-16T04:13:32.314Z
-Stopped at: Completed 09-02-PLAN.md
+Last session: 2026-07-16T04:31:32.096Z
+Stopped at: Completed 09-03-PLAN.md
 Resume file: None
