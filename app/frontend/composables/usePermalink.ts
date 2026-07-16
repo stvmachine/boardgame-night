@@ -65,7 +65,16 @@ export function usePermalink() {
 
   const sort = params.get('sort')
   if (sort) {
-    filterStore.sort = LEGACY_SORT_MAP[sort] ?? 'name_asc'
+    const mapped = LEGACY_SORT_MAP[sort] ?? 'name_asc'
+    filterStore.sort = mapped
+    if (sort !== mapped) {
+      if (mapped === 'name_asc') {
+        params.delete('sort')
+      } else {
+        params.set('sort', mapped)
+      }
+      replaceUrl(params)
+    }
   }
 
   const groupBy = params.get('groupBy')

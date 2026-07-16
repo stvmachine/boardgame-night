@@ -6,7 +6,9 @@ import { ApolloClient, InMemoryCache } from '@apollo/client/core'
 import { createRouter, createWebHistory } from 'vue-router'
 import { ref, nextTick, type Ref } from 'vue'
 import { useCollectorsStore } from '@/stores/collectors'
+import { useFilterStore } from '@/stores/filters'
 import * as operations from '@/generated/operations'
+import { sortGames } from '@/utils/sorting'
 import CollectionView from '@/views/CollectionView.vue'
 
 vi.mock('@/generated/operations')
@@ -39,9 +41,10 @@ function createTestRouter() {
   })
 }
 
-function buildGroupCollectionItem(id: string, name: string) {
+function buildGroupCollectionItem(id: string, name: string, overrides: Record<string, any> = {}) {
   return {
     id,
+    objectid: id,
     name,
     thumbnail: null,
     yearPublished: 2020,
@@ -51,7 +54,10 @@ function buildGroupCollectionItem(id: string, name: string) {
     maxPlaytime: 120,
     average: 7.5,
     averageWeight: 2.5,
-    owners: [{ bggUsername: 'alice_bgg', avatar: null }]
+    description: 'Plain text description.',
+    lastPlayedAt: null,
+    owners: [{ bggUsername: 'alice_bgg', avatar: null }],
+    ...overrides
   }
 }
 
@@ -256,5 +262,100 @@ describe('CollectionView', () => {
     await flushPromises()
 
     expect(mockMutate).toHaveBeenCalledWith({ username: 'alice_bgg' })
+  })
+
+  it('sorts merged collection by scoped lastPlayedAt for Recently Played', async () => {
+    mergedResult.value = {
+      mergedCollection: {
+        items: [
+          {
+            id: '100',
+            objectid: '100',
+            name: 'Azul',
+            yearPublished: 2017,
+            minPlayers: 2,
+            maxPlayers: 4,
+            minPlaytime: 30,
+            maxPlaytime: 45,
+            minAge: null,
+            image: null,
+            thumbnail: null,
+            description: null,
+            average: 7.7,
+            bayesAverage: null,
+            usersRated: null,
+            averageWeight: 1.8,
+            isExpansion: false,
+            lastPlayedAt: null,
+            owners: [{ bggUsername: 'e2e_alice', avatar: null }]
+          },
+          {
+            id: '101',
+            objectid: '101',
+            name: 'Wingspan',
+            yearPublished: 2019,
+            minPlayers: 1,
+            maxPlayers: 5,
+            minPlaytime: 40,
+            maxPlaytime: 70,
+            minAge: null,
+            image: null,
+            thumbnail: null,
+            description: null,
+            average: 7.9,
+            bayesAverage: null,
+            usersRated: null,
+            averageWeight: 2.4,
+            isExpansion: false,
+            lastPlayedAt: '2026-01-15T00:00:00Z',
+            owners: [{ bggUsername: 'e2e_alice', avatar: null }]
+          }
+        ],
+        syncStatuses: []
+      }
+    }
+
+    const wrapper = await mountCollection('/collection?usernames=e2e_alice')
+    await nextTick()
+
+    const filterStore = useFilterStore()
+    filterStore.sort = 'recently_played' as any
+    await nextTick()
+
+    const headings = wrapper.findAll('[data-slot="card"] h3')
+    expect(headings.length).toBe(2)
+    expect(headings[0].text()).toBe('Wingspan')
+    expect(headings[1].text()).toBe('Azul')
+  })
+
+  it('sorts group collection by scoped lastPlayedAt for Recently Played', async () => {
+    groupResult.value = {
+      group: {
+        id: '1',
+        inviteCode: 'NIGHTOWLS',
+        members: [
+          { id: '1', username: 'alice', displayName: 'Alice', bggUsername: 'alice_bgg' }
+        ],
+        collection: {
+          items: [
+            buildGroupCollectionItem('100', 'Azul', { lastPlayedAt: null }),
+            buildGroupCollectionItem('101', 'Wingspan', { lastPlayedAt: '2026-01-15T00:00:00Z' })
+          ],
+          syncStatuses: []
+        }
+      }
+    }
+
+    const wrapper = await mountCollection('/collection?group=NIGHTOWLS')
+    await nextTick()
+
+    const filterStore = useFilterStore()
+    filterStore.sort = 'recently_played' as any
+    await nextTick()
+
+    const headings = wrapper.findAll('[data-slot="card"] h3')
+    expect(headings.length).toBe(2)
+    expect(headings[0].text()).toBe('Wingspan')
+    expect(headings[1].text()).toBe('Azul')
   })
 })

@@ -77,7 +77,6 @@ function normalizeGroupItems(
   return items.map(item => ({
     __typename: 'MergedThing',
     ...item,
-    description: null,
     image: null,
     isExpansion: false,
     minAge: null,
