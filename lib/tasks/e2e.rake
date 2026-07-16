@@ -127,11 +127,11 @@ namespace :e2e do
         host: alice
       ) do |s|
         s.state = "completed"
-        s.scheduled_at = 1.day.ago
+        s.scheduled_at = Time.utc(2026, 1, 15, 20, 0, 0)
         s.location = "Alice's place"
         s.capacity = 6
       end
-      completed_session.update!(state: "completed", scheduled_at: 1.day.ago)
+      completed_session.update!(state: "completed", scheduled_at: Time.utc(2026, 1, 15, 20, 0, 0), picked_game: wingspan)
 
       cancelled_session = NightSession.find_or_create_by!(
         title: "e2e Cancelled Night",

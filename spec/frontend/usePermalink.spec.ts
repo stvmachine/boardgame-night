@@ -245,4 +245,55 @@ describe('usePermalink', () => {
     const lastUrl = String(calls[calls.length - 1]?.[2])
     expect(lastUrl).toContain('group=NIGHTOWLS')
   })
+
+  it('maps legacy sort values to the four approved sort options', () => {
+    const cases: Array<[string, string]> = [
+      ['name_desc', 'name_asc'],
+      ['rating_asc', 'rating_desc'],
+      ['rating_desc', 'rating_desc'],
+      ['year_asc', 'name_asc'],
+      ['year_desc', 'name_asc'],
+      ['weight_asc', 'weight_asc'],
+      ['weight_desc', 'weight_asc'],
+      ['complexity_asc', 'weight_asc'],
+      ['complexity_desc', 'weight_asc']
+    ]
+
+    for (const [legacy, expected] of cases) {
+      setUrl(`?sort=${legacy}`)
+      mount(TestComponent)
+
+      const filterStore = useFilterStore()
+      expect(filterStore.sort).toBe(expected)
+    }
+  })
+
+  it('falls back to name_asc for unknown sort values', () => {
+    setUrl('?sort=unknown_value')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    expect(filterStore.sort).toBe('name_asc')
+  })
+
+  it('preserves a real group token while hydrating a legacy sort', () => {
+    setUrl('?group=NIGHTOWLS&sort=year_desc')
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    expect(filterStore.sort).toBe('name_asc')
+    expect(filterStore.groupBy).toBe('none')
+  })
+
+  it('serializes approved non-default sort values to the URL', async () => {
+    mount(TestComponent)
+
+    const filterStore = useFilterStore()
+    filterStore.sort = 'recently_played'
+    await nextTick()
+
+    const calls = vi.mocked(window.history.replaceState).mock.calls
+    const lastUrl = String(calls[calls.length - 1]?.[2])
+    expect(lastUrl).toContain('sort=recently_played')
+  })
 })
