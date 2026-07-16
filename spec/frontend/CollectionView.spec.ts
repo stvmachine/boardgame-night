@@ -10,6 +10,8 @@ import { useFilterStore } from '@/stores/filters'
 import * as operations from '@/generated/operations'
 import { sortGames } from '@/utils/sorting'
 import CollectionView from '@/views/CollectionView.vue'
+import CollectionFilterPanel from '@/components/collection/CollectionFilterPanel.vue'
+import ActiveFilterChips from '@/components/collection/ActiveFilterChips.vue'
 
 vi.mock('@/generated/operations')
 
@@ -357,5 +359,110 @@ describe('CollectionView', () => {
     expect(headings.length).toBe(2)
     expect(headings[0].text()).toBe('Wingspan')
     expect(headings[1].text()).toBe('Azul')
+  })
+
+  it('renders a desktop filter panel aside with exact geometry classes', async () => {
+    const wrapper = await mountCollection('/collection?usernames=alice_bgg')
+    await nextTick()
+    const aside = wrapper.find('aside')
+    expect(aside.exists()).toBe(true)
+    expect(aside.classes()).toContain('hidden')
+    expect(aside.classes()).toContain('xl:block')
+    expect(aside.classes()).toContain('w-[264px]')
+    expect(aside.classes()).toContain('xl:sticky')
+    expect(aside.classes()).toContain('xl:top-6')
+    expect(aside.classes()).toContain('xl:self-start')
+  })
+
+  it('renders a labelled Filters button and Sheet title/description', async () => {
+    const wrapper = await mountCollection('/collection?usernames=alice_bgg')
+    await nextTick()
+    const button = wrapper.find('button[aria-label="Open filters"]')
+    expect(button.exists()).toBe(true)
+    expect(button.text()).toContain('Filters')
+
+    const sheetTitle = wrapper.find('[data-slot="sheet-title"]')
+    expect(sheetTitle.exists()).toBe(true)
+    expect(sheetTitle.text()).toContain('Filters')
+
+    const sheetDesc = wrapper.find('[data-slot="sheet-description"]')
+    expect(sheetDesc.exists()).toBe(true)
+    expect(sheetDesc.text()).toContain('Filter')
+  })
+
+  it('renders toolbar in Filters → Sort → Group by → chips order', async () => {
+    const wrapper = await mountCollection('/collection?usernames=alice_bgg')
+    const filterStore = useFilterStore()
+    filterStore.query = 'wingspan'
+    await nextTick()
+
+    const toolbar = wrapper.find('[data-testid="collection-toolbar"]')
+    expect(toolbar.exists()).toBe(true)
+
+    const children = toolbar.element.children
+    expect(children[0].tagName).toBe('BUTTON')
+    expect(children[0].getAttribute('aria-label')).toBe('Open filters')
+    expect(children[1].querySelector('label')?.getAttribute('for')).toBe('sort-control')
+    expect(children[2].querySelector('label')?.getAttribute('for')).toBe('group-by')
+    expect(children[3].getAttribute('data-slot')).toBe('active-filter-chips')
+  })
+
+  it('mounts only one CollectionFilterPanel when the Sheet is closed', async () => {
+    const wrapper = await mountCollection('/collection?usernames=alice_bgg')
+    await nextTick()
+    const panels = wrapper.findAllComponents(CollectionFilterPanel)
+    expect(panels.length).toBe(1)
+  })
+
+  it('does not duplicate active filter controls when the Sheet is closed', async () => {
+    const wrapper = await mountCollection('/collection?usernames=alice_bgg')
+    await nextTick()
+    const inputs = wrapper.findAll('input[id="filter-search"]')
+    expect(inputs.length).toBe(1)
+  })
+
+  it('does not mount the Sheet panel content while the Sheet is closed', async () => {
+    const wrapper = await mountCollection('/collection?usernames=alice_bgg')
+    await nextTick()
+    const sheets = wrapper.findAll('[data-slot="sheet-content"]')
+    const closedSheetContent = sheets.filter(s => s.findComponent(CollectionFilterPanel).exists())
+    expect(closedSheetContent.length).toBe(0)
+  })
+
+  it('shows the clear action on the empty state when filters are active', async () => {
+    mergedResult.value = {
+      mergedCollection: {
+        items: [
+          {
+            id: '100',
+            objectid: '100',
+            name: 'Azul',
+            yearPublished: 2017,
+            minPlayers: 2,
+            maxPlayers: 4,
+            minPlaytime: 30,
+            maxPlaytime: 45,
+            minAge: null,
+            image: null,
+            thumbnail: null,
+            description: null,
+            average: 7.7,
+            bayesAverage: null,
+            usersRated: null,
+            averageWeight: 1.8,
+            isExpansion: false,
+            lastPlayedAt: null,
+            owners: [{ bggUsername: 'e2e_alice', avatar: null }]
+          }
+        ],
+        syncStatuses: []
+      }
+    }
+
+    const wrapper = await mountCollection('/collection?usernames=e2e_alice&q=zzzz')
+    await nextTick()
+
+    expect(wrapper.text()).toContain('No games found')
+    expect(wrapper.find('button').text()).toContain('Clear filters')
   })
 })
