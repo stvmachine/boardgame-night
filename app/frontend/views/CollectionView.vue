@@ -15,6 +15,7 @@ import SortControl from '../components/collection/SortControl.vue'
 import GroupByToggle from '../components/collection/GroupByToggle.vue'
 import CollectionFilterPanel from '../components/collection/CollectionFilterPanel.vue'
 import ActiveFilterChips from '../components/collection/ActiveFilterChips.vue'
+import ViewModeToggle from '../components/collection/ViewModeToggle.vue'
 import EmptyState from '../components/collection/EmptyState.vue'
 import Button from '@/components/ui/button/Button.vue'
 import Icon from '@/components/ui/icon/Icon.vue'
@@ -182,6 +183,7 @@ const hasActiveFilters = computed(() => {
           </Button>
           <SortControl v-model="sort" />
           <GroupByToggle v-model="groupBy" />
+          <ViewModeToggle v-model="view" />
           <ActiveFilterChips />
         </div>
 
@@ -206,6 +208,7 @@ const hasActiveFilters = computed(() => {
           v-else
           :groups="groupedGames"
           :group-by="groupBy"
+          :view="view"
           :loading="loading"
         />
       </div>

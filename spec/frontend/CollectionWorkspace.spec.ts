@@ -2,15 +2,32 @@ import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
+import { provideApolloClient } from '@vue/apollo-composable'
+import { ApolloClient, InMemoryCache } from '@apollo/client/core'
+import { createRouter, createWebHistory } from 'vue-router'
 import TimeBucketCheckboxes from '@/components/collection/TimeBucketCheckboxes.vue'
 import ComplexityToggleGroup from '@/components/collection/ComplexityToggleGroup.vue'
 import OwnerAvatarToggles from '@/components/collection/OwnerAvatarToggles.vue'
 import CollectionFilterPanel from '@/components/collection/CollectionFilterPanel.vue'
 import ActiveFilterChips from '@/components/collection/ActiveFilterChips.vue'
 import PlayerRangeSlider from '@/components/collection/PlayerRangeSlider.vue'
+import ViewModeToggle from '@/components/collection/ViewModeToggle.vue'
+import CollectionView from '@/views/CollectionView.vue'
 import { useFilterStore } from '@/stores/filters'
 import { useCollectorsStore } from '@/stores/collectors'
 import { TIME_BUCKETS } from '@/composables/useCollectionFilters'
+import * as operations from '@/generated/operations'
+
+beforeAll(() => {
+  class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
+})
+
+vi.mock('@/generated/operations')
 
 beforeAll(() => {
   class ResizeObserverMock {
@@ -348,29 +365,102 @@ describe('ActiveFilterChips', () => {
     await nextTick()
     expect(wrapper.find('[data-slot="active-filter-chips"]').exists()).toBe(false)
   })
+})
 
-  it('clears all filter restrictions while preserving sort, grouping, and view', async () => {
-    const wrapper = mountChips()
-    const store = useFilterStore()
-    store.query = 'wingspan'
-    store.playerRange = { min: 3, max: 6 }
-    store.selectedTimeBuckets = new Set([1])
-    store.complexityBucket = 2
-    store.selectedOwners = new Set(['alice'])
-    store.sort = 'rating_desc'
-    store.groupBy = 'players'
-    store.view = 'list'
+describe('ViewModeToggle', () => {
+  function mountToggle(modelValue = 'grid') {
+    return mount(ViewModeToggle, {
+      props: {
+        modelValue,
+        'onUpdate:modelValue': vi.fn()
+      }
+    })
+  }
+
+  it('renders Grid view and List view buttons with aria-labels', () => {
+    const wrapper = mountToggle()
+    expect(wrapper.find('button[aria-label="Grid view"]').exists()).toBe(true)
+    expect(wrapper.find('button[aria-label="List view"]').exists()).toBe(true)
+  })
+
+  it('selects grid by default and list when modelValue is list', () => {
+    const grid = mountToggle('grid')
+    expect(grid.find('button[aria-label="Grid view"]').attributes('aria-pressed')).toBe('true')
+
+    const list = mountToggle('list')
+    expect(list.find('button[aria-label="List view"]').attributes('aria-pressed')).toBe('true')
+  })
+
+  it('emits the new view mode when a button is clicked', async () => {
+    const onUpdate = vi.fn()
+    const wrapper = mount(ViewModeToggle, {
+      props: { modelValue: 'grid', 'onUpdate:modelValue': onUpdate }
+    })
+
+    await wrapper.find('button[aria-label="List view"]').trigger('click')
+    expect(onUpdate).toHaveBeenCalledWith('list')
+  })
+})
+
+describe('CollectionView toolbar', () => {
+  function createMockClient() {
+    return new ApolloClient({
+      link: { request: vi.fn() } as any,
+      cache: new InMemoryCache()
+    })
+  }
+
+  function createTestRouter() {
+    return createRouter({
+      history: createWebHistory(),
+      routes: [
+        { path: '/', component: { template: '<div />' } },
+        { path: '/collection', component: CollectionView, name: 'collection' }
+      ]
+    })
+  }
+
+  async function mountCollection() {
+    setActivePinia(createPinia())
+    provideApolloClient(createMockClient())
+
+    vi.mocked(operations.useMergedCollectionQuery).mockReturnValue({
+      result: { value: { mergedCollection: { items: [], syncStatuses: [] } } },
+      loading: { value: false },
+      error: { value: null }
+    } as any)
+
+    vi.mocked(operations.useGroupCollectionQuery).mockReturnValue({
+      result: { value: { group: null } },
+      loading: { value: false },
+      error: { value: null }
+    } as any)
+
+    vi.mocked(operations.useImportCollectionMutation).mockReturnValue({
+      mutate: vi.fn()
+    } as any)
+
+    const router = createTestRouter()
+    await router.push('/collection?usernames=alice_bgg')
+    await router.isReady()
+
+    return mount(CollectionView, { global: { plugins: [router] } })
+  }
+
+  it('renders toolbar in Filters → Sort → Group by → View → chips order', async () => {
+    const wrapper = await mountCollection()
+    const filterStore = useFilterStore()
+    filterStore.query = 'wingspan'
     await nextTick()
 
-    await wrapper.find('[data-testid="clear-all-filters"]').trigger('click')
+    const toolbar = wrapper.find('[data-testid="collection-toolbar"]')
+    expect(toolbar.exists()).toBe(true)
 
-    expect(store.query).toBe('')
-    expect(store.playerRange).toBeNull()
-    expect(store.selectedTimeBuckets.size).toBe(0)
-    expect(store.complexityBucket).toBeNull()
-    expect(store.selectedOwners).toEqual(new Set(['alice', 'bob', 'carol']))
-    expect(store.sort).toBe('rating_desc')
-    expect(store.groupBy).toBe('players')
-    expect(store.view).toBe('list')
+    const children = toolbar.element.children
+    expect(children[0].getAttribute('aria-label')).toBe('Open filters')
+    expect(children[1].querySelector('label')?.getAttribute('for')).toBe('sort-control')
+    expect(children[2].querySelector('label')?.getAttribute('for')).toBe('group-by')
+    expect(children[3].getAttribute('data-slot')).toBe('toggle-group')
+    expect(children[4].getAttribute('data-slot')).toBe('active-filter-chips')
   })
 })

@@ -13,6 +13,7 @@ interface Props {
   games?: MergedThing[]
   groups?: GameGroup[]
   groupBy?: GroupOption
+  view?: 'grid' | 'list'
   loading?: boolean
 }
 
@@ -20,6 +21,7 @@ const props = withDefaults(defineProps<Props>(), {
   games: () => [],
   groups: () => [],
   groupBy: 'none',
+  view: 'grid',
   loading: false
 })
 
@@ -43,7 +45,7 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
   <div class="space-y-6">
     <template v-if="loading">
       <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
-        <ResultsSkeleton v-for="i in 12" :key="i" />
+        <ResultsSkeleton v-for="i in 12" :key="i" :variant="view" />
       </div>
     </template>
 

@@ -424,7 +424,36 @@ describe('CollectionView', () => {
   })
 
   it('reproduces rich list view from the permalink', async () => {
-    const wrapper = await mountCollection('/collection?usernames=alice_bgg&view=list')
+    mergedResult.value = {
+      mergedCollection: {
+        items: [
+          {
+            id: '100',
+            objectid: '100',
+            name: 'Azul',
+            yearPublished: 2017,
+            minPlayers: 2,
+            maxPlayers: 4,
+            minPlaytime: 30,
+            maxPlaytime: 45,
+            minAge: null,
+            image: null,
+            thumbnail: null,
+            description: null,
+            average: 7.7,
+            bayesAverage: null,
+            usersRated: null,
+            averageWeight: 1.8,
+            isExpansion: false,
+            lastPlayedAt: null,
+            owners: [{ bggUsername: 'e2e_alice', avatar: null }]
+          }
+        ],
+        syncStatuses: []
+      }
+    }
+
+    const wrapper = await mountCollection('/collection?usernames=e2e_alice&view=list')
     await nextTick()
 
     const listButton = wrapper.find('button[aria-label="List view"]')
