@@ -1,11 +1,21 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeAll } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { h } from 'vue'
+import { h, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Slider } from '@/components/ui/slider'
+
+beforeAll(() => {
+  class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
+})
 
 describe('Primitive M3 token styling', () => {
   it('Button primary uses M3 primary tokens', () => {
@@ -80,5 +90,39 @@ describe('Primitive M3 token styling', () => {
     const classes = wrapper.classes().join(' ')
     expect(classes).toContain('animate-pulse')
     expect(classes).toContain('bg-surface-variant')
+  })
+
+  it('Slider is a source-owned reka-ui wrapper with two-thumb support', async () => {
+    const modelValue = ref([2, 7])
+    const wrapper = mount(Slider, {
+      props: { modelValue: modelValue.value, min: 1, max: 10, step: 1 },
+      attrs: { 'onUpdate:modelValue': (v: number[]) => { modelValue.value = v } }
+    })
+
+    const thumbs = wrapper.findAll('[data-slot="slider-thumb"]')
+    expect(thumbs.length).toBe(2)
+  })
+
+  it('Slider uses M3 tokens instead of shadcn default colors', () => {
+    const wrapper = mount(Slider, { props: { modelValue: [2, 7], min: 1, max: 10, step: 1 } })
+    const html = wrapper.html()
+    expect(html).toContain('bg-surface-variant')
+    expect(html).toContain('bg-primary')
+    expect(html).toContain('bg-surface-container')
+  })
+
+  it('Slider does not import icons from a second icon library', () => {
+    const source = `
+import { Slider } from '@/components/ui/slider'
+import SliderSource from '@/components/ui/slider/Slider.vue'
+`
+    expect(source).not.toContain('@lucide/vue')
+    // The actual source file must not reference lucide
+    const fs = require('fs')
+    const path = require('path')
+    const sliderPath = path.resolve(__dirname, '../slider/Slider.vue')
+    const content = fs.readFileSync(sliderPath, 'utf-8')
+    expect(content).not.toContain('@lucide/vue')
+    expect(content).not.toContain('lucide')
   })
 })
