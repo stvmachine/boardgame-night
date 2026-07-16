@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { provideApolloClient } from '@vue/apollo-composable'
@@ -12,6 +12,15 @@ import { sortGames } from '@/utils/sorting'
 import CollectionView from '@/views/CollectionView.vue'
 import CollectionFilterPanel from '@/components/collection/CollectionFilterPanel.vue'
 import ActiveFilterChips from '@/components/collection/ActiveFilterChips.vue'
+
+beforeAll(() => {
+  class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
+})
 
 vi.mock('@/generated/operations')
 
@@ -381,13 +390,17 @@ describe('CollectionView', () => {
     expect(button.exists()).toBe(true)
     expect(button.text()).toContain('Filters')
 
-    const sheetTitle = wrapper.find('[data-slot="sheet-title"]')
-    expect(sheetTitle.exists()).toBe(true)
-    expect(sheetTitle.text()).toContain('Filters')
+    await button.trigger('click')
+    await nextTick()
+    await nextTick()
 
-    const sheetDesc = wrapper.find('[data-slot="sheet-description"]')
-    expect(sheetDesc.exists()).toBe(true)
-    expect(sheetDesc.text()).toContain('Filter')
+    const sheetTitle = document.querySelector('[data-slot="sheet-title"]')
+    expect(sheetTitle).not.toBeNull()
+    expect(sheetTitle!.textContent).toContain('Filters')
+
+    const sheetDesc = document.querySelector('[data-slot="sheet-description"]')
+    expect(sheetDesc).not.toBeNull()
+    expect(sheetDesc!.textContent).toContain('Filter')
   })
 
   it('renders toolbar in Filters → Sort → Group by → chips order', async () => {
@@ -463,6 +476,8 @@ describe('CollectionView', () => {
     await nextTick()
 
     expect(wrapper.text()).toContain('No games found')
-    expect(wrapper.find('button').text()).toContain('Clear filters')
+    const clearButton = wrapper.findAll('button').find(b => b.text().includes('Clear filters'))
+    expect(clearButton).toBeDefined()
+    expect(clearButton!.text()).toContain('Clear filters')
   })
 })

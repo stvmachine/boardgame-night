@@ -13,16 +13,22 @@ import { groupGames, type GroupOption } from '../utils/grouping'
 import GameGrid from '../components/collection/GameGrid.vue'
 import SortControl from '../components/collection/SortControl.vue'
 import GroupByToggle from '../components/collection/GroupByToggle.vue'
-import CollectionFilters from '../components/collection/CollectionFilters.vue'
+import CollectionFilterPanel from '../components/collection/CollectionFilterPanel.vue'
+import ActiveFilterChips from '../components/collection/ActiveFilterChips.vue'
 import EmptyState from '../components/collection/EmptyState.vue'
+import Button from '@/components/ui/button/Button.vue'
+import Icon from '@/components/ui/icon/Icon.vue'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 
 const route = useRoute()
 const collectorsStore = useCollectorsStore()
 const filterStore = useFilterStore()
-const { query, playerCount, timeBucket, complexityBucket, ratingMin, selectedOwners, sort, groupBy } = storeToRefs(filterStore)
+const { query, playerRange, selectedTimeBuckets, complexityBucket, ratingMin, selectedOwners, sort, groupBy, view } = storeToRefs(filterStore)
 const { usernames } = storeToRefs(collectorsStore)
 
 usePermalink()
+
+const filtersOpen = ref(false)
 
 const LEGACY_GROUP_OPTIONS: GroupOption[] = ['players', 'rating', 'bestPlayers', 'owner']
 
@@ -134,8 +140,8 @@ watch(
 
 const { filteredGames } = useCollectionFilters(allGames, {
   query,
-  playerCount,
-  timeBucket,
+  playerRange,
+  selectedTimeBuckets,
   complexityBucket,
   ratingMin,
   selectedOwners
@@ -145,51 +151,74 @@ const sortedGames = computed(() => sortGames(filteredGames.value, filterStore.so
 const groupedGames = computed(() => groupGames(sortedGames.value, filterStore.groupBy))
 
 const hasActiveFilters = computed(() => {
+  const allOwners = collectorsStore.usernames
+  const hasOwnerFilter = selectedOwners.value.size > 0 && selectedOwners.value.size < allOwners.length
   return query.value.trim() !== '' ||
-    playerCount.value != null ||
-    timeBucket.value != null ||
+    playerRange.value != null ||
+    selectedTimeBuckets.value.size > 0 ||
     complexityBucket.value != null ||
-    ratingMin.value != null
+    ratingMin.value != null ||
+    hasOwnerFilter
 })
 </script>
 
 <template>
-  <div class="p-4 md:p-6 space-y-4">
-    <div class="flex flex-row gap-4 items-start">
-      <SortControl v-model="sort" />
-      <GroupByToggle v-model="groupBy" />
+  <div class="p-4 md:p-6">
+    <div class="flex flex-col xl:flex-row gap-6">
+      <aside class="hidden xl:block w-[264px] xl:sticky xl:top-6 xl:self-start space-y-6">
+        <CollectionFilterPanel />
+      </aside>
+
+      <div class="flex-1 min-w-0 space-y-4">
+        <div class="flex flex-wrap items-center gap-3" data-testid="collection-toolbar">
+          <Button
+            variant="outline"
+            class="xl:hidden"
+            aria-label="Open filters"
+            @click="filtersOpen = true"
+          >
+            <Icon name="filter_list" class="mr-2 size-4" />
+            Filters
+          </Button>
+          <SortControl v-model="sort" />
+          <GroupByToggle v-model="groupBy" />
+          <ActiveFilterChips />
+        </div>
+
+        <EmptyState
+          v-if="error"
+          heading="Could not load collection"
+          :body="error.message"
+        />
+        <EmptyState
+          v-else-if="usernames.length === 0 && !groupMode && !loading"
+          heading="No collectors selected"
+          body="Enter one or more BoardGameGeek usernames to merge collections."
+        />
+        <EmptyState
+          v-else-if="filteredGames.length === 0 && !loading"
+          heading="No games found"
+          body="Try clearing filters or selecting more collectors."
+          :show-clear="hasActiveFilters"
+          @clear="filterStore.clearFilters"
+        />
+        <GameGrid
+          v-else
+          :groups="groupedGames"
+          :group-by="groupBy"
+          :loading="loading"
+        />
+      </div>
     </div>
 
-    <CollectionFilters
-      v-model:query="query"
-      v-model:player-count="playerCount"
-      v-model:time-bucket="timeBucket"
-      v-model:complexity-bucket="complexityBucket"
-      v-model:rating-min="ratingMin"
-    />
-
-    <EmptyState
-      v-if="error"
-      heading="Could not load collection"
-      :body="error.message"
-    />
-    <EmptyState
-      v-else-if="usernames.length === 0 && !groupMode && !loading"
-      heading="No collectors selected"
-      body="Enter one or more BoardGameGeek usernames to merge collections."
-    />
-    <EmptyState
-      v-else-if="filteredGames.length === 0 && !loading"
-      heading="No games found"
-      body="Try clearing filters or selecting more collectors."
-      :show-clear="hasActiveFilters"
-      @clear="filterStore.clearFilters"
-    />
-    <GameGrid
-      v-else
-      :groups="groupedGames"
-      :group-by="groupBy"
-      :loading="loading"
-    />
+    <Sheet v-model:open="filtersOpen">
+      <SheetContent side="left" class="w-[300px] sm:w-[360px]">
+        <SheetHeader>
+          <SheetTitle>Filters</SheetTitle>
+          <SheetDescription>Filter the shared collection</SheetDescription>
+        </SheetHeader>
+        <CollectionFilterPanel v-if="filtersOpen" />
+      </SheetContent>
+    </Sheet>
   </div>
 </template>

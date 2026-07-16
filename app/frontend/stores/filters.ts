@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { SortOption } from '@/utils/sorting'
 import type { GroupOption } from '@/utils/grouping'
+import { useCollectorsStore } from '@/stores/collectors'
 
 export type { SortOption, GroupOption }
 
@@ -43,6 +44,8 @@ export const useFilterStore = defineStore('filters', () => {
   const groupBy = ref<GroupOption>('none')
   const view = ref<ViewMode>('grid')
 
+  const collectorsStore = useCollectorsStore()
+
   // Owner toggles
   function toggleOwner(username: string) {
     const next = new Set(selectedOwners.value)
@@ -68,6 +71,7 @@ export const useFilterStore = defineStore('filters', () => {
     selectedTimeBuckets.value = new Set()
     complexityBucket.value = null
     ratingMin.value = null
+    selectedOwners.value = new Set(collectorsStore.usernames)
   }
 
   return {
