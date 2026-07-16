@@ -6,14 +6,14 @@ current_phase: 09
 current_phase_name: Home & Collection Redesign
 status: executing
 stopped_at: Completed 09-06-PLAN.md
-last_updated: "2026-07-16T06:10:53.185Z"
+last_updated: "2026-07-16T06:44:31.412Z"
 last_activity: 2026-07-15
 last_activity_desc: Phase 09 execution started
 progress:
   total_phases: 11
   completed_phases: 8
   total_plans: 46
-  completed_plans: 44
+  completed_plans: 45
   percent: 73
 ---
 
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-15)
 ## Current Position
 
 Phase: 09 (Home & Collection Redesign) — EXECUTING
-Plan: 7 of 8
+Plan: 8 of 8
 Status: Ready to execute
 Last activity: 2026-07-15 — Phase 09 execution started
 
@@ -85,6 +85,7 @@ Progress: [███████░░░] 73%
 | Phase 09-home-collection-redesign P04 | 20 | 3 tasks | 10 files |
 | Phase 09-home-collection-redesign P05 | 16m 24s | 3 tasks | 13 files |
 | Phase 09 P06 | 15min | 3 tasks | 10 files |
+| Phase 09 P07 | 13m | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -160,6 +161,10 @@ Recent decisions affecting current work:
 - [Phase 09]: Keep shadcn-vue primitives source-owned; avoid external icon-only dependencies. — Generator dependency drift destabilizes lockfiles; vendored source gives full control.
 - [Phase 09]: Use v-model plus modelValue pattern on collection filter controls; emit option lists from panels. — Parents bind arrays; child components expose typed option sets and emit minimal deltas.
 - [Phase 09]: Adopt source slots for Material Symbols icons in shadcn-vue primitives; no lucide-only icon dependency. — Project icon contract is Material Symbols; primitives use slot placeholders so callers supply the correct icon font.
+- [Phase 09]: Implemented ActiveFilterChips as a standalone toolbar component rather than embedding chips inside CollectionFilterPanel.
+- [Phase 09]: Used reka-ui DialogPortal for Sheet content so tests query document to verify title/description copy.
+- [Phase 09]: Reset selectedOwners to all collectors in clearFilters so Clear all removes the owner restriction while preserving the collector list and group token.
+- [Phase 09]: Deleted the legacy CollectionFilters component and spec only after replacement suites passed, with a filesystem assertion as the deletion gate.
 
 ### Pending Todos
 
@@ -187,6 +192,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-16T06:10:53.178Z
+Last session: 2026-07-16T06:42:17.589Z
 Stopped at: Completed 09-06-PLAN.md
 Resume file: None
