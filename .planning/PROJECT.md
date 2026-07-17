@@ -15,13 +15,11 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 - ✓ Rails API exposes a GraphQL endpoint consumed by the Vue frontend — Phase 1
 - ✓ Full poll-based suggestion engine parses and persists BGG poll data, ranks attendee-owned games with explainable scoring, and exposes the shortlist through GraphQL — Phases 6–7
 - ✓ Group Detail provides one responsive hub for sessions, shared-game spotlight, authorized member management, and invitation controls — Phase 8
+- ✓ Tabletop Social design system and responsive app shell provide Material 3 tokens, shared primitives, navigation, badges, avatars, and skeletons — Phase 5
+- ✓ Home and Collection deliver the merge dashboard, personal stats, persisted trending games, rich filters, exact sorting, grid/list cards, and view-matched loading states — Phase 9
 
 ### Active
 
-- [ ] Migrate UI to "Tabletop Social" design system (Inter, indigo, Material 3 tonal palette, Material Symbols icons, 280px sidebar, rounded-xl cards, status badges, skeleton loaders)
-- [ ] Redesign app shell with new sidebar navigation (Home/Collection/Hot/Groups/Account + Settings/Logout + "New Session" primary button)
-- [ ] Redesign Home as a dashboard (hero with BGG merge input + personal stats card + trending games)
-- [ ] Redesign Collection view (structured filter sidebar with range slider, checkbox groups, segmented buttons + rich game cards + sort + grid/list toggle + skeleton loaders)
 - [ ] Redesign Picking a Game screen (session header with status badge + attendee-aware filtered game suggestions + "Pick this game" cards)
 - [ ] Address v1.0 tech debt (E2E suite in CI, Action Cable dev config, cleanup legacy BGG classes, update REQUIREMENTS checkboxes)
 
@@ -109,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-15 after Phase 8 complete (Group Detail Surface); Milestone v1.1 in progress*
+*Last updated: 2026-07-17 after Phase 9 complete (Home & Collection Redesign); Milestone v1.1 in progress*
