@@ -21,7 +21,7 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-15)
+See: .planning/PROJECT.md (updated 2026-07-17)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
 **Current focus:** Phase 10 — Picking a Game Redesign
