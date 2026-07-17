@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
-current_phase: 09
-current_phase_name: Home & Collection Redesign
-status: verifying
-stopped_at: Phase 09 plans complete; verification artifact missing
-last_updated: "2026-07-17T22:13:03Z"
+current_phase: 10
+current_phase_name: Picking a Game Redesign
+status: ready_to_plan
+stopped_at: Phase 09 complete, ready to discuss Phase 10
+last_updated: "2026-07-17T22:20:54Z"
 last_activity: 2026-07-17
-last_activity_desc: Plan 09-08 passed all integrated gates; phase verifier failed to write its artifact
+last_activity_desc: Phase 09 complete, transitioned to Phase 10
 progress:
   total_phases: 11
-  completed_phases: 8
+  completed_phases: 9
   total_plans: 46
   completed_plans: 46
-  percent: 73
+  percent: 82
 ---
 
 # Project State
@@ -24,22 +24,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-15)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 09 — Home & Collection Redesign
+**Current focus:** Phase 10 — Picking a Game Redesign
 
 ## Current Position
 
-Phase: 09 (Home & Collection Redesign) — VERIFYING
-Plan: 8 of 8
-Status: Awaiting phase verification artifact
-Last activity: 2026-07-17 — Plan 09-08 passed all integrated gates; phase verifier failed to write its artifact
+Phase: 10 — Picking a Game Redesign
+Plan: Not started
+Status: Ready to discuss and plan
+Last activity: 2026-07-17 — Phase 09 complete, transitioned to Phase 10
 
-Progress: [███████░░░] 73%
+Progress: [████████░░] 82%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 38
+- Total plans completed: 46
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -55,7 +55,7 @@ Progress: [███████░░░] 73%
 | 6. BGG Poll Data Layer | 3 | ~19m | ~6 min |
 | 7. Suggestion Engine Backend | 4 | ~1h 50m | ~28 min |
 | 8. Group Detail Surface | 6 | — | — |
-| 9. Home & Collection Redesign | TBD | — | — |
+| 9. Home & Collection Redesign | 8 | — | — |
 | 10. Picking a Game Redesign | TBD | — | — |
 | 11. Polish & E2E Hardening | TBD | — | — |
 | 06 | 3 | - | - |
@@ -172,7 +172,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase verifier completed twice without creating `09-VERIFICATION.md`; canonical verification status is `missing`, so Phase 09 cannot be marked complete.
+None.
 
 ### Roadmap Evolution
 
@@ -192,6 +192,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-17T22:13:03Z
-Stopped at: Phase 09 plan execution and integrated verification complete; required phase verification artifact missing
-Resume file: .planning/phases/09-home-collection-redesign/.continue-here.md
+Last session: 2026-07-17T22:20:54Z
+Stopped at: Phase 09 complete, ready to discuss Phase 10
+Resume file: None
