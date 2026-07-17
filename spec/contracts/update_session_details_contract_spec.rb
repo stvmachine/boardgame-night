@@ -59,7 +59,7 @@ RSpec.describe UpdateSessionDetailsContract do
   it "fails when only session_id is provided" do
     contract = described_class.new.call({ session_id: "session-123" })
     expect(contract).to be_failure
-    expect(contract.errors.to_h).to have_key(:base)
+    expect(contract.errors.to_h.values.flatten).to include("at least one ordinary detail must be provided")
   end
 
   it "allows explicit nil for nullable fields" do
