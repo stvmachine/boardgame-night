@@ -33,8 +33,26 @@ namespace :e2e do
       end
       wingspan.update!(
         description: "Attract birds to a thriving wildlife preserve through careful card play.",
-        thumbnail: "https://example.com/wingspan.jpg"
+        thumbnail: "https://example.com/wingspan.jpg",
+        poll_data_fetched_at: Time.current
       )
+
+      wingspan_poll = BggPoll.find_or_create_by!(bgg_thing: wingspan, name: "suggested_numplayers") do |poll|
+        poll.title = "User Suggested Number of Players"
+        poll.total_votes = 100
+      end
+      puts "DEBUG: wingspan_poll id=#{wingspan_poll.id} results=#{wingspan_poll.bgg_poll_results.count}"
+      wingspan_poll.bgg_poll_results.where(player_count: 1).destroy_all
+      puts "DEBUG: after destroy results=#{wingspan_poll.bgg_poll_results.count}"
+      [
+        { value: "Best", player_count: 1, num_votes: 60 },
+        { value: "Recommended", player_count: 1, num_votes: 30 },
+        { value: "Not Recommended", player_count: 1, num_votes: 10 }
+      ].each do |attrs|
+        wingspan_poll.bgg_poll_results.create!(attrs)
+      end
+      puts "DEBUG: after create results=#{wingspan_poll.bgg_poll_results.count}"
+      puts "DEBUG: pc1 results=#{wingspan_poll.results_for_player_count(1).map { |r| "#{r.value}=#{r.num_votes}" }.join(', ')}"
 
       azul = BggThing.find_or_create_by!(objectid: 123_457) do |thing|
         thing.name = "Azul"
@@ -159,7 +177,7 @@ namespace :e2e do
       InviteToken.create!(
         group: group,
         inviter: alice,
-        email: "e2e_guest@example.com",
+        email: bob.email,
         night_session: invited_session,
         token_digest: digest,
         status: "pending",
