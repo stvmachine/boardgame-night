@@ -97,7 +97,15 @@ async function handlePick(suggestion: Suggestion) {
         <Skeleton class="h-4 w-3/4" />
         <Skeleton class="h-4 w-full" />
         <Skeleton class="h-4 w-1/2" />
-        <Skeleton class="h-4 w-1/3" />
+        <div class="flex gap-2">
+          <Skeleton class="h-6 w-16 rounded-full" />
+          <Skeleton class="h-6 w-20 rounded-full" />
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <Skeleton class="h-6 w-24 rounded-full" />
+          <Skeleton class="h-6 w-32 rounded-full" />
+          <Skeleton class="h-6 w-20 rounded-full" />
+        </div>
         <Skeleton class="h-10 w-full" />
       </div>
     </div>
@@ -154,7 +162,7 @@ async function handlePick(suggestion: Suggestion) {
           :description="suggestion.thing.description"
           :owners="suggestion.thing.owners"
           :score="suggestion.score"
-          :confidence="suggestion.confidence as any"
+          :confidence="suggestion.confidence"
           :reasons="suggestion.reasons"
         >
           <template #action>

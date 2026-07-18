@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   useNightSessionQuery,
@@ -80,8 +80,11 @@ onDone(() => {
 
 onUpdateDetailsDone(() => {
   showDetailsEditor.value = false
-  detailsAnnouncement.value = 'Session details updated.'
-  pickingHeaderRef.value?.focusEditButton()
+  detailsAnnouncement.value = ''
+  nextTick(() => {
+    detailsAnnouncement.value = 'Session details updated.'
+    pickingHeaderRef.value?.focusEditButton()
+  })
 })
 
 async function handleSchedule(payload: {
@@ -104,7 +107,10 @@ async function handleStartPicking() {
 }
 
 function handlePicked(gameName: string) {
-  pickAnnouncement.value = `${gameName} selected for this night.`
+  pickAnnouncement.value = ''
+  nextTick(() => {
+    pickAnnouncement.value = `${gameName} selected for this night.`
+  })
 }
 
 async function handleUpdateDetails(payload: {
@@ -263,7 +269,7 @@ const isActiveState = computed(() => {
             {{ pickAnnouncement }} {{ detailsAnnouncement }}
           </div>
 
-          <div v-if="loading" class="rounded-xl border border-outline bg-surface-container shadow-card p-4 md:p-6 space-y-4">
+          <div v-if="loading && !session" class="rounded-xl border border-outline bg-surface-container shadow-card p-4 md:p-6 space-y-4">
             <Skeleton class="h-8 w-1/2" />
             <Skeleton class="h-6 w-24" />
             <Skeleton class="h-4 w-1/3" />

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
 import { useMemberColor } from '@/composables/useMemberColor'
 import Icon from '@/components/ui/icon/Icon.vue'
+import type { ConfidenceLevel } from '@/generated/types'
 
 interface Owner {
   bggUsername: string
@@ -27,7 +28,7 @@ interface Props {
   owners: Owner[]
   variant?: 'grid' | 'list'
   score?: number | null
-  confidence?: 'HIGH' | 'MEDIUM' | 'LOW' | null
+  confidence?: ConfidenceLevel | null
   reasons?: string[] | null
 }
 

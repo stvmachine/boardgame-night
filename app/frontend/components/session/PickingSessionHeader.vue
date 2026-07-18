@@ -71,22 +71,6 @@ defineExpose({
         </Badge>
       </div>
 
-      <!-- Host-only Edit Details -->
-      <div
-        v-if="isHost"
-        class="lg:order-1 lg:w-1/2 lg:flex lg:justify-end"
-      >
-        <Button
-          ref="editButtonRef"
-          variant="outline"
-          class="w-full sm:w-auto h-11"
-          @click="emitEditDetails"
-        >
-          <Icon name="edit" class="mr-2 h-4 w-4" />
-          Edit Details
-        </Button>
-      </div>
-
       <!-- Date and location metadata -->
       <div class="lg:order-2 lg:w-1/2">
         <p class="text-base text-on-surface">
@@ -132,6 +116,22 @@ defineExpose({
             {{ goingAttendees.length }} going
           </span>
         </div>
+      </div>
+
+      <!-- Host-only Edit Details (source order after attendees for mobile UI-SPEC compliance) -->
+      <div
+        v-if="isHost"
+        class="lg:order-1 lg:w-1/2 lg:flex lg:justify-end"
+      >
+        <Button
+          ref="editButtonRef"
+          variant="outline"
+          class="w-full sm:w-auto h-11"
+          @click="emitEditDetails"
+        >
+          <Icon name="edit" class="mr-2 h-4 w-4" />
+          Edit Details
+        </Button>
       </div>
     </div>
   </div>
