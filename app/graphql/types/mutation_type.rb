@@ -16,6 +16,7 @@ module Types
     field :create_night_session, mutation: Mutations::CreateNightSession, description: "Create a new night session in draft state."
     field :schedule_session, mutation: Mutations::ScheduleSession, description: "Schedule a draft session and send invitations."
     field :update_session_preferences, mutation: Mutations::UpdateSessionPreferences, description: "Edit a session's time budget and complexity preference before picking starts."
+    field :update_session_details, mutation: Mutations::UpdateSessionDetails, description: "Edit a session's ordinary details while in draft, invited, or picking state."
     field :start_picking, mutation: Mutations::StartPicking, description: "Transition an invited session to the picking state."
     field :pick_game, mutation: Mutations::PickGame, description: "Pick a game from the group's collection and complete the session."
     field :cancel_session, mutation: Mutations::CancelSession, description: "Cancel an active session."

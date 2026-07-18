@@ -276,12 +276,13 @@ RSpec.describe "updateSessionDetails mutation" do
     session = NightSession.create!(title: "Draft", group: group, host: owner, state: "draft")
 
     result = BoardgameNightSchema.execute(
-      mutation,
-      variables: {
-        sessionId: session.id.to_s,
-        title: "Safe title",
-        timeBudgetMinutes: 90
-      },
+      <<~GRAPHQL,
+        mutation {
+          updateSessionDetails(sessionId: "#{session.id}", title: "Safe title", timeBudgetMinutes: 90) {
+            session { id }
+          }
+        }
+      GRAPHQL
       context: context
     )
 
