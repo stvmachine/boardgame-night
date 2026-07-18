@@ -34,12 +34,12 @@ The six v1.0 requirement rows below are restored as checked with their implement
 
 | Requirement | Implementation evidence | Verification evidence | Source |
 |-------------|-----------------------|---------------------|--------|
-| **BGG-01** — Fetch BGG user collection with correct base games + expansions via two-call workaround | Bgg::CollectionFetcher implements the `subtype=boardgame` + `excludesubtype=boardgameexpansion` / `subtype=boardgameexpansion` two-call pattern; XML fixtures cover single-vs-array normalization | RSpec specs with ported XML fixtures; rate-limiter/throttle/retry specs | [v1.0 Milestone Audit](../v1.0-MILESTONE-AUDIT.md) |
-| **BGG-04** — Persisted collections merge into deduplicated view via pure database query | `BggThing.merged_for_users` scope; BggCollection model with deduplication merge query | Rails integration specs; collection merge query tests | [v1.0 Milestone Audit](../v1.0-MILESTONE-AUDIT.md) |
-| **BGG-05** — Collection imports as Solid Queue background jobs with explicit retry/discard | `Bgg::ImportCollectionJob` with `limits_concurrency to: 1, key: "bgg_api"` and `retry_on`/`discard_on` | Focused job specs (15 examples) | [v1.0 Milestone Audit](../v1.0-MILESTONE-AUDIT.md) |
-| **COLL-01** — N-user merge with owner color-avatars in responsive layout | N-user GraphQL merge resolver; color-avatar mapping; responsive grid layout | Collection View component tests; E2E merge flow | [v1.0 Milestone Audit](../v1.0-MILESTONE-AUDIT.md) |
-| **COLL-03** — Fuzzy search, filter by players/time/complexity, sort by name/rating/year/complexity | Fuse.js client-side search; filter/sort/group composables and controls | Filter/sort unit tests; Collection View integration tests | [v1.0 Milestone Audit](../v1.0-MILESTONE-AUDIT.md) |
-| **COLL-05** — Hot/trending games on landing page with well-formed game cards | TrendingGames component; HomeView dashboard; BggThing hot cache | HomeDashboard specs; E2E home smoke test | [v1.0 Milestone Audit](../v1.0-MILESTONE-AUDIT.md) |
+| **BGG-01** — Fetch BGG user collection with correct base games + expansions via two-call workaround | Bgg::CollectionFetcher implements the `subtype=boardgame` + `excludesubtype=boardgameexpansion` / `subtype=boardgameexpansion` two-call pattern; XML fixtures cover single-vs-array normalization | RSpec specs with ported XML fixtures; rate-limiter/throttle/retry specs | [v1.0 Milestone Audit](../../v1.0-MILESTONE-AUDIT.md) |
+| **BGG-04** — Persisted collections merge into deduplicated view via pure database query | `BggThing.merged_for_users` scope; BggCollection model with deduplication merge query | Rails integration specs; collection merge query tests | [v1.0 Milestone Audit](../../v1.0-MILESTONE-AUDIT.md) |
+| **BGG-05** — Collection imports as Solid Queue background jobs with explicit retry/discard | `Bgg::ImportCollectionJob` with `limits_concurrency to: 1, key: "bgg_api"` and `retry_on`/`discard_on` | Focused job specs (15 examples) | [v1.0 Milestone Audit](../../v1.0-MILESTONE-AUDIT.md) |
+| **COLL-01** — N-user merge with owner color-avatars in responsive layout | N-user GraphQL merge resolver; color-avatar mapping; responsive grid layout | Collection View component tests; E2E merge flow | [v1.0 Milestone Audit](../../v1.0-MILESTONE-AUDIT.md) |
+| **COLL-03** — Fuzzy search, filter by players/time/complexity, sort by name/rating/year/complexity | Fuse.js client-side search; filter/sort/group composables and controls | Filter/sort unit tests; Collection View integration tests | [v1.0 Milestone Audit](../../v1.0-MILESTONE-AUDIT.md) |
+| **COLL-05** — Hot/trending games on landing page with well-formed game cards | TrendingGames component; HomeView dashboard; BggThing hot cache | HomeDashboard specs; E2E home smoke test | [v1.0 Milestone Audit](../../v1.0-MILESTONE-AUDIT.md) |
 
 ---
 
@@ -47,7 +47,7 @@ The six v1.0 requirement rows below are restored as checked with their implement
 
 | Check | Result | Source |
 |-------|--------|--------|
-| DS-02 implementation verified in Phase 5 | ✅ PASS | [Phase 5 Verification](../phases/05-design-system-foundation/05-VERIFICATION.md) — row 2: DS-02 |
+| DS-02 implementation verified in Phase 5 | ✅ PASS | [Phase 5 Verification](../05-design-system-foundation/05-VERIFICATION.md) — row 2: DS-02 |
 | Desktop sidebar renders at 280px width | ✅ PASS | `tests/e2e/shell.spec.ts` — `desktop sidebar shows 280px nav shell` |
 | Desktop sidebar contains nav items | ✅ PASS | `tests/e2e/shell.spec.ts` — Home, Collection, Hot, Groups, Account links |
 | Mobile drawer available | ✅ PASS | `tests/e2e/shell.spec.ts` — `mobile hides sidebar and opens sheet drawer` |
