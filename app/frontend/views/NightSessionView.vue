@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { useNightSessionQuery, useScheduleSessionMutation, useStartPickingMutation, useCancelSessionMutation, useReopenSessionMutation, useCurrentUserQuery } from '@/generated/operations'
+import {
+  useNightSessionQuery,
+  useScheduleSessionMutation,
+  useStartPickingMutation,
+  useCancelSessionMutation,
+  useReopenSessionMutation,
+  useCurrentUserQuery,
+  useUpdateSessionDetailsMutation
+} from '@/generated/operations'
+import type { NightSession } from '@/generated/operations'
 import { useSessionDraftStore } from '@/stores/sessionDraft'
 import AppShell from '@/components/layout/AppShell.vue'
 import SessionEditor from '@/components/session/SessionEditor.vue'
@@ -9,23 +18,35 @@ import RsvpDashboard from '@/components/session/RsvpDashboard.vue'
 import GamePicker from '@/components/session/GamePicker.vue'
 import SessionSummary from '@/components/session/SessionSummary.vue'
 import EmptyState from '@/components/collection/EmptyState.vue'
+import PickingSessionHeader from '@/components/session/PickingSessionHeader.vue'
+import SessionDetailsEditor from '@/components/session/SessionDetailsEditor.vue'
+import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
 import { Badge } from '@/components/ui/badge'
 
 const route = useRoute()
 const draft = useSessionDraftStore()
 
-const sessionId = computed(() => String(route.params.id))
-const { result, loading, error: queryError } = useNightSessionQuery(() => ({ id: sessionId.value }))
+const sessionId = computed(() => String(route.params.id as string))
+const { result, loading, error: queryError, refetch } = useNightSessionQuery(
+  () => ({ id: sessionId.value }),
+  { errorPolicy: 'all' }
+)
 const { result: currentUserResult } = useCurrentUserQuery()
 const { mutate: schedule, loading: scheduling, error: scheduleError, onDone } = useScheduleSessionMutation()
 const { mutate: startPicking, loading: startingPicking, error: startPickingError } = useStartPickingMutation()
 const { mutate: cancelSession, loading: cancelling, error: cancelError } = useCancelSessionMutation()
 const { mutate: reopenSession, loading: reopening, error: reopenError } = useReopenSessionMutation()
+const { mutate: updateDetails, loading: updatingDetails, error: updateDetailsError, onDone: onUpdateDetailsDone } = useUpdateSessionDetailsMutation()
 
 const session = computed(() => result.value?.nightSession)
 const currentUser = computed(() => currentUserResult.value?.currentUser)
 const isHost = computed(() => session.value?.host?.id === currentUser.value?.id)
 const showCancelConfirm = ref(false)
+const showDetailsEditor = ref(false)
+const pickingHeaderRef = ref<InstanceType<typeof PickingSessionHeader> | null>(null)
+const pickAnnouncement = ref('')
+const detailsAnnouncement = ref('')
+const detailsErrorMessage = computed(() => updateDetailsError?.value?.message ?? null)
 
 const stateBadgeVariant = computed(() => {
   switch (session.value?.state) {
@@ -48,13 +69,19 @@ watch(session, (s) => {
   if (!s) return
   draft.title = s.title || ''
   draft.description = s.description || ''
-  draft.scheduledAt = s.scheduledAt || null
+  draft.scheduledAt = (s.scheduledAt as string | null) ?? null
   draft.location = s.location || ''
   draft.capacity = s.capacity || null
 }, { immediate: true })
 
 onDone(() => {
   draft.reset()
+})
+
+onUpdateDetailsDone(() => {
+  showDetailsEditor.value = false
+  detailsAnnouncement.value = 'Session details updated.'
+  pickingHeaderRef.value?.focusEditButton()
 })
 
 async function handleSchedule(payload: {
@@ -73,10 +100,22 @@ async function handleSchedule(payload: {
 
 async function handleStartPicking() {
   await startPicking({ sessionId: sessionId.value })
+  await refetch()
 }
 
-function handlePicked() {
-  // Apollo cache updates via mutation result; no manual refetch needed
+function handlePicked(gameName: string) {
+  pickAnnouncement.value = `${gameName} selected for this night.`
+}
+
+async function handleUpdateDetails(payload: {
+  sessionId: string
+  title: string
+  description: string | null
+  scheduledAt: string | null
+  location: string | null
+  capacity: number | null
+}) {
+  await updateDetails(payload)
 }
 
 async function handleCancel() {
@@ -96,16 +135,19 @@ const isActiveState = computed(() => {
 <template>
   <AppShell>
     <div class="p-4 md:p-6">
-      <div v-if="loading" class="text-sm text-neutral-500">Loading session...</div>
+      <div v-if="loading && !session" class="text-sm text-neutral-500">Loading session...</div>
 
       <EmptyState
-        v-else-if="queryError"
+        v-else-if="queryError && !session"
         heading="Couldn’t load this page"
         body="Please check your connection and try again."
       />
 
       <template v-else-if="session">
-        <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div
+          v-if="session.state !== 'PICKING'"
+          class="mb-6 flex flex-wrap items-center justify-between gap-3"
+        >
           <div>
             <h1 class="text-xl font-semibold text-neutral-900">{{ session.title }}</h1>
             <p class="text-sm text-neutral-500">Hosted by {{ session.host.displayName }}</p>
@@ -113,6 +155,7 @@ const isActiveState = computed(() => {
           <div class="flex items-center gap-2">
             <button
               v-if="session.state === 'INVITED' && isHost"
+              data-testid="start-picking"
               type="button"
               class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-neutral-300 disabled:text-neutral-500"
               :disabled="startingPicking"
@@ -122,6 +165,7 @@ const isActiveState = computed(() => {
             </button>
             <button
               v-if="session.state === 'CANCELLED' && isHost"
+              data-testid="reopen-session"
               type="button"
               class="rounded-md bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-neutral-300 disabled:text-neutral-500"
               :disabled="reopening"
@@ -209,16 +253,57 @@ const isActiveState = computed(() => {
           :is-host="isHost"
         />
 
-        <div v-else-if="session.state === 'PICKING'" class="rounded-lg bg-white p-4 shadow-sm">
+        <div v-else-if="session.state === 'PICKING'" class="max-w-7xl mx-auto space-y-8">
+          <div
+            aria-live="polite"
+            aria-atomic="true"
+            data-testid="live-region"
+            class="sr-only"
+          >
+            {{ pickAnnouncement }} {{ detailsAnnouncement }}
+          </div>
+
+          <div v-if="loading" class="rounded-xl border border-outline bg-surface-container shadow-card p-4 md:p-6 space-y-4">
+            <Skeleton class="h-8 w-1/2" />
+            <Skeleton class="h-6 w-24" />
+            <Skeleton class="h-4 w-1/3" />
+            <div class="flex items-center gap-2">
+              <Skeleton class="h-8 w-8 rounded-full" />
+              <Skeleton class="h-4 w-16" />
+            </div>
+            <Skeleton class="h-11 w-full sm:w-40" />
+          </div>
+
+          <PickingSessionHeader
+            v-else
+            ref="pickingHeaderRef"
+            :session="session as NightSession"
+            :is-host="isHost"
+            @edit-details="showDetailsEditor = true"
+          />
+
+          <SessionDetailsEditor
+            v-if="isHost"
+            v-model:open="showDetailsEditor"
+            :session="session as NightSession"
+            :loading="updatingDetails"
+            :error="detailsErrorMessage"
+            @save="handleUpdateDetails"
+          />
+
           <GamePicker
-            :session="session"
+            :session="session as NightSession"
+            :is-host="isHost"
+            :loading="loading"
+            :error="queryError"
+            @retry="refetch"
             @picked="handlePicked"
           />
         </div>
 
         <div v-else-if="session.state === 'COMPLETED'" class="rounded-lg bg-white p-4 shadow-sm">
           <SessionSummary
-            :session="session"
+            :session="session as NightSession"
             @reopen="handleReopen"
           />
         </div>
@@ -233,6 +318,7 @@ const isActiveState = computed(() => {
             </p>
             <button
               v-if="isHost"
+              data-testid="reopen-session"
               type="button"
               class="rounded-md bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-neutral-300 disabled:text-neutral-500"
               :disabled="reopening"
@@ -244,7 +330,7 @@ const isActiveState = computed(() => {
         </div>
 
         <div v-else class="rounded-lg bg-white p-4 shadow-sm">
-          <p class="text-sm text-neutral-600">Session is {{ session.state.toLowerCase() }}.</p>
+          <p class="text-sm text-neutral-600">Session is {{ (session.state as unknown as string).toLowerCase() }}.</p>
         </div>
       </template>
 

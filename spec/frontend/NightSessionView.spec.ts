@@ -204,7 +204,7 @@ function createMockUpdateMutation() {
   }
 }
 
-function mountView({ query = createMockQuery(), user = { id: '1', username: 'alice', displayName: 'Alice' } } = {}) {
+function mountView({ query = createMockQuery(), user = { id: '1', username: 'alice', displayName: 'Alice' }, mutations = {} as any } = {}) {
   vi.mocked(useNightSessionQuery).mockReturnValue(query as any)
   vi.mocked(useCurrentUserQuery).mockReturnValue(createMockUser(user) as any)
   vi.mocked(useScheduleSessionMutation).mockReturnValue(createMockMutation() as any)
@@ -212,6 +212,10 @@ function mountView({ query = createMockQuery(), user = { id: '1', username: 'ali
   vi.mocked(useCancelSessionMutation).mockReturnValue(createMockMutation() as any)
   vi.mocked(useReopenSessionMutation).mockReturnValue(createMockMutation() as any)
   vi.mocked(useUpdateSessionDetailsMutation).mockReturnValue(createMockUpdateMutation() as any)
+
+  if (mutations.useUpdateSessionDetailsMutation) {
+    vi.mocked(useUpdateSessionDetailsMutation).mockReturnValue(mutations.useUpdateSessionDetailsMutation as any)
+  }
 
   return mount(NightSessionView, {
     global: {
@@ -274,8 +278,10 @@ describe('NightSessionView', () => {
 
   it('lets the host open the details editor, save, and restores focus with an announcement on success', async () => {
     const updateMock = createMockUpdateMutation()
-    vi.mocked(useUpdateSessionDetailsMutation).mockReturnValue(updateMock as any)
-    const wrapper = mountView({ query: createMockQuery({ result: buildSession({ state: 'PICKING' }) }) })
+    const wrapper = mountView({
+      query: createMockQuery({ result: buildSession({ state: 'PICKING' }) }),
+      mutations: { useUpdateSessionDetailsMutation: updateMock }
+    })
     await flush()
 
     await wrapper.find('[data-testid="edit-details"]').trigger('click')
@@ -304,8 +310,10 @@ describe('NightSessionView', () => {
 
   it('keeps the details editor open and passes an error when the mutation fails', async () => {
     const updateMock = createMockUpdateMutation()
-    vi.mocked(useUpdateSessionDetailsMutation).mockReturnValue(updateMock as any)
-    const wrapper = mountView({ query: createMockQuery({ result: buildSession({ state: 'PICKING' }) }) })
+    const wrapper = mountView({
+      query: createMockQuery({ result: buildSession({ state: 'PICKING' }) }),
+      mutations: { useUpdateSessionDetailsMutation: updateMock }
+    })
     await flush()
 
     await wrapper.find('[data-testid="edit-details"]').trigger('click')
