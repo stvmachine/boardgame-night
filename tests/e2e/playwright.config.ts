@@ -11,9 +11,24 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   globalSetup: resolve(__dirname, './global-setup.ts'),
+  globalTeardown: resolve(__dirname, './global-teardown.ts'),
   use: {
-    baseURL: 'http://localhost:5173'
+    baseURL: 'http://localhost:5173',
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure'
   },
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        browserName: 'chromium'
+      }
+    }
+  ],
+  reporter: [
+    ['line'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }]
+  ],
   webServer: {
     command: 'bash -c "cd ' + repoRoot + ' && exec ./bin/dev-e2e"',
     url: 'http://localhost:5173',
