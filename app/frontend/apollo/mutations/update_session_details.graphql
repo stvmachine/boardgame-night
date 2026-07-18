@@ -1,0 +1,56 @@
+mutation UpdateSessionDetails($sessionId: ID!, $title: String, $description: String, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int) {
+  updateSessionDetails(sessionId: $sessionId, title: $title, description: $description, scheduledAt: $scheduledAt, location: $location, capacity: $capacity) {
+    session {
+      id
+      title
+      description
+      state
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        displayName
+      }
+      group {
+        id
+        name
+      }
+      attendances {
+        id
+        response
+        user {
+          id
+          displayName
+        }
+      }
+      timeBudgetMinutes
+      complexityPreference
+      suggestions {
+        score
+        confidence
+        reasons
+        thing {
+          id
+          objectid
+          name
+          thumbnail
+          image
+          yearPublished
+          minPlayers
+          maxPlayers
+          minPlaytime
+          maxPlaytime
+          average
+          averageWeight
+          description
+          owners {
+            bggUsername
+            avatar
+          }
+        }
+      }
+    }
+  }
+}

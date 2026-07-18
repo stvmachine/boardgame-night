@@ -6,7 +6,7 @@ import type * as Types from './types';
 
 import gql from 'graphql-tag';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from '@vue/composition-api';
+import * as VueCompositionApi from 'vue';
 export * from './types';
 export type ReactiveFunction<TParam> = () => TParam;
 export type AcceptGroupInviteMutationVariables = Exact<{
@@ -146,6 +146,18 @@ export type UpdateGroupMemberRoleMutationVariables = Exact<{
 
 export type UpdateGroupMemberRoleMutation = { updateGroupMemberRole: { membership: { id: string, role: Types.GroupRole, user: { id: string, username: string, displayName: string } } } | null };
 
+export type UpdateSessionDetailsMutationVariables = Exact<{
+  sessionId: string | number;
+  title?: string | null | undefined;
+  description?: string | null | undefined;
+  scheduledAt?: unknown;
+  location?: string | null | undefined;
+  capacity?: number | null | undefined;
+}>;
+
+
+export type UpdateSessionDetailsMutation = { updateSessionDetails: { session: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, timeBudgetMinutes: number, complexityPreference: string, host: { id: string, displayName: string }, group: { id: string, name: string }, attendances: Array<{ id: string, response: string, user: { id: string, displayName: string } }>, suggestions: Array<{ score: number, confidence: Types.ConfidenceLevel, reasons: Array<string>, thing: { id: string, objectid: string, name: string, thumbnail: string | null, image: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, description: string | null, owners: Array<{ bggUsername: string, avatar: string | null }> } }> | null } } | null };
+
 export type UpgradeToAccountMutationVariables = Exact<{
   email: string;
   password: string;
@@ -213,7 +225,7 @@ export type NightSessionQueryVariables = Exact<{
 }>;
 
 
-export type NightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, previousState: Types.SessionState | null, host: { id: string, username: string, displayName: string }, group: { id: string, name: string, inviteCode: string | null, myRole: Types.GroupRole | null, members: Array<{ id: string, username: string, displayName: string }> }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, username: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> } | null } | null };
+export type NightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: Types.SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, attendeeCount: number, timeBudgetMinutes: number, complexityPreference: string, previousState: Types.SessionState | null, host: { id: string, username: string, displayName: string }, group: { id: string, name: string, inviteCode: string | null, myRole: Types.GroupRole | null, members: Array<{ id: string, username: string, displayName: string }> }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, username: string, displayName: string } }>, pickedGame: { id: string, name: string, thumbnail: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, owners: Array<{ bggUsername: string, avatar: string | null }> } | null, suggestions: Array<{ score: number, confidence: Types.ConfidenceLevel, reasons: Array<string>, thing: { id: string, objectid: string, name: string, thumbnail: string | null, image: string | null, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, average: number | null, averageWeight: number | null, description: string | null, owners: Array<{ bggUsername: string, avatar: string | null }> } }> | null } | null };
 
 export type SearchQueryVariables = Exact<{
   query: string;
@@ -1053,6 +1065,98 @@ export function useUpdateGroupMemberRoleMutation(options: VueApolloComposable.Us
   return VueApolloComposable.useMutation<UpdateGroupMemberRoleMutation, UpdateGroupMemberRoleMutationVariables>(UpdateGroupMemberRoleDocument, options);
 }
 export type UpdateGroupMemberRoleMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<UpdateGroupMemberRoleMutation, UpdateGroupMemberRoleMutationVariables>;
+export const UpdateSessionDetailsDocument = gql`
+    mutation UpdateSessionDetails($sessionId: ID!, $title: String, $description: String, $scheduledAt: ISO8601DateTime, $location: String, $capacity: Int) {
+  updateSessionDetails(
+    sessionId: $sessionId
+    title: $title
+    description: $description
+    scheduledAt: $scheduledAt
+    location: $location
+    capacity: $capacity
+  ) {
+    session {
+      id
+      title
+      description
+      state
+      scheduledAt
+      location
+      capacity
+      attendeeCount
+      host {
+        id
+        displayName
+      }
+      group {
+        id
+        name
+      }
+      attendances {
+        id
+        response
+        user {
+          id
+          displayName
+        }
+      }
+      timeBudgetMinutes
+      complexityPreference
+      suggestions {
+        score
+        confidence
+        reasons
+        thing {
+          id
+          objectid
+          name
+          thumbnail
+          image
+          yearPublished
+          minPlayers
+          maxPlayers
+          minPlaytime
+          maxPlaytime
+          average
+          averageWeight
+          description
+          owners {
+            bggUsername
+            avatar
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useUpdateSessionDetailsMutation__
+ *
+ * To run a mutation, you first call `useUpdateSessionDetailsMutation` within a Vue component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateSessionDetailsMutation` returns an object that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - Several other properties: https://v4.apollo.vuejs.org/api/use-mutation.html#return
+ *
+ * @param options that will be passed into the mutation, supported options are listed on: https://v4.apollo.vuejs.org/guide-composable/mutation.html#options;
+ *
+ * @example
+ * const { mutate, loading, error, onDone } = useUpdateSessionDetailsMutation({
+ *   variables: {
+ *     sessionId: // value for 'sessionId'
+ *     title: // value for 'title'
+ *     description: // value for 'description'
+ *     scheduledAt: // value for 'scheduledAt'
+ *     location: // value for 'location'
+ *     capacity: // value for 'capacity'
+ *   },
+ * });
+ */
+export function useUpdateSessionDetailsMutation(options: VueApolloComposable.UseMutationOptions<UpdateSessionDetailsMutation, UpdateSessionDetailsMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<UpdateSessionDetailsMutation, UpdateSessionDetailsMutationVariables>> = {}) {
+  return VueApolloComposable.useMutation<UpdateSessionDetailsMutation, UpdateSessionDetailsMutationVariables>(UpdateSessionDetailsDocument, options);
+}
+export type UpdateSessionDetailsMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<UpdateSessionDetailsMutation, UpdateSessionDetailsMutationVariables>;
 export const UpgradeToAccountDocument = gql`
     mutation UpgradeToAccount($email: String!, $password: String!, $bggUsername: String) {
   upgradeToAccount(email: $email, password: $password, bggUsername: $bggUsername) {
@@ -1561,6 +1665,32 @@ export const NightSessionDocument = gql`
       owners {
         bggUsername
         avatar
+      }
+    }
+    timeBudgetMinutes
+    complexityPreference
+    suggestions {
+      score
+      confidence
+      reasons
+      thing {
+        id
+        objectid
+        name
+        thumbnail
+        image
+        yearPublished
+        minPlayers
+        maxPlayers
+        minPlaytime
+        maxPlaytime
+        average
+        averageWeight
+        description
+        owners {
+          bggUsername
+          avatar
+        }
       }
     }
     previousState

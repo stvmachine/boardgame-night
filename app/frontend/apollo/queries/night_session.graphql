@@ -50,6 +50,32 @@ query NightSession($id: ID!) {
         avatar
       }
     }
+    timeBudgetMinutes
+    complexityPreference
+    suggestions {
+      score
+      confidence
+      reasons
+      thing {
+        id
+        objectid
+        name
+        thumbnail
+        image
+        yearPublished
+        minPlayers
+        maxPlayers
+        minPlaytime
+        maxPlaytime
+        average
+        averageWeight
+        description
+        owners {
+          bggUsername
+          avatar
+        }
+      }
+    }
     previousState
   }
 }

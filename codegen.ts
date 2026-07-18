@@ -15,7 +15,8 @@ const config: CodegenConfig = {
       ],
       config: {
         importSchemaTypesFrom: './app/frontend/generated/types',
-        namespacedImportName: 'Types'
+        namespacedImportName: 'Types',
+        vueCompositionApiImportFrom: 'vue'
       }
     }
   }
