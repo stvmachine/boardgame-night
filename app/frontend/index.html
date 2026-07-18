@@ -4,6 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Boardgame Night</title>
+    <script>
+      (function() {
+        var theme;
+        try {
+          var raw = localStorage.getItem('boardgame-night:theme');
+          if (raw === 'light' || raw === 'dark' || raw === 'system') {
+            theme = raw;
+          }
+        } catch(e) {}
+        if (!theme) theme = 'light';
+        var resolved = theme === 'system'
+          ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : theme;
+        if (resolved === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+        document.documentElement.style.colorScheme = resolved;
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>
