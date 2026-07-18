@@ -5,16 +5,16 @@ milestone_name: UI Redesign + Suggestion Engine
 current_phase: 10
 current_phase_name: Picking a Game Redesign
 status: executing
-stopped_at: Phase 10 Plan 03 complete, proceeding to Plan 04
-last_updated: "2026-07-18T07:03:22.369Z"
+stopped_at: Wave 3 complete, proceeding to Phase 10 Plan 05
+last_updated: "2026-07-18T11:08:58.227Z"
 last_activity: 2026-07-18
-last_activity_desc: Completed Phase 10 Plan 03
+last_activity_desc: Completed Phase 10 Plan 04
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 52
-completed_plans: 50
-   percent: 96
+  completed_plans: 51
+  percent: 82
 ---
 
 # Project State
@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 ## Current Position
 
 Phase: 10 (Picking a Game Redesign) — EXECUTING
-Plan: 4 of 6 complete; ready to execute Plan 05
+Plan: 5 of 6 complete; ready to execute Plan 05
 Status: Completed Plan 04
 Last activity: 2026-07-18 — Completed Phase 10 Plan 04
 
@@ -90,6 +90,7 @@ Progress: [█████████░] 96%
 | Phase 10-picking-a-game-redesign P02 | 15min | 2 tasks | 7 files |
 | Phase 10-picking-a-game-redesign P04 | 15min | 2 tasks | 4 files |
 | Phase 10-picking-a-game-redesign P03 | 14min | 2 tasks | 4 files |
+| Phase 10 P05 | 33min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -177,7 +178,10 @@ Recent decisions affecting current work:
 - [Phase 10]: GameCard suggestion context is strictly additive; collection rendering is unchanged when score/confidence/reasons props are absent.
 - [Phase 10]: GamePicker consumes only session.suggestions, preserves server order, and caps display at eight with no client ranking, search, or Browse All fallback.
 - [Phase 10]: Pick action is host-only, guarded against concurrent submissions, and emits the picked game name from the mutation result so Apollo normalized state drives the completed transition.
-
+- [Phase ?]: Test decision
+- [Phase ?]: Back up and restore fixture JSON files inside Playwright globalSetup so tracked files stay unchanged across every E2E run.
+- [Phase ?]: Use [data-testid=game-card] for the E2E card locator because the Card primitive renders a div with role=button, not an article.
+- [Phase ?]: Disable Spring during e2e:seed to prevent stale rake code from being cached.
 
 ### Pending Todos
 
@@ -205,6 +209,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-18T07:20:00.000Z
-Stopped at: Phase 10 Plan 04 complete, proceeding to Plan 05
+Last session: 2026-07-18T11:08:58.220Z
+Stopped at: Wave 3 complete, proceeding to Phase 10 Plan 05
 Resume file: .planning/phases/10-picking-a-game-redesign/10-05-PLAN.md
