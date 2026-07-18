@@ -47,8 +47,8 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 ### Picking a Game (PICK)
 
 - [x] **PICK-01**: Picking screen displays session header (title, status badge, date/time, attendee avatars with count, "Edit Details" button)
-- [ ] **PICK-02**: Picking screen displays "Game Suggestions (Filtered for N Players)" heading with attendee-aware filtering
-- [ ] **PICK-03**: Picking screen displays game suggestion cards with thumbnail, title, duration, description, player count, and "Pick this game" button
+- [x] **PICK-02**: Picking screen displays "Game Suggestions (Filtered for N Players)" heading with attendee-aware filtering
+- [x] **PICK-03**: Picking screen displays game suggestion cards with thumbnail, title, duration, description, player count, and "Pick this game" button
 
 ### Suggestion Engine (SUGG)
 
@@ -119,8 +119,8 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 | GROUP-10 | Phase 8 | Complete |
 | GROUP-11 | Phase 8 | Complete |
 | PICK-01 | Phase 10 | Complete |
-| PICK-02 | Phase 10 | Pending |
-| PICK-03 | Phase 10 | Pending |
+| PICK-02 | Phase 10 | Complete |
+| PICK-03 | Phase 10 | Complete |
 | SUGG-01 | Phase 6 | Complete |
 | SUGG-02 | Phase 7 | Complete |
 | SUGG-03 | Phase 7 | Complete |

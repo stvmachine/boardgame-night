@@ -321,7 +321,7 @@ Plans:
   3. User sees game suggestion cards with thumbnail, title, duration, description, player count, and a "Pick this game" button.
   4. User can pick a game from the suggestion list and the session updates to the selected game state.
 
-**Plans:** 1/6 plans executed
+**Plans:** 2/6 plans executed
 Plans:
 
 **Wave 1**
@@ -330,7 +330,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 10-02-PLAN.md — Schema publication, main NightSession suggestion operation, and generated Vue contracts
+- [x] 10-02-PLAN.md — Schema publication, main NightSession suggestion operation, and generated Vue contracts
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -380,7 +380,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Suggestion Engine Backend | 4/4 | Complete    | 2026-07-14 |
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
-| 10. Picking a Game Redesign | 1/6 | In Progress|  |
+| 10. Picking a Game Redesign | 2/6 | In Progress|  |
 | 11. Polish & E2E Hardening | 0/TBD | Not started | - |
 
 ---
