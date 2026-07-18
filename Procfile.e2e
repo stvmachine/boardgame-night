@@ -1,0 +1,6 @@
+# E2E test process file — deterministic credential-free local services.
+# Does NOT use dotenvx, .env.bggeek, or .env.bggeek.keys.
+# All browser data is supplied by the deterministic Rails seed and cache.
+web: bin/rails server -p 3000
+vite: bin/vite dev
+worker: bin/jobs start
