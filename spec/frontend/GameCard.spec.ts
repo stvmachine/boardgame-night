@@ -151,78 +151,116 @@ describe('GameCard', () => {
     expect(footer.text()).toContain('—')
   })
 
-  it('opens BGG using the persisted objectid with opener isolation', () => {
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+  // ── D-15 ARIA and external link ───────────────────────────────
+
+  it('card container has role="article" with accessible name and no button role/tabindex', () => {
+    const wrapper = mountCard()
+    const card = wrapper.find('[data-slot="card"]')
+
+    expect(card.attributes('role')).toBe('article')
+    expect(card.attributes('aria-label')).toMatch(/Game card:/)
+    expect(card.attributes('tabindex')).toBeUndefined()
+  })
+
+  it('renders a single labelled external BGG link with opener isolation', () => {
     const wrapper = mountCard({ objectid: '174430' })
 
-    wrapper.find('[data-slot="card"]').trigger('click')
-
-    expect(openSpy).toHaveBeenCalledWith(
-      'https://boardgamegeek.com/boardgame/174430',
-      '_blank',
-      'noopener,noreferrer'
-    )
-    openSpy.mockRestore()
+    const link = wrapper.find('[data-testid="game-card-link"]')
+    expect(link.exists()).toBe(true)
+    expect(link.attributes('href')).toBe('https://boardgamegeek.com/boardgame/174430')
+    expect(link.attributes('target')).toBe('_blank')
+    expect(link.attributes('rel')).toBe('noopener noreferrer')
+    expect(link.attributes('aria-label')).toBe('View Gloomhaven on BoardGameGeek')
   })
 
-  it('activates BGG on Enter key', () => {
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
-    const wrapper = mountCard()
+  it('does not render a BGG link when objectid is absent', () => {
+    const wrapper = mountCard({ objectid: null })
 
+    expect(wrapper.find('[data-testid="game-card-link"]').exists()).toBe(false)
+  })
+
+  it('link is a native anchor covering the full card (Enter opens via browser)', () => {
+    const wrapper = mountCard({ objectid: '174430' })
+    const link = wrapper.find('[data-testid="game-card-link"]')
+    expect(link.attributes('href')).toBeTruthy()
+    expect(link.element.tagName).toBe('A')
+  })
+
+  // ── Structural stacking guards ─────────────────────────────
+
+  it('link overlay has absolute/inset-0/z-10 coverage for full-card click target', () => {
+    const wrapper = mountCard({ objectid: '174430' })
+    const link = wrapper.find('[data-testid="game-card-link"]')
+    const classes = link.classes()
+    expect(classes).toContain('absolute')
+    expect(classes).toContain('inset-0')
+    expect(classes).toContain('z-10')
+  })
+
+  it('non-control content wrapper has pointer-events-none so clicks pass through to link', () => {
+    const wrapper = mountCard({ objectid: '174430' })
+    // The pointer-events-none class is on the div that wraps CardContent.
+    // That div is a direct child of data-slot="card" but not the link itself.
     const card = wrapper.find('[data-slot="card"]')
-    card.trigger('keydown', { key: 'Enter' })
-
-    expect(openSpy).toHaveBeenCalled()
-    openSpy.mockRestore()
+    const children = card.element.children
+    // Find the non-link wrapper (the one without the link testid)
+    for (let i = 0; i < children.length; i++) {
+      const el = children[i]
+      if (el.tagName === 'DIV' && !el.hasAttribute('data-testid')) {
+        expect(el.classList.contains('pointer-events-none')).toBe(true)
+        break
+      }
+    }
   })
 
-  it('activates BGG on Space key', () => {
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
-    const wrapper = mountCard()
-
-    const card = wrapper.find('[data-slot="card"]')
-    card.trigger('keydown', { key: ' ' })
-
-    expect(openSpy).toHaveBeenCalled()
-    openSpy.mockRestore()
+  it('disclosure button has pointer-events-auto and z-20 to sit above the overlay link', () => {
+    const wrapper = mountSuggestionCard({
+      reasons: ['One', 'Two', 'Three', 'Four']
+    })
+    const disclosure = wrapper.find('[data-testid="show-more-reasons"]')
+    expect(disclosure.classes()).toContain('pointer-events-auto')
+    expect(disclosure.classes()).toContain('z-20')
   })
 
-  it('does not activate BGG when a nested action is clicked', async () => {
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+  it('action slot container has pointer-events-auto and z-20 to sit above the overlay link', () => {
     const wrapper = mountCard({
+      objectid: '174430',
       slots: {
-        action: '<button data-testid="nested-action" type="button">Action</button>'
+        action: '<button data-testid="nested-action" type="button">Pick</button>'
       }
     })
-
-    const nested = wrapper.find('[data-testid="nested-action"]')
-    expect(nested.exists()).toBe(true)
-    await nested.trigger('click')
-
-    expect(openSpy).not.toHaveBeenCalled()
-    openSpy.mockRestore()
+    const actionContainer = wrapper.find('[data-slot="game-card-action"]')
+    expect(actionContainer.classes()).toContain('pointer-events-auto')
+    expect(actionContainer.classes()).toContain('z-20')
   })
 
-  it('does not activate BGG when a nested action is activated by Enter', async () => {
-    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+  // ── Behavior: disclosure toggles, action slot click handlers execute ──
+
+  it('disclosure click toggles aria-expanded', async () => {
+    const wrapper = mountSuggestionCard({
+      reasons: ['One', 'Two', 'Three', 'Four']
+    })
+    const disclosure = wrapper.find('[data-testid="show-more-reasons"]')
+    await disclosure.trigger('click')
+    await flushPromises()
+    expect(disclosure.attributes('aria-expanded')).toBe('true')
+  })
+
+  it('action slot button click handler executes', async () => {
+    const clickHandler = vi.fn()
     const wrapper = mountCard({
       slots: {
-        action: '<button data-testid="nested-action" type="button">Action</button>'
+        action: '<button data-testid="nested-action" type="button" @click.stop="() => {}">Pick</button>'
       }
     })
-
-    const nested = wrapper.find('[data-testid="nested-action"]')
-    await nested.trigger('keydown', { key: 'Enter' })
-
-    expect(openSpy).not.toHaveBeenCalled()
-    openSpy.mockRestore()
+    const action = wrapper.find('[data-testid="nested-action"]')
+    expect(action.exists()).toBe(true)
+    action.element.addEventListener('click', clickHandler)
+    await action.trigger('click')
+    expect(clickHandler).toHaveBeenCalledOnce()
   })
 
-  it('exposes a single tab stop for the card when no nested action is present', () => {
-    const wrapper = mountCard()
-    const card = wrapper.find('[data-slot="card"]')
-    expect(card.attributes('tabindex')).toBe('0')
-  })
+  // ── Suggestion context ────────────────────────────────────────
 
   describe('suggestion context', () => {
     it('renders no suggestion-only DOM when score, confidence, and reasons are absent', () => {
@@ -311,32 +349,6 @@ describe('GameCard', () => {
       expect(wrapper.text()).not.toContain('ownershipBonus')
       expect(wrapper.text()).not.toContain('playerCountFit')
       expect(wrapper.text()).not.toContain('timeFit')
-    })
-
-    it('preserves BGG isolation when the disclosure is clicked', async () => {
-      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
-      const wrapper = mountSuggestionCard({
-        reasons: ['One', 'Two', 'Three', 'Four']
-      })
-
-      const disclosure = wrapper.find('[data-testid="show-more-reasons"]')
-      await disclosure.trigger('click')
-
-      expect(openSpy).not.toHaveBeenCalled()
-      openSpy.mockRestore()
-    })
-
-    it('preserves BGG isolation when the disclosure is activated by keyboard', async () => {
-      const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
-      const wrapper = mountSuggestionCard({
-        reasons: ['One', 'Two', 'Three', 'Four']
-      })
-
-      const disclosure = wrapper.find('[data-testid="show-more-reasons"]')
-      await disclosure.trigger('keydown', { key: 'Enter' })
-
-      expect(openSpy).not.toHaveBeenCalled()
-      openSpy.mockRestore()
     })
   })
 })
