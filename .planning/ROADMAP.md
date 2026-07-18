@@ -380,7 +380,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Suggestion Engine Backend | 4/4 | Complete    | 2026-07-14 |
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
-| 10. Picking a Game Redesign | 6/6 | Complete   | 2026-07-18 |
+| 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
 | 11. Polish & E2E Hardening | 0/TBD | Not started | - |
 
 ---
