@@ -361,7 +361,7 @@ Plans:
   4. REQUIREMENTS.md checkboxes are updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05).
   5. Dark mode and responsive layouts are verified across all redesigned surfaces.
 
-**Plans**: 2/5 plans executed
+**Plans**: 3/5 plans executed
 
 Plans:
 **Wave 1**
@@ -374,7 +374,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 11-03-PLAN.md — Mount and secure the real Solid Cable WebSocket path with browser connection proof (Wave 3)
+- [x] 11-03-PLAN.md — Mount and secure the real Solid Cable WebSocket path with browser connection proof (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -403,7 +403,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
-| 11. Polish & E2E Hardening | 2/5 | In Progress|  |
+| 11. Polish & E2E Hardening | 3/5 | In Progress|  |
 
 ---
 
