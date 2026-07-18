@@ -349,7 +349,7 @@ Plans:
 
 ### Phase 11: Polish & E2E Hardening
 
-**Goal**: v1.1 is hardened with E2E tests in CI, dev infrastructure fixes, and cleanup of legacy code.
+**Goal**: As a group member, I want to plan game nights reliably on any device, so that v1.1 is ready for regular use.
 **Mode:** mvp
 **Depends on**: Phases 8, 9, 10 (all redesigned surfaces)
 **Requirements**: DEBT-01, DEBT-02, DEBT-03, DEBT-04
@@ -361,7 +361,29 @@ Plans:
   4. REQUIREMENTS.md checkboxes are updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05).
   5. Dark mode and responsive layouts are verified across all redesigned surfaces.
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 11-01-PLAN.md — Deliver persistent Light/Dark/System appearance through the Account surface (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 11-02-PLAN.md — Make Playwright fixture restoration permanent and run the full Chromium suite in dedicated CI (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 11-03-PLAN.md — Mount and secure the real Solid Cable WebSocket path with browser connection proof (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 11-04-PLAN.md — Correct GameCard ARIA and close responsive/dark acceptance with the final implementation gate (Wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 11-05-PLAN.md — Verify legacy BGG cleanup evidence and reconcile requirements metadata (Wave 5)
+
 **UI hint**: yes
 
 ## Progress
@@ -381,7 +403,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
-| 11. Polish & E2E Hardening | 0/TBD | Not started | - |
+| 11. Polish & E2E Hardening | 0/5 | Not started | - |
 
 ---
 
