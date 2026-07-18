@@ -54,6 +54,8 @@ module Mutations
       return value.to_datetime if value.respond_to?(:to_datetime)
 
       Time.parse(value).to_datetime
+    rescue ArgumentError
+      raise GraphQL::ExecutionError, "scheduledAt is not a valid datetime"
     end
   end
 end
