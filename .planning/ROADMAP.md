@@ -321,7 +321,7 @@ Plans:
   3. User sees game suggestion cards with thumbnail, title, duration, description, player count, and a "Pick this game" button.
   4. User can pick a game from the suggestion list and the session updates to the selected game state.
 
-**Plans:** 2/6 plans executed
+**Plans:** 3/6 plans executed
 Plans:
 
 **Wave 1**
@@ -334,7 +334,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 10-03-PLAN.md — Responsive Picking session header and accessible Edit Details dialog
+- [x] 10-03-PLAN.md — Responsive Picking session header and accessible Edit Details dialog
 - [ ] 10-04-PLAN.md — Additive explainable GameCard extension and server-ranked top-eight picker
 
 **Wave 4** *(blocked on both Wave 3 plans)*
@@ -380,7 +380,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Suggestion Engine Backend | 4/4 | Complete    | 2026-07-14 |
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
-| 10. Picking a Game Redesign | 2/6 | In Progress|  |
+| 10. Picking a Game Redesign | 3/6 | In Progress|  |
 | 11. Polish & E2E Hardening | 0/TBD | Not started | - |
 
 ---
