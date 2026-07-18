@@ -1,6 +1,6 @@
 ---
 phase: 10-picking-a-game-redesign
-reviewed: 2026-07-18T12:00:00Z
+reviewed: 2026-07-18T14:15:00Z
 depth: standard
 files_reviewed: 22
 files_reviewed_list:
@@ -27,25 +27,34 @@ files_reviewed_list:
   - tests/e2e/global-setup.ts
   - AGENTS.md
 findings:
-  critical: 1
-  warning: 12
+  critical: 0
+  warning: 2
   info: 0
-  total: 13
+  total: 2
 status: issues_found
 ---
 
 # Phase 10: Code Review Report
 
-**Reviewed:** 2026-07-18T12:00:00Z
+**Reviewed:** 2026-07-18T14:15:00Z
 **Depth:** standard
 **Files Reviewed:** 22
 **Status:** issues_found
 
 ## Summary
 
-Phase 10 implements the redesigned picking screen, a host-only `updateSessionDetails` mutation, and supporting tests/E2E. The implementation largely follows the UI-SPEC and architecture decisions, but several correctness and accessibility issues remain. The most serious is an unhandled `ArgumentError` in the `updateSessionDetails` resolver when an invalid `scheduledAt` is supplied, which can crash the GraphQL mutation instead of returning a validation error. There are also UI-SPEC violations in the picking header DOM order and the skeleton header behavior, plus live-region accessibility gaps, test coverage holes, and E2E fixture safety issues.
+Post-fix review leaves no critical findings. CR-01 and WR-01/02/03/04/06/08/09/10/11/12 were resolved and verified in commits `490dcde` through `d418bb7`; see `10-REVIEW-FIX.md`. Two broader advisories remain deferred: WR-05 requires a cross-phase shared-card accessibility redesign, and WR-07 requires a dedicated design-system form-primitives extension.
 
-## Critical Issues
+## Remaining Warnings
+
+- **WR-05:** Shared `GameCard` uses a clickable card boundary containing nested controls. Address through a dedicated Phase 9/10 accessibility redesign rather than a surgical Phase 10 change.
+- **WR-07:** `SessionDetailsEditor` uses styled native controls where no source-owned textarea/date/number primitives exist. Address as a design-system extension without adding ad hoc dependencies.
+
+## Resolved Findings
+
+The original findings are retained below as an audit trail. All are resolved except WR-05 and WR-07. Resolution commits and verification evidence are recorded in `10-REVIEW-FIX.md`.
+
+### Original Critical Issue — Resolved
 
 ### CR-01: `updateSessionDetails` resolver crashes on invalid `scheduledAt`
 
@@ -63,7 +72,7 @@ rescue ArgumentError
 end
 ```
 
-## Warnings
+### Original Warnings — Resolved Except WR-05 and WR-07
 
 ### WR-01: Picking header mobile DOM order violates the UI-SPEC
 
@@ -168,6 +177,6 @@ const backupDir = resolve(tmpdir(), 'opencode', 'phase10-picking')
 
 ---
 
-_Reviewed: 2026-07-18T12:00:00Z_
+_Reviewed: 2026-07-18T14:15:00Z (post-fix)_
 _Reviewer: the agent (gsd-code-reviewer)_
 _Depth: standard_
