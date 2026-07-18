@@ -257,12 +257,12 @@ describe('NightSessionView', () => {
     expect(wrapper.find('[data-testid="session-summary-stub"]').exists()).toBe(false)
   })
 
-  it('shows a header skeleton only when session data is absent while loading', async () => {
+  it('shows the outer loading message, not the PICKING header, when session data is absent while loading', async () => {
     const wrapper = mountView({ query: createMockQuery({ result: null, loading: true }) })
     await flush()
 
+    expect(wrapper.text()).toContain('Loading session...')
     expect(wrapper.find('[data-testid="picking-header-stub"]').exists()).toBe(false)
-    expect(wrapper.findAll('[data-testid="skeleton-stub"]').length).toBeGreaterThan(0)
   })
 
   it('preserves the real header during refetch when session data is available', async () => {
