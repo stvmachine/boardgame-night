@@ -4,16 +4,16 @@ milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
 current_phase: 10
 current_phase_name: Picking a Game Redesign
-status: ready_to_plan
+status: executing
 stopped_at: Phase 10 planned
-last_updated: "2026-07-17T23:02:34.993Z"
+last_updated: "2026-07-18T03:02:15.479Z"
 last_activity: 2026-07-17
-last_activity_desc: Phase 09 complete, transitioned to Phase 10
+last_activity_desc: Phase 10 execution started
 progress:
   total_phases: 11
   completed_phases: 9
   total_plans: 52
-  completed_plans: 46
+  completed_plans: 47
   percent: 82
 ---
 
@@ -28,10 +28,10 @@ See: .planning/PROJECT.md (updated 2026-07-17)
 
 ## Current Position
 
-Phase: 10 — Picking a Game Redesign
-Plan: Not started
-Status: Ready to discuss and plan
-Last activity: 2026-07-17 — Phase 09 complete, transitioned to Phase 10
+Phase: 10 (Picking a Game Redesign) — EXECUTING
+Plan: 2 of 6
+Status: Ready to execute
+Last activity: 2026-07-17 — Phase 10 execution started
 
 Progress: [████████░░] 82%
 
@@ -86,6 +86,7 @@ Progress: [████████░░] 82%
 | Phase 09-home-collection-redesign P05 | 16m 24s | 3 tasks | 13 files |
 | Phase 09 P06 | 15min | 3 tasks | 10 files |
 | Phase 09 P07 | 13m | 2 tasks | 7 files |
+| Phase 10 P01 | 3h 55m | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -165,6 +166,8 @@ Recent decisions affecting current work:
 - [Phase 09]: Used reka-ui DialogPortal for Sheet content so tests query document to verify title/description copy.
 - [Phase 09]: Reset selectedOwners to all collectors in clearFilters so Clear all removes the owner restriction while preserving the collector list and group token.
 - [Phase 09]: Deleted the legacy CollectionFilters component and spec only after replacement suites passed, with a filesystem assertion as the deletion gate.
+- [Phase ?]: Used context[:current_arguments].argument_values.key? to preserve omitted fields while allowing explicit null to clear nullable fields — D-04/D-05 require preserving omitted fields and allowing explicit null to clear nullable fields; GraphQL arguments alone cannot distinguish omitted from null, so the resolver inspects the provided argument metadata
+- [Phase ?]: Kept timeBudgetMinutes and complexityPreference outside the updateSessionDetails mutation schema so GraphQL validation rejects them before persistence — D-05 locks preferences during picking; excluding them from the GraphQL argument allowlist and contract schema prevents any caller from altering them
 
 ### Pending Todos
 
@@ -192,6 +195,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-17T23:02:34.984Z
+Last session: 2026-07-18T03:01:39.985Z
 Stopped at: Phase 10 planned
 Resume file: .planning/phases/10-picking-a-game-redesign/10-01-PLAN.md

@@ -321,12 +321,12 @@ Plans:
   3. User sees game suggestion cards with thumbnail, title, duration, description, player count, and a "Pick this game" button.
   4. User can pick a game from the suggestion list and the session updates to the selected game state.
 
-**Plans:** 6 plans
+**Plans:** 1/6 plans executed
 Plans:
 
 **Wave 1**
 
-- [ ] 10-01-PLAN.md — Host-only ordinary session-details mutation and lifecycle/authorization contract
+- [x] 10-01-PLAN.md — Host-only ordinary session-details mutation and lifecycle/authorization contract
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -344,6 +344,7 @@ Plans:
 **Wave 5** *(blocked on Wave 4 completion)*
 
 - [ ] 10-06-PLAN.md — Human visual and interaction UI-SPEC compliance checkpoint
+
 **UI hint**: yes
 
 ### Phase 11: Polish & E2E Hardening
@@ -379,7 +380,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Suggestion Engine Backend | 4/4 | Complete    | 2026-07-14 |
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
-| 10. Picking a Game Redesign | 0/6 | Not started | - |
+| 10. Picking a Game Redesign | 1/6 | In Progress|  |
 | 11. Polish & E2E Hardening | 0/TBD | Not started | - |
 
 ---
