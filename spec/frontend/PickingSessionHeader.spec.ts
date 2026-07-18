@@ -191,6 +191,7 @@ describe('PickingSessionHeader', () => {
     expect(container.classes()).toContain('border')
     expect(container.classes()).toContain('border-outline')
     expect(container.classes()).toContain('bg-surface-container')
+    expect(container.classes()).toContain('shadow-card')
     expect(container.classes()).toContain('p-4')
     expect(container.classes()).toContain('md:p-6')
   })

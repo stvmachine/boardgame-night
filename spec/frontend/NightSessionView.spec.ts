@@ -257,13 +257,20 @@ describe('NightSessionView', () => {
     expect(wrapper.find('[data-testid="session-summary-stub"]').exists()).toBe(false)
   })
 
-  it('shows a header skeleton and passes loading to the picker while PICKING data is loading', async () => {
-    const wrapper = mountView({ query: createMockQuery({ result: buildSession({ state: 'PICKING' }), loading: true }) })
+  it('shows a header skeleton only when session data is absent while loading', async () => {
+    const wrapper = mountView({ query: createMockQuery({ result: null, loading: true }) })
     await flush()
 
     expect(wrapper.find('[data-testid="picking-header-stub"]').exists()).toBe(false)
     expect(wrapper.findAll('[data-testid="skeleton-stub"]').length).toBeGreaterThan(0)
-    expect(wrapper.find('[data-testid="picker-loading"]').text()).toBe('true')
+  })
+
+  it('preserves the real header during refetch when session data is available', async () => {
+    const wrapper = mountView({ query: createMockQuery({ result: buildSession({ state: 'PICKING' }), loading: true }) })
+    await flush()
+
+    expect(wrapper.find('[data-testid="picking-header-stub"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="game-picker-stub"]').exists()).toBe(true)
   })
 
   it('preserves the real header and passes a partial query error to the picker', async () => {
