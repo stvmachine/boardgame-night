@@ -16,7 +16,7 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 ### Design System (DS)
 
 - [x] **DS-01**: App uses the "Tabletop Social" Material 3 design system (Inter font, indigo `#4f46e5` primary, M3 tonal palette, Material Symbols Outlined icons)
-- [ ] **DS-02**: App shell has a 280px fixed sidebar (Home/Collection/Hot/Groups/Account + Settings/Logout + "New Session" primary button) with mobile drawer
+- [x] **DS-02**: App shell has a 280px fixed sidebar (Home/Collection/Hot/Groups/Account + Settings/Logout + "New Session" primary button) with mobile drawer
 - [x] **DS-03**: Cards use rounded-xl corners, soft shadows, and M3 surface tonal layering (Level 0 background, Level 1 cards with 1px border)
 - [x] **DS-04**: Status badges render with semantic colors (Draft=gray, Invited=indigo, Picking=amber, Completed=green) using small-caps label-sm typography
 - [x] **DS-05**: Loading states use skeleton loaders (animated pulse placeholders matching game card layout)
@@ -60,10 +60,21 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 ### Tech Debt (DEBT)
 
-- [ ] **DEBT-01**: E2E test suite runs in CI (Playwright tests execute on every PR)
-- [ ] **DEBT-02**: Action Cable dev config uses solid_cable adapter and Vite proxies /cable for real-time subscriptions in local dev
-- [ ] **DEBT-03**: Legacy BGG classes removed (duplicate `app/jobs/import_collection_job.rb`, unsafe `Bgg::CollectionPersister#fetch_and_persist!`)
-- [ ] **DEBT-04**: REQUIREMENTS.md checkboxes updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05)
+- [x] **DEBT-01**: E2E test suite runs in CI (Playwright tests execute on every PR)
+- [x] **DEBT-02**: Action Cable dev config uses solid_cable adapter and Vite proxies /cable for real-time subscriptions in local dev
+- [x] **DEBT-03**: Legacy BGG classes removed (duplicate `app/jobs/import_collection_job.rb`, unsafe `Bgg::CollectionPersister#fetch_and_persist!`)
+- [x] **DEBT-04**: REQUIREMENTS.md checkboxes updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05)
+
+### Restored v1.0 Implementation Evidence
+
+The following v1.0 requirements have implementation evidence verified against [v1.0 Milestone Audit](v1.0-MILESTONE-AUDIT.md). Evidence provenance: [Phase 11 Evidence Ledger](phases/11-polish-e2e-hardening/11-EVIDENCE.md).
+
+- [x] **BGG-01**: Fetch BGG user collection with correct base games + expansions via two-call workaround, nil-safe XML normalization, and rate-limited/throttled/retried HTTP client
+- [x] **BGG-04**: Persisted collections from N users merge into a single deduplicated view via pure database query (no live BGG on read path)
+- [x] **BGG-05**: Collection imports run as Solid Queue background jobs with explicit `retry_on`/`discard_on` and concurrency `key: "bgg_api"`
+- [x] **COLL-01**: N-user merge with owner color-avatars in responsive layout (desktop sidebar + mobile drawer, adaptive grid)
+- [x] **COLL-03**: Fuzzy search, filter by players/time/complexity, sort by name/rating/year/complexity, and group by player-count/rating/best-players/none
+- [x] **COLL-05**: Hot/trending games on landing page with well-formed game cards (thumbnail, name, rating, players, time, complexity, owner avatars, click to BGG)
 
 ## v2 Requirements (Deferred — Add After Validation)
 
@@ -99,8 +110,14 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
+| BGG-01 | Phase 2 | Complete |
+| BGG-04 | Phase 2 | Complete |
+| BGG-05 | Phase 2 | Complete |
+| COLL-01 | Phase 3 | Complete |
+| COLL-03 | Phase 3 | Complete |
+| COLL-05 | Phase 3 | Complete |
 | DS-01 | Phase 5 | Complete |
-| DS-02 | Phase 5 | Pending |
+| DS-02 | Phase 5 | Complete |
 | DS-03 | Phase 5 | Complete |
 | DS-04 | Phase 5 | Complete |
 | DS-05 | Phase 5 | Complete |
@@ -126,10 +143,10 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 | SUGG-03 | Phase 7 | Complete |
 | SUGG-04 | Phase 7 | Complete |
 | SUGG-05 | Phase 6 | Complete |
-| DEBT-01 | Phase 11 | Pending |
-| DEBT-02 | Phase 11 | Pending |
-| DEBT-03 | Phase 11 | Pending |
-| DEBT-04 | Phase 11 | Pending |
+| DEBT-01 | Phase 11 | Complete |
+| DEBT-02 | Phase 11 | Complete |
+| DEBT-03 | Phase 11 | Complete |
+| DEBT-04 | Phase 11 | Complete |
 
 **Coverage:**
 
