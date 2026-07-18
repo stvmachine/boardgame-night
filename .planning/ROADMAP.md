@@ -361,12 +361,12 @@ Plans:
   4. REQUIREMENTS.md checkboxes are updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05).
   5. Dark mode and responsive layouts are verified across all redesigned surfaces.
 
-**Plans**: 5 plans
+**Plans**: 1/5 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 11-01-PLAN.md — Deliver persistent Light/Dark/System appearance through the Account surface (Wave 1)
+- [x] 11-01-PLAN.md — Deliver persistent Light/Dark/System appearance through the Account surface (Wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -403,7 +403,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
-| 11. Polish & E2E Hardening | 0/5 | Not started | - |
+| 11. Polish & E2E Hardening | 1/5 | In Progress|  |
 
 ---
 
