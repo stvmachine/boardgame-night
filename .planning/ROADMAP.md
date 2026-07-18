@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Group Detail Surface** - Group hub with sessions, members, spotlight, invite link (completed 2026-07-15)
 - [x] **Phase 9: Home & Collection Redesign** - Dashboard hero, stats, trending, rich filters, game cards (completed 2026-07-17)
 - [x] **Phase 10: Picking a Game Redesign** - Session header, attendee-aware suggestions, pick cards (completed 2026-07-18)
-- [ ] **Phase 11: Polish & E2E Hardening** - E2E in CI, solid_cable dev config, legacy cleanup, dark mode/responsive QA
+- [x] **Phase 11: Polish & E2E Hardening** - E2E in CI, solid_cable dev config, legacy cleanup, dark mode/responsive QA
 
 ## Phase Details
 
