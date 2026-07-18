@@ -97,6 +97,18 @@ RSpec.describe "CI workflow (.github/workflows/ci.yml)" do
     expect(apt_step["run"]).not_to include("libcups2")
   end
 
+  it "sets workers to 1 for deterministic serialized execution" do
+    config_path = Rails.root.join("tests/e2e/playwright.config.ts")
+    config_content = File.read(config_path)
+    expect(config_content).to include("workers: 1")
+  end
+
+  it "sets a 60-second default timeout for serialized execution" do
+    config_path = Rails.root.join("tests/e2e/playwright.config.ts")
+    config_content = File.read(config_path)
+    expect(config_content).to include("timeout: 60_000")
+  end
+
   it "keeps retries at zero (Playwright config) and does not add flaky tolerance" do
     # The Playwright config is the source of truth for retries.
     config_path = Rails.root.join("tests/e2e/playwright.config.ts")

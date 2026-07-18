@@ -9,7 +9,9 @@ const repoRoot = resolve(__dirname, '../../')
 export default defineConfig({
   testDir: '.',
   fullyParallel: false,
+  workers: 1,
   retries: 0,
+  timeout: 60_000,
   globalSetup: resolve(__dirname, './global-setup.ts'),
   globalTeardown: resolve(__dirname, './global-teardown.ts'),
   use: {
