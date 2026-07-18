@@ -4,9 +4,9 @@ milestone: v1.1
 milestone_name: UI Redesign + Suggestion Engine
 current_phase: 11
 current_phase_name: Polish & E2E Hardening
-status: completed
-stopped_at: Wave 4 complete, proceeding to Phase 10 UI checkpoint
-last_updated: "2026-07-18T11:50:01.929Z"
+status: ready_to_plan
+stopped_at: Phase 10 complete, ready to discuss Phase 11
+last_updated: "2026-07-18T11:51:32Z"
 last_activity: 2026-07-18
 last_activity_desc: Phase 10 complete, transitioned to Phase 11
 progress:
@@ -21,16 +21,16 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-17)
+See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 10 — Picking a Game Redesign
+**Current focus:** Phase 11 — Polish & E2E Hardening
 
 ## Current Position
 
 Phase: 11 — Polish & E2E Hardening
 Plan: Not started
-Status: Completed Plan 06
+Status: Ready to discuss and plan
 Last activity: 2026-07-18 — Phase 10 complete, transitioned to Phase 11
 
 Progress: [█████████░] 91%
@@ -39,7 +39,7 @@ Progress: [█████████░] 91%
 
 **Velocity:**
 
-- Total plans completed: 51
+- Total plans completed: 52
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -56,10 +56,9 @@ Progress: [█████████░] 91%
 | 7. Suggestion Engine Backend | 4 | ~1h 50m | ~28 min |
 | 8. Group Detail Surface | 6 | — | — |
 | 9. Home & Collection Redesign | 8 | — | — |
-| 10. Picking a Game Redesign | TBD | — | — |
+| 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | TBD | — | — |
 | 06 | 3 | - | - |
-| 10 | 6 | - | - |
 
 **Recent Trend:**
 
@@ -191,7 +190,9 @@ None yet.
 
 ### Blockers/Concerns
 
-None.
+- [Phase 10] Shared `GameCard` keeps a clickable card boundary around nested controls; review the cross-phase ARIA model during hardening.
+- [Phase 10] `SessionDetailsEditor` uses styled native textarea/date/number controls because dedicated design-system primitives do not yet exist.
+- Full-project `vue-tsc --noEmit` retains unrelated legacy diagnostics despite Phase 10-owned files being clean.
 
 ### Roadmap Evolution
 
@@ -211,6 +212,6 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-18T11:15:04.924Z
-Stopped at: Wave 4 complete, proceeding to Phase 10 UI checkpoint
-Resume file: .planning/phases/10-picking-a-game-redesign/10-06-PLAN.md
+Last session: 2026-07-18T11:51:32Z
+Stopped at: Phase 10 complete, ready to discuss Phase 11
+Resume file: None
