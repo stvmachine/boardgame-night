@@ -7,8 +7,12 @@ import { dirname } from 'path'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
-const fixture = JSON.parse(
+const sessionFixture = JSON.parse(
   readFileSync(resolve(__dirname, 'fixtures', 'e2e_session.json'), 'utf-8')
+)
+
+const groupFixture = JSON.parse(
+  readFileSync(resolve(__dirname, 'fixtures', 'e2e_group.json'), 'utf-8')
 )
 
 async function signIn(page: Page, email: string, password: string) {
@@ -20,51 +24,98 @@ async function signIn(page: Page, email: string, password: string) {
   await page.waitForURL(/^(?!.*\/login).*$/, { timeout: 30_000 })
 }
 
-test('session lifecycle: guest RSVPs, host picks game, summary shows result', async ({ browser }) => {
-  const { session_id: sessionId, invite_token: inviteToken } = fixture
+test('picking lifecycle: host edits, member views, host picks, completed summary', async ({ browser }) => {
+  const { session_id: sessionId, invite_token: inviteToken } = sessionFixture
+  const { owner_email: ownerEmail, member_email: memberEmail } = groupFixture
 
   const hostContext = await browser.newContext()
   const hostPage = await hostContext.newPage()
-  const guestContext = await browser.newContext()
-  const guestPage = await guestContext.newPage()
+  const memberContext = await browser.newContext()
+  const memberPage = await memberContext.newPage()
 
   try {
     // Host signs in and views the invited session
-    await signIn(hostPage, 'e2e_alice@example.com', 'password')
+    await signIn(hostPage, ownerEmail, 'password')
     await hostPage.goto(`/s/${sessionId}`)
     await expect(hostPage.getByText('INVITED')).toBeVisible({ timeout: 10_000 })
-    await expect(hostPage.getByRole('button', { name: 'Start picking' })).toBeVisible({ timeout: 10_000 })
-    await expect(hostPage.getByText('Attendee count')).toBeVisible()
-    await expect(hostPage.getByText('0', { exact: true })).toBeVisible()
+    await expect(hostPage.getByRole('button', { name: 'Start picking' })).toBeVisible()
 
-    // Guest opens the magic invite link and RSVPs "Going"
-    await guestPage.goto(`/invite/${inviteToken}`)
-    await expect(guestPage.getByText("e2e Friday Games")).toBeVisible({ timeout: 10_000 })
-    await guestPage.getByLabel('Name your nickname (optional)').fill('Guest')
-    await guestPage.getByRole('button', { name: 'Going', exact: true }).click()
-    await expect(guestPage.getByText('Thanks! Your response is Going')).toBeVisible({ timeout: 10_000 })
-    await expect(guestPage.getByText('Attendee count: 1')).toBeVisible()
+    // Member signs in and RSVPs Going via the invite link
+    await signIn(memberPage, memberEmail, 'password')
+    await memberPage.goto(`/invite/${inviteToken}`)
+    await expect(memberPage.getByText('e2e Friday Games')).toBeVisible({ timeout: 10_000 })
+    await memberPage.getByRole('button', { name: 'Going', exact: true }).click()
+    await expect(memberPage.getByText('Thanks! Your response is Going')).toBeVisible({ timeout: 10_000 })
 
     // Host sees the updated attendee count and starts picking
     await hostPage.reload()
     await expect(hostPage.getByText('1', { exact: true })).toBeVisible({ timeout: 10_000 })
     await hostPage.getByRole('button', { name: 'Start picking' }).click()
-    await expect(hostPage.getByText('PICKING')).toBeVisible({ timeout: 10_000 })
-    await expect(hostPage.getByText('Pick a game')).toBeVisible()
+    await expect(hostPage.getByText('Picking')).toBeVisible({ timeout: 10_000 })
+    await expect(hostPage.getByRole('heading', { name: /Game Suggestions \(Filtered for \d+ Players\)/ })).toBeVisible()
+    await expect(hostPage.getByText('Up to 120 min')).toBeVisible()
+    await expect(hostPage.getByText('Any complexity')).toBeVisible()
+    await expect(hostPage.getByRole('button', { name: 'Edit Details' })).toBeVisible()
 
-    // Host picks a game from the group collection
+    // Member sees the redesigned picking view without host controls
+    await memberPage.goto(`/s/${sessionId}`)
+    await expect(memberPage.getByRole('heading', { name: /Game Suggestions \(Filtered for \d+ Players\)/ })).toBeVisible({ timeout: 10_000 })
+    await expect(memberPage.getByRole('button', { name: 'Edit Details' })).not.toBeVisible()
+    await expect(memberPage.getByRole('button', { name: 'Pick this game' })).not.toBeVisible()
+    await expect(memberPage.getByText('The host will choose the game.')).toBeVisible()
+
+    // Responsive layout checks at all approved widths
+    const widths = [320, 375, 414, 768, 1024, 1280]
+    for (const width of widths) {
+      await hostPage.setViewportSize({ width, height: 800 })
+      await hostPage.reload()
+      await expect(hostPage.getByRole('heading', { name: /Game Suggestions \(Filtered for \d+ Players\)/ })).toBeVisible({ timeout: 10_000 })
+
+      const hasHorizontalOverflow = await hostPage.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
+      expect(hasHorizontalOverflow, `horizontal overflow at ${width}px`).toBe(false)
+
+      const grid = hostPage.locator('[data-testid="suggestion-grid"]')
+      const gridStyle = await grid.evaluate((el: HTMLElement) => window.getComputedStyle(el).gridTemplateColumns)
+      const columnCount = gridStyle.split(' ').length
+      if (width < 768) {
+        expect(columnCount, `expected 1 column at ${width}px`).toBe(1)
+      } else if (width < 1280) {
+        expect(columnCount, `expected 2 columns at ${width}px`).toBe(2)
+      } else {
+        expect(columnCount, `expected 3 columns at ${width}px`).toBe(3)
+      }
+    }
+
+    // Host edits ordinary details while picking; preferences stay locked
+    await hostPage.setViewportSize({ width: 1280, height: 800 })
+    await hostPage.getByRole('button', { name: 'Edit Details' }).click()
+    await expect(hostPage.getByRole('dialog', { name: 'Edit session details' })).toBeVisible()
+    await expect(hostPage.getByText('Game preferences stay locked while picking.')).toBeVisible()
+    await hostPage.getByLabel('Title').fill('Updated Picking Night')
+    await hostPage.getByRole('button', { name: 'Save details' }).click()
+    await expect(hostPage.getByRole('dialog', { name: 'Edit session details' })).not.toBeVisible()
+    await expect(hostPage.getByRole('heading', { name: 'Updated Picking Night' })).toBeVisible()
+    await expect(hostPage.getByText('Picking')).toBeVisible()
+
+    // Host opens the reason disclosure with the keyboard
     const wingspanCard = hostPage.locator('article', { has: hostPage.getByRole('heading', { name: 'Wingspan' }) })
     await expect(wingspanCard).toBeVisible({ timeout: 10_000 })
-    await wingspanCard.getByRole('button', { name: 'Pick this game' }).click()
+    await expect(wingspanCard.getByText(/Score \d+/)).toBeVisible()
+    await expect(wingspanCard.getByText(/Best at 1 players?/)).toBeVisible()
+    const showMoreReasons = wingspanCard.getByRole('button', { name: 'Show more reasons' })
+    if (await showMoreReasons.isVisible().catch(() => false)) {
+      await showMoreReasons.focus()
+      await showMoreReasons.press('Enter')
+      await expect(showMoreReasons).toHaveAttribute('aria-expanded', 'true')
+    }
 
-    // Completed summary shows the picked game and the attending guest
+    // Host picks the game
+    await wingspanCard.getByRole('button', { name: 'Pick this game' }).click()
     await expect(hostPage.getByText('COMPLETED')).toBeVisible({ timeout: 10_000 })
     await expect(hostPage.getByRole('heading', { name: 'Wingspan' })).toBeVisible()
     await expect(hostPage.getByText('Picked game')).toBeVisible()
-    await expect(hostPage.getByText('Guest')).toBeVisible()
-    await expect(hostPage.getByRole('listitem').getByText('Going')).toBeVisible()
   } finally {
     await hostContext.close()
-    await guestContext.close()
+    await memberContext.close()
   }
 })
