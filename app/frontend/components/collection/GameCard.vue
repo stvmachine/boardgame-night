@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
@@ -26,6 +26,9 @@ interface Props {
   description?: string | null
   owners: Owner[]
   variant?: 'grid' | 'list'
+  score?: number | null
+  confidence?: 'HIGH' | 'MEDIUM' | 'LOW' | null
+  reasons?: string[] | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -36,6 +39,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const MAX_VISIBLE_OWNERS = 3
 const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+
+const showAllReasons = ref(false)
 
 const plainDescription = computed(() => {
   if (!props.description) return ''
@@ -55,6 +60,33 @@ const ownerOverflow = computed(() => Math.max(0, props.owners.length - MAX_VISIB
 
 const hasAverage = computed(() => props.average != null && props.average > 0)
 const hasWeight = computed(() => props.averageWeight != null && props.averageWeight > 0)
+
+const hasScore = computed(() => props.score != null)
+const hasConfidence = computed(() => props.confidence != null)
+const hasReasons = computed(() => props.reasons != null && props.reasons.length > 0)
+const roundedScore = computed(() => props.score != null ? Math.round(props.score) : null)
+const hasMoreReasons = computed(() => props.reasons != null && props.reasons.length > 3)
+const visibleReasons = computed(() => {
+  if (!props.reasons) return []
+  return showAllReasons.value ? props.reasons : props.reasons.slice(0, 3)
+})
+const reasonSectionId = computed(() => `game-card-reasons-${props.id || props.objectid || 'unknown'}`)
+const confidenceVariant = computed(() => {
+  switch (props.confidence) {
+    case 'HIGH': return 'completed'
+    case 'MEDIUM': return 'invited'
+    case 'LOW': return 'draft'
+    default: return 'default'
+  }
+})
+const confidenceLabel = computed(() => {
+  switch (props.confidence) {
+    case 'HIGH': return 'High confidence'
+    case 'MEDIUM': return 'Medium confidence'
+    case 'LOW': return 'Low confidence'
+    default: return ''
+  }
+})
 
 const playerLabel = computed(() => {
   if (props.minPlayers == null || props.maxPlayers == null) return '—'
@@ -82,7 +114,12 @@ function openBgg() {
   )
 }
 
+function isInsideAction(target: HTMLElement | null): boolean {
+  return target?.closest('[data-slot="game-card-action"]') != null
+}
+
 function handleKeydown(event: KeyboardEvent) {
+  if (isInsideAction(event.target as HTMLElement | null)) return
   if (event.key === 'Enter' || event.key === ' ') {
     event.preventDefault()
     openBgg()
@@ -90,8 +127,7 @@ function handleKeydown(event: KeyboardEvent) {
 }
 
 function handleClick(event: MouseEvent) {
-  const target = event.target as HTMLElement | null
-  if (target?.closest('[data-slot="game-card-action"]')) return
+  if (isInsideAction(event.target as HTMLElement | null)) return
   openBgg()
 }
 </script>
@@ -129,6 +165,40 @@ function handleClick(event: MouseEvent) {
         >
           {{ plainDescription }}
         </p>
+        <div v-if="hasScore || hasConfidence || hasReasons" class="space-y-2 mt-2">
+          <div v-if="hasScore || hasConfidence" class="flex items-center gap-2">
+            <span
+              v-if="hasScore"
+              data-testid="suggestion-score"
+              class="rounded-full bg-surface-container-high px-2 py-0.5 text-sm font-semibold tabular-nums text-primary"
+            >
+              Score {{ roundedScore }}
+            </span>
+            <Badge v-if="hasConfidence" :variant="confidenceVariant">{{ confidenceLabel }}</Badge>
+          </div>
+          <div v-if="hasReasons" :id="reasonSectionId" class="flex flex-wrap gap-2">
+            <span
+              v-for="reason in visibleReasons"
+              :key="reason"
+              data-testid="reason-chip"
+              class="inline-flex items-center rounded-full bg-surface-container-high px-2 py-1 text-xs text-on-surface-variant"
+            >
+              {{ reason }}
+            </span>
+            <button
+              v-if="hasMoreReasons"
+              type="button"
+              data-testid="show-more-reasons"
+              :aria-expanded="showAllReasons"
+              :aria-controls="reasonSectionId"
+              class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+              @click.stop="showAllReasons = !showAllReasons"
+              @keydown.stop="() => {}"
+            >
+              Show more reasons
+            </button>
+          </div>
+        </div>
         <div class="flex items-center justify-between mt-2">
           <div
             data-testid="game-card-footer"
@@ -190,6 +260,40 @@ function handleClick(event: MouseEvent) {
         >
           {{ plainDescription }}
         </p>
+        <div v-if="hasScore || hasConfidence || hasReasons" class="space-y-2">
+          <div v-if="hasScore || hasConfidence" class="flex items-center gap-2">
+            <span
+              v-if="hasScore"
+              data-testid="suggestion-score"
+              class="rounded-full bg-surface-container-high px-2 py-0.5 text-sm font-semibold tabular-nums text-primary"
+            >
+              Score {{ roundedScore }}
+            </span>
+            <Badge v-if="hasConfidence" :variant="confidenceVariant">{{ confidenceLabel }}</Badge>
+          </div>
+          <div v-if="hasReasons" :id="reasonSectionId" class="flex flex-wrap gap-2">
+            <span
+              v-for="reason in visibleReasons"
+              :key="reason"
+              data-testid="reason-chip"
+              class="inline-flex items-center rounded-full bg-surface-container-high px-2 py-1 text-xs text-on-surface-variant"
+            >
+              {{ reason }}
+            </span>
+            <button
+              v-if="hasMoreReasons"
+              type="button"
+              data-testid="show-more-reasons"
+              :aria-expanded="showAllReasons"
+              :aria-controls="reasonSectionId"
+              class="inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold text-primary underline-offset-2 hover:underline"
+              @click.stop="showAllReasons = !showAllReasons"
+              @keydown.stop="() => {}"
+            >
+              Show more reasons
+            </button>
+          </div>
+        </div>
         <div class="flex items-center gap-2">
           <Badge v-if="hasAverage" variant="invited">{{ average?.toFixed(1) }}</Badge>
           <Badge v-if="hasWeight" variant="draft">{{ averageWeight?.toFixed(1) }}</Badge>
