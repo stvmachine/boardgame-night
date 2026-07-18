@@ -1,4 +1,5 @@
 import { execSync } from 'child_process'
+import { tmpdir } from 'os'
 import { fileURLToPath } from 'url'
 import { dirname, resolve } from 'path'
 import { copyFileSync, existsSync, mkdirSync } from 'fs'
@@ -8,7 +9,7 @@ const __dirname = dirname(__filename)
 const repoRoot = resolve(__dirname, '../../')
 
 const fixturesDir = resolve(__dirname, 'fixtures')
-const backupDir = '/var/folders/yr/v0ygzpgd79b5pr9vlt83fswc0000gn/T/opencode/phase10-picking'
+const backupDir = resolve(tmpdir(), 'opencode', 'phase10-picking')
 const fixtureNames = ['e2e_group.json', 'e2e_session.json']
 
 export default function globalSetup() {

@@ -103,11 +103,10 @@ test('picking lifecycle: host edits, member views, host picks, completed summary
     await expect(wingspanCard.getByText(/Score \d+/)).toBeVisible()
     await expect(wingspanCard.getByText(/Best at 1 players?/)).toBeVisible()
     const showMoreReasons = wingspanCard.getByRole('button', { name: 'Show more reasons' })
-    if (await showMoreReasons.isVisible().catch(() => false)) {
-      await showMoreReasons.focus()
-      await showMoreReasons.press('Enter')
-      await expect(showMoreReasons).toHaveAttribute('aria-expanded', 'true')
-    }
+    await expect(showMoreReasons).toBeVisible({ timeout: 10_000 })
+    await showMoreReasons.focus()
+    await showMoreReasons.press('Enter')
+    await expect(showMoreReasons).toHaveAttribute('aria-expanded', 'true')
 
     // Host picks the game
     await wingspanCard.getByRole('button', { name: 'Pick this game' }).click()

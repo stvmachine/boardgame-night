@@ -3,6 +3,16 @@
 namespace :e2e do
   desc "Seed the database with fixtures for end-to-end tests"
   task seed: :environment do
+    alice = nil
+    bob = nil
+    group = nil
+    invited_session = nil
+    picking_session = nil
+    draft_session = nil
+    completed_session = nil
+    cancelled_session = nil
+    hot_items = nil
+
     ActiveRecord::Base.transaction do
       # Clean up any previous e2e fixture data so the task is idempotent
       User.where(bgg_username: ["e2e_alice", "e2e_bob"]).destroy_all
@@ -184,24 +194,6 @@ namespace :e2e do
         expires_at: 7.days.from_now
       )
 
-      session_fixture_path = Rails.root.join("tests", "e2e", "fixtures", "e2e_session.json")
-      File.write(session_fixture_path, JSON.pretty_generate({ session_id: invited_session.id.to_s, invite_token: raw_token }))
-
-      group_fixture_path = Rails.root.join("tests", "e2e", "fixtures", "e2e_group.json")
-      File.write(group_fixture_path, JSON.pretty_generate({
-        group_id: group.id.to_s,
-        invite_code: group.invite_code,
-        owner_email: alice.email,
-        member_email: bob.email,
-        session_ids: {
-          picking: picking_session.id.to_s,
-          invited: invited_session.id.to_s,
-          draft: draft_session.id.to_s,
-          completed: completed_session.id.to_s,
-          cancelled: cancelled_session.id.to_s
-        }
-      }))
-
       # Seed the BGG hot list cache so the Home/Hot E2E preview tests do not
       # depend on live BoardGameGeek availability or rate limiting.
       hot_items = [
@@ -216,5 +208,25 @@ namespace :e2e do
 
       Rails.logger.info("Seeded e2e fixtures: alice (#{alice.bgg_username}), bob (#{bob.bgg_username}), group #{group.id}, sessions #{[invited_session, picking_session, draft_session, completed_session, cancelled_session].map(&:id).join(", ")}")
     end
+
+    # Write fixture JSON files only after the DB transaction commits,
+    # so a rollback cannot leave corrupt fixture data on disk.
+    session_fixture_path = Rails.root.join("tests", "e2e", "fixtures", "e2e_session.json")
+    File.write(session_fixture_path, JSON.pretty_generate({ session_id: invited_session.id.to_s, invite_token: "e2e_session_invite_token" }))
+
+    group_fixture_path = Rails.root.join("tests", "e2e", "fixtures", "e2e_group.json")
+    File.write(group_fixture_path, JSON.pretty_generate({
+      group_id: group.id.to_s,
+      invite_code: group.invite_code,
+      owner_email: alice.email,
+      member_email: bob.email,
+      session_ids: {
+        picking: picking_session.id.to_s,
+        invited: invited_session.id.to_s,
+        draft: draft_session.id.to_s,
+        completed: completed_session.id.to_s,
+        cancelled: cancelled_session.id.to_s
+      }
+    }))
   end
 end
