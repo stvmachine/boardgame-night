@@ -17,10 +17,10 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 - ✓ Group Detail provides one responsive hub for sessions, shared-game spotlight, authorized member management, and invitation controls — Phase 8
 - ✓ Tabletop Social design system and responsive app shell provide Material 3 tokens, shared primitives, navigation, badges, avatars, and skeletons — Phase 5
 - ✓ Home and Collection deliver the merge dashboard, personal stats, persisted trending games, rich filters, exact sorting, grid/list cards, and view-matched loading states — Phase 9
+- ✓ Picking a Game delivers the responsive session header, host-only ordinary-details editing, attendee-aware top-eight explainable suggestions, role-correct pick controls, and normalized completion — Phase 10
 
 ### Active
 
-- [ ] Redesign Picking a Game screen (session header with status badge + attendee-aware filtered game suggestions + "Pick this game" cards)
 - [ ] Address v1.0 tech debt (E2E suite in CI, Action Cable dev config, cleanup legacy BGG classes, update REQUIREMENTS checkboxes)
 
 ### Out of Scope
@@ -107,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-17 after Phase 9 complete (Home & Collection Redesign); Milestone v1.1 in progress*
+*Last updated: 2026-07-18 after Phase 10 complete (Picking a Game Redesign); Milestone v1.1 in progress*
