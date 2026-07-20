@@ -109,6 +109,14 @@ RSpec.describe "CI workflow (.github/workflows/ci.yml)" do
     expect(config_content).to include("timeout: 60_000")
   end
 
+  it "runs RSpec tests (not Minitest) in the test job" do
+    steps = workflow.dig("jobs", "test", "steps")
+    test_step = steps.find { |s| s["run"]&.include?("rspec") }
+    expect(test_step).to be_present
+    expect(test_step["run"]).to include("bundle exec rspec")
+    expect(test_step["run"]).not_to include("rails db:test:prepare test")
+  end
+
   it "keeps retries at zero (Playwright config) and does not add flaky tolerance" do
     # The Playwright config is the source of truth for retries.
     config_path = Rails.root.join("tests/e2e/playwright.config.ts")
@@ -133,9 +141,4 @@ RSpec.describe "CI workflow (.github/workflows/ci.yml)" do
     expect(content).not_to include("Procfile.dev")
   end
 
-  it "keeps Playwright retries at zero for deterministic failures" do
-    config_path = Rails.root.join("tests/e2e/playwright.config.ts")
-    config_content = File.read(config_path)
-    expect(config_content).to include("retries: 0")
-  end
 end

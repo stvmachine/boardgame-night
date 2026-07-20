@@ -73,9 +73,6 @@ describe('AccountView Appearance', () => {
     localStorage.clear()
     document.documentElement.classList.remove('dark')
     document.documentElement.style.colorScheme = ''
-    // Ensure each test starts with a fresh Pinia.
-    const freshPinia = createPinia()
-    setActivePinia(freshPinia)
   })
 
   it('renders the Appearance section with heading and helper text', () => {
@@ -133,7 +130,8 @@ describe('AccountView Appearance', () => {
       const classes = item.classes()
       const hasMinH = classes.some((c: string) => c.includes('min-h-[44px]'))
       const hasMinW = classes.some((c: string) => c.includes('min-w-[44px]'))
-      expect(hasMinH || hasMinW).toBe(true)
+      expect(hasMinH).toBe(true)
+      expect(hasMinW).toBe(true)
     }
   })
 

@@ -36,7 +36,7 @@ afterEach(() => {
   // Clean up any test-created opencode dirs
   const opencodeDir = resolve(tmpdir(), 'opencode')
   if (existsSync(opencodeDir)) {
-    const entries = rmSync(opencodeDir, { recursive: true, force: true })
+    rmSync(opencodeDir, { recursive: true, force: true })
   }
 })
 

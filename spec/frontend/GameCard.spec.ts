@@ -199,18 +199,8 @@ describe('GameCard', () => {
 
   it('non-control content wrapper has pointer-events-none so clicks pass through to link', () => {
     const wrapper = mountCard({ objectid: '174430' })
-    // The pointer-events-none class is on the div that wraps CardContent.
-    // That div is a direct child of data-slot="card" but not the link itself.
-    const card = wrapper.find('[data-slot="card"]')
-    const children = card.element.children
-    // Find the non-link wrapper (the one without the link testid)
-    for (let i = 0; i < children.length; i++) {
-      const el = children[i]
-      if (el.tagName === 'DIV' && !el.hasAttribute('data-testid')) {
-        expect(el.classList.contains('pointer-events-none')).toBe(true)
-        break
-      }
-    }
+    const contentWrapper = wrapper.find('[data-testid="game-card-content"]')
+    expect(contentWrapper.classes()).toContain('pointer-events-none')
   })
 
   it('disclosure button has pointer-events-auto and z-20 to sit above the overlay link', () => {

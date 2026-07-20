@@ -145,7 +145,7 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
     />
 
     <!-- Non-interactive content wrapper — pointer events pass through to the link -->
-    <div class="pointer-events-none">
+    <div class="pointer-events-none" data-testid="game-card-content">
       <template v-if="variant === 'list'">
         <img
           :src="thumbnail || TRANSPARENT_PIXEL"

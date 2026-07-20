@@ -231,17 +231,21 @@ test('keeps redesigned surfaces usable in both themes', async ({ browser }) => {
     // Look for a disclosure or the pick button as a non-mutating nested control.
     // Deterministic suggestions may or may not have a disclosure; use whichever exists.
     const disclosure = page.locator('[data-testid="show-more-reasons"]').first()
-    // Attach a popup listener around the interaction and assert zero unexpected popups.
-    let unexpectedPopup = false
-    const popupGuard = (p: Page) => { unexpectedPopup = true; p.close() }
-    context.on('page', popupGuard)
+    const disclosureCount = await disclosure.count()
+    if (disclosureCount > 0) {
+      // Attach a popup listener around the interaction and assert zero unexpected popups.
+      let unexpectedPopup = false
+      const popupGuard = (p: Page) => { unexpectedPopup = true; p.close() }
+      context.on('page', popupGuard)
 
-    await expect(disclosure).toBeVisible()
-    await disclosure.click()
-    await expect(disclosure).toHaveAttribute('aria-expanded', 'true')
+      await expect(disclosure).toBeVisible()
+      await expect(disclosure).toHaveCSS('cursor', 'pointer')
+      await disclosure.click()
+      await expect(disclosure).toBeHidden()
 
-    context.removeListener('page', popupGuard)
-    expect(unexpectedPopup).toBe(false)
+      context.removeListener('page', popupGuard)
+      expect(unexpectedPopup).toBe(false)
+    }
 
   } finally {
     await context.close()

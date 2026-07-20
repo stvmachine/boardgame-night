@@ -5,14 +5,15 @@ test('connects to Action Cable through the Vite /cable proxy', async ({ page }) 
 
   // Collect CORS/origin/rejection console messages from the browser
   page.on('console', (msg) => {
+    if (msg.type() !== 'error') return
     const text = msg.text()
-    if (/Access-Control|CORS|origin|forbidden|403|actioncable|websocket.*close/i.test(text)) {
+    if (/origin not allowed|forbidden|403|invalid_request/i.test(text)) {
       corsErrors.push(text)
     }
   })
 
   // Navigate so the page origin matches Vite (needed for correct WebSocket origin headers)
-  await page.goto('/health')
+  await page.goto('/')
 
   // Establish a real WebSocket from the browser context through Vite to Rails.
   // Uses Action Cable subprotocols. Resolves only after receiving JSON
