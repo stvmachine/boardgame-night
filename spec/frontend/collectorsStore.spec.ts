@@ -70,13 +70,21 @@ describe('collectors store URL sync', () => {
     expect(router.currentRoute.value.query.usernames).toBeUndefined()
   })
 
-  it('allows set() to replace the full list and update the URL', async () => {
+  it('does not write usernames to URL on non-collection routes', async () => {
     const { store, router } = await createStoreWithRoute({ usernames: 'alice' })
 
-    store.set(['bob', 'carol'])
+    await router.push({ name: 'home' })
+    store.add('bob')
     await new Promise(resolve => setTimeout(resolve, 0))
 
-    expect(store.usernames).toEqual(['bob', 'carol'])
-    expect(router.currentRoute.value.query.usernames).toBe('bob,carol')
+    expect(router.currentRoute.value.query.usernames).toBeUndefined()
+  })
+
+  it('keeps usernames in memory when navigating away from collection', async () => {
+    const { store, router } = await createStoreWithRoute({ usernames: 'alice,bob' })
+
+    await router.push({ name: 'home' })
+
+    expect(store.usernames).toEqual(['alice', 'bob'])
   })
 })
