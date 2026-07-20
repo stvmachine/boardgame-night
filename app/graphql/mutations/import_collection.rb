@@ -24,7 +24,18 @@ module Mutations
               "Cooldown active: #{remaining_seconds} seconds remaining."
       end
 
-      Bgg::ImportCollectionJob.perform_later(bgg_username)
+      # Dedupe: don't enqueue if an import for this username is already pending.
+      # The frontend fires this mutation on every page load while status is QUEUED,
+      # so without this guard a stopped worker lets jobs pile up unboundedly.
+      # The job clears sync_requested_at when it finishes (see ImportCollectionJob),
+      # so a stale timestamp only lingers if the worker died mid-import; in that
+      # case the cooldown above and the 15-minute staleness window below bound it.
+      pending = user.sync_requested_at.present? && user.sync_requested_at > 15.minutes.ago
+
+      unless pending
+        user.update!(sync_requested_at: Time.current)
+        Bgg::ImportCollectionJob.perform_later(bgg_username)
+      end
       context[:sync_status_for_username] = bgg_username
 
       { user: user }

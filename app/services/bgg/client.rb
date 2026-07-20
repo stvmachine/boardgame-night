@@ -12,23 +12,6 @@ module Bgg
       @conn = build_connection
     end
 
-    def collection(username)
-      cache_key = "bgg:collection:#{username}"
-      stale_cache = Rails.cache.read(cache_key)
-
-      cached_value = begin
-        Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
-          request_with_202_retry(:collection, username: username, own: 1, stats: 1).to_xml
-        end
-      rescue => e
-        raise e if stale_cache.nil?
-
-        stale_cache
-      end
-
-      cached_value.is_a?(Nokogiri::XML::Document) ? cached_value : parse_xml(cached_value)
-    end
-
     def thing(ids)
       ids = Array(ids).map(&:to_s).uniq
       cached_xmls = {}

@@ -183,7 +183,6 @@ RSpec.describe "lastPlayedAt scope isolation" do
   it "does not call any BGG client method when resolving lastPlayedAt" do
     expect_any_instance_of(Bgg::Client).not_to receive(:hot)
     expect_any_instance_of(Bgg::Client).not_to receive(:thing)
-    expect_any_instance_of(Bgg::Client).not_to receive(:collection)
     expect_any_instance_of(Bgg::Client).not_to receive(:search)
 
     NightSession.create!(group: other_group, host: alice, title: "Session", state: "completed", picked_game: thing, scheduled_at: Time.now)

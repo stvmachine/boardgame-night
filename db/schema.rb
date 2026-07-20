@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_14_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_20_140015) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -167,6 +167,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_14_000002) do
     t.string "nickname"
     t.string "password_digest"
     t.boolean "provisional", default: false, null: false
+    t.datetime "sync_requested_at"
     t.datetime "updated_at", null: false
     t.string "username", null: false
     t.index ["bgg_username"], name: "index_users_on_bgg_username"

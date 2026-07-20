@@ -58,7 +58,7 @@ class Bgg::ImportCollectionJob < ApplicationJob
     Rails.logger.info("[Bgg::ImportCollectionJob] Successfully imported #{result[:added]} games, " \
                       "#{result[:updated]} updated for '#{username}'")
 
-    user.update!(last_synced_at: Time.current)
+    user.update!(last_synced_at: Time.current, sync_requested_at: nil)
 
     Bgg::EnrichThingPollsJob.perform_later(username)
 

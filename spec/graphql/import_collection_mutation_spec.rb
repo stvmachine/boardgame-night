@@ -89,6 +89,45 @@ RSpec.describe "importCollection mutation" do
     expect(user_data["syncStatus"]["username"]).to eq("stevmachine")
   end
 
+  it "does not enqueue a duplicate job when an import for the username is already pending" do
+    BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+
+    expect {
+      BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+    }.not_to have_enqueued_job(Bgg::ImportCollectionJob)
+  end
+
+  it "still returns the user with QUEUED status when deduped" do
+    BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+
+    result = BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+
+    expect(result["errors"]).to be_nil
+    expect(result.dig("data", "importCollection", "user", "syncStatus", "status")).to eq("QUEUED")
+  end
+
+  it "enqueues again once the pending request is stale (worker died mid-import)" do
+    user = User.create!(
+      username: "stevmachine",
+      bgg_username: "stevmachine",
+      password: "password",
+      sync_requested_at: 20.minutes.ago
+    )
+
+    expect {
+      BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+    }.to have_enqueued_job(Bgg::ImportCollectionJob).with("stevmachine")
+    expect(user.reload.sync_requested_at).to be > 1.minute.ago
+  end
+
+  it "does not dedupe across different usernames" do
+    BoardgameNightSchema.execute(mutation, variables: { username: "stevmachine" })
+
+    expect {
+      BoardgameNightSchema.execute(mutation, variables: { username: "donutgamer" })
+    }.to have_enqueued_job(Bgg::ImportCollectionJob).with("donutgamer")
+  end
+
   it "rejects invalid BGG usernames" do
     result = BoardgameNightSchema.execute(mutation, variables: { username: "invalid username!" })
 
