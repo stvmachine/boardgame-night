@@ -241,7 +241,7 @@ test('keeps redesigned surfaces usable in both themes', async ({ browser }) => {
       await expect(disclosure).toBeVisible()
       await expect(disclosure).toHaveCSS('cursor', 'pointer')
       await disclosure.click()
-      await expect(disclosure).toBeHidden()
+      await expect(disclosure).toHaveAttribute('aria-expanded', 'true')
 
       context.removeListener('page', popupGuard)
       expect(unexpectedPopup).toBe(false)
