@@ -104,7 +104,7 @@ module Types
             rank: item["rank"].to_i,
             name: item.at_css("name")&.[]("value"),
             year_published: item.at_css("yearpublished")&.[]("value")&.to_i,
-            thumbnail: item.at_css("thumbnail")&.text
+            thumbnail: item.at_css("thumbnail")&.[]("value")
           }
         end
       end
@@ -122,42 +122,42 @@ module Types
 
     private
 
-    def distinct_group_count_for(user)
-      Group
-        .where("id IN (SELECT group_id FROM group_memberships WHERE user_id = ?) OR id IN (SELECT id FROM groups WHERE owner_id = ?)", user.id, user.id)
-        .distinct
-        .count
-    end
+      def distinct_group_count_for(user)
+        Group
+          .where("id IN (SELECT group_id FROM group_memberships WHERE user_id = ?) OR id IN (SELECT id FROM groups WHERE owner_id = ?)", user.id, user.id)
+          .distinct
+          .count
+      end
 
-    def distinct_session_count_for(user)
-      NightSession
-        .where("host_id = ? OR id IN (SELECT night_session_id FROM attendances WHERE user_id = ? AND response = ?)", user.id, user.id, "going")
-        .where.not(state: "cancelled")
-        .distinct
-        .count
-    end
+      def distinct_session_count_for(user)
+        NightSession
+          .where("host_id = ? OR id IN (SELECT night_session_id FROM attendances WHERE user_id = ? AND response = ?)", user.id, user.id, "going")
+          .where.not(state: "cancelled")
+          .distinct
+          .count
+      end
 
-    def with_eager_load(scope)
-      scope.includes(
-        :owner,
-        { group_memberships: :user },
-        { night_sessions: [ :host, { attendances: :user } ] }
-      )
-    end
+      def with_eager_load(scope)
+        scope.includes(
+          :owner,
+          { group_memberships: :user },
+          { night_sessions: [ :host, { attendances: :user } ] }
+        )
+      end
 
-    def sync_status_for(username, users)
-      user = users.find { |u| u.bgg_username == username }
-      synced = user && user.last_synced_at.present?
-      status = synced ? "READY" : "QUEUED"
-      SyncStatus.new(
-        username: username,
-        status: status,
-        last_synced_at: user&.last_synced_at,
-        error: nil,
-        game_count: user&.bgg_collections&.count
-      )
-    end
+      def sync_status_for(username, users)
+        user = users.find { |u| u.bgg_username == username }
+        synced = user && user.last_synced_at.present?
+        status = synced ? "READY" : "QUEUED"
+        SyncStatus.new(
+          username: username,
+          status: status,
+          last_synced_at: user&.last_synced_at,
+          error: nil,
+          game_count: user&.bgg_collections&.count
+        )
+      end
 
-    SyncStatus = Struct.new(:username, :status, :last_synced_at, :error, :game_count, keyword_init: true)
+      SyncStatus = Struct.new(:username, :status, :last_synced_at, :error, :game_count, keyword_init: true)
   end
 end

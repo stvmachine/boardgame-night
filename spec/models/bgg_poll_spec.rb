@@ -27,7 +27,7 @@ RSpec.describe BggPoll, type: :model do
 
     it "returns the associated results for the requested player count" do
       results = poll.results_for_player_count(2)
-      expect(results.map(&:player_count).uniq).to eq([2])
+      expect(results.map(&:player_count).uniq).to eq([ 2 ])
       expect(results.map(&:value)).to contain_exactly("Best", "Recommended")
     end
 

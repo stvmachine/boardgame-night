@@ -110,57 +110,57 @@ module Bgg
 
     def parse_xml(body)
       Nokogiri::XML(body) { |config| config.strict; config.nonet }
-    rescue Nokogiri::XML::SyntaxError => e
-      raise Bgg::ParseError, e.message
+          rescue Nokogiri::XML::SyntaxError => e
+            raise Bgg::ParseError, e.message
     end
 
     private
 
-    def thing_cache_key(id)
-      "bgg:thing:#{id}"
-    end
-
-    def merge_item_xmls(xml_strings)
-      merged = Nokogiri::XML::Document.new
-      root = merged.create_element("items")
-      xml_strings.each do |xml|
-        item = Nokogiri::XML(xml).at_css("item")
-        root.add_child(item.dup) if item
-      end
-      merged.root = root
-      merged
-    end
-
-    def build_connection
-      Faraday.new(url: BASE_URL, request: { timeout: 10, open_timeout: 5 }) do |f|
-        f.request :retry, max: 3, backoff_factor: 2, retry_statuses: [ 429, 502, 503 ]
-        f.headers["User-Agent"] = USER_AGENT
-        f.headers["Authorization"] = "Bearer #{ENV["BGG_TOKEN"]}" if ENV["BGG_TOKEN"].present?
-        f.response :raise_error
-        f.adapter :net_http
-      end
-    end
-
-    def perform_request(endpoint, params)
-      response = nil
-
-      rate_limiter.throttle do
-        response = conn.get(endpoint.to_s, params)
+      def thing_cache_key(id)
+        "bgg:thing:#{id}"
       end
 
-      parse_xml(response.body)
-    end
+      def merge_item_xmls(xml_strings)
+        merged = Nokogiri::XML::Document.new
+        root = merged.create_element("items")
+        xml_strings.each do |xml|
+          item = Nokogiri::XML(xml).at_css("item")
+          root.add_child(item.dup) if item
+        end
+        merged.root = root
+        merged
+      end
 
-    def handle_faraday_errors
-      yield
-    rescue Faraday::ResourceNotFound => e
-      raise Bgg::ResourceNotFound, e.message
-    rescue Faraday::ClientError => e
-      raise Bgg::ClientError, e.message
-    rescue Faraday::ServerError => e
-      raise Bgg::ServerError, e.message
-    rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
-      raise Bgg::NetworkError, e.message
-    end
+      def build_connection
+        Faraday.new(url: BASE_URL, request: { timeout: 10, open_timeout: 5 }) do |f|
+          f.request :retry, max: 3, backoff_factor: 2, retry_statuses: [ 429, 502, 503 ]
+          f.headers["User-Agent"] = USER_AGENT
+          f.headers["Authorization"] = "Bearer #{ENV["BGG_TOKEN"]}" if ENV["BGG_TOKEN"].present?
+          f.response :raise_error
+          f.adapter :net_http
+        end
+      end
+
+      def perform_request(endpoint, params)
+        response = nil
+
+        rate_limiter.throttle do
+          response = conn.get(endpoint.to_s, params)
+        end
+
+        parse_xml(response.body)
+      end
+
+      def handle_faraday_errors
+        yield
+            rescue Faraday::ResourceNotFound => e
+              raise Bgg::ResourceNotFound, e.message
+            rescue Faraday::ClientError => e
+              raise Bgg::ClientError, e.message
+            rescue Faraday::ServerError => e
+              raise Bgg::ServerError, e.message
+            rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
+              raise Bgg::NetworkError, e.message
+      end
   end
 end

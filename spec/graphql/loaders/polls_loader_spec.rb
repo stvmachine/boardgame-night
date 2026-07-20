@@ -19,7 +19,7 @@ RSpec.describe Loaders::PollsLoader do
     end
 
     it "returns polls in input order for each thing id" do
-      result = Loaders::PollsLoader.new.fetch([thing1.id, thing2.id])
+      result = Loaders::PollsLoader.new.fetch([ thing1.id, thing2.id ])
       expect(result.size).to eq(2)
       expect(result[0]).to all(be_a(BggPoll))
       expect(result[0].first.name).to eq("suggested_numplayers")
@@ -28,7 +28,7 @@ RSpec.describe Loaders::PollsLoader do
     end
 
     it "returns an empty array for unknown thing ids" do
-      result = Loaders::PollsLoader.new.fetch([thing1.id, 999_999])
+      result = Loaders::PollsLoader.new.fetch([ thing1.id, 999_999 ])
       expect(result[0]).not_to be_empty
       expect(result[1]).to be_empty
     end
@@ -39,7 +39,7 @@ RSpec.describe Loaders::PollsLoader do
         counts << 1
       end
 
-      Loaders::PollsLoader.new.fetch([thing1.id, thing2.id])
+      Loaders::PollsLoader.new.fetch([ thing1.id, thing2.id ])
 
       ActiveSupport::Notifications.unsubscribe(subscriber)
       # One query for bgg_polls and one for bgg_poll_results via includes.

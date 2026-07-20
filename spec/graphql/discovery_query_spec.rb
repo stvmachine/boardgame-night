@@ -8,12 +8,12 @@ RSpec.describe "discovery queries" do
       <?xml version="1.0" encoding="utf-8"?>
       <items termsofuse="https://boardgamegeek.com/xmlapi/termsofuse">
         <item id="174430" rank="1">
-          <thumbnail>https://cf.geekdo-images.com/ghotw/pic2437871_t.jpg</thumbnail>
+          <thumbnail value="https://cf.geekdo-images.com/ghotw/pic2437871_t.jpg" />
           <name value="Gloomhaven" />
           <yearpublished value="2017" />
         </item>
         <item id="161936" rank="2">
-          <thumbnail>https://cf.geekdo-images.com/pandemic/pic161936_t.jpg</thumbnail>
+          <thumbnail value="https://cf.geekdo-images.com/pandemic/pic161936_t.jpg" />
           <name value="Pandemic Legacy: Season 1" />
           <yearpublished value="2015" />
         </item>

@@ -77,11 +77,11 @@ module Mutations
 
     private
 
-    def parse_datetime(value)
-      return nil if value.nil?
-      return value.to_datetime if value.respond_to?(:to_datetime)
+      def parse_datetime(value)
+        return nil if value.nil?
+        return value.to_datetime if value.respond_to?(:to_datetime)
 
-      Time.parse(value).to_datetime
-    end
+        Time.parse(value).to_datetime
+      end
   end
 end

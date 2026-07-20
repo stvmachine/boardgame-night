@@ -15,7 +15,7 @@ namespace :e2e do
 
     ActiveRecord::Base.transaction do
       # Clean up any previous e2e fixture data so the task is idempotent
-      User.where(bgg_username: ["e2e_alice", "e2e_bob"]).destroy_all
+      User.where(bgg_username: [ "e2e_alice", "e2e_bob" ]).destroy_all
       Group.where(name: "e2e Night Owls").destroy_all
 
       alice = User.create!(
@@ -206,7 +206,7 @@ namespace :e2e do
       ]
       Rails.cache.write("bgg/hot", hot_items, expires_in: 1.hour)
 
-      Rails.logger.info("Seeded e2e fixtures: alice (#{alice.bgg_username}), bob (#{bob.bgg_username}), group #{group.id}, sessions #{[invited_session, picking_session, draft_session, completed_session, cancelled_session].map(&:id).join(", ")}")
+      Rails.logger.info("Seeded e2e fixtures: alice (#{alice.bgg_username}), bob (#{bob.bgg_username}), group #{group.id}, sessions #{[ invited_session, picking_session, draft_session, completed_session, cancelled_session ].map(&:id).join(", ")}")
     end
 
     # Write fixture JSON files only after the DB transaction commits,

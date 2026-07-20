@@ -73,37 +73,37 @@ class Bgg::ImportCollectionJob < ApplicationJob
 
   private
 
-  def broadcast(username, status, error: nil, game_count: nil)
-    payload = {
-      username: username,
-      status: status,
-      last_synced_at: status == "READY" ? Time.current : nil,
-      error: error,
-      game_count: game_count
-    }
+    def broadcast(username, status, error: nil, game_count: nil)
+      payload = {
+        username: username,
+        status: status,
+        last_synced_at: status == "READY" ? Time.current : nil,
+        error: error,
+        game_count: game_count
+      }
 
-    BoardgameNightSchema.subscriptions.trigger(
-      :collection_synced,
-      { username: username },
-      payload
-    )
-  rescue => e
-    Rails.logger.warn("[Bgg::ImportCollectionJob] Failed to broadcast sync status: #{e.message}")
-  end
-
-  def validate_user!(username)
-    client = Bgg::Client.new
-    user_doc = client.user(username)
-
-    # BGG returns <user id="..." name="..."> for valid usernames
-    # Invalid usernames return an empty response or error
-    user_node = user_doc.at_css("user")
-    if user_node.nil? || user_node.attr("id").to_s.empty?
-      raise Bgg::InvalidUsernameError,
-        "BGG user '#{username}' not found or invalid"
+      BoardgameNightSchema.subscriptions.trigger(
+        :collection_synced,
+        { username: username },
+        payload
+      )
+    rescue => e
+      Rails.logger.warn("[Bgg::ImportCollectionJob] Failed to broadcast sync status: #{e.message}")
     end
 
-    Rails.logger.debug("[Bgg::ImportCollectionJob] Validated user '#{username}' " \
-                       "(BGG ID: #{user_node.attr('id')})")
-  end
+    def validate_user!(username)
+      client = Bgg::Client.new
+      user_doc = client.user(username)
+
+      # BGG returns <user id="..." name="..."> for valid usernames
+      # Invalid usernames return an empty response or error
+      user_node = user_doc.at_css("user")
+      if user_node.nil? || user_node.attr("id").to_s.empty?
+        raise Bgg::InvalidUsernameError,
+          "BGG user '#{username}' not found or invalid"
+      end
+
+      Rails.logger.debug("[Bgg::ImportCollectionJob] Validated user '#{username}' " \
+                         "(BGG ID: #{user_node.attr('id')})")
+    end
 end

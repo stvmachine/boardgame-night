@@ -71,7 +71,7 @@ Rails.application.configure do
 
   # Allow only the Vite development server origins for Action Cable WebSocket upgrades.
   # Request-forgery protection remains enabled; production origins are untouched.
-  config.action_cable.allowed_request_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+  config.action_cable.allowed_request_origins = [ "http://localhost:5173", "http://127.0.0.1:5173" ]
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true

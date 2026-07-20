@@ -9,7 +9,7 @@ class CreateBggPollsAndResults < ActiveRecord::Migration[8.1]
       t.integer :total_votes
       t.timestamps
 
-      t.index [:bgg_thing_id, :name], unique: true
+      t.index [ :bgg_thing_id, :name ], unique: true
     end
 
     create_table :bgg_poll_results do |t|
@@ -20,7 +20,7 @@ class CreateBggPollsAndResults < ActiveRecord::Migration[8.1]
       t.integer :level
       t.timestamps
 
-      t.index [:bgg_poll_id, :player_count, :value], unique: true
+      t.index [ :bgg_poll_id, :player_count, :value ], unique: true
     end
 
     add_column :bgg_things, :poll_data_fetched_at, :datetime

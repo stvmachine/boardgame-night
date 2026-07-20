@@ -18,6 +18,7 @@ This directory contains the architecture decision records (ADRs) for the boardga
 | [ADR-010](./010-group-invitation-tokens.md) | Group Invitation Tokens | accepted | 2026-07-09 |
 | [ADR-011](./011-group-collection-view.md) | Group Collection View via Dynamic Computation | accepted | 2026-07-09 |
 | [ADR-012](./012-session-lifecycle-state-machine.md) | Session Lifecycle State Machine | accepted | 2026-07-09 |
+| [ADR-013](./013-rubocop-indentation-cops.md) | Re-enable RuboCop Indentation Cops Over rails-omakase Defaults | accepted | 2026-07-20 |
 
 ## Status Key
 

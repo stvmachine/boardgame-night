@@ -37,11 +37,11 @@ module Mutations
 
     private
 
-    def authorized_to_manage?(group)
-      return true if group.owner_id == context[:current_user].id
+      def authorized_to_manage?(group)
+        return true if group.owner_id == context[:current_user].id
 
-      caller_membership = group.group_memberships.find_by(user_id: context[:current_user].id)
-      caller_membership&.role.in?(%w[owner admin])
-    end
+        caller_membership = group.group_memberships.find_by(user_id: context[:current_user].id)
+        caller_membership&.role.in?(%w[owner admin])
+      end
   end
 end

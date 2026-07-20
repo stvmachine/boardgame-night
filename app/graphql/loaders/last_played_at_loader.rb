@@ -37,11 +37,11 @@ module Loaders
 
     private
 
-    def normalize_time(datetime)
-      return nil unless datetime
-      return datetime.utc if datetime.respond_to?(:utc)
+      def normalize_time(datetime)
+        return nil unless datetime
+        return datetime.utc if datetime.respond_to?(:utc)
 
-      Time.parse("#{datetime} UTC")
-    end
+        Time.parse("#{datetime} UTC")
+      end
   end
 end

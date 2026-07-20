@@ -68,9 +68,9 @@ module Types
           else 3
           end
           date_key = if s.state == "draft" && s.scheduled_at.nil?
-                       Float::INFINITY
+            Float::INFINITY
           else
-                       (s.scheduled_at || Time.at(0)).to_i
+            (s.scheduled_at || Time.at(0)).to_i
           end
           [ state_order, date_key, s.created_at, s.id ]
         end
@@ -78,27 +78,27 @@ module Types
 
     private
 
-    def viewer_role
-      @viewer_role ||= begin
-        if object.owner_id == context[:current_user]&.id
-          "OWNER"
-        else
-          membership = object.group_memberships.find { |m| m.user_id == context[:current_user]&.id }
-          membership&.role&.upcase
+      def viewer_role
+        @viewer_role ||= begin
+          if object.owner_id == context[:current_user]&.id
+            "OWNER"
+          else
+            membership = object.group_memberships.find { |m| m.user_id == context[:current_user]&.id }
+            membership&.role&.upcase
+          end
         end
       end
-    end
 
-    def sync_status_for(user)
-      SyncStatus.new(
-        username: user.bgg_username || user.username,
-        status: user.bgg_collections.any? ? "READY" : "QUEUED",
-        last_synced_at: user.last_synced_at,
-        error: nil,
-        game_count: user.bgg_collections.count
-      )
-    end
+      def sync_status_for(user)
+        SyncStatus.new(
+          username: user.bgg_username || user.username,
+          status: user.bgg_collections.any? ? "READY" : "QUEUED",
+          last_synced_at: user.last_synced_at,
+          error: nil,
+          game_count: user.bgg_collections.count
+        )
+      end
 
-    SyncStatus = Struct.new(:username, :status, :last_synced_at, :error, :game_count, keyword_init: true)
+      SyncStatus = Struct.new(:username, :status, :last_synced_at, :error, :game_count, keyword_init: true)
   end
 end

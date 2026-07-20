@@ -40,7 +40,7 @@ RSpec.describe "createGroup mutation" do
       expect(data["inviteCode"]).to be_present
       expect(data["myRole"]).to eq("OWNER")
       expect(data["owner"]["username"]).to eq("alice")
-      expect(data["members"].map { |m| m["username"] }).to eq(["alice"])
+      expect(data["members"].map { |m| m["username"] }).to eq([ "alice" ])
     }.to change(Group, :count).by(1).and change(GroupMembership, :count).by(1)
   end
 

@@ -8,6 +8,6 @@ class CreateBggCollections < ActiveRecord::Migration[8.0]
       t.integer :quantity, default: 1, null: false
       t.timestamps
     end
-    add_index :bgg_collections, [:user_id, :bgg_thing_id], unique: true
+    add_index :bgg_collections, [ :user_id, :bgg_thing_id ], unique: true
   end
 end

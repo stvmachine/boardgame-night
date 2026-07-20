@@ -11,7 +11,7 @@ class User < ApplicationRecord
 
   validates :username, presence: true, uniqueness: true
   validates :email, uniqueness: true, allow_nil: true
-  validates :provisional, inclusion: { in: [true, false] }
+  validates :provisional, inclusion: { in: [ true, false ] }
   validates :invite_token, uniqueness: true, allow_nil: true
 
   def display_name

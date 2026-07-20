@@ -10,9 +10,9 @@ class GroupMembership < ApplicationRecord
 
   private
 
-  def user_must_not_be_provisional
-    return unless user&.provisional?
+    def user_must_not_be_provisional
+      return unless user&.provisional?
 
-    errors.add(:user, "Provisional users cannot join groups")
-  end
+      errors.add(:user, "Provisional users cannot join groups")
+    end
 end

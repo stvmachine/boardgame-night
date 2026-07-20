@@ -40,8 +40,8 @@ module Types
 
     private
 
-    def thing
-      dataloader.with(Loaders::HotItemThingLoader).load(object[:id])
-    end
+      def thing
+        dataloader.with(Loaders::HotItemThingLoader).load(object[:id])
+      end
   end
 end

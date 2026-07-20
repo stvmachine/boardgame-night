@@ -61,11 +61,11 @@ RSpec.describe Suggestions::Engine do
     )
   end
 
-  def call_engine(things, attendees = [host, member])
+  def call_engine(things, attendees = [ host, member ])
     attendee_ids = attendees.map(&:id)
     attendee_count = attendee_ids.size
-    polls_by_thing = things.to_h { |thing| [thing.id, thing.bgg_polls.includes(:bgg_poll_results).to_a] }
-    owners_by_thing = things.to_h { |thing| [thing.id, thing.bgg_collections.includes(:user).to_a] }
+    polls_by_thing = things.to_h { |thing| [ thing.id, thing.bgg_polls.includes(:bgg_poll_results).to_a ] }
+    owners_by_thing = things.to_h { |thing| [ thing.id, thing.bgg_collections.includes(:user).to_a ] }
 
     described_class.call(
       session: session,
@@ -102,7 +102,7 @@ RSpec.describe Suggestions::Engine do
     BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
     BggCollection.create!(user: member, bgg_thing: game, quantity: 1)
 
-    result = call_engine([game]).first
+    result = call_engine([ game ]).first
 
     expect(result).to be_present
     expect(result.score).to be_between(0, 100)
@@ -154,7 +154,7 @@ RSpec.describe Suggestions::Engine do
     ])
     BggCollection.create!(user: host, bgg_thing: weaker, quantity: 1)
 
-    results = call_engine([weaker, perfect])
+    results = call_engine([ weaker, perfect ])
 
     expect(results.size).to eq(2)
     expect(results.first.thing.name).to eq("Perfect Game")
@@ -195,7 +195,7 @@ RSpec.describe Suggestions::Engine do
     ])
     BggCollection.create!(user: host, bgg_thing: too_many_players, quantity: 1)
 
-    results = call_engine([too_long, too_many_players])
+    results = call_engine([ too_long, too_many_players ])
 
     expect(results).to be_empty
   end
@@ -218,7 +218,7 @@ RSpec.describe Suggestions::Engine do
     BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
     BggCollection.create!(user: member, bgg_thing: game, quantity: 1)
 
-    result = call_engine([game]).first
+    result = call_engine([ game ]).first
 
     expect(result.confidence).to eq("LOW")
     expect(result.breakdown.player_count_fit).to be_between(0, 60)
@@ -247,16 +247,16 @@ RSpec.describe Suggestions::Engine do
       average: 8.0,
       bayes_average: 8.0
     )
-    [a, b].each do |game|
+    [ a, b ].each do |game|
       create_poll_with_results(game, [
         { player_count: 2, value: "Best", num_votes: 80 }
       ])
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
     end
 
-    results = call_engine([a, b])
+    results = call_engine([ a, b ])
 
-    expect(results.map { |r| r.thing.objectid }).to eq([50, 100])
+    expect(results.map { |r| r.thing.objectid }).to eq([ 50, 100 ])
   end
 
   describe "confidence boundaries" do
@@ -290,7 +290,7 @@ RSpec.describe Suggestions::Engine do
 
     it "is HIGH with 50 target-count votes" do
       game = game_with_poll_votes(best: 40, recommended: 8, not_recommended: 2)
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result.confidence).to eq("HIGH")
       expect(result.breakdown.player_count_fit).to be_within(0.01).of(89.6)
@@ -298,7 +298,7 @@ RSpec.describe Suggestions::Engine do
 
     it "is MEDIUM with 20 target-count votes" do
       game = game_with_poll_votes(best: 12, recommended: 6, not_recommended: 2)
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result.confidence).to eq("MEDIUM")
       expect(result.breakdown.player_count_fit).to be_within(0.01).of(73.64)
@@ -306,7 +306,7 @@ RSpec.describe Suggestions::Engine do
 
     it "is MEDIUM with 49 target-count votes" do
       game = game_with_poll_votes(best: 30, recommended: 15, not_recommended: 4)
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result.confidence).to eq("MEDIUM")
       expect(result.breakdown.player_count_fit).to be_within(0.01).of(77.65)
@@ -314,7 +314,7 @@ RSpec.describe Suggestions::Engine do
 
     it "is LOW with 19 target-count votes" do
       game = game_with_poll_votes(best: 10, recommended: 7, not_recommended: 2)
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result.confidence).to eq("LOW")
       expect(result.breakdown.player_count_fit).to be_within(0.01).of(24.0)
@@ -344,7 +344,7 @@ RSpec.describe Suggestions::Engine do
       game.update!(poll_data_fetched_at: Time.current)
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
 
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result.confidence).to eq("LOW")
       expect(result.breakdown.player_count_fit).to be_within(0.01).of(24.0)
@@ -364,7 +364,7 @@ RSpec.describe Suggestions::Engine do
       )
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
 
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result.confidence).to eq("LOW")
       expect(result.breakdown.player_count_fit).to be_within(0.01).of(24.0)
@@ -397,8 +397,8 @@ RSpec.describe Suggestions::Engine do
       )
       BggCollection.create!(user: host, bgg_thing: outside, quantity: 1)
 
-      expect(call_engine([edge], [host, member])).to be_empty
-      expect(call_engine([outside], [host, member])).to be_empty
+      expect(call_engine([ edge ], [ host, member ])).to be_empty
+      expect(call_engine([ outside ], [ host, member ])).to be_empty
     end
   end
 
@@ -423,16 +423,16 @@ RSpec.describe Suggestions::Engine do
         average: 8.0,
         bayes_average: 8.0
       )
-      create_poll_with_results(game, [{ player_count: 2, value: "Best", num_votes: 80 }])
+      create_poll_with_results(game, [ { player_count: 2, value: "Best", num_votes: 80 } ])
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
 
-      attendee_ids = [host.id, member.id]
+      attendee_ids = [ host.id, member.id ]
       polls_by_thing = { game.id => game.bgg_polls.includes(:bgg_poll_results).to_a }
       owners_by_thing = { game.id => game.bgg_collections.includes(:user).to_a }
 
       described_class.call(
         session: session,
-        things: [game],
+        things: [ game ],
         attendee_user_ids: attendee_ids,
         attendee_count: attendee_ids.size,
         polls_by_thing: polls_by_thing,
@@ -466,7 +466,7 @@ RSpec.describe Suggestions::Engine do
         average: 7.0,
         bayes_average: 8.4
       )
-      create_poll_with_results(with_bayes, [{ player_count: 2, value: "Best", num_votes: 80 }])
+      create_poll_with_results(with_bayes, [ { player_count: 2, value: "Best", num_votes: 80 } ])
       BggCollection.create!(user: host, bgg_thing: with_bayes, quantity: 1)
 
       average_only = create_thing(
@@ -480,7 +480,7 @@ RSpec.describe Suggestions::Engine do
         average: 7.5,
         bayes_average: nil
       )
-      create_poll_with_results(average_only, [{ player_count: 2, value: "Best", num_votes: 80 }])
+      create_poll_with_results(average_only, [ { player_count: 2, value: "Best", num_votes: 80 } ])
       BggCollection.create!(user: host, bgg_thing: average_only, quantity: 1)
 
       no_rating = create_thing(
@@ -494,12 +494,12 @@ RSpec.describe Suggestions::Engine do
         average: nil,
         bayes_average: nil
       )
-      create_poll_with_results(no_rating, [{ player_count: 2, value: "Best", num_votes: 80 }])
+      create_poll_with_results(no_rating, [ { player_count: 2, value: "Best", num_votes: 80 } ])
       BggCollection.create!(user: host, bgg_thing: no_rating, quantity: 1)
 
-      expect(call_engine([with_bayes]).first.breakdown.community_rating).to be_within(0.01).of(84.0)
-      expect(call_engine([average_only]).first.breakdown.community_rating).to be_within(0.01).of(75.0)
-      expect(call_engine([no_rating]).first.breakdown.community_rating).to be_within(0.01).of(0.0)
+      expect(call_engine([ with_bayes ]).first.breakdown.community_rating).to be_within(0.01).of(84.0)
+      expect(call_engine([ average_only ]).first.breakdown.community_rating).to be_within(0.01).of(75.0)
+      expect(call_engine([ no_rating ]).first.breakdown.community_rating).to be_within(0.01).of(0.0)
     end
   end
 
@@ -516,11 +516,11 @@ RSpec.describe Suggestions::Engine do
         average: 8.0,
         bayes_average: 8.0
       )
-      create_poll_with_results(game, [{ player_count: 1, value: "Best", num_votes: 80 }])
+      create_poll_with_results(game, [ { player_count: 1, value: "Best", num_votes: 80 } ])
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
       BggCollection.create!(user: member, bgg_thing: game, quantity: 1)
 
-      result = call_engine([game], [host]).first
+      result = call_engine([ game ], [ host ]).first
 
       expect(result.breakdown.ownership_bonus).to be_within(0.01).of(100.0)
       expect(result.reasons).to include("Owned by alice@example.com")
@@ -547,12 +547,12 @@ RSpec.describe Suggestions::Engine do
         average: 8.0,
         bayes_average: 8.0
       )
-      create_poll_with_results(game, [{ player_count: 2, value: "Best", num_votes: 80 }])
+      create_poll_with_results(game, [ { player_count: 2, value: "Best", num_votes: 80 } ])
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
       BggCollection.create!(user: member, bgg_thing: game, quantity: 1)
       BggCollection.create!(user: another_owner, bgg_thing: game, quantity: 1)
 
-      result = call_engine([game], [host, member]).first
+      result = call_engine([ game ], [ host, member ]).first
 
       expect(result.breakdown.ownership_bonus).to be_within(0.01).of(100.0)
       expect(result.reasons).to include("Owned by alice@example.com & bob@example.com")
@@ -572,10 +572,10 @@ RSpec.describe Suggestions::Engine do
         average: 8.0,
         bayes_average: 8.0
       )
-      create_poll_with_results(game, [{ player_count: 2, value: "Best", num_votes: 5 }])
+      create_poll_with_results(game, [ { player_count: 2, value: "Best", num_votes: 5 } ])
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
 
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result.reasons).to include("2 players may fit (limited community data)")
       expect(result.reasons).to include("90 min fits your 120 min budget")
@@ -601,7 +601,7 @@ RSpec.describe Suggestions::Engine do
       ])
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
 
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result.reasons).to include("Best at 2 players (80% Best votes)")
     end
@@ -620,10 +620,10 @@ RSpec.describe Suggestions::Engine do
         average: 8.0,
         bayes_average: 8.0
       )
-      create_poll_with_results(game, [{ player_count: 2, value: "Best", num_votes: 80 }])
+      create_poll_with_results(game, [ { player_count: 2, value: "Best", num_votes: 80 } ])
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
 
-      expect(call_engine([game])).to be_empty
+      expect(call_engine([ game ])).to be_empty
     end
 
     it "returns the top eight candidates and excludes zero-score games" do
@@ -639,7 +639,7 @@ RSpec.describe Suggestions::Engine do
           average: 8.0,
           bayes_average: 8.0
         )
-        create_poll_with_results(game, [{ player_count: 2, value: "Best", num_votes: 80 + i }])
+        create_poll_with_results(game, [ { player_count: 2, value: "Best", num_votes: 80 + i } ])
         BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
         game
       end
@@ -665,10 +665,10 @@ RSpec.describe Suggestions::Engine do
         average: nil,
         bayes_average: nil
       )
-      create_poll_with_results(game, [{ player_count: 2, value: "Best", num_votes: 80 }])
+      create_poll_with_results(game, [ { player_count: 2, value: "Best", num_votes: 80 } ])
       BggCollection.create!(user: host, bgg_thing: game, quantity: 1)
 
-      result = call_engine([game]).first
+      result = call_engine([ game ]).first
 
       expect(result).to be_present
       expect(result.score).to be_between(0, 100)

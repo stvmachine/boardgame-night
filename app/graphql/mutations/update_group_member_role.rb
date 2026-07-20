@@ -36,11 +36,11 @@ module Mutations
 
     private
 
-    def authorized_as_owner?(group)
-      return true if group.owner_id == context[:current_user].id
+      def authorized_as_owner?(group)
+        return true if group.owner_id == context[:current_user].id
 
-      caller_membership = group.group_memberships.find_by(user_id: context[:current_user].id)
-      caller_membership&.role == "owner"
-    end
+        caller_membership = group.group_memberships.find_by(user_id: context[:current_user].id)
+        caller_membership&.role == "owner"
+      end
   end
 end

@@ -57,17 +57,17 @@ gem "graphql", "~> 2.6"
 
 gem "bcrypt", "~> 3.1"
 
-gem "rack-cors", "~> 3.0", group: [:development, :test]
+gem "rack-cors", "~> 3.0", group: [ :development, :test ]
 
-gem "dotenv-rails", "~> 3.2", group: [:development, :test]
+gem "dotenv-rails", "~> 3.2", group: [ :development, :test ]
 
-gem "bullet", "~> 8.1", group: [:development, :test]
+gem "bullet", "~> 8.1", group: [ :development, :test ]
 
-gem "rspec-rails", "~> 8.0", group: [:development, :test]
+gem "rspec-rails", "~> 8.0", group: [ :development, :test ]
 
-gem "webmock", "~> 3.26", group: [:development, :test]
+gem "webmock", "~> 3.26", group: [ :development, :test ]
 
-gem "shoulda-matchers", "~> 6.4", group: [:development, :test]
+gem "shoulda-matchers", "~> 6.4", group: [ :development, :test ]
 
 # Dev-only tools
 gem "graphiql-rails", "~> 1.10", group: :development

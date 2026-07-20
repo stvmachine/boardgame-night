@@ -19,7 +19,7 @@ class InviteToken < ApplicationRecord
   def self.generate_raw_token
     raw_token = SecureRandom.hex(32)
     digest = Digest::SHA256.hexdigest(raw_token)
-    [raw_token, digest]
+    [ raw_token, digest ]
   end
 
   def expired?

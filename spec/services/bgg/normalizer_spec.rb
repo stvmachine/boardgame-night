@@ -195,13 +195,13 @@ RSpec.describe Bgg::Normalizer do
 
       it "returns results for each player count" do
         expect(result[:results].length).to eq(4)
-        expect(result[:results].map { |r| r[:player_count] }).to eq([1, 2, 3, 4])
+        expect(result[:results].map { |r| r[:player_count] }).to eq([ 1, 2, 3, 4 ])
       end
 
       it "extracts Best/Recommended/Not Recommended votes" do
         first_result = result[:results].first
         expect(first_result[:votes].map { |v| v[:value] }).to eq(
-          ["Best", "Recommended", "Not Recommended"]
+          [ "Best", "Recommended", "Not Recommended" ]
         )
         best_vote = first_result[:votes].find { |v| v[:value] == "Best" }
         expect(best_vote[:num_votes]).to eq(100)

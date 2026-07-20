@@ -163,7 +163,7 @@ RSpec.describe "NightSession suggestions query", type: :request do
   end
 
   it "returns null for authorized non-picking states and [] for picking with no going attendees" do
-    [:draft, :invited, :completed, :cancelled].each do |state|
+    [ :draft, :invited, :completed, :cancelled ].each do |state|
       session = NightSession.create!(
         group: group,
         host: host,
@@ -380,7 +380,7 @@ RSpec.describe "NightSession suggestions query", type: :request do
 
     query_log = []
     callback = ->(_name, _started, _finished, _unique_id, payload) {
-      query_log << payload[:sql] if payload[:sql].present? && !payload[:name].in?(["SCHEMA", "TRANSACTION"])
+      query_log << payload[:sql] if payload[:sql].present? && !payload[:name].in?([ "SCHEMA", "TRANSACTION" ])
     }
 
     ActiveSupport::Notifications.subscribed(callback, "sql.active_record") do

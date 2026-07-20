@@ -27,6 +27,6 @@ module Bgg
 
     private
 
-    attr_reader :query, :client
+      attr_reader :query, :client
   end
 end

@@ -81,7 +81,7 @@ RSpec.describe "group query" do
     result = BoardgameNightSchema.execute(query, variables: { token: group.invite_code }, context: { current_user: owner })
     expect(result["errors"]).to be_nil
     data = result.dig("data", "group")
-    expect(data["collection"]["items"].map { |i| i["name"] }).to eq(["Catan"])
+    expect(data["collection"]["items"].map { |i| i["name"] }).to eq([ "Catan" ])
     expect(data["collection"]["syncStatuses"]).to be_present
   end
 
@@ -276,7 +276,7 @@ RSpec.describe "group query" do
       result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
       expect(result["errors"]).to be_nil
       names = spotlight(result).map { |g| g["name"] }
-      expect(names).to eq(["Shared Game", "Solo Game"])
+      expect(names).to eq([ "Shared Game", "Solo Game" ])
     end
 
     it "breaks ties by average descending, then name case-insensitive ascending, then id ascending" do
@@ -290,7 +290,7 @@ RSpec.describe "group query" do
       result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
       expect(result["errors"]).to be_nil
       names = spotlight(result).map { |g| g["name"] }
-      expect(names).to eq(["Alpha", "beta", "Gamma"])
+      expect(names).to eq([ "Alpha", "beta", "Gamma" ])
     end
 
     it "returns at most four items" do
@@ -311,14 +311,14 @@ RSpec.describe "group query" do
       single_c = BggThing.create!(objectid: "403", name: "Single C", average: 6.0)
       BggCollection.create!(user: owner, bgg_thing: multi, quantity: 1)
       BggCollection.create!(user: admin, bgg_thing: multi, quantity: 1)
-      [single_a, single_b, single_c].each do |game|
+      [ single_a, single_b, single_c ].each do |game|
         BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
       end
 
       result = BoardgameNightSchema.execute(spotlight_query, variables: { token: group.invite_code, limit: 4 }, context: { current_user: owner })
       expect(result["errors"]).to be_nil
       names = spotlight(result).map { |g| g["name"] }
-      expect(names).to eq(["Multi Owner", "Single A", "Single B", "Single C"])
+      expect(names).to eq([ "Multi Owner", "Single A", "Single B", "Single C" ])
     end
 
     it "returns an empty array when the group collection is empty" do

@@ -140,5 +140,4 @@ RSpec.describe "CI workflow (.github/workflows/ci.yml)" do
     expect(content).to include("Procfile.e2e")
     expect(content).not_to include("Procfile.dev")
   end
-
 end

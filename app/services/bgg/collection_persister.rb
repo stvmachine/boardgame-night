@@ -30,27 +30,27 @@ module Bgg
 
     private
 
-    def upsert_thing!(item)
-      thing = BggThing.find_or_initialize_by(objectid: item[:id])
-      thing.assign_attributes(
-        name: item[:name],
-        year_published: item[:year_published],
-        min_players: item[:stats]&.[](:min_players),
-        max_players: item[:stats]&.[](:max_players),
-        playing_time: item[:stats]&.[](:playing_time),
-        min_playtime: item[:stats]&.[](:min_playtime),
-        max_playtime: item[:stats]&.[](:max_playtime),
-        image: item[:image],
-        thumbnail: item[:thumbnail],
-        description: item[:description],
-        average: item[:stats]&.[](:average),
-        bayes_average: item[:stats]&.[](:bayes_average),
-        users_rated: item[:stats]&.[](:users_rated),
-        average_weight: item[:stats]&.[](:average_weight),
-        num_comments: item[:stats]&.[](:num_comments)
-      )
-      thing.save! if thing.changed?
-      thing
-    end
+      def upsert_thing!(item)
+        thing = BggThing.find_or_initialize_by(objectid: item[:id])
+        thing.assign_attributes(
+          name: item[:name],
+          year_published: item[:year_published],
+          min_players: item[:stats]&.[](:min_players),
+          max_players: item[:stats]&.[](:max_players),
+          playing_time: item[:stats]&.[](:playing_time),
+          min_playtime: item[:stats]&.[](:min_playtime),
+          max_playtime: item[:stats]&.[](:max_playtime),
+          image: item[:image],
+          thumbnail: item[:thumbnail],
+          description: item[:description],
+          average: item[:stats]&.[](:average),
+          bayes_average: item[:stats]&.[](:bayes_average),
+          users_rated: item[:stats]&.[](:users_rated),
+          average_weight: item[:stats]&.[](:average_weight),
+          num_comments: item[:stats]&.[](:num_comments)
+        )
+        thing.save! if thing.changed?
+        thing
+      end
   end
 end

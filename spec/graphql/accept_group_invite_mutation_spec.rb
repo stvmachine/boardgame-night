@@ -29,7 +29,7 @@ RSpec.describe "acceptGroupInvite mutation" do
 
   def create_invite(email: "friend@example.com", role: "member", expires_at: 7.days.from_now)
     raw_token, digest = InviteToken.generate_raw_token
-    [raw_token, InviteToken.create!(
+    [ raw_token, InviteToken.create!(
       group: group,
       inviter: owner,
       email: email,
@@ -37,7 +37,7 @@ RSpec.describe "acceptGroupInvite mutation" do
       token_digest: digest,
       status: "pending",
       expires_at: expires_at
-    )]
+    ) ]
   end
 
   it "creates a membership with the token role" do

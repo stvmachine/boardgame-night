@@ -11,7 +11,7 @@ if Rails.env.development?
 
       resource "/graphql",
                headers: :any,
-               methods: [:post, :options]
+               methods: [ :post, :options ]
     end
   end
 end

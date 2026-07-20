@@ -82,6 +82,8 @@ function handleKeydown(event: KeyboardEvent) {
         {{ item.name }}
       </h3>
       <p class="text-xs text-on-surface-variant">
+        <span v-if="item.yearPublished">{{ item.yearPublished }}</span>
+        <span v-if="item.yearPublished">·</span>
         <span class="inline-flex items-center gap-1">
           <Icon name="star" class="size-3" /> {{ rating }}
         </span>

@@ -8,13 +8,13 @@ RSpec.describe Loaders::UsersLoader do
     let!(:user2) { User.create!(username: "bob", bgg_username: "bggbob", password: "password") }
 
     it "returns users in input order for each bgg_username" do
-      result = Loaders::UsersLoader.new.fetch(["bggalice", "bggbob"])
-      expect(result).to eq([user1, user2])
+      result = Loaders::UsersLoader.new.fetch([ "bggalice", "bggbob" ])
+      expect(result).to eq([ user1, user2 ])
     end
 
     it "returns nil for unknown usernames" do
-      result = Loaders::UsersLoader.new.fetch(["bggalice", "missing"])
-      expect(result).to eq([user1, nil])
+      result = Loaders::UsersLoader.new.fetch([ "bggalice", "missing" ])
+      expect(result).to eq([ user1, nil ])
     end
   end
 end

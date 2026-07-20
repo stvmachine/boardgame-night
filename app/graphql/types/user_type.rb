@@ -29,12 +29,12 @@ module Types
 
     def sync_status
       status = if context[:sync_status_for_username] == object.bgg_username
-                 "QUEUED"
-               elsif object.bgg_collections.any?
-                 "READY"
-               else
-                 "QUEUED"
-               end
+        "QUEUED"
+      elsif object.bgg_collections.any?
+        "READY"
+      else
+        "QUEUED"
+      end
 
       SyncStatus.new(
         username: object.bgg_username,

@@ -30,12 +30,12 @@ module Bgg
 
     private
 
-    def log_missing_ids(requested_objectids, doc)
-      returned_ids = doc.css("items > item").map { |item| item["id"].to_i }
-      missing = requested_objectids - returned_ids
-      return if missing.empty?
+      def log_missing_ids(requested_objectids, doc)
+        returned_ids = doc.css("items > item").map { |item| item["id"].to_i }
+        missing = requested_objectids - returned_ids
+        return if missing.empty?
 
-      Rails.logger.warn("[Bgg::BackfillPollDataJob] Missing from BGG response: #{missing.join(',')}")
-    end
+        Rails.logger.warn("[Bgg::BackfillPollDataJob] Missing from BGG response: #{missing.join(',')}")
+      end
   end
 end

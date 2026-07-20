@@ -28,13 +28,13 @@ RSpec.describe BggThing, type: :model do
     end
 
     it "returns deduplicated things for the given user_ids" do
-      result = BggThing.merged_for_users([user1.id, user2.id])
+      result = BggThing.merged_for_users([ user1.id, user2.id ])
       expect(result).to include(thing1, thing2)
       expect(result.size).to eq(2)
     end
 
     it "returns only things owned by the specified users" do
-      result = BggThing.merged_for_users([user2.id])
+      result = BggThing.merged_for_users([ user2.id ])
       expect(result).to include(thing1)
       expect(result).not_to include(thing2)
     end
@@ -57,13 +57,13 @@ RSpec.describe BggThing, type: :model do
     end
 
     it "returns deduplicated things for the given BGG usernames" do
-      result = BggThing.merged_for_bgg_usernames(["bggalice", "bggbob"])
+      result = BggThing.merged_for_bgg_usernames([ "bggalice", "bggbob" ])
       expect(result).to include(thing1, thing2)
       expect(result.size).to eq(2)
     end
 
     it "returns only things owned by the specified BGG usernames" do
-      result = BggThing.merged_for_bgg_usernames(["bggbob"])
+      result = BggThing.merged_for_bgg_usernames([ "bggbob" ])
       expect(result).to include(thing1)
       expect(result).not_to include(thing2)
     end

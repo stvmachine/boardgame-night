@@ -18,12 +18,12 @@ class Group < ApplicationRecord
 
   private
 
-  def generate_invite_code
-    return if invite_code.present?
+    def generate_invite_code
+      return if invite_code.present?
 
-    self.invite_code = loop do
-      token = SecureRandom.alphanumeric(12).upcase
-      break token unless self.class.exists?(invite_code: token)
+      self.invite_code = loop do
+        token = SecureRandom.alphanumeric(12).upcase
+        break token unless self.class.exists?(invite_code: token)
+      end
     end
-  end
 end

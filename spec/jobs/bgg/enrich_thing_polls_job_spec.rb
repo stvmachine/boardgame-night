@@ -26,13 +26,13 @@ RSpec.describe Bgg::EnrichThingPollsJob, type: :job do
       let!(:thing2) { BggThing.create!(objectid: 9209, name: "Another Game") }
 
       before do
-        user.bgg_things << [thing1, thing2]
+        user.bgg_things << [ thing1, thing2 ]
 
-        allow(client).to receive(:thing).with([174_430, 9209]).and_return(xml_doc)
+        allow(client).to receive(:thing).with([ 174_430, 9209 ]).and_return(xml_doc)
       end
 
       it "fetches thing details for games missing poll data" do
-        expect(client).to receive(:thing).with([174_430, 9209]).and_return(xml_doc)
+        expect(client).to receive(:thing).with([ 174_430, 9209 ]).and_return(xml_doc)
         job.perform(username)
       end
 
@@ -44,7 +44,7 @@ RSpec.describe Bgg::EnrichThingPollsJob, type: :job do
       it "only fetches things with poll_data_fetched_at nil" do
         thing1.update!(poll_data_fetched_at: Time.current)
 
-        expect(client).to receive(:thing).with([9209]).and_return(xml_doc)
+        expect(client).to receive(:thing).with([ 9209 ]).and_return(xml_doc)
         job.perform(username)
       end
     end

@@ -23,7 +23,7 @@ RSpec.describe InviteMailer, type: :mailer do
     it "sends an email with the magic link" do
       email = InviteMailer.group_invite(invite.id, raw_token)
 
-      expect(email.to).to eq(["friend@example.com"])
+      expect(email.to).to eq([ "friend@example.com" ])
       expect(email.subject).to eq("You've been invited to Night Owls")
       expect(email.body.encoded).to include("/invite/#{raw_token}")
       expect(email.body.encoded).to include("Join group")
@@ -55,7 +55,7 @@ RSpec.describe InviteMailer, type: :mailer do
     it "sends an email with the RSVP link" do
       email = InviteMailer.session_invite(session_invite.id, raw_token)
 
-      expect(email.to).to eq(["friend@example.com"])
+      expect(email.to).to eq([ "friend@example.com" ])
       expect(email.subject).to eq("You're invited to a board game night")
       expect(email.body.encoded).to include("/invite/#{raw_token}")
       expect(email.body.encoded).to include(session.title)

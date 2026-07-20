@@ -63,14 +63,14 @@ module Types
 
     private
 
-    def require_authentication!
-      return if context[:current_user].present?
+      def require_authentication!
+        return if context[:current_user].present?
 
-      raise GraphQL::ExecutionError, "Authentication required"
-    end
+        raise GraphQL::ExecutionError, "Authentication required"
+      end
 
-    def group_member?(user)
-      object.host_id == user.id || object.group.member_ids.include?(user.id)
-    end
+      def group_member?(user)
+        object.host_id == user.id || object.group.member_ids.include?(user.id)
+      end
   end
 end

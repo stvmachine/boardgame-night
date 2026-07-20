@@ -38,37 +38,37 @@ class GraphqlController < ApplicationController
     logger.error "[GraphqlController] #{e.message}"
     logger.error e.backtrace.first(10).join("\n")
     render json: {
-      errors: [{ message: "Internal server error" }],
+      errors: [ { message: "Internal server error" } ],
       data: {}
     }, status: 500
   end
 
   private
 
-  # Handle form data, JSON body, or a blank value
-  def ensure_hash(variables_param)
-    case variables_param
-    when String
-      if variables_param.present?
-        JSON.parse(variables_param, max_nesting: 100) || {}
-      else
+    # Handle form data, JSON body, or a blank value
+    def ensure_hash(variables_param)
+      case variables_param
+      when String
+        if variables_param.present?
+          JSON.parse(variables_param, max_nesting: 100) || {}
+        else
+          {}
+        end
+      when Hash
+        variables_param
+      when ActionController::Parameters
+        variables_param.to_unsafe_hash
+      when nil
         {}
+      else
+        raise ArgumentError, "Unexpected parameter: #{variables_param}"
       end
-    when Hash
-      variables_param
-    when ActionController::Parameters
-      variables_param.to_unsafe_hash
-    when nil
-      {}
-    else
-      raise ArgumentError, "Unexpected parameter: #{variables_param}"
     end
-  end
 
-  def handle_error_in_development(e)
-    logger.error e.message
-    logger.error e.backtrace.join("\n")
+    def handle_error_in_development(e)
+      logger.error e.message
+      logger.error e.backtrace.join("\n")
 
-    render json: { errors: [{ message: e.message, backtrace: e.backtrace }], data: {} }, status: 500
-  end
+      render json: { errors: [ { message: e.message, backtrace: e.backtrace } ], data: {} }, status: 500
+    end
 end

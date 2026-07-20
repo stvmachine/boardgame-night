@@ -22,7 +22,7 @@ RSpec.describe Bgg::ImportCollectionJob, type: :job do
       end
 
       let(:collection_array) do
-        [{ id: 1, name: "Game A" }, { id: 2, name: "Game B" }]
+        [ { id: 1, name: "Game A" }, { id: 2, name: "Game B" } ]
       end
 
       before do
@@ -141,34 +141,34 @@ RSpec.describe Bgg::ImportCollectionJob, type: :job do
     end
 
     describe "retry/discard configuration" do
-    it "retries on Bgg::NetworkError and Bgg::ServerError" do
-      handlers = described_class.rescue_handlers.map { |klass, _| klass }
+      it "retries on Bgg::NetworkError and Bgg::ServerError" do
+        handlers = described_class.rescue_handlers.map { |klass, _| klass }
 
-      expect(handlers).to include("Bgg::NetworkError")
-      expect(handlers).to include("Bgg::ServerError")
-      expect(handlers).not_to include("Faraday::TimeoutError")
-      expect(handlers).not_to include("Faraday::ServerError")
-    end
+        expect(handlers).to include("Bgg::NetworkError")
+        expect(handlers).to include("Bgg::ServerError")
+        expect(handlers).not_to include("Faraday::TimeoutError")
+        expect(handlers).not_to include("Faraday::ServerError")
+      end
 
-    it "retries on Bgg::CollectionNotReadyError" do
-      handlers = described_class.rescue_handlers.map { |klass, _| klass }
+      it "retries on Bgg::CollectionNotReadyError" do
+        handlers = described_class.rescue_handlers.map { |klass, _| klass }
 
-      expect(handlers).to include("Bgg::CollectionNotReadyError")
-    end
+        expect(handlers).to include("Bgg::CollectionNotReadyError")
+      end
 
-    it "discards on Bgg::ResourceNotFound and Bgg::InvalidUsernameError" do
-      handlers = described_class.rescue_handlers.map { |klass, _| klass }
+      it "discards on Bgg::ResourceNotFound and Bgg::InvalidUsernameError" do
+        handlers = described_class.rescue_handlers.map { |klass, _| klass }
 
-      expect(handlers).to include("Bgg::ResourceNotFound")
-      expect(handlers).to include("Bgg::InvalidUsernameError")
-      expect(handlers).not_to include("Faraday::ResourceNotFound")
-    end
+        expect(handlers).to include("Bgg::ResourceNotFound")
+        expect(handlers).to include("Bgg::InvalidUsernameError")
+        expect(handlers).not_to include("Faraday::ResourceNotFound")
+      end
 
-    it "discards on ActiveJob::DeserializationError" do
-      handlers = described_class.rescue_handlers.map { |klass, _| klass }
+      it "discards on ActiveJob::DeserializationError" do
+        handlers = described_class.rescue_handlers.map { |klass, _| klass }
 
-      expect(handlers).to include("ActiveJob::DeserializationError")
-    end
+        expect(handlers).to include("ActiveJob::DeserializationError")
+      end
     end
   end
 end

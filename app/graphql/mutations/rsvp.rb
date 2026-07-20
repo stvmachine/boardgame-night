@@ -45,14 +45,14 @@ module Mutations
 
     private
 
-    def create_provisional_user(email, nickname)
-      User.create!(
-        email: email,
-        username: "guest_#{SecureRandom.hex(6)}",
-        nickname: nickname,
-        provisional: true,
-        password: SecureRandom.hex(16)
-      )
-    end
+      def create_provisional_user(email, nickname)
+        User.create!(
+          email: email,
+          username: "guest_#{SecureRandom.hex(6)}",
+          nickname: nickname,
+          provisional: true,
+          password: SecureRandom.hex(16)
+        )
+      end
   end
 end

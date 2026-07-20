@@ -38,7 +38,7 @@ namespace :docker do
         "service: boardgame-night" =>  content.include?("service: boardgame-night"),
         "image: ghcr.io/youruser/boardgame-night" => content.include?("image: ghcr.io/youruser/boardgame-night"),
         "DOTENV_PRIVATE_KEY_BGGEEK" => content.include?("DOTENV_PRIVATE_KEY_BGGEEK"),
-        "RAILS_MASTER_KEY" => content.include?("RAILS_MASTER_KEY"),
+        "RAILS_MASTER_KEY" => content.include?("RAILS_MASTER_KEY")
       }
       checks.each do |name, ok|
         if ok

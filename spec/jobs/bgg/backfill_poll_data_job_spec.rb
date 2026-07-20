@@ -24,11 +24,11 @@ RSpec.describe Bgg::BackfillPollDataJob, type: :job do
       end
 
       before do
-        allow(client).to receive(:thing).with([174_430, 9209]).and_return(xml_doc)
+        allow(client).to receive(:thing).with([ 174_430, 9209 ]).and_return(xml_doc)
       end
 
       it "fetches things in batches of 20" do
-        expect(client).to receive(:thing).with([174_430, 9209]).and_return(xml_doc)
+        expect(client).to receive(:thing).with([ 174_430, 9209 ]).and_return(xml_doc)
         job.perform
       end
 
@@ -38,7 +38,7 @@ RSpec.describe Bgg::BackfillPollDataJob, type: :job do
       end
 
       it "skips things already enriched" do
-        expect(client).not_to receive(:thing).with([999])
+        expect(client).not_to receive(:thing).with([ 999 ])
         job.perform
       end
     end
@@ -59,7 +59,7 @@ RSpec.describe Bgg::BackfillPollDataJob, type: :job do
       end
 
       before do
-        allow(client).to receive(:thing).with([174_430, 9209]).and_return(partial_xml)
+        allow(client).to receive(:thing).with([ 174_430, 9209 ]).and_return(partial_xml)
         allow(Rails).to receive(:logger).and_return(Logger.new(File::NULL))
       end
 
