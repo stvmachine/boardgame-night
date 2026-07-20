@@ -217,6 +217,13 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-18T17:48:00.000Z
-Stopped at: Phase 11 closeout complete
-Resume file: .planning/phases/11-polish-e2e-hardening/11-05-SUMMARY.md
+Last session: 2026-07-20T13:45:00.000Z
+Stopped at: v1.1 milestone complete — final audit reports committed and verified
+Resume file: none
+
+### Recent Session Activity
+- Applied Phase 11 code review fixes (CR-01, WR-01/04/05/06/07/08, IN-01/04) → commit `1dba74f`
+- Fixed WR-09 regression in `theme.spec.ts` disclosure assertion → commit `12e438b`
+- Fixed collector sidebar persistence across page navigation using Pinia store → commit `5e58c4f`
+- Added regression test for cross-route collector persistence → commit `7b2851c`
+- Committed final audit reports (11-REVIEW PASS, 11-SECURITY PASS, 11-UI-REVIEW FLAG, 11-VERIFICATION ACHIEVED) → commit `79ad42d`
