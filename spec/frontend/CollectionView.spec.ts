@@ -9,6 +9,7 @@ import { useCollectorsStore } from '@/stores/collectors'
 import { useFilterStore } from '@/stores/filters'
 import * as operations from '@/generated/operations'
 import { sortGames } from '@/utils/sorting'
+import CollectorsProvider from '@/components/providers/CollectorsProvider.vue'
 import CollectionView from '@/views/CollectionView.vue'
 import CollectionFilterPanel from '@/components/collection/CollectionFilterPanel.vue'
 import ActiveFilterChips from '@/components/collection/ActiveFilterChips.vue'
@@ -82,7 +83,12 @@ async function mountCollection(initialRoute: string = '/collection') {
   await router.push(initialRoute)
   await router.isReady()
 
-  return mount(CollectionView, { global: { plugins: [router] } })
+  const Wrapper = {
+    components: { CollectorsProvider, CollectionView },
+    template: '<CollectorsProvider><CollectionView /></CollectorsProvider>'
+  }
+
+  return mount(Wrapper, { global: { plugins: [router] } })
 }
 
 function getLastOption(mockFn: any) {

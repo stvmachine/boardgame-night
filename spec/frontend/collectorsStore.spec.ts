@@ -1,89 +1,43 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { defineComponent } from 'vue'
 import { setActivePinia, createPinia } from 'pinia'
-import { createRouter, createWebHistory } from 'vue-router'
 import { useCollectorsStore } from '@/stores/collectors'
 
-const TestComponent = defineComponent({
-  setup() {
-    return { store: useCollectorsStore() }
-  },
-  template: '<div />'
-})
-
-function createTestRouter() {
-  return createRouter({
-    history: createWebHistory(),
-    routes: [
-      { path: '/', name: 'home', component: { template: '<div />' } },
-      { path: '/collection', name: 'collection', component: { template: '<div />' } }
-    ]
-  })
-}
-
-async function createStoreWithRoute(query: Record<string, string> = {}) {
-  const router = createTestRouter()
-  await router.push({ path: '/collection', query })
-  await router.isReady()
-
-  setActivePinia(createPinia())
-  const wrapper = mount(TestComponent, {
-    global: { plugins: [router] }
-  })
-
-  return { store: wrapper.vm.store, router }
-}
-
-describe('collectors store URL sync', () => {
+describe('collectors store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
   })
 
-  it('hydrates usernames from route.query.usernames', async () => {
-    const { store } = await createStoreWithRoute({ usernames: 'alice,bob' })
+  it('add appends a normalized username', () => {
+    const store = useCollectorsStore()
+
+    store.add('Alice')
+
+    expect(store.usernames).toEqual(['alice'])
+  })
+
+  it('add does not duplicate usernames', () => {
+    const store = useCollectorsStore()
+
+    store.add('Alice')
+    store.add('alice')
+    store.add('BOB')
 
     expect(store.usernames).toEqual(['alice', 'bob'])
   })
 
-  it('ignores empty usernames and normalizes spacing', async () => {
-    const { store } = await createStoreWithRoute({ usernames: ' Alice , BOB ' })
+  it('remove filters out the username', () => {
+    const store = useCollectorsStore()
+    store.set(['alice', 'bob'])
 
-    expect(store.usernames).toEqual(['alice', 'bob'])
+    store.remove('Alice')
+
+    expect(store.usernames).toEqual(['bob'])
   })
 
-  it('updates the URL when usernames are added', async () => {
-    const { store, router } = await createStoreWithRoute({ usernames: 'alice' })
+  it('set replaces the list and normalizes values', () => {
+    const store = useCollectorsStore()
 
-    store.add('bob')
-    await new Promise(resolve => setTimeout(resolve, 0))
-
-    expect(router.currentRoute.value.query.usernames).toBe('alice,bob')
-  })
-
-  it('removes usernames from the URL when cleared', async () => {
-    const { store, router } = await createStoreWithRoute({ usernames: 'alice' })
-
-    store.remove('alice')
-    await new Promise(resolve => setTimeout(resolve, 0))
-
-    expect(router.currentRoute.value.query.usernames).toBeUndefined()
-  })
-
-  it('does not write usernames to URL on non-collection routes', async () => {
-    const { store, router } = await createStoreWithRoute({ usernames: 'alice' })
-
-    await router.push({ name: 'home' })
-    store.add('bob')
-    await new Promise(resolve => setTimeout(resolve, 0))
-
-    expect(router.currentRoute.value.query.usernames).toBeUndefined()
-  })
-
-  it('keeps usernames in memory when navigating away from collection', async () => {
-    const { store, router } = await createStoreWithRoute({ usernames: 'alice,bob' })
-
-    await router.push({ name: 'home' })
+    store.set([' Alice ', 'BOB', '', 'alice'])
 
     expect(store.usernames).toEqual(['alice', 'bob'])
   })
