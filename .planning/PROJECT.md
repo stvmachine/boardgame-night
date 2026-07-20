@@ -21,7 +21,7 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 
 ### Active
 
-- [ ] Address v1.0 tech debt (E2E suite in CI, Action Cable dev config, cleanup legacy BGG classes, update REQUIREMENTS checkboxes)
+- [ ] Dev blog (`docs/development/`) with pure-Ruby SSG, agent-drafted architecture posts, Kamal subdomain deploy
 
 ### Out of Scope
 
@@ -73,21 +73,15 @@ For this rewrite:
 | Vue 3.5 SPA with Apollo 3.13 + @vue/apollo-composable 4.2.2 | Apollo 4 + composable v5 still in beta (incompatible) | ✅ Phase 1 — Apollo BatchHttpLink, vue-router, Pinia, Tailwind v4, HealthView E2E verified via Playwright |
 | Deterministic poll-based suggestion scoring | Keep rankings reproducible and explainable with fixed player/time/complexity/rating/ownership weights | ✅ Phase 7 — GraphQL exposes an authenticated, attendee-aware top-eight shortlist from persisted BGG data with no live BGG calls |
 
-## Current Milestone: v1.1 UI Redesign + Suggestion Engine
+## Current Milestone: v1.2 Dev Blog & Architecture Docs
 
-**Goal:** Reskin the entire app with the "Tabletop Social" Stitch design system, build the new Group Detail surface, and ship the full poll-based suggestion engine.
+**Goal:** Publish a `docs/development/` blog — built with a pure-Ruby static site generator, served from the same Kamal VPS on a subdomain — that explains how the app was made.
 
 **Target features:**
-- Design system migration (Inter, indigo, Material 3 tonal palette, Material Symbols icons, 280px sidebar, rounded-xl cards, status badges, skeleton loaders)
-- App shell redesign (sidebar nav: Home/Collection/Hot/Groups/Account + Settings/Logout + "New Session" button)
-- Home redesign (dashboard: hero + personal stats + trending games)
-- Collection redesign (structured filter sidebar + rich game cards + sort + grid/list toggle + skeleton loaders)
-- Group Detail (new surface: sessions list + shared collection spotlight + members panel + invite link)
-- Picking a Game redesign (session header + attendee-aware filtered suggestions + "Pick this game" cards)
-- Suggestion engine (SUGG-01/02: poll-based weighted scoring, explainable shortlist)
-- Tech debt cleanup (E2E in CI, Action Cable dev config, legacy BGG class cleanup, REQUIREMENTS checkboxes)
-
-**Design reference:** Stitch project "BoardGame Night UI Redesign" (projects/2288729336915094585) — "Tabletop Social" design system
+- Ruby SSG blog engine (Astro-like, markdown content) chosen via research + ADR
+- Agent-drafted posts: mergedCollection query deep-dive, boardgame night flow, auth, GraphQL wiring, challenges/decisions
+- Static build integrated into the Kamal deploy, routed to a subdomain
+- ADR documenting the engine choice
 
 ## Evolution
 
@@ -107,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-18 after Phase 10 complete (Picking a Game Redesign); Milestone v1.1 in progress*
+*Last updated: 2026-07-21 after milestone v1.2 started (Dev Blog & Architecture Docs)*

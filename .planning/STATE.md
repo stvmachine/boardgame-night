@@ -1,20 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: UI Redesign + Suggestion Engine
-current_phase: 11
-current_phase_name: Polish & E2E Hardening
-status: executing
-stopped_at: Phase 11 closeout complete
-last_updated: "2026-07-18T17:48:00.000Z"
-last_activity: 2026-07-18
-last_activity_desc: Phase 11 closeout complete — v1.1 milestone finished
+milestone: v1.2
+milestone_name: Dev Blog & Architecture Docs
+status: planning
+last_updated: "2026-07-20T14:23:24.769Z"
+last_activity: 2026-07-20
 progress:
-  total_phases: 11
-  completed_phases: 11
-  total_plans: 57
-  completed_plans: 57
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -28,12 +24,10 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 
 ## Current Position
 
-Phase: 11 (Polish & E2E Hardening) — COMPLETE
-Plan: 5 of 5
-Status: Complete
-Last activity: 2026-07-18 — Phase 11 closeout complete
-
-Progress: [██████████] 100%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-07-20 — Milestone v1.2 started
 
 ## Performance Metrics
 
@@ -222,6 +216,7 @@ Stopped at: v1.1 milestone complete — final audit reports committed and verifi
 Resume file: none
 
 ### Recent Session Activity
+
 - Applied Phase 11 code review fixes (CR-01, WR-01/04/05/06/07/08, IN-01/04) → commit `1dba74f`
 - Fixed WR-09 regression in `theme.spec.ts` disclosure assertion → commit `12e438b`
 - Fixed collector sidebar persistence across page navigation using Pinia store → commit `5e58c4f`
