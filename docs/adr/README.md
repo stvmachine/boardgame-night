@@ -19,6 +19,7 @@ This directory contains the architecture decision records (ADRs) for the boardga
 | [ADR-011](./011-group-collection-view.md) | Group Collection View via Dynamic Computation | accepted | 2026-07-09 |
 | [ADR-012](./012-session-lifecycle-state-machine.md) | Session Lifecycle State Machine | accepted | 2026-07-09 |
 | [ADR-013](./013-rubocop-indentation-cops.md) | Re-enable RuboCop Indentation Cops Over rails-omakase Defaults | accepted | 2026-07-20 |
+| [ADR-014](./014-dev-blog-engine.md) | Pure-Ruby SSG for Dev Blog | accepted | 2026-07-21 |
 
 ## Status Key
 
