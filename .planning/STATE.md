@@ -202,6 +202,7 @@ None yet.
 ### Roadmap Evolution
 
 - Phase 08 edited: edited fields: goal
+- Phase 12 added: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
 
 ## Deferred Items
 

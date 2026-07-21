@@ -405,6 +405,17 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
 | 11. Polish & E2E Hardening | 3/5 | In Progress|  |
 
+### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 11
+**Plans:** 0 plans
+
+Plans:
+
+- [ ] TBD (run /gsd-plan-phase 12 to break down)
+
 ---
 
 *Roadmap created: 2026-07-01; updated for v1.1 on 2026-07-13*
