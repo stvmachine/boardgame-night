@@ -407,14 +407,30 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 ### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Publish a `docs/development/` blog — built with a pure-Ruby static site generator, served from the same Kamal VPS on a subdomain — that explains how the app was made.
+**Mode:** standard
 **Depends on:** Phase 11
-**Plans:** 0 plans
+**Requirements**: BLOG-01, BLOG-02, BLOG-03, BLOG-04, BLOG-05
+**Success Criteria** (what must be TRUE):
+
+  1. A pure-Ruby SSG engine is chosen and documented in ADR-014 (BLOG-01)
+  2. The engine parses markdown frontmatter, builds an index page, and renders individual post pages to static HTML (BLOG-02)
+  3. At least four agent-drafted architecture posts exist in `docs/development/` and are included in the generated site (BLOG-03)
+  4. The static site is built into the production Docker image and reachable on a subdomain routed from the same Kamal VPS (BLOG-04)
+  5. The build is verified in CI and the deployment is documented for maintainers (BLOG-05)
+
+**Plans:** 6 plans
 
 Plans:
 
-- [ ] TBD (run /gsd-plan-phase 12 to break down)
+- [ ] 12-01-PLAN.md — Research and ADR: choose a pure-Ruby SSG engine (Wave 1)
+- [ ] 12-02-PLAN.md — Engine core: Post, PostParser, MarkdownConverter, Site, TemplateRenderer (Wave 2)
+- [ ] 12-03-PLAN.md — Builder and templates: Builder, ERB templates, stylesheet, CLI, Rake task (Wave 3)
+- [ ] 12-04-PLAN.md — First real posts and content pipeline (Wave 4)
+- [ ] 12-05-PLAN.md — Kamal deploy integration and subdomain routing (Wave 5)
+- [ ] 12-06-PLAN.md — Verification and documentation (Wave 6)
+
+**UI hint**: no
 
 ---
 

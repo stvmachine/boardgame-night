@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** v1.1 milestone complete — Phase 11 closeout finished
+**Current focus:** v1.2 Dev Blog & Architecture Docs — Phase 12 planning complete
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-07-21 — Completed quick task 260721-j5g: auth architecture dev-blog post
+Phase: 12 of 12 — dev blog engine
+Plan: 6 plans created and verified
+Status: Ready to execute
+Last activity: 2026-07-21 — Planned Phase 12 (6 plans) and passed plan-checker review
 
 ## Performance Metrics
 
@@ -218,8 +218,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-20T13:45:00.000Z
-Stopped at: v1.1 milestone complete — final audit reports committed and verified
+Last session: 2026-07-21T16:00:00.000Z
+Stopped at: Phase 12 planning complete — 6 plans verified and ready to execute
 Resume file: none
 
 ### Recent Session Activity

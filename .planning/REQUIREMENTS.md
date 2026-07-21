@@ -65,6 +65,14 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 - [x] **DEBT-03**: Legacy BGG classes removed (duplicate `app/jobs/import_collection_job.rb`, unsafe `Bgg::CollectionPersister#fetch_and_persist!`)
 - [x] **DEBT-04**: REQUIREMENTS.md checkboxes updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05)
 
+## v1.2 Requirements (Dev Blog & Architecture Docs)
+
+- [ ] **BLOG-01**: Research and ADR — choose a pure-Ruby static site generator engine for `docs/development/` markdown posts
+- [ ] **BLOG-02**: Build a pure-Ruby SSG engine that parses markdown frontmatter, builds an index, and renders static HTML
+- [ ] **BLOG-03**: Produce the first agent-drafted architecture posts in `docs/development/`
+- [ ] **BLOG-04**: Integrate the static blog build into the existing Kamal 2 single-container deploy and route it to a subdomain
+- [ ] **BLOG-05**: Verify the generated blog and document usage for maintainers
+
 ### Restored v1.0 Implementation Evidence
 
 The following v1.0 requirements have implementation evidence verified against [v1.0 Milestone Audit](v1.0-MILESTONE-AUDIT.md). Evidence provenance: [Phase 11 Evidence Ledger](phases/11-polish-e2e-hardening/11-EVIDENCE.md).
@@ -147,12 +155,19 @@ The following v1.0 requirements have implementation evidence verified against [v
 | DEBT-02 | Phase 11 | Complete |
 | DEBT-03 | Phase 11 | Complete |
 | DEBT-04 | Phase 11 | Complete |
+| BLOG-01 | Phase 12 | In Progress |
+| BLOG-02 | Phase 12 | In Progress |
+| BLOG-03 | Phase 12 | In Progress |
+| BLOG-04 | Phase 12 | In Progress |
+| BLOG-05 | Phase 12 | In Progress |
 
 **Coverage:**
 
 - v1.1 requirements: 31 total
 - Mapped to phases: 31 ✓
 - Unmapped: 0 ✓
+- v1.2 requirements: 5 total
+- Mapped to Phase 12: 5 ✓
 
 ---
 *Requirements defined: 2026-07-13*
