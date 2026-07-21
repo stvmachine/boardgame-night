@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 Phase: Not started (defining requirements)
 Plan: —
 Status: Defining requirements
-Last activity: 2026-07-20 — Milestone v1.2 started
+Last activity: 2026-07-21 — Completed quick task 260721-j5g: auth architecture dev-blog post
 
 ## Performance Metrics
 
@@ -192,6 +192,12 @@ None yet.
 - [Phase 10] Shared `GameCard` keeps a clickable card boundary around nested controls; review the cross-phase ARIA model during hardening.
 - [Phase 10] `SessionDetailsEditor` uses styled native textarea/date/number controls because dedicated design-system primitives do not yet exist.
 - Full-project `vue-tsc --noEmit` retains unrelated legacy diagnostics despite Phase 10-owned files being clean.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260721-j5g | Write dev-blog post on authentication architecture (ADR-008) | 2026-07-21 | d93c9c8 | [260721-j5g-write-a-dev-blog-post-in-docs-developmen](./quick/260721-j5g-write-a-dev-blog-post-in-docs-developmen/) |
 
 ### Roadmap Evolution
 
