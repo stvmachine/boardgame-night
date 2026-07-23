@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from '@/components/ui/avatar'
@@ -41,6 +41,9 @@ const props = withDefaults(defineProps<Props>(), {
 const MAX_VISIBLE_OWNERS = 3
 
 const showAllReasons = ref(false)
+const imageFailed = ref(false)
+
+watch(() => props.thumbnail, () => { imageFailed.value = false })
 
 const plainDescription = computed(() => {
   if (!props.description) return ''
@@ -129,7 +132,8 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
     :aria-label="`Game card: ${name}`"
     data-testid="game-card"
     :class="[
-      'relative overflow-hidden hover:shadow-md transition-all duration-300 p-0 gap-0 motion-reduce:hover:translate-y-0',
+      'relative overflow-hidden transition-all duration-300 p-0 gap-0 motion-reduce:hover:translate-y-0',
+      'border-outline/50 shadow-lg hover:shadow-xl',
       variant === 'list' ? 'flex-row' : 'flex-col hover:-translate-y-1'
     ]"
   >
@@ -147,10 +151,11 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
     <div class="pointer-events-none" data-testid="game-card-content">
       <template v-if="variant === 'list'">
         <img
-          v-if="thumbnail"
+          v-if="thumbnail && !imageFailed"
           :src="thumbnail"
           :alt="name"
           class="w-24 aspect-[4/3] object-cover bg-surface-variant rounded-lg flex-shrink-0 m-3"
+          @error="imageFailed = true"
         />
         <div
           v-else
@@ -246,64 +251,53 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
       </template>
 
       <template v-else>
-        <img
-          v-if="thumbnail"
-          :src="thumbnail"
-          :alt="name"
-          class="w-full aspect-[4/3] object-cover bg-surface-container"
-        />
-        <div
-          v-else
-          class="w-full aspect-[4/3] bg-surface-variant flex items-center justify-center text-on-surface-variant"
-        >
-          <Icon name="image" class="size-8" />
-        </div>
-        <CardContent class="p-3 space-y-2">
-          <h3 class="text-sm font-semibold line-clamp-2 leading-tight text-on-surface" :title="name">{{ name }}</h3>
-          <p
-            v-if="plainDescription"
-            data-testid="game-description"
-            class="text-sm text-on-surface-variant line-clamp-2"
+        <!-- Hero image with gradient scrim and overlaid badges -->
+        <div class="relative overflow-hidden">
+          <img
+            v-if="thumbnail && !imageFailed"
+            :src="thumbnail"
+            :alt="name"
+            class="w-full aspect-[4/3] object-cover bg-surface-container"
+            @error="imageFailed = true"
+          />
+          <div
+            v-else
+            class="w-full aspect-[4/3] bg-surface-variant flex items-center justify-center text-on-surface-variant"
           >
-            {{ plainDescription }}
-          </p>
-          <div v-if="hasScore || hasConfidence || hasReasons" class="space-y-2">
-            <div v-if="hasScore || hasConfidence" class="flex items-center gap-2">
-              <span
-                v-if="hasScore"
-                data-testid="suggestion-score"
-                class="rounded-full bg-surface-container-high px-2 py-0.5 text-sm font-semibold tabular-nums text-primary"
-              >
-                Score {{ roundedScore }}
-              </span>
-              <Badge v-if="hasConfidence" :variant="confidenceVariant">{{ confidenceLabel }}</Badge>
-            </div>
-            <div v-if="hasReasons" :id="reasonSectionId" class="flex flex-wrap gap-2">
-              <span
-                v-for="reason in visibleReasons"
-                :key="reason"
-                data-testid="reason-chip"
-                class="inline-flex items-center rounded-full bg-surface-container-high px-2 py-1 text-xs text-on-surface-variant"
-              >
-                {{ reason }}
-              </span>
-              <button
-                v-if="hasMoreReasons"
-                type="button"
-                data-testid="show-more-reasons"
-                :aria-expanded="showAllReasons"
-                :aria-controls="reasonSectionId"
-                class="relative z-20 pointer-events-auto inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold text-primary underline-offset-2 hover:underline"
-                @click.stop="showAllReasons = !showAllReasons"
-              >
-                Show more reasons
-              </button>
-            </div>
+            <Icon name="image" class="size-8" />
           </div>
-          <div class="flex items-center gap-2">
-            <Badge v-if="hasAverage" variant="invited">{{ average?.toFixed(1) }}</Badge>
-            <Badge v-if="hasWeight" variant="draft">{{ averageWeight?.toFixed(1) }}</Badge>
+          <!-- Gradient scrim for badge legibility -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/50 pointer-events-none" />
+          <!-- Overlaid badges: year (top-left), rating (top-right) -->
+          <div class="absolute top-2 left-2 flex gap-1.5">
+            <span
+              v-if="yearPublished"
+              class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-black/60 text-white backdrop-blur-sm"
+            >
+              {{ yearPublished }}
+            </span>
           </div>
+          <div v-if="hasAverage" class="absolute top-2 right-2">
+            <span class="inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold bg-black/60 text-white backdrop-blur-sm">
+              <Icon name="star" class="size-3" /> {{ average?.toFixed(1) }}
+            </span>
+          </div>
+        </div>
+        <CardContent class="p-3 space-y-1.5">
+          <h3 class="text-sm font-semibold line-clamp-2 leading-tight text-on-surface" :title="name">{{ name }}</h3>
+          <!-- Compact inline stats -->
+          <div class="flex items-center gap-3 text-xs font-semibold text-on-surface-variant">
+            <span class="inline-flex items-center gap-0.5">
+              <Icon name="groups" class="size-3" /> {{ playerLabel }}
+            </span>
+            <span class="inline-flex items-center gap-0.5">
+              <Icon name="schedule" class="size-3" /> {{ timeLabel }}
+            </span>
+            <span class="inline-flex items-center gap-0.5">
+              <Icon name="fitness_center" class="size-3" /> {{ weightLabel }}
+            </span>
+          </div>
+          <!-- Owner avatars -->
           <AvatarGroup class="flex -space-x-1 *:data-[slot=avatar]:ring-white">
             <Avatar
               v-for="owner in visibleOwners"
@@ -321,21 +315,7 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
               +{{ ownerOverflow }}
             </AvatarGroupCount>
           </AvatarGroup>
-          <div
-            data-testid="game-card-footer"
-            class="grid grid-cols-3 gap-1 text-sm font-semibold text-on-surface-variant pt-2 border-t border-outline"
-          >
-            <div class="flex items-center gap-1">
-              <Icon name="groups" class="size-4" /> {{ playerLabel }}
-            </div>
-            <div class="flex items-center gap-1">
-              <Icon name="schedule" class="size-4" /> {{ timeLabel }}
-            </div>
-            <div class="flex items-center gap-1">
-              <Icon name="fitness_center" class="size-4" /> {{ weightLabel }}
-            </div>
-          </div>
-          <div v-if="$slots.action" data-slot="game-card-action" class="mt-3 relative z-20 pointer-events-auto">
+          <div v-if="$slots.action" data-slot="game-card-action" class="mt-2 relative z-20 pointer-events-auto">
             <slot name="action" />
           </div>
         </CardContent>

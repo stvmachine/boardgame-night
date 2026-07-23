@@ -48,7 +48,7 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
       <div v-if="view === 'list'" class="space-y-3">
         <ResultsSkeleton v-for="i in 12" :key="i" :variant="view" />
       </div>
-      <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+      <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
         <ResultsSkeleton v-for="i in 12" :key="i" :variant="view" />
       </div>
     </template>
@@ -116,7 +116,7 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
           :initially-open="!isCollapsed(group.name)"
           @toggle="toggle(group.name)"
         >
-          <div class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+          <div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
             <GameCard
               v-for="game in group.games"
               :key="game.id"
@@ -170,7 +170,7 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
         </GameCard>
       </div>
 
-      <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
+      <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-4">
         <GameCard
           v-for="game in ungroupedGames"
           :key="game.id"
