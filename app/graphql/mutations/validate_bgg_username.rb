@@ -24,6 +24,15 @@ module Mutations
           avatar: avatar
         }
       }
+    rescue Bgg::ResourceNotFound
+      {
+        validation_result: {
+          valid: true,
+          username: normalized,
+          exists: false,
+          avatar: nil
+        }
+      }
     end
   end
 end

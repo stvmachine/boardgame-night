@@ -34,6 +34,7 @@ const mergedError: Ref<any> = ref(null)
 const groupResult: Ref<any> = ref({ group: null })
 const groupLoading: Ref<boolean> = ref(false)
 const groupError: Ref<any> = ref(null)
+const currentUserResult: Ref<any> = ref({ currentUser: null })
 
 const mockMutate = vi.fn()
 
@@ -107,6 +108,7 @@ describe('CollectionView', () => {
     groupResult.value = { group: null }
     groupLoading.value = false
     groupError.value = null
+    currentUserResult.value = { currentUser: null }
 
     mockMutate.mockReset().mockResolvedValue({})
 
@@ -124,6 +126,11 @@ describe('CollectionView', () => {
 
     vi.mocked(operations.useImportCollectionMutation).mockReturnValue({
       mutate: mockMutate
+    } as any)
+
+    vi.mocked(operations.useCurrentUserQuery).mockReturnValue({
+      result: currentUserResult,
+      refetch: vi.fn()
     } as any)
   })
 

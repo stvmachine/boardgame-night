@@ -8,14 +8,22 @@ describe('CollectorsSection', () => {
     setActivePinia(createPinia())
   })
 
-  function mountSection(selected = new Set<string>()) {
+  function mountSection(selected = new Set<string>(), currentUsername?: string) {
     return mount(CollectorsSection, {
       props: {
         usernames: ['alice', 'bob'],
-        selected
+        selected,
+        currentUsername
       }
     })
   }
+
+  it('marks the bound BGG username as You', () => {
+    const wrapper = mountSection(new Set(), 'alice')
+
+    expect(wrapper.text()).toContain('alice')
+    expect(wrapper.text()).toContain('You')
+  })
 
   it('renders Select All and Deselect All buttons', () => {
     const wrapper = mountSection()

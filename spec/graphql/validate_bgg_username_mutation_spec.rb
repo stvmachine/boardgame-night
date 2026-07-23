@@ -66,6 +66,19 @@ RSpec.describe "validateBggUsername mutation" do
     expect(data["exists"]).to be false
   end
 
+  it "returns valid but not exists when BGG responds with 404" do
+    stub_request(:get, /boardgamegeek.com\/xmlapi2\/user/)
+      .with(query: hash_including(name: "nobody"))
+      .to_return(status: 404, body: "")
+
+    result = BoardgameNightSchema.execute(mutation, variables: { username: "nobody" })
+
+    expect(result["errors"]).to be_nil
+    data = result.dig("data", "validateBggUsername", "validationResult")
+    expect(data["valid"]).to be true
+    expect(data["exists"]).to be false
+  end
+
   it "returns invalid for a malformed username" do
     result = BoardgameNightSchema.execute(mutation, variables: { username: "bad name!" })
 

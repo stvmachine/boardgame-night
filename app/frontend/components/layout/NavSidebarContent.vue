@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useCollectorsStore } from '@/stores/collectors'
 import { useFilterStore } from '@/stores/filters'
 import { useUiStore } from '@/stores/ui'
-import { useMergedCollectionQuery } from '@/generated/operations'
+import { useMergedCollectionQuery, useValidateBggUsernameMutation } from '@/generated/operations'
 import { useRefreshCollection } from '@/composables/useRefreshCollection'
 import { useAuth } from '@/composables/useAuth'
 import { Button } from '@/components/ui/button'
@@ -28,6 +28,8 @@ const uiStore = useUiStore()
 
 const { selectedOwners } = storeToRefs(filterStore)
 const { collectorsOpen } = storeToRefs(uiStore)
+const { currentUser, signOut } = useAuth()
+const boundUsername = computed(() => currentUser.value?.bggUsername?.trim().toLowerCase() ?? null)
 
 const { refresh, isRefreshing, cooldownFor, initFromSyncStatuses } = useRefreshCollection()
 
@@ -47,16 +49,45 @@ watch(
 )
 
 const newUsername = ref('')
+const addLoading = ref(false)
+const collectorToast = ref('')
+const { mutate: validateBggUsername } = useValidateBggUsernameMutation()
 
-function add() {
-  const value = newUsername.value.trim()
-  if (value) {
-    store.add(value)
+async function add() {
+  const value = newUsername.value.trim().toLowerCase()
+  if (!value || addLoading.value) return
+
+  collectorToast.value = ''
+  if (store.usernames.includes(value)) {
     newUsername.value = ''
+    return
+  }
+
+  addLoading.value = true
+  try {
+    const response = await validateBggUsername({ username: value })
+    const result = response?.data?.validateBggUsername?.validationResult
+
+    if (!result?.valid) {
+      collectorToast.value = 'Enter a valid BoardGameGeek username.'
+      return
+    }
+    if (!result.exists) {
+      collectorToast.value = 'BGG user not found.'
+      return
+    }
+
+    store.add(result.username)
+    newUsername.value = ''
+  } catch {
+    collectorToast.value = 'Could not validate the BGG username. Please try again.'
+  } finally {
+    addLoading.value = false
   }
 }
 
 function remove(username: string) {
+  if (username === boundUsername.value) return
   store.remove(username)
 }
 
@@ -73,7 +104,7 @@ function handleRefresh(username: string) {
 }
 
 async function handleLogout() {
-  await useAuth().signOut()
+  await signOut()
   router.push('/')
 }
 
@@ -129,10 +160,18 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
               type="text"
               placeholder="BGG username"
               class="flex-1 min-w-0 rounded-md border border-outline bg-surface px-3 py-2 text-sm text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
-              @keydown.enter="add"
+              :disabled="addLoading"
+              @keydown.enter.prevent="add"
             />
-            <Button type="button" variant="primary" size="sm" @click="add">
-              Add
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              :disabled="!newUsername.trim() || addLoading"
+              @click="add"
+            >
+              <Icon v-if="addLoading" name="progress-activity" class="mr-1 size-4 animate-spin" />
+              {{ addLoading ? 'Validating…' : 'Add' }}
             </Button>
           </div>
         </div>
@@ -143,6 +182,7 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
           :sync-statuses="result?.mergedCollection.syncStatuses"
           :cooldown-for="cooldownFor"
           :is-refreshing="isRefreshing"
+          :current-username="boundUsername"
           @toggle="filterStore.toggleOwner"
           @select-all="selectAllOwners"
           @deselect-all="deselectAllOwners"
@@ -161,8 +201,15 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
             <div class="flex items-center gap-2">
               <MemberAvatar :username="username" size="sm" />
               <span class="text-sm font-medium text-on-surface">{{ username }}</span>
+              <span
+                v-if="username === boundUsername"
+                class="rounded-full bg-primary-container px-1.5 py-0.5 text-[10px] font-semibold text-on-primary-container"
+              >
+                You
+              </span>
             </div>
             <Button
+              v-if="username !== boundUsername"
               type="button"
               variant="ghost"
               size="sm"
@@ -193,5 +240,15 @@ const isAuthenticated = computed(() => authStore.isAuthenticated)
       <AppNav to="/login" icon="login" label="Log in" @click="uiStore.closeSidebar" />
       <AppNav to="/signup" icon="person-add" label="Sign up" @click="uiStore.closeSidebar" />
     </template>
+  </div>
+
+  <div
+    v-if="collectorToast"
+    role="alert"
+    aria-live="assertive"
+    data-testid="collector-toast"
+    class="fixed bottom-4 right-4 z-50 max-w-sm rounded-lg border border-error bg-error-container px-4 py-3 text-sm font-medium text-on-error-container shadow-lg"
+  >
+    {{ collectorToast }}
   </div>
 </template>

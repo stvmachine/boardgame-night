@@ -9,6 +9,7 @@ interface Props {
   syncStatuses?: UserSyncStatus[]
   cooldownFor?: (username: string) => number
   isRefreshing?: boolean
+  currentUsername?: string | null
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -77,6 +78,12 @@ function isDisabled(username: string): boolean {
         <label :for="`owner-${username}`" class="flex items-center gap-2 flex-1 cursor-pointer">
           <MemberAvatar :username="username" size="sm" />
           <span class="text-sm font-medium text-on-surface">{{ username }}</span>
+          <span
+            v-if="username === currentUsername"
+            class="rounded-full bg-primary-container px-1.5 py-0.5 text-[10px] font-semibold text-on-primary-container"
+          >
+            You
+          </span>
         </label>
         <div class="flex items-center gap-2">
           <span

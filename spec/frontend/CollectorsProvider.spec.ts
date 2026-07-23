@@ -1,10 +1,18 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { setActivePinia, createPinia } from 'pinia'
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import { useCollectorsStore } from '@/stores/collectors'
 import CollectorsProvider from '@/components/providers/CollectorsProvider.vue'
+
+const currentUserResult = ref<{ currentUser: { bggUsername: string | null } | null }>({ currentUser: null })
+const refetchCurrentUser = vi.fn()
+
+vi.mock('@/generated/operations', () => ({
+  useCurrentUserQuery: vi.fn(() => ({ result: currentUserResult, refetch: refetchCurrentUser }))
+}))
 
 const TestComponent = defineComponent({
   setup() {
@@ -41,7 +49,42 @@ async function mountProvider(initialRoute: string) {
 
 describe('CollectorsProvider', () => {
   beforeEach(() => {
+    sessionStorage.clear()
     setActivePinia(createPinia())
+    currentUserResult.value = { currentUser: null }
+    refetchCurrentUser.mockReset()
+  })
+
+  it('defaults to the authenticated user bound BGG username', async () => {
+    currentUserResult.value = { currentUser: { bggUsername: 'StevMachine' } }
+
+    const wrapper = await mountProvider('/')
+    const store = wrapper.findComponent(TestComponent).vm.store
+
+    expect(store.usernames).toEqual(['stevmachine'])
+  })
+
+  it('keeps the bound BGG username when a shared URL omits it', async () => {
+    currentUserResult.value = { currentUser: { bggUsername: 'stevmachine' } }
+
+    const wrapper = await mountProvider('/collection?usernames=alice')
+    const store = wrapper.findComponent(TestComponent).vm.store
+
+    expect(store.usernames).toEqual(['alice', 'stevmachine'])
+
+    store.remove('stevmachine')
+    await flushPromises()
+
+    expect(store.usernames).toEqual(['alice', 'stevmachine'])
+  })
+
+  it('refetches the current user when a session is established', async () => {
+    await mountProvider('/')
+
+    useAuthStore().setSession('session-token', '1')
+    await flushPromises()
+
+    expect(refetchCurrentUser).toHaveBeenCalledOnce()
   })
 
   it('hydrates usernames from route.query.usernames', async () => {
