@@ -3,6 +3,8 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useAuth } from '@/composables/useAuth'
+import Input from '@/components/ui/input/Input.vue'
+import Button from '@/components/ui/button/Button.vue'
 
 const router = useRouter()
 const { signIn, signInError } = useAuth()
@@ -42,32 +44,31 @@ const canSubmit = computed(() =>
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-4">
     <div class="space-y-1">
-      <label for="login-email" class="text-sm font-medium text-neutral-700">Email</label>
-      <input
+      <label for="login-email" class="text-sm font-medium text-on-surface-variant">Email</label>
+      <Input
         id="login-email"
         v-model="email"
         type="email"
         autocomplete="email"
-        class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
     </div>
     <div class="space-y-1">
-      <label for="login-password" class="text-sm font-medium text-neutral-700">Password</label>
-      <input
+      <label for="login-password" class="text-sm font-medium text-on-surface-variant">Password</label>
+      <Input
         id="login-password"
         v-model="password"
         type="password"
         autocomplete="current-password"
-        class="w-full rounded-md border border-neutral-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
     </div>
-    <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
-    <button
+    <p v-if="errorMessage" class="text-sm text-error">{{ errorMessage }}</p>
+    <Button
       type="submit"
+      variant="primary"
       :disabled="!canSubmit || loading"
-      class="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:bg-neutral-300"
+      class="w-full"
     >
       {{ loading ? 'Signing in…' : 'Log in' }}
-    </button>
+    </Button>
   </form>
 </template>

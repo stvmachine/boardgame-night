@@ -13,6 +13,7 @@ export const badgeVariants = cva(
         invited: 'bg-badge-invited text-badge-invited-foreground',
         picking: 'bg-badge-picking text-badge-picking-foreground',
         completed: 'bg-badge-completed text-badge-completed-foreground',
+        cancelled: 'bg-error-container text-on-error-container',
       },
     },
     defaultVariants: {

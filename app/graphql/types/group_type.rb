@@ -12,6 +12,8 @@ module Types
     field :collection, Types::MergedCollectionType, null: false
     field :my_role, Types::GroupRoleEnum, null: true
     field :sessions, [ Types::NightSessionType ], null: false
+    field :past_sessions, [ Types::NightSessionType ], null: false
+    field :collection_total_count, Integer, null: false
     field :collection_spotlight, [ Types::GroupSpotlightThingType ], null: false do
       argument :limit, Integer, required: false, default_value: 4
     end
@@ -28,6 +30,27 @@ module Types
         sync_statuses: object.members.map { |user| sync_status_for(user) },
         scope: ScopedMergedThing::Scope.new(:group, object.id)
       }
+    end
+
+    def past_sessions
+      return [] unless viewer_role
+
+      completed = %w[completed cancelled]
+      object.night_sessions
+        .select { |s| completed.include?(s.state) }
+        .sort_by { |s| [ -(s.scheduled_at || s.created_at).to_i, s.id ] }
+    end
+
+    def collection_total_count
+      return 0 unless viewer_role
+
+      member_ids = object.group_memberships.map(&:user_id)
+      return 0 if member_ids.empty?
+
+      BggThing.joins(:bgg_collections)
+        .where(bgg_collections: { user_id: member_ids })
+        .distinct
+        .count
     end
 
     def collection_spotlight(limit: 4)

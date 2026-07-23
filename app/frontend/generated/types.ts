@@ -83,6 +83,7 @@ export type Group = {
   __typename?: 'Group';
   collection: MergedCollection;
   collectionSpotlight: Array<GroupSpotlightThing>;
+  collectionTotalCount: Scalars['Int']['output'];
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   inviteCode?: Maybe<Scalars['String']['output']>;
@@ -91,6 +92,7 @@ export type Group = {
   myRole?: Maybe<GroupRole>;
   name: Scalars['String']['output'];
   owner: User;
+  pastSessions: Array<NightSession>;
   sessions: Array<NightSession>;
 };
 

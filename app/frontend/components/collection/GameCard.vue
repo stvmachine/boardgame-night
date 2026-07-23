@@ -39,7 +39,6 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const MAX_VISIBLE_OWNERS = 3
-const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 
 const showAllReasons = ref(false)
 
@@ -148,10 +147,17 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
     <div class="pointer-events-none" data-testid="game-card-content">
       <template v-if="variant === 'list'">
         <img
-          :src="thumbnail || TRANSPARENT_PIXEL"
+          v-if="thumbnail"
+          :src="thumbnail"
           :alt="name"
           class="w-24 aspect-[4/3] object-cover bg-surface-variant rounded-lg flex-shrink-0 m-3"
         />
+        <div
+          v-else
+          class="w-24 aspect-[4/3] bg-surface-variant rounded-lg flex-shrink-0 m-3 flex items-center justify-center text-on-surface-variant"
+        >
+          <Icon name="image" class="size-6" />
+        </div>
         <CardContent class="p-3 flex-1 min-w-0">
           <div class="flex items-start justify-between gap-2">
             <h3 class="text-sm font-semibold text-on-surface line-clamp-1" :title="name">{{ name }}</h3>
@@ -206,13 +212,13 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
               class="grid grid-cols-3 gap-4 text-sm font-semibold text-on-surface-variant"
             >
               <span class="flex items-center gap-1">
-                <Icon name="groups" class="size-3" /> {{ playerLabel }}
+                <Icon name="groups" class="size-4" /> {{ playerLabel }}
               </span>
               <span class="flex items-center gap-1">
-                <Icon name="schedule" class="size-3" /> {{ timeLabel }}
+                <Icon name="schedule" class="size-4" /> {{ timeLabel }}
               </span>
               <span class="flex items-center gap-1">
-                <Icon name="fitness_center" class="size-3" /> {{ weightLabel }}
+                <Icon name="fitness_center" class="size-4" /> {{ weightLabel }}
               </span>
             </div>
             <AvatarGroup class="flex -space-x-1 *:data-[slot=avatar]:ring-white">
@@ -248,9 +254,9 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
         />
         <div
           v-else
-          class="w-full aspect-[4/3] bg-surface-variant flex items-center justify-center text-on-surface-variant text-sm"
+          class="w-full aspect-[4/3] bg-surface-variant flex items-center justify-center text-on-surface-variant"
         >
-          No image
+          <Icon name="image" class="size-8" />
         </div>
         <CardContent class="p-3 space-y-2">
           <h3 class="text-sm font-semibold line-clamp-2 leading-tight text-on-surface" :title="name">{{ name }}</h3>
@@ -320,13 +326,13 @@ const bggLabel = computed(() => `View ${props.name} on BoardGameGeek`)
             class="grid grid-cols-3 gap-1 text-sm font-semibold text-on-surface-variant pt-2 border-t border-outline"
           >
             <div class="flex items-center gap-1">
-              <Icon name="groups" class="size-3" /> {{ playerLabel }}
+              <Icon name="groups" class="size-4" /> {{ playerLabel }}
             </div>
             <div class="flex items-center gap-1">
-              <Icon name="schedule" class="size-3" /> {{ timeLabel }}
+              <Icon name="schedule" class="size-4" /> {{ timeLabel }}
             </div>
             <div class="flex items-center gap-1">
-              <Icon name="fitness_center" class="size-3" /> {{ weightLabel }}
+              <Icon name="fitness_center" class="size-4" /> {{ weightLabel }}
             </div>
           </div>
           <div v-if="$slots.action" data-slot="game-card-action" class="mt-3 relative z-20 pointer-events-auto">

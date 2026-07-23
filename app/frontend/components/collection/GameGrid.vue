@@ -6,6 +6,7 @@ import { useCollapsedGroups } from '@/composables/useCollapsedGroups'
 import GameCard from './GameCard.vue'
 import ResultsSkeleton from './ResultsSkeleton.vue'
 import CollapsibleGroup from './CollapsibleGroup.vue'
+import Button from '@/components/ui/button/Button.vue'
 
 import type { GroupOption } from '@/utils/grouping'
 
@@ -54,20 +55,20 @@ const { isCollapsed, toggle, expandAll, collapseAll } = useCollapsedGroups(group
 
     <template v-else-if="isGrouped">
       <div class="flex gap-2">
-        <button
-          type="button"
-          class="px-3 py-1.5 text-sm font-medium text-primary bg-primary-container rounded hover:bg-primary-container/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        <Button
+          variant="outline"
+          size="sm"
           @click="expandAll(groupNames)"
         >
           Expand All
-        </button>
-        <button
-          type="button"
-          class="px-3 py-1.5 text-sm font-medium text-on-surface-variant bg-surface-container-high rounded hover:bg-surface-container-high/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
           @click="collapseAll(groupNames)"
         >
           Collapse All
-        </button>
+        </Button>
       </div>
 
       <div v-if="view === 'list'" class="space-y-3">

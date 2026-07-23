@@ -40,6 +40,26 @@ query Group($token: String!) {
         }
       }
     }
+    pastSessions {
+      id
+      title
+      state
+      scheduledAt
+      attendeeCount
+      pickedGame {
+        name
+      }
+      attendances {
+        id
+        response
+        user {
+          id
+          username
+          displayName
+        }
+      }
+    }
+    collectionTotalCount
     collectionSpotlight(limit: 4) {
       id
       objectid

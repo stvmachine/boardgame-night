@@ -14,11 +14,11 @@ function handleSuccess() {
 <template>
   <AppShell>
     <div class="max-w-md mx-auto mt-12 px-6">
-      <h1 class="text-2xl font-bold text-neutral-800 mb-6">Log in</h1>
+      <h1 class="text-2xl font-bold text-on-surface mb-6">Log in</h1>
       <LoginForm @success="handleSuccess" />
-      <p class="mt-4 text-sm text-neutral-600">
+      <p class="mt-4 text-sm text-on-surface-variant">
         Don't have an account yet?
-        <a href="/signup" class="text-indigo-600 hover:underline">Sign up</a>
+        <RouterLink to="/signup" class="text-primary hover:underline">Sign up</RouterLink>
       </p>
     </div>
   </AppShell>

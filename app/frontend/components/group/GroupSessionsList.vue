@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarGroup } from '@/components/ui/avatar'
 import { useMemberColor } from '@/composables/useMemberColor'
 import EmptyState from '@/components/collection/EmptyState.vue'
+import { RouterLink } from 'vue-router'
 
 interface Props {
   sessions: NightSession[]
@@ -91,7 +92,15 @@ const emptyBody = computed(() =>
 <template>
   <Card>
     <CardHeader>
-      <CardTitle>Upcoming sessions</CardTitle>
+      <div class="flex items-center justify-between">
+        <CardTitle>Upcoming sessions</CardTitle>
+        <RouterLink
+          :to="{ name: 'group-sessions', params: { token: group.inviteCode } }"
+          class="text-sm font-medium text-primary hover:underline"
+        >
+          View All
+        </RouterLink>
+      </div>
     </CardHeader>
     <CardContent>
       <div v-if="sessions.length === 0" class="text-center">

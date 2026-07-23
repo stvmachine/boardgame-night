@@ -9,7 +9,7 @@ import EmptyState from '@/components/collection/EmptyState.vue'
 
 interface Props {
   games: GroupSpotlightThing[]
-  group: Group
+  group: Pick<Group, 'id' | 'inviteCode' | 'collectionTotalCount'>
 }
 
 const props = defineProps<Props>()
@@ -53,7 +53,7 @@ function handleKeydown(event: KeyboardEvent, game: GroupSpotlightThing) {
           :to="{ path: '/collection', query: { group: group.inviteCode } }"
           class="text-sm font-medium text-primary hover:underline"
         >
-          Browse Library
+          Browse Library ({{ group.collectionTotalCount }})
         </RouterLink>
       </div>
     </CardHeader>

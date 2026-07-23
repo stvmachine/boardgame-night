@@ -52,6 +52,11 @@ const router = createRouter({
       component: () => import('../views/GroupView.vue')
     },
     {
+      path: '/g/:token/sessions',
+      name: 'group-sessions',
+      component: () => import('../views/PastSessionsView.vue')
+    },
+    {
       path: '/invite/:token',
       name: 'invite',
       component: () => import('../views/InviteView.vue')
