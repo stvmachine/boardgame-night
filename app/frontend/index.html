@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="bg-page">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Boardgame Night</title>
+    <title>BoardGameNight — Board game night, sorted.</title>
+    <meta name="description" content="Merge your group's BoardGameGeek collections, discover games everyone can play, and spin up a game night in seconds." />
+    <meta name="theme-color" content="#0f0f12" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Inter:wght@100..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <script>
       (function() {
         var theme;
@@ -13,19 +18,19 @@
             theme = raw;
           }
         } catch(e) {}
-        if (!theme) theme = 'light';
+        if (!theme) theme = 'dark';
         var resolved = theme === 'system'
           ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
           : theme;
-        if (resolved === 'dark') {
-          document.documentElement.classList.add('dark');
+        if (resolved === 'light') {
+          document.documentElement.classList.add('light');
         }
         document.documentElement.style.colorScheme = resolved;
       })();
     </script>
   </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/entrypoints/application.ts"></script>
+  <body class="bg-page text-ink antialiased">
+    <div id="root"></div>
+    <script type="module" src="/entrypoints/main.tsx"></script>
   </body>
 </html>

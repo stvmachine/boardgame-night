@@ -83,3 +83,9 @@ gem "dry-rails", "~> 0.7"
 
 # Rate limiting for auth endpoints (T-04-01)
 gem "rack-attack", "~> 6.6"
+
+gem "faker", "~> 3.8", groups: [:development, :test]
+
+gem "mutant", "~> 0.16.3", groups: [:development, :test]
+
+gem "mutant-rspec", "~> 0.16.3", groups: [:development, :test]

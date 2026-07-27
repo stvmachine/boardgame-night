@@ -48,11 +48,11 @@ RSpec.describe "signUp mutation" do
     expect(result["errors"]).to be_present
   end
 
-  it "returns an error for a duplicate username" do
+  it "allows duplicate usernames" do
     User.create!(username: "newuser", email: "other@example.com", password: "password")
 
     result = BoardgameNightSchema.execute(mutation, variables: valid_variables)
-    expect(result["errors"]).to be_present
+    expect(result["errors"]).to be_nil
   end
 
   it "returns an error for a short password" do

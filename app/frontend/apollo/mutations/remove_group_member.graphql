@@ -1,6 +1,0 @@
-mutation RemoveGroupMember($groupId: ID!, $userId: ID!) {
-  removeGroupMember(groupId: $groupId, userId: $userId) {
-    success
-    removedMembershipId
-  }
-}

@@ -91,6 +91,7 @@ type DashboardStats {
 type Group {
   collection: MergedCollection!
   collectionSpotlight(limit: Int = 4): [GroupSpotlightThing!]!
+  collectionTotalCount: Int!
   description: String
   id: ID!
   inviteCode: String
@@ -99,6 +100,7 @@ type Group {
   myRole: GroupRole
   name: String!
   owner: User!
+  pastSessions: [NightSession!]!
   sessions: [NightSession!]!
 }
 

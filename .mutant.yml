@@ -1,0 +1,16 @@
+# Mutant configuration for boardgame-night-rails-vue
+---
+require:
+  - rails
+matcher:
+  ignore:
+    - "app/graphql/types/*"
+    - "app/frontend/*"
+    - "db/*"
+    - "bin/*"
+    - "config/*"
+    - "vendor/*"
+integration:
+  rspec:
+    enabled: true
+jobs: 4

@@ -4,9 +4,7 @@ require "rails_helper"
 
 RSpec.describe User, type: :model do
   describe "validations" do
-    subject { User.new(username: "alice") }
-    it { should validate_presence_of(:username) }
-    it { should validate_uniqueness_of(:username) }
+    subject { User.new(email: "alice@example.com") }
     it { should validate_uniqueness_of(:email).allow_nil }
     it { should validate_inclusion_of(:provisional).in_array([ true, false ]) }
     it { should validate_uniqueness_of(:invite_token).allow_nil }

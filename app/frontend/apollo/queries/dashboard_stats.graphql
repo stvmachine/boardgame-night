@@ -1,7 +1,0 @@
-query DashboardStats {
-  dashboardStats {
-    collectionCount
-    groupCount
-    sessionCount
-  }
-}

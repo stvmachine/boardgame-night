@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_20_140015) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_23_000001) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -169,11 +169,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_20_140015) do
     t.boolean "provisional", default: false, null: false
     t.datetime "sync_requested_at"
     t.datetime "updated_at", null: false
-    t.string "username", null: false
+    t.string "username"
     t.index ["bgg_username"], name: "index_users_on_bgg_username"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invite_token"], name: "index_users_on_invite_token", unique: true
-    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "bgg_poll_results", "bgg_polls"
