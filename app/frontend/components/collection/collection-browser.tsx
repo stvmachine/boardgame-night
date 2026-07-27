@@ -14,6 +14,7 @@ import { FilterPanel } from '@/components/collection/filter-panel'
 import { GameCard, SkeletonGrid } from '@/components/game-card'
 import { CategoryPill, EmptyState, MemberAvatar } from '@/components/primitives'
 import { Button } from '@/components/ui/button'
+import { LinkButton } from '@/components/ui/link-button'
 import {
   activeCount,
   applyFilters,
@@ -29,6 +30,7 @@ import { toGame } from '@/lib/graphql/adapters'
 import type { GqlMergedCollection } from '@/lib/graphql/types'
 import { cn } from '@/lib/utils'
 import type { Member, Game } from '@/lib/data'
+import { useActiveGroup } from '@/contexts/ActiveGroupContext'
 
 // TODO: Get these from the active group's members
 const PLACEHOLDER_USERNAMES = ['alex123', 'sam456', 'jordan789', 'riley012', 'casey345']
@@ -77,9 +79,15 @@ const sortLabels: Record<SortKey, string> = {
 export function CollectionBrowser() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { bggUsernames } = useActiveGroup()
+
+  // Use active group's BGG usernames if available, otherwise query with empty list
+  const usernames = bggUsernames.length > 0 ? bggUsernames : []
+  const hasActiveGroup = bggUsernames.length > 0
 
   const { data, loading } = useQuery(MERGED_COLLECTION, {
-    variables: { usernames: PLACEHOLDER_USERNAMES },
+    variables: { usernames },
+    skip: !hasActiveGroup,
   })
 
   const games: Game[] = useMemo(
@@ -317,6 +325,17 @@ export function CollectionBrowser() {
 
         {loading ? (
           <SkeletonGrid count={12} />
+        ) : !hasActiveGroup ? (
+          <EmptyState
+            icon={<SearchX className="size-5" />}
+            title="No group selected"
+            description="Visit a group page first to view its merged collection."
+            action={
+              <LinkButton to="/groups" size="lg">
+                Browse groups
+              </LinkButton>
+            }
+          />
         ) : results.length === 0 ? (
           <EmptyState
             icon={<SearchX className="size-5" />}

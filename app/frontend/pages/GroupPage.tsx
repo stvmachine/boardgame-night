@@ -1,11 +1,13 @@
 import { useParams } from 'react-router-dom'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { useQuery } from '@apollo/client'
 import { Eyebrow, Card, StateBadge, MemberAvatar } from '@/components/primitives'
 import { AvatarStack } from '@/components/primitives'
 import { LinkButton } from '@/components/ui/link-button'
 import { GET_GROUP } from '@/lib/graphql/documents'
 import { toGroup, toMember, toSession } from '@/lib/graphql/adapters'
+import { useActiveGroup } from '@/contexts/ActiveGroupContext'
+import type { GqlUser } from '@/lib/graphql/types'
 
 export function GroupPage() {
   const { token } = useParams<{ token: string }>()
@@ -13,11 +15,22 @@ export function GroupPage() {
     variables: { token: token ?? '' },
     skip: !token,
   })
+  const { setActiveGroup } = useActiveGroup()
 
   const group = useMemo(
     () => (data?.group ? toGroup(data.group) : null),
     [data],
   )
+
+  // Set this group as the active group when loaded
+  useEffect(() => {
+    if (data?.group) {
+      const bggUsernames = (data.group.members ?? [])
+        .map((m: { bggUsername?: string }) => m.bggUsername)
+        .filter(Boolean) as string[]
+      setActiveGroup(data.group.inviteCode, data.group.name, bggUsernames)
+    }
+  }, [data, setActiveGroup])
 
   const groupMembers = useMemo(
     () => (data?.group?.members ?? []).map(toMember),
