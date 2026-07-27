@@ -1,16 +1,17 @@
 import { defineConfig } from 'vitest/config'
-import vue from '@vitejs/plugin-vue'
+import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: { '@': resolve(__dirname, 'app/frontend') }
   },
   test: {
     environment: 'jsdom',
     globals: true,
-    include: ['app/frontend/**/*.spec.ts', 'spec/frontend/**/*.spec.ts', 'tests/vitest/**/*.spec.ts']
+    setupFiles: ['tests/vitest/setup.ts'],
+    include: ['app/frontend/**/*.spec.{ts,tsx}', 'spec/frontend/**/*.spec.{ts,tsx}', 'tests/vitest/**/*.spec.{ts,tsx}']
   }
 })
