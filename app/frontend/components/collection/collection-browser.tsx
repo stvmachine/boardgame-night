@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
+import { useQuery } from '@apollo/client'
 import { FilterPanel } from '@/components/collection/filter-panel'
 import { GameCard, SkeletonGrid } from '@/components/game-card'
 import { CategoryPill, EmptyState, MemberAvatar } from '@/components/primitives'
@@ -23,8 +24,47 @@ import {
   type Filters,
   type SortKey,
 } from '@/lib/collection'
-import { games, memberById, members } from '@/lib/data'
+import { MERGED_COLLECTION } from '@/lib/graphql/documents'
+import { toGame } from '@/lib/graphql/adapters'
+import type { GqlMergedCollection } from '@/lib/graphql/types'
 import { cn } from '@/lib/utils'
+import type { Member, Game } from '@/lib/data'
+
+// TODO: Get these from the active group's members
+const PLACEHOLDER_USERNAMES = ['alex123', 'sam456', 'jordan789', 'riley012', 'casey345']
+
+const COLOR_PALETTE = [
+  '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6',
+  '#8b5cf6', '#ef4444', '#06b6d4', '#84cc16', '#f97316',
+] as const
+
+function stringToColor(str: string): string {
+  let hash = 0
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return COLOR_PALETTE[Math.abs(hash) % COLOR_PALETTE.length]
+}
+
+function buildMembersFromCollection(collection: GqlMergedCollection): Member[] {
+  const seen = new Set<string>()
+  const result: Member[] = []
+  for (const item of collection.items) {
+    for (const owner of item.owners) {
+      if (!seen.has(owner.bggUsername)) {
+        seen.add(owner.bggUsername)
+        result.push({
+          id: owner.bggUsername,
+          name: owner.bggUsername,
+          bgg: owner.bggUsername,
+          color: stringToColor(owner.bggUsername),
+          online: true,
+        })
+      }
+    }
+  }
+  return result
+}
 
 const sortLabels: Record<SortKey, string> = {
   name: 'Name (A–Z)',
@@ -38,18 +78,29 @@ export function CollectionBrowser() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
+  const { data, loading } = useQuery(MERGED_COLLECTION, {
+    variables: { usernames: PLACEHOLDER_USERNAMES },
+  })
+
+  const games: Game[] = useMemo(
+    () => (data?.mergedCollection?.items ?? []).map(toGame),
+    [data],
+  )
+  const members: Member[] = useMemo(
+    () => (data?.mergedCollection ? buildMembersFromCollection(data.mergedCollection) : []),
+    [data],
+  )
+  const memberById = useMemo(() => {
+    const map = new Map(members.map((m) => [m.id, m]))
+    return (id: string) => map.get(id)
+  }, [members])
+
   const [filters, setFiltersState] = useState<Filters>(() =>
     fromParams(new URLSearchParams(searchParams.toString())),
   )
   const [searchDraft, setSearchDraft] = useState(filters.q)
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [sheetOpen, setSheetOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const id = setTimeout(() => setLoading(false), 700)
-    return () => clearTimeout(id)
-  }, [])
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -65,7 +116,7 @@ export function CollectionBrowser() {
 
   const setFilters = (next: Partial<Filters>) => setFiltersState((f) => ({ ...f, ...next }))
 
-  const results = useMemo(() => applyFilters(games, filters), [filters])
+  const results = useMemo(() => applyFilters(games, filters), [games, filters])
   const active = activeCount(filters)
 
   function clearAll() {
@@ -121,7 +172,7 @@ export function CollectionBrowser() {
     })),
     ...filters.owners.map((o) => ({
       key: `o${o}`,
-      label: `Owned by ${memberById(o)?.name.split(' ')[0] ?? o}`,
+      label: `Owned by ${memberById(o)?.name ?? o}`,
       clear: () => setFilters({ owners: filters.owners.filter((x) => x !== o) }),
     })),
   ]
@@ -289,7 +340,7 @@ export function CollectionBrowser() {
             ))}
           </div>
         ) : (
-          <ListView ids={results.map((g) => g.id)} />
+          <ListView ids={results.map((g) => g.id)} games={games} members={members} />
         )}
       </div>
 
@@ -333,7 +384,7 @@ export function CollectionBrowser() {
   )
 }
 
-function ListView({ ids }: { ids: string[] }) {
+function ListView({ ids, games, members }: { ids: string[]; games: Game[]; members: Member[] }) {
   const rows = ids.map((id) => games.find((g) => g.id === id)!)
   return (
     <div className="overflow-x-auto rounded-xl border border-line bg-surface">

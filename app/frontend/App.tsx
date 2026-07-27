@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
+import { ApolloProvider } from '@apollo/client'
+import { apolloClient } from '@/lib/graphql/apollo'
 import { SiteNav } from '@/components/site-nav'
 import { SiteFooter } from '@/components/site-footer'
 import { MobileTabBar } from '@/components/mobile-tab-bar'
@@ -11,29 +13,32 @@ import { GroupPage } from '@/pages/GroupPage'
 import { AccountPage } from '@/pages/AccountPage'
 import { SessionPage } from '@/pages/SessionPage'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export default function App() {
   return (
-    <>
-      <SiteNav />
-      <main className="pb-20 md:pb-0">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/collection" element={<CollectionPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/groups" element={<GroupsPage />} />
-          <Route path="/g/:token" element={<GroupPage />} />
-          <Route path="/g/:token/sessions" element={<PlaceholderPage title="Past Sessions" />} />
-          <Route path="/s/:id" element={<SessionPage />} />
-          <Route path="/invite/:token" element={<PlaceholderPage title="Invite" />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/hot" element={<PlaceholderPage title="Hot Games" />} />
-          <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
-        </Routes>
-      </main>
-      <SiteFooter />
-      <MobileTabBar />
-    </>
+    <ApolloProvider client={apolloClient}>
+      <AuthProvider>
+        <SiteNav />
+        <main className="pb-20 md:pb-0">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/collection" element={<CollectionPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/groups" element={<GroupsPage />} />
+            <Route path="/g/:token" element={<GroupPage />} />
+            <Route path="/g/:token/sessions" element={<PlaceholderPage title="Past Sessions" />} />
+            <Route path="/s/:id" element={<SessionPage />} />
+            <Route path="/invite/:token" element={<PlaceholderPage title="Invite" />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/hot" element={<PlaceholderPage title="Hot Games" />} />
+            <Route path="*" element={<PlaceholderPage title="Page Not Found" />} />
+          </Routes>
+        </main>
+        <SiteFooter />
+        <MobileTabBar />
+      </AuthProvider>
+    </ApolloProvider>
   )
 }

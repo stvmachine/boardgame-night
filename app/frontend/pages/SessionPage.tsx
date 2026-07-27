@@ -1,27 +1,96 @@
 import { useParams } from 'react-router-dom'
+import { useMemo } from 'react'
+import { useQuery } from '@apollo/client'
 import { Clock, Users, Check, Star, Trophy } from 'lucide-react'
 import { Eyebrow, Card, StateBadge, MemberAvatar, Progress } from '@/components/primitives'
 import { LinkButton } from '@/components/ui/link-button'
-import { sessionById, gameById, members, suggestions, scoreboard } from '@/lib/data'
+import { GET_NIGHT_SESSION } from '@/lib/graphql/documents'
+import { toGame, toMember, toSuggestion } from '@/lib/graphql/adapters'
+import type { GqlNightSession, GqlSuggestion, GqlAttendance } from '@/lib/graphql/types'
+import type { Member, Game, Suggestion } from '@/lib/data'
 
 export function SessionPage() {
   const { id } = useParams<{ id: string }>()
-  const session = sessionById(id ?? '')
-  const game = gameById(session.gameId)
+  const { data, loading, error } = useQuery(GET_NIGHT_SESSION, {
+    variables: { id: id ?? '' },
+    skip: !id,
+  })
 
-  const going = session.rsvps.filter((r) => r.status === 'going')
+  const nightSession: GqlNightSession | null = data?.nightSession ?? null
+
+  const members: Member[] = useMemo(
+    () => (nightSession?.attendances ?? []).map((a) => toMember(a.user)),
+    [nightSession],
+  )
+
+  const memberById = useMemo(() => {
+    const map = new Map(members.map((m) => [m.id, m]))
+    return (id: string) => map.get(id)
+  }, [members])
+
+  const attendances: GqlAttendance[] = nightSession?.attendances ?? []
+  const going = attendances.filter((a) => a.response === 'going')
+
+  // Derive session metadata from the GQL session
+  const sessionMeta = useMemo(() => {
+    if (!nightSession) return null
+    const dt = nightSession.scheduledAt ? new Date(nightSession.scheduledAt) : null
+    return {
+      title: nightSession.title,
+      state: nightSession.state as import('@/lib/data').SessionState,
+      date: dt
+        ? dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        : 'TBD',
+      time: dt ? dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '',
+      location: nightSession.location || 'TBD',
+      gameId: nightSession.pickedGame?.objectid,
+    }
+  }, [nightSession])
+
+  const pickedGame: Game | null = useMemo(
+    () => (nightSession?.pickedGame ? toGame(nightSession.pickedGame) : null),
+    [nightSession],
+  )
+
+  const suggestions: Suggestion[] = useMemo(
+    () => (nightSession?.suggestions ?? []).map((s) => toSuggestion(s, attendances.length)),
+    [nightSession, attendances.length],
+  )
+
+  if (loading) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 pt-24 pb-20 sm:px-6">
+        <div className="skeleton mb-8 h-32 rounded-xl" />
+        <div className="flex flex-col gap-6">
+          <div className="skeleton h-48 rounded-xl" />
+          <div className="skeleton h-48 rounded-xl" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !nightSession || !sessionMeta) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-4 pt-24 pb-20 sm:px-6">
+        <Card className="flex flex-col items-center gap-3 p-12 text-center">
+          <p className="text-ink-secondary">Session not found.</p>
+          <LinkButton to="/" variant="outline" size="lg">Back home</LinkButton>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pt-24 pb-20 sm:px-6">
       <div className="mb-8 flex flex-col gap-3">
         <Eyebrow>Session</Eyebrow>
         <div className="flex items-center justify-between">
-          <h1 className="text-h1 text-ink">{session.title}</h1>
-          <StateBadge state={session.state} />
+          <h1 className="text-h1 text-ink">{sessionMeta.title}</h1>
+          <StateBadge state={sessionMeta.state} />
         </div>
         <p className="flex items-center gap-2 text-sm text-ink-secondary">
           <Clock className="size-4" />
-          {session.date} &middot; {session.time} &middot; {session.location}
+          {sessionMeta.date} &middot; {sessionMeta.time} &middot; {sessionMeta.location}
         </p>
       </div>
 
@@ -29,16 +98,16 @@ export function SessionPage() {
         <Card className="flex flex-col gap-4 p-5">
           <h2 className="text-sm font-semibold text-ink">
             <Users className="mr-1.5 inline size-4" />
-            RSVPs ({going.length}/{session.rsvps.length})
+            RSVPs ({going.length}/{attendances.length})
           </h2>
           <Progress
-            value={(going.length / session.rsvps.length) * 100}
+            value={attendances.length > 0 ? (going.length / attendances.length) * 100 : 0}
             barClassName="bg-success"
             label="RSVP progress"
           />
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-            {session.rsvps.map((r) => {
-              const m = members.find((x) => x.id === r.memberId)
+            {attendances.map((a) => {
+              const m = memberById(a.user.id)
               if (!m) return null
               return (
                 <li key={m.id} className="flex flex-col items-center gap-1.5 rounded-lg bg-surface-raised px-2 py-3">
@@ -46,14 +115,14 @@ export function SessionPage() {
                   <span className="text-xs font-medium text-ink">{m.name.split(' ')[0]}</span>
                   <span
                     className={
-                      r.status === 'going'
+                      a.response === 'going'
                         ? 'text-[10px] font-semibold text-success'
-                        : r.status === 'maybe'
+                        : a.response === 'maybe'
                           ? 'text-[10px] font-semibold text-warning'
                           : 'text-[10px] text-ink-muted'
                     }
                   >
-                    {r.status === 'going' ? 'Going' : r.status === 'maybe' ? 'Maybe' : '—'}
+                    {a.response === 'going' ? 'Going' : a.response === 'maybe' ? 'Maybe' : '—'}
                   </span>
                 </li>
               )
@@ -61,7 +130,7 @@ export function SessionPage() {
           </ul>
         </Card>
 
-        {session.state === 'INVITED' && (
+        {suggestions.length > 0 && (
           <Card className="flex flex-col gap-4 p-5">
             <h2 className="text-sm font-semibold text-ink">
               <Star className="mr-1.5 inline size-4 text-star" />
@@ -69,15 +138,17 @@ export function SessionPage() {
             </h2>
             <ul className="flex flex-col gap-3">
               {suggestions.map((s, i) => {
-                const g = gameById(s.gameId)
-                if (!g) return null
+                const g = pickedGame?.id === s.gameId ? pickedGame : null
+                // Find the thing from the GQL suggestion data for richer display
+                const thing = nightSession.suggestions?.[i]
+                const gameTitle = thing?.thing?.name
                 return (
                   <li key={s.gameId} className="flex items-center gap-3 rounded-lg bg-surface-raised p-3">
                     <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
                       {i + 1}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink">{g.title}</p>
+                      <p className="truncate text-sm font-medium text-ink">{gameTitle ?? s.gameId}</p>
                       <p className="font-mono text-xs text-accent-teal">
                         {s.match}% match &middot; {s.votes} votes
                       </p>
@@ -94,31 +165,13 @@ export function SessionPage() {
           </Card>
         )}
 
-        {session.state === 'COMPLETED' && session.gameId && (
+        {sessionMeta.state === 'COMPLETED' && pickedGame && (
           <Card className="flex flex-col gap-4 p-5">
             <h2 className="text-sm font-semibold text-ink">
               <Trophy className="mr-1.5 inline size-4 text-star" />
-              Scoreboard — {game?.title}
+              Scoreboard — {pickedGame.title}
             </h2>
-            <ul className="flex flex-col gap-2">
-              {scoreboard
-                .sort((a, b) => a.total - b.total)
-                .reverse()
-                .map((row, i) => {
-                  const m = members.find((x) => x.id === row.memberId)
-                  if (!m) return null
-                  return (
-                    <li key={m.id} className="flex items-center gap-3 rounded-lg bg-surface-raised px-3 py-2">
-                      <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                        {i + 1}
-                      </span>
-                      <MemberAvatar member={m} size="sm" showRing={false} />
-                      <span className="flex-1 text-sm font-medium text-ink">{m.name}</span>
-                      <span className="font-mono text-sm text-ink">{row.total}</span>
-                    </li>
-                  )
-                })}
-            </ul>
+            <p className="text-sm text-ink-muted">Scoreboard coming soon.</p>
           </Card>
         )}
       </div>

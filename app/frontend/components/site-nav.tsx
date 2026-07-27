@@ -1,10 +1,11 @@
 import { Dices, Menu, X } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
 import { LinkButton } from '@/components/ui/link-button'
+import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
+import { useAuth } from '@/contexts/AuthContext'
 
 const links = [
   { href: '/collection', label: 'Collection' },
@@ -30,6 +31,8 @@ export function SiteNav() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const { user, signOut } = useAuth()
+  const navigate = useNavigate()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -39,6 +42,15 @@ export function SiteNav() {
   }, [])
 
   useEffect(() => setOpen(false), [pathname])
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/')
+  }
+
+  const userInitials = user?.displayName
+    ? user.displayName.split(' ').map((n) => n[0]).slice(0, 2).join('')
+    : user?.username?.slice(0, 2).toUpperCase() ?? ''
 
   return (
     <header
@@ -72,21 +84,55 @@ export function SiteNav() {
               </li>
             )
           })}
+          {user && (
+            <li>
+              <Link
+                to="/account"
+                className={cn(
+                  'rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  pathname === '/account' ? 'text-primary' : 'text-ink-secondary hover:text-ink',
+                )}
+              >
+                Account
+              </Link>
+            </li>
+          )}
         </ul>
 
         <div className="flex items-center gap-2">
           <ThemeToggle className="hidden sm:inline-flex" />
-          <LinkButton
-            to="/login"
-            variant="ghost"
-            size="lg"
-            className="hidden text-ink-secondary hover:text-ink sm:inline-flex"
-          >
-            Log in
-          </LinkButton>
-          <LinkButton to="/signup" size="lg" className="shadow-glow">
-            Start free
-          </LinkButton>
+          {user ? (
+            <>
+              <span className="hidden items-center gap-2 sm:flex">
+                <span className="inline-flex size-8 items-center justify-center rounded-full bg-surface-raised text-xs font-semibold text-ink ring-2 ring-offset-2 ring-offset-page">
+                  {userInitials}
+                </span>
+                <span className="text-sm font-medium text-ink">{user.displayName || user.username}</span>
+              </span>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={handleLogout}
+                className="hidden text-ink-secondary hover:text-ink sm:inline-flex"
+              >
+                Log out
+              </Button>
+            </>
+          ) : (
+            <>
+              <LinkButton
+                to="/login"
+                variant="ghost"
+                size="lg"
+                className="hidden text-ink-secondary hover:text-ink sm:inline-flex"
+              >
+                Log in
+              </LinkButton>
+              <LinkButton to="/signup" size="lg" className="shadow-glow">
+                Start free
+              </LinkButton>
+            </>
+          )}
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
@@ -112,12 +158,35 @@ export function SiteNav() {
                 </Link>
               </li>
             ))}
-            <li className="mt-2 flex items-center justify-between border-t border-line pt-3">
-              <Link to="/login" className="px-3 text-sm font-medium text-ink-secondary">
-                Log in
-              </Link>
-              <ThemeToggle />
-            </li>
+            {user && (
+              <>
+                <li>
+                  <Link
+                    to="/account"
+                    className="block rounded-lg px-3 py-2.5 text-sm font-medium text-ink-secondary hover:bg-surface-raised hover:text-ink"
+                  >
+                    Account
+                  </Link>
+                </li>
+                <li className="mt-1">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-ink-secondary hover:bg-surface-raised hover:text-ink"
+                  >
+                    Log out
+                  </button>
+                </li>
+              </>
+            )}
+            {!user && (
+              <li className="mt-2 flex items-center justify-between border-t border-line pt-3">
+                <Link to="/login" className="px-3 text-sm font-medium text-ink-secondary">
+                  Log in
+                </Link>
+                <ThemeToggle />
+              </li>
+            )}
           </ul>
         </div>
       )}

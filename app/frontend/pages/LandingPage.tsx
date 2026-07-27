@@ -1,4 +1,6 @@
 import { ArrowRight, Dices, Sparkles } from 'lucide-react'
+import { useMemo } from 'react'
+import { useQuery } from '@apollo/client'
 import { HeroFlow } from '@/components/landing/hero-flow'
 import {
   ConnectVisual,
@@ -8,6 +10,8 @@ import {
 } from '@/components/landing/chapter-visuals'
 import { AvatarStack, Card, Eyebrow, MemberAvatar } from '@/components/primitives'
 import { LinkButton } from '@/components/ui/link-button'
+import { DASHBOARD_STATS } from '@/lib/graphql/documents'
+// TODO: Replace with real group members when group context is available
 import { members, stats, testimonials } from '@/lib/data'
 
 const chapters = [
@@ -42,6 +46,19 @@ const chapters = [
 ]
 
 export function LandingPage() {
+  const { data: statsData } = useQuery(DASHBOARD_STATS)
+
+  const displayStats = useMemo(() => {
+    if (statsData?.dashboardStats) {
+      return {
+        gamesMerged: (statsData.dashboardStats.collectionCount ?? 0).toLocaleString(),
+        sessionsHosted: (statsData.dashboardStats.sessionCount ?? 0).toLocaleString(),
+        activeGroups: (statsData.dashboardStats.groupCount ?? 0).toLocaleString(),
+      }
+    }
+    return stats
+  }, [statsData])
+
   return (
     <>
       {/* ------------------------------- Hero ------------------------------- */}
@@ -77,7 +94,7 @@ export function LandingPage() {
             <div className="flex items-center gap-3">
               <AvatarStack memberList={members} />
               <p className="text-sm text-ink-muted">
-                Join {stats.activeGroups} groups already playing
+                Join {displayStats.activeGroups} groups already playing
               </p>
             </div>
           </div>
@@ -95,9 +112,9 @@ export function LandingPage() {
             <Dices className="size-4 text-primary" />
             Integrates with BoardGameGeek
           </span>
-          <Stat value={stats.gamesMerged} label="games merged" />
-          <Stat value={stats.sessionsHosted} label="sessions hosted" />
-          <Stat value={stats.activeGroups} label="active groups" />
+          <Stat value={displayStats.gamesMerged} label="games merged" />
+          <Stat value={displayStats.sessionsHosted} label="sessions hosted" />
+          <Stat value={displayStats.activeGroups} label="active groups" />
         </div>
       </section>
 
