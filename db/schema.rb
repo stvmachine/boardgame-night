@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_23_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_28_000001) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -82,6 +82,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_23_000001) do
     t.index ["name"], name: "index_bgg_things_on_name"
     t.index ["objectid"], name: "index_bgg_things_on_objectid", unique: true
     t.index ["poll_data_fetched_at"], name: "index_bgg_things_on_poll_data_fetched_at"
+  end
+
+  create_table "game_scores", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "night_session_id", null: false
+    t.integer "rank"
+    t.integer "score", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["night_session_id", "user_id"], name: "index_game_scores_on_night_session_id_and_user_id", unique: true
+    t.index ["night_session_id"], name: "index_game_scores_on_night_session_id"
+    t.index ["user_id"], name: "index_game_scores_on_user_id"
   end
 
   create_table "group_memberships", force: :cascade do |t|
@@ -177,6 +189,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_23_000001) do
 
   add_foreign_key "bgg_poll_results", "bgg_polls"
   add_foreign_key "bgg_polls", "bgg_things"
+  add_foreign_key "game_scores", "night_sessions"
+  add_foreign_key "game_scores", "users"
   add_foreign_key "group_memberships", "groups"
   add_foreign_key "group_memberships", "users"
   add_foreign_key "groups", "users", column: "owner_id"
