@@ -107,6 +107,13 @@ export interface GqlAttendance {
   respondedAt: string | null
 }
 
+export interface GqlScore {
+  id: string
+  score: number
+  rank: number | null
+  user: { id: string; displayName: string; avatar: string | null }
+}
+
 export interface GqlSuggestionBreakdown {
   playerCountFit: number
   timeFit: number
@@ -140,6 +147,7 @@ export interface GqlNightSession {
   timeBudgetMinutes: number
   complexityPreference: string
   suggestions: GqlSuggestion[] | null
+  scores: GqlScore[]
 }
 
 export interface GqlDashboardStats {

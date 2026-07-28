@@ -188,6 +188,16 @@ export const GET_NIGHT_SESSION = gql`
           bestPlayerCount
         }
       }
+      scores {
+        id
+        score
+        rank
+        user {
+          id
+          displayName
+          avatar
+        }
+      }
     }
   }
 `
@@ -651,6 +661,26 @@ export const UPGRADE_TO_ACCOUNT = gql`
         email
         displayName
         isProvisional
+      }
+    }
+  }
+`
+
+export const SUBMIT_SCORES = gql`
+  mutation SubmitScores($sessionId: ID!, $scores: [ScoreInputType!]!) {
+    submitScores(sessionId: $sessionId, scores: $scores) {
+      session {
+        id
+        scores {
+          id
+          score
+          rank
+          user {
+            id
+            displayName
+            avatar
+          }
+        }
       }
     }
   }

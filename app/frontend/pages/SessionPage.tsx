@@ -9,6 +9,7 @@ import { GET_NIGHT_SESSION } from '@/lib/graphql/documents'
 import { toGame, toMember, toSuggestion } from '@/lib/graphql/adapters'
 import type { GqlNightSession, GqlSuggestion, GqlAttendance } from '@/lib/graphql/types'
 import type { Member, Game, Suggestion } from '@/lib/data'
+import type { ScoreEntry } from '@/components/scoreboard'
 
 export function SessionPage() {
   const { id } = useParams<{ id: string }>()
@@ -56,6 +57,18 @@ export function SessionPage() {
   const suggestions: Suggestion[] = useMemo(
     () => (nightSession?.suggestions ?? []).map((s) => toSuggestion(s, attendances.length)),
     [nightSession, attendances.length],
+  )
+
+  const scores: ScoreEntry[] = useMemo(
+    () =>
+      (nightSession?.scores ?? []).map((s) => ({
+        userId: s.user.id,
+        displayName: s.user.displayName,
+        avatar: s.user.avatar,
+        score: s.score,
+        rank: s.rank,
+      })),
+    [nightSession],
   )
 
   if (loading) {
@@ -167,8 +180,7 @@ export function SessionPage() {
         )}
 
         {sessionMeta.state === 'COMPLETED' && pickedGame && (
-          // TODO: Wire to GET_NIGHT_SESSION scores field when backend adds it
-          <Scoreboard scores={[]} pickedGameName={pickedGame.title} />
+          <Scoreboard scores={scores} pickedGameName={pickedGame.title} />
         )}
       </div>
     </div>

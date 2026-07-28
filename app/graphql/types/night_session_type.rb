@@ -18,6 +18,7 @@ module Types
     field :time_budget_minutes, Int, null: false
     field :complexity_preference, String, null: false
     field :suggestions, [ Types::SuggestionType ], null: true
+    field :scores, [ Types::ScoreType ], null: false
 
     def attendances
       if object.association(:attendances).loaded?

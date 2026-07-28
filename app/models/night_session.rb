@@ -7,6 +7,7 @@ class NightSession < ApplicationRecord
   has_many :attendances, dependent: :destroy
   has_many :attendees, through: :attendances, source: :user
   has_many :invite_tokens, dependent: :destroy
+  has_many :game_scores, dependent: :destroy
 
   VALID_COMPLEXITY_PREFERENCES = %w[Light Medium Medium-Heavy Heavy Any].freeze
 

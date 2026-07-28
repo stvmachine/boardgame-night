@@ -97,6 +97,7 @@ const makeSession = (
   timeBudgetMinutes: 90,
   complexityPreference: 'medium',
   suggestions: null,
+  scores: [],
   ...overrides,
 })
 

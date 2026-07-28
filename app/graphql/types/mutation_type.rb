@@ -23,5 +23,6 @@ module Types
     field :reopen_session, mutation: Mutations::ReopenSession, description: "Reopen a cancelled session to its previous state."
     field :rsvp, mutation: Mutations::Rsvp, description: "RSVP to a session via a magic-link invite token."
     field :upgrade_to_account, mutation: Mutations::UpgradeToAccount, description: "Convert a provisional user to a full account."
+    field :submit_scores, mutation: Mutations::SubmitScores, description: "Submit scores for a completed session."
   end
 end
