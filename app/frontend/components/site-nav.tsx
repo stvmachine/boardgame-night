@@ -6,12 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/contexts/AuthContext'
-
-const links = [
-  { href: '/collection', label: 'Collection' },
-  { href: '/groups', label: 'Groups' },
-  { href: '/g/abc123', label: 'Sessions' },
-]
+import { useActiveGroup } from '@/contexts/ActiveGroupContext'
 
 export function Logo({ className }: { className?: string }) {
   return (
@@ -32,7 +27,14 @@ export function SiteNav() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const { user, signOut } = useAuth()
+  const { token } = useActiveGroup()
   const navigate = useNavigate()
+
+  const links = [
+    { href: '/collection', label: 'Collection' },
+    { href: '/groups', label: 'Groups' },
+    ...(token ? [{ href: `/g/${token}`, label: 'Sessions' }] : []),
+  ]
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)

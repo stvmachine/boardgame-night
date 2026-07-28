@@ -1,8 +1,9 @@
 import { useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
-import { Clock, Users, Check, Star, Trophy } from 'lucide-react'
+import { Clock, Users, Check, Star } from 'lucide-react'
 import { Eyebrow, Card, StateBadge, MemberAvatar, Progress } from '@/components/primitives'
+import { Scoreboard } from '@/components/scoreboard'
 import { LinkButton } from '@/components/ui/link-button'
 import { GET_NIGHT_SESSION } from '@/lib/graphql/documents'
 import { toGame, toMember, toSuggestion } from '@/lib/graphql/adapters'
@@ -166,13 +167,8 @@ export function SessionPage() {
         )}
 
         {sessionMeta.state === 'COMPLETED' && pickedGame && (
-          <Card className="flex flex-col gap-4 p-5">
-            <h2 className="text-sm font-semibold text-ink">
-              <Trophy className="mr-1.5 inline size-4 text-star" />
-              Scoreboard — {pickedGame.title}
-            </h2>
-            <p className="text-sm text-ink-muted">Scoreboard coming soon.</p>
-          </Card>
+          // TODO: Wire to GET_NIGHT_SESSION scores field when backend adds it
+          <Scoreboard scores={[]} pickedGameName={pickedGame.title} />
         )}
       </div>
     </div>

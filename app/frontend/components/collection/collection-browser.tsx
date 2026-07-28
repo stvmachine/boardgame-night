@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@apollo/client'
+import { useQuery, useSubscription } from '@apollo/client'
 import { FilterPanel } from '@/components/collection/filter-panel'
 import { GameCard, SkeletonGrid } from '@/components/game-card'
 import { CategoryPill, EmptyState, MemberAvatar } from '@/components/primitives'
@@ -25,7 +25,7 @@ import {
   type Filters,
   type SortKey,
 } from '@/lib/collection'
-import { MERGED_COLLECTION } from '@/lib/graphql/documents'
+import { MERGED_COLLECTION, COLLECTION_SYNCED } from '@/lib/graphql/documents'
 import { toGame } from '@/lib/graphql/adapters'
 import type { GqlMergedCollection } from '@/lib/graphql/types'
 import { cn } from '@/lib/utils'
@@ -79,15 +79,28 @@ const sortLabels: Record<SortKey, string> = {
 export function CollectionBrowser() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { bggUsernames } = useActiveGroup()
+  const { name, bggUsernames } = useActiveGroup()
 
   // Use active group's BGG usernames if available, otherwise query with empty list
   const usernames = bggUsernames.length > 0 ? bggUsernames : []
   const hasActiveGroup = bggUsernames.length > 0
 
-  const { data, loading } = useQuery(MERGED_COLLECTION, {
+  const { data, loading, refetch } = useQuery(MERGED_COLLECTION, {
     variables: { usernames },
     skip: !hasActiveGroup,
+  })
+
+  // Subscribe to real-time collection sync updates
+  // When a member's BGG import completes, refetch the merged collection
+  useSubscription(COLLECTION_SYNCED, {
+    variables: { username: usernames[0] || '' },
+    skip: !hasActiveGroup || usernames.length === 0,
+    onData: () => {
+      refetch()
+    },
+    onError: () => {
+      // Silently ignore — server may not support subscriptions yet
+    },
   })
 
   const games: Game[] = useMemo(
@@ -209,7 +222,7 @@ export function CollectionBrowser() {
         <header className="flex flex-col gap-2">
           <h1 className="text-h1 text-ink">Merged collection</h1>
           <p className="text-sm text-ink-secondary">
-            Strategy Crew &middot; 5 members &middot; every shelf in one place
+            {name ? `${name} · ` : ''}{bggUsernames.length} {bggUsernames.length === 1 ? 'member' : 'members'} &middot; every shelf in one place
           </p>
         </header>
 
