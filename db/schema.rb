@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_28_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_28_000002) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -32,6 +32,43 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_28_000001) do
     t.index ["bgg_thing_id"], name: "index_bgg_collections_on_bgg_thing_id"
     t.index ["user_id", "bgg_thing_id"], name: "index_bgg_collections_on_user_id_and_bgg_thing_id", unique: true
     t.index ["user_id"], name: "index_bgg_collections_on_user_id"
+  end
+
+  create_table "bgg_play_players", force: :cascade do |t|
+    t.integer "bgg_play_id", null: false
+    t.integer "bgg_userid"
+    t.string "bgg_username"
+    t.string "color"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.boolean "new_player", default: false, null: false
+    t.integer "rating"
+    t.integer "score"
+    t.string "start_position"
+    t.datetime "updated_at", null: false
+    t.boolean "win", default: false, null: false
+    t.index ["bgg_play_id", "bgg_username"], name: "index_bgg_play_players_on_bgg_play_id_and_bgg_username"
+    t.index ["bgg_play_id"], name: "index_bgg_play_players_on_bgg_play_id"
+  end
+
+  create_table "bgg_plays", force: :cascade do |t|
+    t.integer "bgg_game_objectid", null: false
+    t.integer "bgg_play_id", null: false
+    t.text "comments"
+    t.datetime "created_at", null: false
+    t.date "date", null: false
+    t.string "game_name"
+    t.boolean "incomplete", default: false, null: false
+    t.integer "length_minutes", default: 0, null: false
+    t.string "location"
+    t.boolean "now_in_stats", default: true, null: false
+    t.integer "quantity", default: 1, null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["bgg_game_objectid"], name: "index_bgg_plays_on_bgg_game_objectid"
+    t.index ["bgg_play_id"], name: "index_bgg_plays_on_bgg_play_id", unique: true
+    t.index ["user_id", "date"], name: "index_bgg_plays_on_user_id_and_date"
+    t.index ["user_id"], name: "index_bgg_plays_on_user_id"
   end
 
   create_table "bgg_poll_results", force: :cascade do |t|
@@ -187,6 +224,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_28_000001) do
     t.index ["invite_token"], name: "index_users_on_invite_token", unique: true
   end
 
+  add_foreign_key "bgg_play_players", "bgg_plays"
+  add_foreign_key "bgg_plays", "users"
   add_foreign_key "bgg_poll_results", "bgg_polls"
   add_foreign_key "bgg_polls", "bgg_things"
   add_foreign_key "game_scores", "night_sessions"

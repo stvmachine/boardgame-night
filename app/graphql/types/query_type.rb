@@ -35,6 +35,21 @@ module Types
       argument :id, ID, required: true, description: "Session id."
     end
 
+    field :my_plays, [ Types::BggPlayType ], null: false, description: "Recent play history for the current user." do
+      argument :limit, Integer, required: false, description: "Max plays to return (default 20)."
+    end
+
+    field :group_plays, [ Types::BggPlayType ], null: false, description: "Recent plays across a group's members." do
+      argument :group_id, ID, required: true, description: "Group id."
+      argument :limit, Integer, required: false, description: "Max plays to return (default 20)."
+    end
+
+    field :game_plays, [ Types::BggPlayType ], null: false, description: "Play history for a specific game across group members." do
+      argument :group_id, ID, required: true, description: "Group id."
+      argument :objectid, Int, required: true, description: "BGG object ID of the game."
+      argument :limit, Integer, required: false, description: "Max plays to return (default 20)."
+    end
+
     field :session_invite, Types::SessionInviteType, null: true, description: "Look up a session invite by its magic-link token." do
       argument :token, String, required: true, description: "Magic-link token from the invitation email."
     end
@@ -118,6 +133,37 @@ module Types
           year_published: result.year_published
         }
       end
+    end
+
+    def my_plays(limit: 20)
+      return [] unless context[:current_user]
+
+      BggPlay
+        .where(user: context[:current_user])
+        .order(date: :desc)
+        .limit(limit)
+    end
+
+    def group_plays(group_id:, limit: 20)
+      group = Group.find_by(id: group_id)
+      return [] unless group
+
+      member_ids = group.group_memberships.pluck(:user_id)
+      BggPlay
+        .where(user_id: member_ids)
+        .order(date: :desc)
+        .limit(limit)
+    end
+
+    def game_plays(group_id:, objectid:, limit: 20)
+      group = Group.find_by(id: group_id)
+      return [] unless group
+
+      member_ids = group.group_memberships.pluck(:user_id)
+      BggPlay
+        .where(user_id: member_ids, bgg_game_objectid: objectid)
+        .order(date: :desc)
+        .limit(limit)
     end
 
     private

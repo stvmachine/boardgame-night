@@ -68,6 +68,48 @@ module Bgg
       }
     end
 
+    def normalize_plays(xml_doc)
+      total = xml_doc.at_css("plays")&.attr("total")&.to_i || 0
+      plays = xml_doc.css("plays > play").map { |play| normalize_play(play) }
+      { total: total, plays: plays }
+    end
+
+    def normalize_play(play_node)
+      item_node = play_node.at_css("item")
+      {
+        bgg_play_id: play_node["id"]&.to_i,
+        date: play_node["date"],
+        quantity: play_node["quantity"]&.to_i || 1,
+        length: play_node["length"]&.to_i || 0,
+        incomplete: play_node["incomplete"] == "1",
+        now_in_stats: play_node["nowinstats"] == "1",
+        location: play_node["location"],
+        game_objectid: item_node&.attr("objectid")&.to_i,
+        game_name: item_node&.attr("name"),
+        comments: play_node.at_css("comments")&.text&.strip,
+        players: play_node.css("players > player").map { |p| normalize_play_player(p) }
+      }
+    end
+
+    def normalize_play_player(player_node)
+      score_str = player_node["score"].to_s
+      score_val = score_str.to_i
+      # BGG uses -1 to indicate "no score entered"
+      score_val = nil if score_str.blank? || score_str == "-1"
+
+      {
+        username: player_node["username"].presence,
+        userid: player_node["userid"]&.to_i,
+        name: player_node["name"],
+        score: score_val,
+        rating: player_node["rating"]&.to_i,
+        win: player_node["win"] == "1",
+        new_player: player_node["new"] == "1",
+        color: player_node["color"].presence,
+        start_position: player_node["startposition"].presence
+      }
+    end
+
     def normalize_polls(item_node)
       poll = item_node.at_css('poll[name="suggested_numplayers"]')
       return nil unless poll

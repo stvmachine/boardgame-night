@@ -1,9 +1,11 @@
 import { useParams } from 'react-router-dom'
-import { useMemo, useEffect } from 'react'
+import { useMemo, useEffect, useCallback } from 'react'
 import { useQuery } from '@apollo/client'
+import { Download } from 'lucide-react'
 import { Eyebrow, Card, StateBadge, MemberAvatar } from '@/components/primitives'
 import { AvatarStack } from '@/components/primitives'
 import { LinkButton } from '@/components/ui/link-button'
+import { PlaysHistory, ImportPlaysButton } from '@/components/plays-history'
 import { GET_GROUP } from '@/lib/graphql/documents'
 import { toGroup, toMember, toSession } from '@/lib/graphql/adapters'
 import { useActiveGroup } from '@/contexts/ActiveGroupContext'
@@ -121,6 +123,21 @@ export function GroupPage() {
             </ul>
           )}
         </Card>
+      </div>
+
+      {/* Play history section */}
+      <div className="mt-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-ink">Play History</h2>
+          {data?.group?.members?.[0]?.bggUsername && (
+            <ImportPlaysButton
+              username={data.group.members[0].bggUsername}
+              groupId={data.group.id}
+              onComplete={() => {}}
+            />
+          )}
+        </div>
+        <PlaysHistory groupId={data?.group?.id} />
       </div>
     </div>
   )

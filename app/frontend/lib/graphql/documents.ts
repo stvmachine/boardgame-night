@@ -699,3 +699,104 @@ export const COLLECTION_SYNCED = gql`
     }
   }
 `
+
+// --- BGG PLAY HISTORY ---
+
+export const MY_PLAYS = gql`
+  query MyPlays($limit: Int) {
+    myPlays(limit: $limit) {
+      id
+      date
+      quantity
+      bggGameObjectid
+      gameName
+      lengthMinutes
+      incomplete
+      nowInStats
+      location
+      comments
+      winnersCount
+      user {
+        id
+        displayName
+        avatar
+      }
+      players {
+        id
+        bggUsername
+        name
+        score
+        win
+      }
+    }
+  }
+`
+
+export const GROUP_PLAYS = gql`
+  query GroupPlays($groupId: ID!, $limit: Int) {
+    groupPlays(groupId: $groupId, limit: $limit) {
+      id
+      date
+      quantity
+      bggGameObjectid
+      gameName
+      lengthMinutes
+      incomplete
+      nowInStats
+      location
+      comments
+      winnersCount
+      user {
+        id
+        displayName
+        avatar
+      }
+      players {
+        id
+        bggUsername
+        name
+        score
+        win
+      }
+    }
+  }
+`
+
+export const GAME_PLAYS = gql`
+  query GamePlays($groupId: ID!, $objectid: Int!, $limit: Int) {
+    gamePlays(groupId: $groupId, objectid: $objectid, limit: $limit) {
+      id
+      date
+      quantity
+      bggGameObjectid
+      gameName
+      lengthMinutes
+      incomplete
+      nowInStats
+      location
+      comments
+      winnersCount
+      user {
+        id
+        displayName
+        avatar
+      }
+      players {
+        id
+        bggUsername
+        name
+        score
+        win
+      }
+    }
+  }
+`
+
+export const IMPORT_PLAYS = gql`
+  mutation ImportPlays($username: String!) {
+    importPlays(username: $username) {
+      success
+      message
+    }
+  }
+`

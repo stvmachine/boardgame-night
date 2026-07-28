@@ -62,6 +62,12 @@ module Bgg
       end
     end
 
+    def plays(username:, page: 1)
+      handle_faraday_errors do
+        perform_request("plays", username: username, page: page)
+      end
+    end
+
     # Public — consumed by CollectionFetcher to abstract BGG's async collection
     # generation. Retries on 202 (BGG is still preparing the response) up to 5
     # times with 5-second backoff, then raises CollectionNotReadyError.

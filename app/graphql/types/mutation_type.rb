@@ -24,5 +24,6 @@ module Types
     field :rsvp, mutation: Mutations::Rsvp, description: "RSVP to a session via a magic-link invite token."
     field :upgrade_to_account, mutation: Mutations::UpgradeToAccount, description: "Convert a provisional user to a full account."
     field :submit_scores, mutation: Mutations::SubmitScores, description: "Submit scores for a completed session."
+    field :import_plays, mutation: Mutations::ImportPlays, description: "Import play history from BGG for a username."
   end
 end

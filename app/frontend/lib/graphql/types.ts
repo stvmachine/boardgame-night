@@ -293,3 +293,36 @@ export interface CollectionSyncedPayload {
   gameCount: number | null
   lastSyncedAt: string | null
 }
+
+// --- BGG Play History Types ---
+
+export interface GqlPlayPlayer {
+  id: string
+  username: string
+  name: string | null
+  score: number | null
+  win: boolean
+}
+
+export interface GqlPlay {
+  id: string
+  date: string
+  quantity: number
+  bggGameObjectid: number
+  bggPlayId: number
+  gameName: string | null
+  lengthMinutes: number
+  incomplete: boolean
+  nowInStats: boolean
+  location: string | null
+  comments: string | null
+  playerCount: number
+  winnersCount: number
+  user: { id: string; displayName: string; avatar: string | null }
+  players: GqlPlayPlayer[]
+}
+
+export interface ImportPlaysPayload {
+  success: boolean
+  message: string
+}
