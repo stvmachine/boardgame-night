@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A board game collection and night-organizing app for groups of friends. Users create friend groups, link their BoardGameGeek (BGG) usernames, and the app merges everyone's collections into a shared deduplicated view. From there, any member can spin up a boardgame night session — invite group members, get game suggestions drawn from the shared pool (filtered by who's coming and player count), and pick what to play. Built as a monorepo with Ruby on Rails 8 (API-only) serving a GraphQL API consumed by a Vue.js 3 frontend.
+A board game collection and night-organizing app for groups of friends. Users create friend groups, link their BoardGameGeek (BGG) usernames, and the app merges everyone's collections into a shared deduplicated view. From there, any member can spin up a boardgame night session — invite group members, get game suggestions drawn from the shared pool (filtered by who's coming and player count), and pick what to play. Built as a monorepo with Ruby on Rails 8 (API-only) serving a GraphQL API and a React 19 frontend; milestone v2.0 completes and validates the recent Vue-to-React rewrite.
 
 ## Core Value
 
@@ -21,7 +21,11 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 
 ### Active
 
-- [ ] Dev blog (`docs/development/`) with pure-Ruby SSG, agent-drafted architecture posts, Kamal subdomain deploy
+- [ ] React fully replaces Vue while preserving every existing product journey and the Tabletop Social interface
+- [ ] Auth, collection merge/browse, groups, invitations, sessions, RSVP, suggestions, and game picking work end to end in React
+- [ ] Frontend and Rails/GraphQL defects exposed by parity verification are repaired
+- [ ] React tests and production delivery replace Vue tooling; Vue source and dependencies are removed after parity is proven
+- [ ] Dev blog (`docs/development/`) ships with a pure-Ruby SSG, architecture posts, Kamal build integration, and subdomain routing
 
 ### Out of Scope
 
@@ -38,6 +42,8 @@ For this rewrite:
 - The Vue frontend takes over the role of `bggeek-shared-list`'s React UI — collection input, merging, filtering, sorting, grouping, and display.
 - The existing `bgg-graphql-proxy` GraphQL schema (things, search, users, collections, plays, geeklists, hot items) is the reference for what the Rails GraphQL API should expose.
 - The existing `bggeek-shared-list` feature set (multi-user collection merge, fuzzy search, filters, sort, group, hot games, permalinks) is the reference for v1 scope.
+- The completed Vue application is the behavior, design, accessibility, and responsive-layout source of truth for the v2.0 React migration.
+- The older `bggeek-shared-list` React app may inform implementation, but it does not supersede newer Vue-era group, session, RSVP, suggestion, or picking behavior.
 
 **BGG API notes:**
 - BGG's XML API v2 (`https://boardgamegeek.com/xmlapi2`) is read-only for the endpoints used (thing, search, collection, plays, hot items) and does not strictly require authentication for public data.
@@ -50,13 +56,13 @@ For this rewrite:
 
 ## Constraints
 
-- **Tech stack**: Ruby on Rails (API-only mode) + Vue.js 3, in a single git repository (monorepo) — Rails serves the Vue build and exposes GraphQL; no separate proxy service.
+- **Tech stack**: Ruby on Rails (API-only mode) + React, in a single git repository (monorepo) — Rails serves the React build and exposes GraphQL; no separate proxy service.
 - **Ruby version management**: rbenv (pin a modern Ruby, e.g. 3.2+).
-- **API style**: GraphQL between Vue and Rails (Rails is the single GraphQL source of truth for the frontend).
+- **API style**: GraphQL between React and Rails (Rails is the single GraphQL source of truth for the frontend).
 - **BGG credentials**: API token loaded from `.env.bggeek` (not committed to git).
 - **BGG rate limits**: Must throttle to ~1 req/5s with retries and caching — BGG will 429/503 otherwise.
-- **Modern Rails**: Use current Rails conventions (Rails 7.1+ / 8.x), Hotwire is not needed (API-only + Vue), use `--api` scaffold.
-- **Frontend build**: Vue 3 with Vite, integrated into the Rails asset pipeline or served as a built SPA from `public/`.
+- **Modern Rails**: Use current Rails conventions (Rails 7.1+ / 8.x), Hotwire is not needed (API-only + React), use `--api` scaffold.
+- **Frontend build**: React with Vite, integrated into the Rails asset pipeline or served as a built SPA from `public/`.
 
 ## Key Decisions
 
@@ -70,18 +76,22 @@ For this rewrite:
 | `.env.bggeek` for BGG credentials | Keeps secrets out of git; user-specified location | ✅ Phase 1 — dotenvx-encrypted, .env.bggeek.keys gitignored, decrypted via DOTENV_PRIVATE_KEY_BGGEEK at runtime |
 | v1 = shared-list parity + boardgame night sessions | v1 rewrites bggeek-shared-list AND adds the night-session features that the project name implies | ✅ Complete — v1.0 shipped 2026-07-09 |
 | v1.1 = UI redesign + suggestion engine | Reskin with Stitch "Tabletop Social" design, build Group Detail surface, ship poll-based suggestion engine | — In progress |
-| Vue 3.5 SPA with Apollo 3.13 + @vue/apollo-composable 4.2.2 | Apollo 4 + composable v5 still in beta (incompatible) | ✅ Phase 1 — Apollo BatchHttpLink, vue-router, Pinia, Tailwind v4, HealthView E2E verified via Playwright |
+| Vue 3.5 SPA with Apollo 3.13 + @vue/apollo-composable 4.2.2 | Apollo 4 + composable v5 still in beta (incompatible) | ⚠️ Superseded in v2.0 by the approved full React replacement |
 | Deterministic poll-based suggestion scoring | Keep rankings reproducible and explainable with fixed player/time/complexity/rating/ownership weights | ✅ Phase 7 — GraphQL exposes an authenticated, attendee-aware top-eight shortlist from persisted BGG data with no live BGG calls |
+| v2.0 = complete React replacement with Vue parity | React must become the sole frontend without regressing the shipped product, design system, responsive behavior, or accessibility | — Pending |
+| Carry unfinished v1.2 dev-blog work into v2.0 | Preserve BLOG-01 through BLOG-05 instead of discarding the planned documentation capability | — Pending |
 
-## Current Milestone: v1.2 Dev Blog & Architecture Docs
+## Current Milestone: v2.0 React Migration & Parity
 
-**Goal:** Publish a `docs/development/` blog — built with a pure-Ruby static site generator, served from the same Kamal VPS on a subdomain — that explains how the app was made.
+**Goal:** Replace the Vue frontend with React while preserving the existing Tabletop Social experience and making every current product journey work end to end.
 
 **Target features:**
-- Ruby SSG blog engine (Astro-like, markdown content) chosen via research + ADR
-- Agent-drafted posts: mergedCollection query deep-dive, boardgame night flow, auth, GraphQL wiring, challenges/decisions
-- Static build integrated into the Kamal deploy, routed to a subdomain
-- ADR documenting the engine choice
+- React SPA in the existing Rails 8 + GraphQL monorepo and single-container deployment
+- Full parity for auth, collection merge/browse, groups, invitations, sessions, RSVP, suggestions, and game picking
+- Preserved Tabletop Social responsive design, interaction behavior, and accessibility
+- Frontend and Rails/GraphQL repairs found through end-to-end parity verification
+- React test/tooling cutover followed by complete Vue source and dependency removal
+- Carried BLOG-01 through BLOG-05 scope: Ruby SSG, architecture posts, Kamal/subdomain integration, and verification
 
 ## Evolution
 
@@ -101,4 +111,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-21 after milestone v1.2 started (Dev Blog & Architecture Docs)*
+*Last updated: 2026-07-30 after milestone v2.0 started (React Migration & Parity)*
