@@ -6,7 +6,8 @@ module Types
     field :name, String, null: false
     field :description, String, null: true
     field :invite_code, String, null: true
-    field :owner, Types::UserType, null: false
+    field :owner, Types::UserType, null: true
+    field :anonymous_bgg_usernames, [ String ], null: false
     field :members, [ Types::UserType ], null: false
     field :memberships, [ Types::GroupMembershipType ], null: false
     field :collection, Types::MergedCollectionType, null: false
@@ -22,12 +23,18 @@ module Types
       object.group_memberships.includes(:user).to_a
     end
 
+    def anonymous_bgg_usernames
+      object.anonymous_members
+    end
+
     def collection
-      return { items: [], sync_statuses: [], scope: nil } unless viewer_role
+      return { items: [], sync_statuses: [], scope: nil } unless viewer_role || object.anonymous_bgg_usernames.present?
+
+      bgg_usernames = object.all_bgg_usernames
 
       {
-        items: BggThing.merged_for_users(object.member_ids),
-        sync_statuses: object.members.map { |user| sync_status_for(user) },
+        items: BggThing.merged_for_bgg_usernames(bgg_usernames),
+        sync_statuses: build_sync_statuses(bgg_usernames),
         scope: ScopedMergedThing::Scope.new(:group, object.id)
       }
     end
@@ -42,32 +49,27 @@ module Types
     end
 
     def collection_total_count
-      return 0 unless viewer_role
+      return 0 unless viewer_role || object.anonymous_bgg_usernames.present?
 
-      member_ids = object.group_memberships.map(&:user_id)
-      return 0 if member_ids.empty?
-
-      BggThing.joins(:bgg_collections)
-        .where(bgg_collections: { user_id: member_ids })
-        .distinct
-        .count
+      BggThing.merged_for_bgg_usernames(object.all_bgg_usernames).distinct.count
     end
 
     def collection_spotlight(limit: 4)
-      return [] unless viewer_role
+      return [] unless viewer_role || object.anonymous_bgg_usernames.present?
 
       clamped = limit.clamp(1, 12)
-      member_ids = object.group_memberships.map(&:user_id)
-      return [] if member_ids.empty?
+      bgg_usernames = object.all_bgg_usernames
+      return [] if bgg_usernames.empty?
 
       things = BggThing
         .select("bgg_things.*, COUNT(DISTINCT bgg_collections.user_id) AS owner_count")
-        .joins(:bgg_collections)
-        .where(bgg_collections: { user_id: member_ids })
+        .joins(:bgg_collections, :users)
+        .where(users: { bgg_username: bgg_usernames })
         .group("bgg_things.id")
         .order(Arel.sql("owner_count DESC, bgg_things.average DESC, LOWER(bgg_things.name) ASC, bgg_things.id ASC"))
         .limit(clamped)
 
+      member_ids = object.member_ids
       things.map { |thing| Types::GroupSpotlightThing.new(thing, member_ids) }
     end
 
@@ -103,12 +105,29 @@ module Types
 
       def viewer_role
         @viewer_role ||= begin
-          if object.owner_id == context[:current_user]&.id
+          current_user = context[:current_user]
+          return nil unless current_user
+
+          if object.owner_id == current_user.id
             "OWNER"
           else
-            membership = object.group_memberships.find { |m| m.user_id == context[:current_user]&.id }
+            membership = object.group_memberships.find { |m| m.user_id == current_user.id }
             membership&.role&.upcase
           end
+        end
+      end
+
+      def build_sync_statuses(bgg_usernames)
+        users_by_username = User.where(bgg_username: bgg_usernames).index_by(&:bgg_username)
+        bgg_usernames.map do |username|
+          user = users_by_username[username]
+          SyncStatus.new(
+            username: username,
+            status: user && user.bgg_collections.any? ? "READY" : "QUEUED",
+            last_synced_at: user&.last_synced_at,
+            error: nil,
+            game_count: user&.bgg_collections&.count
+          )
         end
       end
 

@@ -1,5 +1,5 @@
 import { ChevronDown, Search, Star } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { MemberAvatar } from '@/components/primitives'
 import {
   facetCount,
@@ -7,7 +7,7 @@ import {
   type Filters,
   type TimeBucket,
 } from '@/lib/collection'
-import { allCategories, games, members } from '@/lib/data'
+import type { Game, Member } from '@/lib/data'
 import { cn } from '@/lib/utils'
 
 const playerOptions = [1, 2, 3, 4, 5, 6]
@@ -93,15 +93,31 @@ function Chip({
 export function FilterPanel({
   filters,
   setFilters,
+  games,
+  members,
 }: {
   filters: Filters
   setFilters: (next: Partial<Filters>) => void
+  games: Game[]
+  members: Member[]
 }) {
   const [catQuery, setCatQuery] = useState('')
   const [showAllCats, setShowAllCats] = useState(false)
 
   const toggle = <T,>(list: T[], value: T) =>
     list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
+
+  const allCategories = useMemo(() => {
+    const cats = new Map<string, number>()
+    for (const g of games) {
+      for (const c of g.categories) {
+        cats.set(c, (cats.get(c) ?? 0) + 1)
+      }
+    }
+    return Array.from(cats.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+  }, [games])
 
   const visibleCats = allCategories
     .filter((c) => c.name.toLowerCase().includes(catQuery.toLowerCase()))

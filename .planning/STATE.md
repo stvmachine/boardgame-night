@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: React Migration & Parity
-status: planning
-last_updated: "2026-07-30T04:30:09.506Z"
+status: active
+last_updated: "2026-07-30T00:00:00.000Z"
 last_activity: 2026-07-30
 progress:
   total_phases: 0
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 12 — dev-blog-engine
+**Current focus:** React Migration & Parity (v2.0) — in-flight anonymous group quick-start feature, .planning/phases files deleted in working tree
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: React Migration & Parity (v2.0) — in-flight quick-start anonymous group feature
 Plan: —
-Status: Defining requirements
+Status: Active development with uncommitted changes
 Last activity: 2026-07-30 — Milestone v2.0 started
 
 ## Performance Metrics
@@ -189,6 +189,7 @@ None yet.
 
 ### Blockers/Concerns
 
+- Working tree has uncommitted React migration / anonymous group quick-start changes and all `.planning/phases/*` files are deleted from disk (still in HEAD). Resume action depends on whether to restore planning artifacts or commit the current work first.
 - [Phase 10] Shared `GameCard` keeps a clickable card boundary around nested controls; review the cross-phase ARIA model during hardening.
 - [Phase 10] `SessionDetailsEditor` uses styled native textarea/date/number controls because dedicated design-system primitives do not yet exist.
 - Full-project `vue-tsc --noEmit` retains unrelated legacy diagnostics despite Phase 10-owned files being clean.
@@ -218,9 +219,17 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-21T16:00:00.000Z
-Stopped at: Phase 12 planning complete — 6 plans verified and ready to execute
+Last session: 2026-07-30T00:00:00.000Z
+Stopped at: Session resumed — working tree contains in-flight React migration / anonymous group quick-start changes; .planning/phases files are deleted from working tree and need restoration decision
 Resume file: none
+
+### Working tree divergence (detected on resume)
+
+- `app/frontend/components/collection/collection-browser.tsx`, `filter-panel.tsx`, `pages/GroupPage.tsx`, `pages/LandingPage.tsx` modified
+- `app/frontend/lib/graphql/adapters.ts`, `documents.ts`, `types.ts` modified
+- `app/graphql/types/group_type.rb`, `types/mutation_type.rb`, `app/models/group.rb`, `db/schema.rb`, `db/seeds.rb`, `schema.graphql`, `schema.json` modified
+- Untracked: `app/contracts/create_anonymous_group_contract.rb`, `app/frontend/components/landing/quick-start-form.tsx`, `app/graphql/mutations/create_anonymous_group.rb`, `db/migrate/20260729000001_add_anonymous_bgg_usernames_to_groups.rb`
+- All `.planning/phases/*` files are deleted from the working tree (still in HEAD)
 
 ### Recent Session Activity
 

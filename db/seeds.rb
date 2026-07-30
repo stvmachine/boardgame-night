@@ -13,13 +13,14 @@ puts "Seeding development data..."
 
 stevmachine = User.find_or_initialize_by(username: "stevmachine")
 if stevmachine.new_record?
-  stevmachine.email = "stevmachine@example.com"
-  stevmachine.password = "password"
+  stevmachine.email = "campos.esteban@gmail.com"
+  stevmachine.password = "password123"
   stevmachine.bgg_username = "stevmachine"
   stevmachine.save!
   puts "  Created user: stevmachine"
 else
-  puts "  User stevmachine already exists"
+  stevmachine.update!(email: "campos.esteban@gmail.com", bgg_username: "stevmachine")
+  puts "  Updated user: stevmachine"
 end
 
 donutgamer = User.find_or_initialize_by(username: "donutgamer")
@@ -434,7 +435,8 @@ puts "  BGG hot list cached (#{hot_items.size} items)"
 
 puts ""
 puts "Done! Seed summary:"
-puts "  Users:    stevmachine@example.com / donutgamer@example.com (password: 'password')"
+puts "  Users:    campos.esteban@gmail.com / password123 (stevmachine)"
+puts "           donutgamer@example.com / password (donutgamer)"
 puts "  Group:    #{group.name} (invite code: #{group.invite_code})"
 puts "  Games:    #{bgg_things.size} in collection"
 puts "  Sessions: #{NightSession.where(group: group).count} across all states"

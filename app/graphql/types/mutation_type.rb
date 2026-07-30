@@ -25,5 +25,6 @@ module Types
     field :upgrade_to_account, mutation: Mutations::UpgradeToAccount, description: "Convert a provisional user to a full account."
     field :submit_scores, mutation: Mutations::SubmitScores, description: "Submit scores for a completed session."
     field :import_plays, mutation: Mutations::ImportPlays, description: "Import play history from BGG for a username."
+    field :create_anonymous_group, mutation: Mutations::CreateAnonymousGroup, description: "Create a group with up to 2 BGG usernames without requiring an account."
   end
 end

@@ -77,9 +77,10 @@ export function toGroup(group: GqlGroup): Group {
     description: group.description || '',
     memberIds: group.members.map((m) => m.id),
     mergedCount: group.collectionTotalCount,
-    lastSession: group.pastSessions[0]?.scheduledAt
-      ? timeAgo(new Date(group.pastSessions[0].scheduledAt))
-      : 'Never',
+    lastSession: (() => {
+      const last = (group.pastSessions ?? [])[0]
+      return last?.scheduledAt ? timeAgo(new Date(last.scheduledAt)) : 'Never'
+    })(),
     nextSession: nextSession?.scheduledAt
       ? new Date(nextSession.scheduledAt).toLocaleDateString('en-US', {
           month: 'short',

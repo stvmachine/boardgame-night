@@ -54,10 +54,10 @@ RSpec.describe "group query" do
     GRAPHQL
   end
 
-  let(:owner) { User.create!(username: "owner", email: "owner@example.com", password: "password") }
-  let(:admin) { User.create!(username: "admin", email: "admin@example.com", password: "password") }
-  let(:member) { User.create!(username: "member", email: "member@example.com", password: "password") }
-  let(:outsider) { User.create!(username: "outsider", email: "outsider@example.com", password: "password") }
+  let(:owner) { User.create!(username: "owner", bgg_username: "owner", email: "owner@example.com", password: "password") }
+  let(:admin) { User.create!(username: "admin", bgg_username: "admin", email: "admin@example.com", password: "password") }
+  let(:member) { User.create!(username: "member", bgg_username: "member", email: "member@example.com", password: "password") }
+  let(:outsider) { User.create!(username: "outsider", bgg_username: "outsider", email: "outsider@example.com", password: "password") }
   let(:group) { Group.create!(name: "Night Owls", owner: owner) }
 
   before do
@@ -369,7 +369,7 @@ RSpec.describe "group query" do
     end
 
     it "excludes out-of-group owners from spotlight attribution" do
-      out_group_user = User.create!(username: "outsider_owner", email: "outsider_owner@example.com", password: "password")
+      out_group_user = User.create!(username: "outsider_owner", bgg_username: "outsider_owner", email: "outsider_owner@example.com", password: "password")
       game = BggThing.create!(objectid: "800", name: "Cross-Group Game", average: 8.0)
       BggCollection.create!(user: owner, bgg_thing: game, quantity: 1)
       BggCollection.create!(user: out_group_user, bgg_thing: game, quantity: 1)

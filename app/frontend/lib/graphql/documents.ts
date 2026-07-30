@@ -57,12 +57,13 @@ export const MY_GROUPS = gql`
 `
 
 export const GET_GROUP = gql`
-  query GetGroup($token: String!) {
+    query GetGroup($token: String!) {
     group(token: $token) {
       id
       name
       description
       inviteCode
+      anonymousBggUsernames
       myRole
       collectionTotalCount
       owner {
@@ -396,6 +397,47 @@ export const CREATE_GROUP = gql`
         name
         description
         inviteCode
+      }
+    }
+  }
+`
+
+export const CREATE_ANONYMOUS_GROUP = gql`
+  mutation CreateAnonymousGroup($name: String!, $bggUsernames: [String!]!) {
+    createAnonymousGroup(name: $name, bggUsernames: $bggUsernames) {
+      group {
+        id
+        name
+        inviteCode
+        anonymousBggUsernames
+        collectionTotalCount
+        myRole
+        owner {
+          id
+          displayName
+        }
+        members {
+          id
+          displayName
+          bggUsername
+          avatar
+        }
+        collectionSpotlight {
+          id
+          objectid
+          name
+          thumbnail
+          average
+          owners {
+            bggUsername
+          }
+        }
+        sessions {
+          id
+          title
+          state
+          scheduledAt
+        }
       }
     }
   }

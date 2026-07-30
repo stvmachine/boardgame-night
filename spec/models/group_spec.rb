@@ -14,9 +14,18 @@ RSpec.describe Group, type: :model do
   end
 
   describe "associations" do
-    it { should belong_to(:owner).class_name("User") }
+    it { should belong_to(:owner).class_name("User").optional }
     it { should have_many(:group_memberships).dependent(:destroy) }
     it { should have_many(:members).through(:group_memberships).source(:user) }
+  end
+
+  describe "anonymous groups" do
+    it "can be created without an owner" do
+      group = Group.create!(name: "Quick group", anonymous_bgg_usernames: ["alice", "bob"].to_json)
+      expect(group).to be_persisted
+      expect(group.owner).to be_nil
+      expect(group.anonymous_members).to contain_exactly("alice", "bob")
+    end
   end
 
   describe "invite_code generation" do

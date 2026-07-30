@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_28_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_29_000001) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -145,11 +145,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_28_000002) do
   end
 
   create_table "groups", force: :cascade do |t|
+    t.text "anonymous_bgg_usernames"
     t.datetime "created_at", null: false
     t.text "description"
     t.string "invite_code"
     t.string "name", null: false
-    t.integer "owner_id", null: false
+    t.integer "owner_id"
     t.datetime "updated_at", null: false
     t.index ["invite_code"], name: "index_groups_on_invite_code", unique: true
     t.index ["owner_id"], name: "index_groups_on_owner_id"
@@ -232,7 +233,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_28_000002) do
   add_foreign_key "game_scores", "users"
   add_foreign_key "group_memberships", "groups"
   add_foreign_key "group_memberships", "users"
-  add_foreign_key "groups", "users", column: "owner_id"
   add_foreign_key "invite_tokens", "groups"
   add_foreign_key "invite_tokens", "users", column: "accepted_by_id"
   add_foreign_key "invite_tokens", "users", column: "inviter_id"

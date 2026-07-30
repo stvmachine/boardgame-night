@@ -89,7 +89,8 @@ export interface GqlGroup {
   name: string
   description: string | null
   inviteCode: string | null
-  owner: GqlUser
+  owner: GqlUser | null
+  anonymousBggUsernames: string[]
   members: GqlUser[]
   memberships: GqlGroupMembership[]
   myRole: 'MEMBER' | 'ADMIN' | 'OWNER' | null
@@ -215,6 +216,10 @@ export interface BindBggUsernamePayload {
 }
 
 export interface CreateGroupPayload {
+  group: GqlGroup
+}
+
+export interface CreateAnonymousGroupPayload {
   group: GqlGroup
 }
 

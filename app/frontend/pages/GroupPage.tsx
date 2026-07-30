@@ -9,7 +9,7 @@ import { PlaysHistory, ImportPlaysButton } from '@/components/plays-history'
 import { GET_GROUP } from '@/lib/graphql/documents'
 import { toGroup, toMember, toSession } from '@/lib/graphql/adapters'
 import { useActiveGroup } from '@/contexts/ActiveGroupContext'
-import type { GqlUser } from '@/lib/graphql/types'
+import type { GqlUser, GqlGroup } from '@/lib/graphql/types'
 
 export function GroupPage() {
   const { token } = useParams<{ token: string }>()
@@ -27,10 +27,14 @@ export function GroupPage() {
   // Set this group as the active group when loaded
   useEffect(() => {
     if (data?.group) {
-      const bggUsernames = (data.group.members ?? [])
-        .map((m: { bggUsername?: string }) => m.bggUsername)
-        .filter(Boolean) as string[]
-      setActiveGroup(data.group.inviteCode, data.group.name, bggUsernames)
+      const grp = data.group as GqlGroup
+      const memberBgg: string[] = (grp.members ?? [])
+        .map((m: GqlUser) => m.bggUsername)
+        .filter((u): u is string => u !== null)
+      const bggUsernames = memberBgg.length > 0
+        ? memberBgg
+        : (grp.anonymousBggUsernames ?? [])
+      setActiveGroup(grp.inviteCode ?? grp.id, grp.name, bggUsernames)
     }
   }, [data, setActiveGroup])
 

@@ -2,6 +2,7 @@ import { ArrowRight, Dices, Sparkles } from 'lucide-react'
 import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { HeroFlow } from '@/components/landing/hero-flow'
+import { QuickStartForm } from '@/components/landing/quick-start-form'
 import {
   ConnectVisual,
   MergeVisual,
@@ -91,6 +92,7 @@ export function LandingPage() {
                 <ArrowRight className="size-4" />
               </LinkButton>
             </div>
+            <QuickStartForm />
             <div className="flex items-center gap-3">
               <AvatarStack memberList={members} />
               <p className="text-sm text-ink-muted">

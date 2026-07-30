@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Group < ApplicationRecord
-  belongs_to :owner, class_name: "User"
+  belongs_to :owner, class_name: "User", optional: true
   has_many :group_memberships, dependent: :destroy
   has_many :members, through: :group_memberships, source: :user
   has_many :night_sessions, dependent: :destroy
@@ -14,6 +14,16 @@ class Group < ApplicationRecord
 
   def member_ids
     group_memberships.pluck(:user_id)
+  end
+
+  def anonymous_members
+    val = self[:anonymous_bgg_usernames]
+    return [] if val.blank?
+    val.is_a?(String) ? JSON.parse(val) : val
+  end
+
+  def all_bgg_usernames
+    anonymous_members + members.filter_map(&:bgg_username)
   end
 
   private

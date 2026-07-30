@@ -25,15 +25,12 @@ import {
   type Filters,
   type SortKey,
 } from '@/lib/collection'
-import { MERGED_COLLECTION, COLLECTION_SYNCED } from '@/lib/graphql/documents'
+import { MERGED_COLLECTION, COLLECTION_SYNCED, CURRENT_USER } from '@/lib/graphql/documents'
 import { toGame } from '@/lib/graphql/adapters'
 import type { GqlMergedCollection } from '@/lib/graphql/types'
 import { cn } from '@/lib/utils'
 import type { Member, Game } from '@/lib/data'
 import { useActiveGroup } from '@/contexts/ActiveGroupContext'
-
-// TODO: Get these from the active group's members
-const PLACEHOLDER_USERNAMES = ['alex123', 'sam456', 'jordan789', 'riley012', 'casey345']
 
 const COLOR_PALETTE = [
   '#6366f1', '#ec4899', '#f59e0b', '#10b981', '#3b82f6',
@@ -79,22 +76,32 @@ const sortLabels: Record<SortKey, string> = {
 export function CollectionBrowser() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { name, bggUsernames } = useActiveGroup()
+  const { name: groupName, bggUsernames } = useActiveGroup()
 
-  // Use active group's BGG usernames if available, otherwise query with empty list
-  const usernames = bggUsernames.length > 0 ? bggUsernames : []
-  const hasActiveGroup = bggUsernames.length > 0
+  // Fall back to logged-in user's own BGG username when no group context exists
+  const { data: userData } = useQuery(CURRENT_USER)
+  const currentUserBgg = userData?.currentUser?.bggUsername as string | undefined
+
+  const hasGroupContext = bggUsernames.length > 0
+  const hasUserFallback = !hasGroupContext && !!currentUserBgg
+  const usernames = hasGroupContext
+    ? bggUsernames
+    : hasUserFallback
+      ? [currentUserBgg]
+      : []
+  const collectionName = hasGroupContext ? groupName : hasUserFallback ? currentUserBgg : ''
+  const showCollection = hasGroupContext || hasUserFallback
 
   const { data, loading, refetch } = useQuery(MERGED_COLLECTION, {
     variables: { usernames },
-    skip: !hasActiveGroup,
+    skip: !showCollection,
   })
 
   // Subscribe to real-time collection sync updates
   // When a member's BGG import completes, refetch the merged collection
   useSubscription(COLLECTION_SYNCED, {
     variables: { username: usernames[0] || '' },
-    skip: !hasActiveGroup || usernames.length === 0,
+    skip: !showCollection || usernames.length === 0,
     onData: () => {
       refetch()
     },
@@ -214,15 +221,15 @@ export function CollectionBrowser() {
               </button>
             )}
           </div>
-          <FilterPanel filters={filters} setFilters={setFilters} />
+          <FilterPanel filters={filters} setFilters={setFilters} games={games} members={members} />
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col gap-5">
         <header className="flex flex-col gap-2">
-          <h1 className="text-h1 text-ink">Merged collection</h1>
+          <h1 className="text-h1 text-ink">{showCollection ? `${collectionName}'s collection` : 'Merged collection'}</h1>
           <p className="text-sm text-ink-secondary">
-            {name ? `${name} · ` : ''}{bggUsernames.length} {bggUsernames.length === 1 ? 'member' : 'members'} &middot; every shelf in one place
+            {collectionName ? `${collectionName} · ` : ''}{usernames.length} {usernames.length === 1 ? 'member' : 'members'} &middot; every shelf in one place
           </p>
         </header>
 
@@ -338,7 +345,7 @@ export function CollectionBrowser() {
 
         {loading ? (
           <SkeletonGrid count={12} />
-        ) : !hasActiveGroup ? (
+        ) : !showCollection ? (
           <EmptyState
             icon={<SearchX className="size-5" />}
             title="No group selected"
@@ -399,7 +406,7 @@ export function CollectionBrowser() {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-4">
-              <FilterPanel filters={filters} setFilters={setFilters} />
+              <FilterPanel filters={filters} setFilters={setFilters} games={games} members={members} />
             </div>
             <div className="flex items-center gap-2 border-t border-line px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <Button variant="ghost" size="lg" onClick={clearAll} className="flex-1">
