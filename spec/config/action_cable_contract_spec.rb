@@ -64,7 +64,7 @@ RSpec.describe "Action Cable development contract" do
 
   # ── Apollo consumer ────────────────────────────────────────────
   it "Apollo client creates Action Cable consumer at /cable" do
-    client_path = Rails.root.join("app/frontend/apollo/client.ts")
+    client_path = Rails.root.join("app/frontend/lib/subscriptions.ts")
     content = File.read(client_path)
     expect(content).to include("createConsumer('/cable')")
   end

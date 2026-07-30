@@ -72,7 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       const message = err?.graphQLErrors?.[0]?.message || err?.message || 'Sign in failed'
       setError(message)
-      throw err
     }
   }, [signInMutation])
 
@@ -87,7 +86,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       const message = err?.graphQLErrors?.[0]?.message || err?.message || 'Sign up failed'
       setError(message)
-      throw err
     }
   }, [signUpMutation])
 

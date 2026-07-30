@@ -13,7 +13,7 @@ import {
   teardownGuard,
   removeGuardState,
   type GuardMeta
-} from '../../tests/e2e/fixture-guard'
+} from '../e2e/fixture-guard'
 
 let sandbox: string
 let fixturesDir: string
