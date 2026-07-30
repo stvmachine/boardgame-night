@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: React Migration & Parity
 status: active
-last_updated: "2026-07-30T00:00:00.000Z"
+last_updated: "2026-07-30T20:20:00.000Z"
 last_activity: 2026-07-30
 progress:
   total_phases: 0
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** React Migration & Parity (v2.0) — in-flight anonymous group quick-start feature, .planning/phases files deleted in working tree
+**Current focus:** React Migration & Parity (v2.0) — anonymous group quick-start feature committed and backend/frontend test suites green
 
 ## Current Position
 
-Phase: React Migration & Parity (v2.0) — in-flight quick-start anonymous group feature
+Phase: React Migration & Parity (v2.0) — anonymous quick-start feature committed
 Plan: —
-Status: Active development with uncommitted changes
+Status: Active development, backend and frontend test suites green
 Last activity: 2026-07-30 — Milestone v2.0 started
 
 ## Performance Metrics
@@ -189,7 +189,6 @@ None yet.
 
 ### Blockers/Concerns
 
-- Working tree has uncommitted React migration / anonymous group quick-start changes and all `.planning/phases/*` files are deleted from disk (still in HEAD). Resume action depends on whether to restore planning artifacts or commit the current work first.
 - [Phase 10] Shared `GameCard` keeps a clickable card boundary around nested controls; review the cross-phase ARIA model during hardening.
 - [Phase 10] `SessionDetailsEditor` uses styled native textarea/date/number controls because dedicated design-system primitives do not yet exist.
 - Full-project `vue-tsc --noEmit` retains unrelated legacy diagnostics despite Phase 10-owned files being clean.
@@ -219,22 +218,18 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-30T00:00:00.000Z
-Stopped at: Session resumed — working tree contains in-flight React migration / anonymous group quick-start changes; .planning/phases files are deleted from working tree and need restoration decision
+Last session: 2026-07-30T20:20:00.000Z
+Stopped at: Anonymous quick-start feature committed and test suites green — ready for next v2.0 parity work
 Resume file: none
-
-### Working tree divergence (detected on resume)
-
-- `app/frontend/components/collection/collection-browser.tsx`, `filter-panel.tsx`, `pages/GroupPage.tsx`, `pages/LandingPage.tsx` modified
-- `app/frontend/lib/graphql/adapters.ts`, `documents.ts`, `types.ts` modified
-- `app/graphql/types/group_type.rb`, `types/mutation_type.rb`, `app/models/group.rb`, `db/schema.rb`, `db/seeds.rb`, `schema.graphql`, `schema.json` modified
-- Untracked: `app/contracts/create_anonymous_group_contract.rb`, `app/frontend/components/landing/quick-start-form.tsx`, `app/graphql/mutations/create_anonymous_group.rb`, `db/migrate/20260729000001_add_anonymous_bgg_usernames_to_groups.rb`
-- All `.planning/phases/*` files are deleted from the working tree (still in HEAD)
 
 ### Recent Session Activity
 
-- Applied Phase 11 code review fixes (CR-01, WR-01/04/05/06/07/08, IN-01/04) → commit `1dba74f`
-- Fixed WR-09 regression in `theme.spec.ts` disclosure assertion → commit `12e438b`
-- Fixed collector sidebar persistence across page navigation using Pinia store → commit `5e58c4f`
-- Added regression test for cross-route collector persistence → commit `7b2851c`
-- Committed final audit reports (11-REVIEW PASS, 11-SECURITY PASS, 11-UI-REVIEW FLAG, 11-VERIFICATION ACHIEVED) → commit `79ad42d`
+- Restored deleted `.planning/phases/*` files from git to preserve GSD context
+- Fixed backend regressions caused by the anonymous group quick-start feature (collection merge by BGG username, optional owner association)
+- Added `spec/graphql/create_anonymous_group_mutation_spec.rb`
+- Fixed Action Cable contract spec path for the React subscriptions module
+- Removed obsolete Vue/Pinia frontend specs and moved the fixture-guard test into `tests/vitest`
+- Fixed `AuthContext` to avoid unhandled promise rejections on sign-in/sign-up errors
+- Committed two checkpoints:
+  - `d831454` — ✨ feat(anonymous-group): quick-start group creation without account
+  - `11d577f` — ♻️ refactor(tests): remove legacy Vue specs and fix React test suite
