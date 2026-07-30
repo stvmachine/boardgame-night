@@ -388,6 +388,12 @@ export const sortLabels: Record<SortKey, string> = {
 **How to avoid:** Seed the Rails cache during `e2e:seed` (the project already does this for the Home hero per STATE.md).
 **Warning signs:** `home.spec.ts` trending assertions fail intermittently. [CITED: STATE.md Phase 09 notes, tests/e2e/home.spec.ts]
 
+### Pitfall 7: TypeScript type definitions missing for test files
+**What goes wrong:** E2E and Vitest files report missing modules (`@playwright/test`, `fs`, `path`, `os`) and missing `toBeInTheDocument` matchers even though tests run and pass.
+**Why it happens:** `tsconfig.json` likely omits Node types and/or the jest-dom matcher types are not included in the test setup.
+**How to avoid:** Add `@types/node` to devDependencies and include `testing-library__jest-dom`/`@testing-library/jest-dom` types in `tests/vitest/setup.ts` or `tsconfig.json` types.
+**Warning signs:** Red squiggles in every test file; `vue-tsc --noEmit` or `tsc --noEmit` fails. [CITED: LSP diagnostics observed during research]
+
 ## Code Examples
 
 ### Apollo mutation with cache update for a group session list
