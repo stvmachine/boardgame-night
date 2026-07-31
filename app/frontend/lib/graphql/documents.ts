@@ -709,7 +709,7 @@ export const UPGRADE_TO_ACCOUNT = gql`
 `
 
 export const SUBMIT_SCORES = gql`
-  mutation SubmitScores($sessionId: ID!, $scores: [ScoreInputType!]!) {
+  mutation SubmitScores($sessionId: ID!, $scores: [ScoreInput!]!) {
     submitScores(sessionId: $sessionId, scores: $scores) {
       session {
         id

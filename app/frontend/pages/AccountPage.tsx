@@ -1,24 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useQuery, useMutation, gql } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client'
 import { Eyebrow, Card } from '@/components/primitives'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
-import { CURRENT_USER, BIND_BGG_USERNAME } from '@/lib/graphql/documents'
-
-const SYNC_COLLECTION = gql`
-  mutation SyncCollection {
-    syncCollection {
-      id
-      syncStatus {
-        username
-        status
-        error
-        gameCount
-        lastSyncedAt
-      }
-    }
-  }
-`
+import { CURRENT_USER, BIND_BGG_USERNAME, IMPORT_COLLECTION } from '@/lib/graphql/documents'
 
 export function AccountPage() {
   const { user, signOut } = useAuth()
@@ -34,7 +19,7 @@ export function AccountPage() {
   })
 
   const [bindBggUsername] = useMutation(BIND_BGG_USERNAME)
-  const [syncCollection, { loading: syncing }] = useMutation(SYNC_COLLECTION)
+  const [syncCollection, { loading: syncing }] = useMutation(IMPORT_COLLECTION)
 
   // Populate form from user data
   useEffect(() => {
@@ -69,7 +54,7 @@ export function AccountPage() {
 
   const handleSync = async () => {
     try {
-      await syncCollection()
+      await syncCollection({ variables: { username: bggUsername.trim() } })
     } catch {
       // Silently handle — the sync will be retried by the job
     }
@@ -167,7 +152,7 @@ export function AccountPage() {
               variant="outline"
               size="lg"
               onClick={handleSync}
-              disabled={syncing}
+              disabled={syncing || !bggUsername.trim()}
             >
               {syncing ? 'Syncing…' : 'Sync collection'}
             </Button>
