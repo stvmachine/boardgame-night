@@ -77,20 +77,44 @@ export function CollectionBrowser() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { name: groupName, bggUsernames } = useActiveGroup()
+  const permalinkUsernamesParam = searchParams.get('usernames') ?? ''
+  const groupParam = searchParams.get('group') ?? ''
+  const permalinkUsernames = useMemo(() => {
+    const seen = new Set<string>()
+
+    return permalinkUsernamesParam
+      .split(',')
+      .map((username) => username.trim())
+      .filter((username) => {
+        const normalized = username.toLocaleLowerCase()
+        if (!normalized || seen.has(normalized)) return false
+        seen.add(normalized)
+        return true
+      })
+  }, [permalinkUsernamesParam])
 
   // Fall back to logged-in user's own BGG username when no group context exists
   const { data: userData } = useQuery(CURRENT_USER)
   const currentUserBgg = userData?.currentUser?.bggUsername as string | undefined
 
+  const hasPermalinkUsernames = permalinkUsernames.length > 0
   const hasGroupContext = bggUsernames.length > 0
-  const hasUserFallback = !hasGroupContext && !!currentUserBgg
-  const usernames = hasGroupContext
-    ? bggUsernames
-    : hasUserFallback
-      ? [currentUserBgg]
-      : []
-  const collectionName = hasGroupContext ? groupName : hasUserFallback ? currentUserBgg : ''
-  const showCollection = hasGroupContext || hasUserFallback
+  const hasUserFallback = !hasPermalinkUsernames && !hasGroupContext && !!currentUserBgg
+  const usernames = hasPermalinkUsernames
+    ? permalinkUsernames
+    : hasGroupContext
+      ? bggUsernames
+      : hasUserFallback
+        ? [currentUserBgg]
+        : []
+  const collectionName = hasPermalinkUsernames
+    ? permalinkUsernames.join(', ')
+    : hasGroupContext
+      ? groupName
+      : hasUserFallback
+        ? currentUserBgg
+        : ''
+  const showCollection = hasPermalinkUsernames || hasGroupContext || hasUserFallback
 
   const { data, loading, refetch } = useQuery(MERGED_COLLECTION, {
     variables: { usernames },
@@ -138,9 +162,13 @@ export function CollectionBrowser() {
   }, [searchDraft])
 
   useEffect(() => {
-    const qs = toParams(filters)
+    const nextParams = new URLSearchParams(toParams(filters))
+    if (permalinkUsernamesParam) nextParams.set('usernames', permalinkUsernamesParam)
+    if (groupParam) nextParams.set('group', groupParam)
+
+    const qs = nextParams.toString()
     navigate(qs ? `/collection?${qs}` : '/collection', { replace: true })
-  }, [filters, navigate])
+  }, [filters, groupParam, navigate, permalinkUsernamesParam])
 
   const setFilters = (next: Partial<Filters>) => setFiltersState((f) => ({ ...f, ...next }))
 
