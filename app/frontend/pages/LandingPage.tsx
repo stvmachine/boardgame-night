@@ -1,19 +1,18 @@
-import { ArrowRight, Dices, Sparkles } from 'lucide-react'
-import { useMemo } from 'react'
-import { useQuery } from '@apollo/client'
+import { Dices } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { HeroFlow } from '@/components/landing/hero-flow'
 import { QuickStartForm } from '@/components/landing/quick-start-form'
+import { CollectionMergeForm } from '@/components/landing/collection-merge-form'
 import {
   ConnectVisual,
   MergeVisual,
   PlayVisual,
   SuggestVisual,
 } from '@/components/landing/chapter-visuals'
-import { AvatarStack, Card, Eyebrow, MemberAvatar } from '@/components/primitives'
+import { Eyebrow } from '@/components/primitives'
+import { TrendingCard, TrendingCardSkeleton } from '@/components/trending-card'
 import { LinkButton } from '@/components/ui/link-button'
-import { DASHBOARD_STATS } from '@/lib/graphql/documents'
-// TODO: Replace with real group members when group context is available
-import { members, stats, testimonials } from '@/lib/data'
+import { useDashboardStatsQuery, useHotItemsQuery } from '@/generated/operations'
 
 const chapters = [
   {
@@ -47,18 +46,10 @@ const chapters = [
 ]
 
 export function LandingPage() {
-  const { data: statsData } = useQuery(DASHBOARD_STATS)
-
-  const displayStats = useMemo(() => {
-    if (statsData?.dashboardStats) {
-      return {
-        gamesMerged: (statsData.dashboardStats.collectionCount ?? 0).toLocaleString(),
-        sessionsHosted: (statsData.dashboardStats.sessionCount ?? 0).toLocaleString(),
-        activeGroups: (statsData.dashboardStats.groupCount ?? 0).toLocaleString(),
-      }
-    }
-    return stats
-  }, [statsData])
+  const statsQuery = useDashboardStatsQuery()
+  const hotQuery = useHotItemsQuery()
+  const stats = statsQuery.data?.dashboardStats
+  const trending = hotQuery.data?.hotItems.slice(0, 6) ?? []
 
   return (
     <>
@@ -66,39 +57,15 @@ export function LandingPage() {
       <section className="aurora relative overflow-hidden border-b border-line pt-28 pb-16 sm:pt-32 sm:pb-20">
         <div className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.05fr_1fr]">
           <div className="flex flex-col items-start gap-6">
-            <Eyebrow>For groups of 3–10 board game friends</Eyebrow>
+            <Eyebrow>Bring every shelf together</Eyebrow>
             <h1 className="text-display max-w-xl text-balance text-ink">
-              Board game night, sorted.
+              Merge board game collections
             </h1>
             <p className="max-w-lg text-lg leading-relaxed text-pretty text-ink-secondary">
-              Merge your group's collections, discover games everyone can play, and spin up a
-              session in seconds.
+              Enter one or more BoardGameGeek usernames to combine collections.
             </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <LinkButton
-                to="/signup"
-                size="lg"
-                className="h-11 px-5 text-base shadow-glow hover:scale-[1.02]"
-              >
-                Start your game night
-              </LinkButton>
-              <LinkButton
-                to="/#tour"
-                variant="ghost"
-                size="lg"
-                className="h-11 px-4 text-base text-ink-secondary hover:text-ink"
-              >
-                See how it works
-                <ArrowRight className="size-4" />
-              </LinkButton>
-            </div>
+            <CollectionMergeForm />
             <QuickStartForm />
-            <div className="flex items-center gap-3">
-              <AvatarStack memberList={members} />
-              <p className="text-sm text-ink-muted">
-                Join {displayStats.activeGroups} groups already playing
-              </p>
-            </div>
           </div>
 
           <div className="lg:pl-4">
@@ -107,17 +74,55 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* -------------------------- Social proof strip ----------------------- */}
-      <section aria-label="Product stats" className="border-b border-line">
-        <div className="no-scrollbar mx-auto flex w-full max-w-6xl items-center gap-8 overflow-x-auto px-4 py-6 sm:justify-center sm:gap-12 sm:px-6">
-          <span className="flex shrink-0 items-center gap-2 text-sm font-medium text-ink">
+      {/* --------------------------- Dashboard stats ------------------------- */}
+      <section aria-label="Dashboard statistics" className="border-b border-line">
+        <div
+          className="no-scrollbar mx-auto flex w-full max-w-6xl items-center gap-8 overflow-x-auto px-4 py-6 sm:justify-center sm:gap-12 sm:px-6"
+          aria-busy={statsQuery.loading}
+        >
+          <span className="flex shrink-0 items-center gap-2 text-sm font-semibold text-ink">
             <Dices className="size-4 text-primary" />
-            Integrates with BoardGameGeek
+            Your game nights
           </span>
-          <Stat value={displayStats.gamesMerged} label="games merged" />
-          <Stat value={displayStats.sessionsHosted} label="sessions hosted" />
-          <Stat value={displayStats.activeGroups} label="active groups" />
+          <Stat value={formatStat(stats?.collectionCount)} label="Games" />
+          <Stat value={formatStat(stats?.groupCount)} label="Groups" />
+          <Stat value={formatStat(stats?.sessionCount)} label="Nights" />
+          {statsQuery.error && <span className="sr-only">Dashboard statistics are unavailable.</span>}
         </div>
+      </section>
+
+      {/* ------------------------------ Trending ----------------------------- */}
+      <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20" aria-busy={hotQuery.loading}>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <h2 className="text-h1 text-ink">Trending on BGG</h2>
+          {trending.length > 0 && (
+            <Link to="/hot" className="text-sm font-medium text-primary hover:underline">
+              View all
+            </Link>
+          )}
+        </div>
+
+        {hotQuery.loading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }, (_, index) => (
+              <TrendingCardSkeleton key={index} />
+            ))}
+          </div>
+        ) : hotQuery.error ? (
+          <p role="status" className="rounded-xl border border-line bg-surface p-6 text-sm text-ink-secondary">
+            Trending games are unavailable right now.
+          </p>
+        ) : trending.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {trending.map((item) => (
+              <TrendingCard key={item.id} item={item} />
+            ))}
+          </div>
+        ) : (
+          <p role="status" className="rounded-xl border border-line bg-surface p-6 text-sm text-ink-secondary">
+            No trending games are available yet.
+          </p>
+        )}
       </section>
 
       {/* ----------------------------- Feature tour ------------------------- */}
@@ -154,38 +159,6 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ----------------------------- Testimonials -------------------------- */}
-      <section className="border-y border-line bg-surface/40 py-20 sm:py-24">
-        <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-          <div className="mb-12 flex flex-col gap-3">
-            <Eyebrow>Loved by real tables</Eyebrow>
-            <h2 className="text-h1 max-w-xl text-balance text-ink">
-              Groups stopped negotiating and started playing.
-            </h2>
-          </div>
-          <ul className="grid gap-5 md:grid-cols-3">
-            {testimonials.map((t, i) => (
-              <li key={t.name} className="reveal">
-                <Card className="flex h-full flex-col gap-5 p-6">
-                  <Sparkles className="size-4 text-accent-rose" aria-hidden="true" />
-                  <blockquote className="flex-1 text-[15px] leading-relaxed text-pretty text-ink italic">
-                    &ldquo;{t.quote}&rdquo;
-                  </blockquote>
-                  <div className="flex items-center gap-3 border-t border-line pt-4">
-                    <MemberAvatar member={{ ...members[i], name: t.name, online: false }} size="md" />
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-ink">{t.name}</p>
-                      <p className="truncate text-xs text-ink-muted">{t.group}</p>
-                    </div>
-                  </div>
-                  <p className="font-mono text-[11px] text-accent-teal">{t.stat}</p>
-                </Card>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
       {/* ------------------------------ Final CTA ---------------------------- */}
       <section className="aurora relative overflow-hidden py-20 sm:py-28">
         <div className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6 px-4 text-center sm:px-6">
@@ -207,6 +180,10 @@ export function LandingPage() {
       </section>
     </>
   )
+}
+
+function formatStat(value: number | undefined) {
+  return value == null ? '—' : value.toLocaleString()
 }
 
 function Stat({ value, label }: { value: string; label: string }) {
