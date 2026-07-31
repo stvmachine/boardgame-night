@@ -106,6 +106,7 @@ const makeGroup = (overrides: Partial<GqlGroup> = {}): GqlGroup => ({
   name: 'Strategy Crew',
   description: 'Weekly game night',
   inviteCode: 'abc123',
+  anonymousBggUsernames: [],
   owner: makeUser(),
   members: [
     makeUser({ id: 'user-1', username: 'alex' }),

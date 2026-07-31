@@ -8,7 +8,7 @@ const config: CodegenConfig = {
       plugins: ['typescript']
     },
     'app/frontend/generated/operations.ts': {
-      plugins: ['typescript', 'typescript-operations', 'typescript-react-apollo'],
+      plugins: ['typescript-operations', 'typescript-react-apollo'],
       config: {
         withHooks: true
       }
