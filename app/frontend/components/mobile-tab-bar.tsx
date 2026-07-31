@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { LinkButton } from '@/components/ui/link-button'
+import { useActiveGroup } from '@/contexts/ActiveGroupContext'
 import { cn } from '@/lib/utils'
 
 const tabs = [
@@ -14,7 +15,12 @@ const tabs = [
 
 export function MobileTabBar() {
   const { pathname } = useLocation()
+  const { token } = useActiveGroup()
   const [quickOpen, setQuickOpen] = useState(false)
+  const groupDestination = token ? `/g/${encodeURIComponent(token)}` : '/groups'
+  const libraryDestination = token
+    ? `/collection?group=${encodeURIComponent(token)}`
+    : '/collection'
 
   return (
     <>
@@ -31,30 +37,21 @@ export function MobileTabBar() {
             <p className="mb-4 text-sm text-ink-secondary">Start something for tonight.</p>
             <div className="flex flex-col gap-2">
               <LinkButton
-                to="/g/abc123"
+                to={groupDestination}
                 size="lg"
                 className="w-full justify-start"
                 onClick={() => setQuickOpen(false)}
               >
-                Schedule a game night
+                {token ? 'Schedule a game night' : 'Create a group'}
               </LinkButton>
               <LinkButton
-                to="/s/fri-battle"
+                to={libraryDestination}
                 variant="outline"
                 size="lg"
                 className="w-full justify-start"
                 onClick={() => setQuickOpen(false)}
               >
-                Open tonight's session
-              </LinkButton>
-              <LinkButton
-                to="/groups"
-                variant="ghost"
-                size="lg"
-                className="w-full justify-start text-ink-secondary"
-                onClick={() => setQuickOpen(false)}
-              >
-                Create a group
+                Browse library
               </LinkButton>
             </div>
           </div>
