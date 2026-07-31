@@ -2,15 +2,18 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: React Migration & Parity
-status: active
-last_updated: "2026-07-31T21:56:00.000Z"
-last_activity: 2026-07-31
+current_phase: 13
+current_phase_name: react-migration-parity
+status: executing
+stopped_at: Completed 13-01-PLAN.md
+last_updated: "2026-07-31T23:10:48.773Z"
+last_activity: 2026-08-01
+last_activity_desc: Completed Phase 13 Plan 01 React GraphQL and TypeScript toolchain
 progress:
-  total_phases: 2
-  completed_phases: 0
-  total_plans: 12
-  completed_plans: 0
-  percent: 0
+  total_phases: 13
+  completed_phases: 11
+  total_plans: 69
+  completed_plans: 58
 ---
 
 # Project State
@@ -20,20 +23,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 13 React Migration Parity — six plans reconciled and ready to execute; Phase 12 remains independent carried dev-blog work
+**Current focus:** Phase 13 — react-migration-parity
 
 ## Current Position
 
-Phase: 13 of 13 — React Migration Parity
-Plan: 0 of 6 executed
-Status: Planned — ready to execute
-Last activity: 2026-07-31 — Phase 13 plans and v2.0 tracking reconciled
+Phase: 13 (react-migration-parity) — EXECUTING
+Plan: 2 of 6
+Status: Ready to execute Plan 13-02
+Last activity: 2026-08-01 — Completed Phase 13 Plan 01 React GraphQL and TypeScript toolchain
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 57
+- Total plans completed: 58
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -53,7 +56,7 @@ Last activity: 2026-07-31 — Phase 13 plans and v2.0 tracking reconciled
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
 | 12. Dev Blog Engine | 0/6 | Pending carried scope | — |
-| 13. React Migration Parity | 0/6 | Ready to execute | — |
+| 13. React Migration Parity | 1/6 | In progress | 6 min |
 
 **Recent Trend:**
 
@@ -92,6 +95,11 @@ Last activity: 2026-07-31 — Phase 13 plans and v2.0 tracking reconciled
 | Phase 11 P03 | 10min | 2 tasks | 4 files |
 | Phase 11 P04 | 35min | 2 tasks | 6 files |
 | Phase 11 P05 | 12min | 2 tasks | 2 files |
+**Per-Plan Metrics:**
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 13 P01 | 6 min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -185,6 +193,8 @@ Recent decisions affecting current work:
 - [Phase ?]: Back up and restore fixture JSON files inside Playwright globalSetup so tracked files stay unchanged across every E2E run.
 - [Phase ?]: Use [data-testid=game-card] for the E2E card locator because the Card primitive renders a div with role=button, not an article.
 - [Phase ?]: Disable Spring during e2e:seed to prevent stale rake code from being cached.
+- [Phase 13]: Generate self-contained React Apollo operation hooks while retaining a separate schema-types artifact. — typescript-operations v6 supplies the shared input and enum declarations needed by the hooks output without duplicate base-plugin declarations.
+- [Phase 13]: Use importCollection for Account sync and keep GqlGroup anonymousBggUsernames required. — Both choices preserve the committed Rails schema and production GraphQL contract rather than weakening types around stale client code or fixtures.
 
 ### Pending Todos
 
@@ -194,7 +204,6 @@ None yet.
 
 - [Carried from Phase 10/11] The Vue `GameCard` ARIA defect was corrected in Phase 11; Phase 13 must reproduce the article + safe overlay-link + isolated nested-control contract in React.
 - [Carried from Phase 10] `SessionDetailsEditor` used styled native textarea/date/number controls because dedicated design-system primitives did not exist; React parity must preserve the approved accessible field/dialog behavior.
-- Full-project `tsc --noEmit` currently reports missing explicit `@types/node` / `@playwright/test` dependencies plus one stale adapter fixture type; Phase 13 Plan 01 owns this deterministic tooling repair.
 - Phase 12 dev-blog plans remain pending carried v2.0 scope, but no technical dependency blocks Phase 13.
 
 ### Quick Tasks Completed
@@ -222,9 +231,9 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-31
-Stopped at: Session resumed, proceeding to reconcile Phase 13 planning artifacts with ROADMAP.md and STATE.md
-Resume file: none
+Last session: 2026-07-31T23:10:48.757Z
+Stopped at: Completed 13-01-PLAN.md
+Resume file: None
 
 ### Recent Session Activity
 

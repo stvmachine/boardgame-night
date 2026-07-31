@@ -408,7 +408,7 @@ Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 1
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
 | 11. Polish & E2E Hardening | 5/5 | Complete | 2026-07-20 |
 | 12. Dev Blog Engine | 0/6 | Pending (carried) |  |
-| 13. React Migration Parity | 0/6 | Planned — ready to execute |  |
+| 13. React Migration Parity | 1/6 | In Progress|  |
 
 ### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
 
@@ -451,13 +451,13 @@ Plans:
   4. Frontend or Rails/GraphQL defects proven by parity tests are fixed at their owning boundary without static production fixtures, client-side authorization, or weakened assertions (RMP-03).
   5. `npm run typecheck`, `npm test`, `npm run build`, the Rails RSpec suite, and the serialized Playwright suite all pass against the React application (RMP-05).
 
-**Plans:** 0/6 plans executed
+**Plans:** 1/6 plans executed
 
 Plans:
 
 **Wave 1**
 
-- [ ] 13-01-PLAN.md — React GraphQL codegen and deterministic TypeScript/Playwright toolchain contract
+- [x] 13-01-PLAN.md — React GraphQL codegen and deterministic TypeScript/Playwright toolchain contract
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
