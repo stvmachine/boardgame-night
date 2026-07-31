@@ -5,15 +5,15 @@ milestone_name: React Migration & Parity
 current_phase: 13
 current_phase_name: react-migration-parity
 status: executing
-stopped_at: Completed 13-01-PLAN.md
-last_updated: "2026-07-31T23:10:48.773Z"
+stopped_at: Completed 13-02-PLAN.md
+last_updated: "2026-07-31T23:35:58.314Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed Phase 13 Plan 01 React GraphQL and TypeScript toolchain
+last_activity_desc: Completed Phase 13 Plan 02 live Home and Hot parity
 progress:
   total_phases: 13
   completed_phases: 11
   total_plans: 69
-  completed_plans: 58
+  completed_plans: 59
 ---
 
 # Project State
@@ -28,15 +28,15 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 ## Current Position
 
 Phase: 13 (react-migration-parity) — EXECUTING
-Plan: 2 of 6
-Status: Ready to execute Plan 13-02
-Last activity: 2026-08-01 — Completed Phase 13 Plan 01 React GraphQL and TypeScript toolchain
+Plan: 3 of 6
+Status: Ready to execute Plan 13-03
+Last activity: 2026-08-01 — Completed Phase 13 Plan 02 live Home and Hot parity
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 58
+- Total plans completed: 59
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -56,7 +56,7 @@ Last activity: 2026-08-01 — Completed Phase 13 Plan 01 React GraphQL and TypeS
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
 | 12. Dev Blog Engine | 0/6 | Pending carried scope | — |
-| 13. React Migration Parity | 1/6 | In progress | 6 min |
+| 13. React Migration Parity | 2/6 | 24 min | 12 min |
 
 **Recent Trend:**
 
@@ -100,6 +100,7 @@ Last activity: 2026-08-01 — Completed Phase 13 Plan 01 React GraphQL and TypeS
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 13 P01 | 6 min | 2 tasks | 9 files |
+| Phase 13 P02 | 18 min | 3 tasks | 16 files |
 
 ## Accumulated Context
 
@@ -195,6 +196,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Disable Spring during e2e:seed to prevent stale rake code from being cached.
 - [Phase 13]: Generate self-contained React Apollo operation hooks while retaining a separate schema-types artifact. — typescript-operations v6 supplies the shared input and enum declarations needed by the hooks output without duplicate base-plugin declarations.
 - [Phase 13]: Use importCollection for Account sync and keep GqlGroup anonymousBggUsernames required. — Both choices preserve the committed Rails schema and production GraphQL contract rather than weakening types around stale client code or fixtures.
+- [Phase 13]: Keep collection merge and anonymous group quick-start as separate Home journeys. — The merge permalink and createAnonymousGroup mutation have different authority and navigation contracts; retaining both preserves shipped account-free behavior.
+- [Phase 13]: Use generated DashboardStats and HotItems hooks without static product fallbacks. — Authorization-scoped GraphQL data remains the sole product source of truth; missing data renders neutral states rather than fabricated metrics.
+- [Phase 13]: Permalink usernames outrank ambient collection fallbacks and survive filter URL synchronization. — Shareable collection links must remain deterministic even when active-group or signed-in-user state exists.
 
 ### Pending Todos
 
@@ -231,8 +235,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-31T23:10:48.757Z
-Stopped at: Completed 13-01-PLAN.md
+Last session: 2026-07-31T23:35:58.297Z
+Stopped at: Completed 13-02-PLAN.md
 Resume file: None
 
 ### Recent Session Activity
