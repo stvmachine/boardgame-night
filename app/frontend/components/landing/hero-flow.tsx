@@ -1,7 +1,23 @@
 import { Check, Dices, PartyPopper, Users } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { games, members } from '@/lib/data'
 import { cn } from '@/lib/utils'
+
+const displayMembers = [
+  { id: 'alex', name: 'Alex Rivera', color: '#6366f1' },
+  { id: 'sam', name: 'Sam Okafor', color: '#2dd4bf' },
+  { id: 'jordan', name: 'Jordan Lee', color: '#fb7185' },
+  { id: 'riley', name: 'Riley Chen', color: '#f59e0b' },
+  { id: 'casey', name: 'Casey Moss', color: '#22c55e' },
+]
+
+const displayGames = [
+  { id: 'feathered-realms', title: 'Feathered Realms', cover: '/covers/feathered-realms.png' },
+  { id: 'rail-and-ruin', title: 'Rail & Ruin', cover: '/covers/rail-and-ruin.png' },
+  { id: 'azulejo', title: 'Azulejo', cover: '/covers/azulejo.png' },
+  { id: 'harbor-guild', title: 'Harbor Guild', cover: '/covers/harbor-guild.png' },
+  { id: 'moonlit-heist', title: 'Moonlit Heist', cover: '/covers/moonlit-heist.png' },
+  { id: 'terra-bloom', title: 'Terra Bloom', cover: '/covers/terra-bloom.png' },
+]
 
 const steps = [
   { label: 'Gather the crew', icon: Users },
@@ -20,7 +36,7 @@ export function HeroFlow() {
     return () => clearInterval(id)
   }, [])
 
-  const covers = games.slice(0, 6)
+  const covers = displayGames
 
   return (
     <div className="relative w-full">
@@ -39,7 +55,7 @@ export function HeroFlow() {
         <div className="relative flex min-h-[320px] flex-col gap-4 p-4 sm:min-h-[360px]">
           {/* Step 1 — avatars around the table */}
           <div className="flex items-center gap-2">
-            {members.map((m, i) => (
+            {displayMembers.map((m, i) => (
               <span
                 key={m.id}
                 className={cn(
@@ -101,13 +117,13 @@ export function HeroFlow() {
           >
             <div className="relative size-12 shrink-0 overflow-hidden rounded-md">
               <img
-                src={games[0].cover || '/placeholder.svg'}
+                src={displayGames[0].cover || '/placeholder.svg'}
                 alt=""
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-ink">{games[0].title}</p>
+              <p className="truncate text-xs font-semibold text-ink">{displayGames[0].title}</p>
               <p className="font-mono text-[11px] text-accent-teal">94% match &middot; 4 players &middot; 60m</p>
             </div>
             <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-success text-white">

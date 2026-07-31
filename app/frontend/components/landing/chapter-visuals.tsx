@@ -1,6 +1,28 @@
 import { Check, Clock, Search, Users } from 'lucide-react'
 import { MemberAvatar, Progress, StateBadge } from '@/components/primitives'
-import { games, members } from '@/lib/data'
+
+const displayMembers = [
+  { id: 'alex', name: 'Alex Rivera', bgg: 'alex123', color: '#6366f1' },
+  { id: 'sam', name: 'Sam Okafor', bgg: 'samplays', color: '#2dd4bf' },
+  { id: 'jordan', name: 'Jordan Lee', bgg: 'jordbg', color: '#fb7185' },
+  { id: 'riley', name: 'Riley Chen', bgg: 'rileyb', color: '#f59e0b' },
+  { id: 'casey', name: 'Casey Moss', bgg: 'casey_m', color: '#22c55e' },
+]
+
+const displayGames = [
+  { id: 'feathered-realms', title: 'Feathered Realms', cover: '/covers/feathered-realms.png' },
+  { id: 'rail-and-ruin', title: 'Rail & Ruin', cover: '/covers/rail-and-ruin.png' },
+  { id: 'azulejo', title: 'Azulejo', cover: '/covers/azulejo.png' },
+  { id: 'harbor-guild', title: 'Harbor Guild', cover: '/covers/harbor-guild.png' },
+  { id: 'moonlit-heist', title: 'Moonlit Heist', cover: '/covers/moonlit-heist.png' },
+  { id: 'terra-bloom', title: 'Terra Bloom', cover: '/covers/terra-bloom.png' },
+  { id: 'cat-cafe', title: 'Cat Cafe Co.', cover: '/covers/cat-cafe.png' },
+  { id: 'dungeon-delve', title: 'Dungeon Delve', cover: '/covers/dungeon-delve.png' },
+  { id: 'word-forge', title: 'Word Forge', cover: '/covers/word-forge.png' },
+  { id: 'spice-route', title: 'Spice Route', cover: '/covers/spice-route.png' },
+  { id: 'deep-signal', title: 'Deep Signal', cover: '/covers/deep-signal.png' },
+  { id: 'castle-keep', title: 'Castle Keep', cover: '/covers/castle-keep.png' },
+]
 
 function Frame({ children }: { children: React.ReactNode }) {
   return (
@@ -39,7 +61,7 @@ export function ConnectVisual() {
           <Progress value={90} label="Import progress" />
         </div>
         <div className="grid grid-cols-4 gap-2">
-          {games.slice(0, 8).map((g, i) => (
+          {displayGames.slice(0, 8).map((g, i) => (
             <div
               key={g.id}
               className="relative aspect-2/3 overflow-hidden rounded-md border border-line"
@@ -60,7 +82,7 @@ export function MergeVisual() {
     <Frame>
       <div className="flex flex-col gap-4 p-5">
         <div className="flex items-center gap-3">
-          {members.slice(0, 3).map((m) => (
+          {displayMembers.slice(0, 3).map((m) => (
             <div key={m.id} className="flex items-center gap-2 rounded-full bg-surface-raised px-2 py-1">
               <MemberAvatar member={{ ...m, online: false }} size="sm" />
               <span className="pr-1 text-[11px] text-ink-secondary">
@@ -70,7 +92,7 @@ export function MergeVisual() {
           ))}
         </div>
         <div className="grid grid-cols-6 gap-2">
-          {games.map((g, i) => (
+          {displayGames.map((g, i) => (
             <div key={g.id} className="relative aspect-2/3 overflow-hidden rounded-md border border-line">
               <img src={g.cover || '/placeholder.svg'} alt="" className="absolute inset-0 h-full w-full object-cover" />
               {(i === 2 || i === 7) && (
@@ -149,7 +171,7 @@ export function SuggestVisual() {
             Showing <span className="font-mono text-ink">6</span> of 89 games
           </p>
           <div className="grid grid-cols-3 gap-2">
-            {games.slice(0, 6).map((g) => (
+            {displayGames.slice(0, 6).map((g) => (
               <div key={g.id} className="overflow-hidden rounded-md border border-line bg-surface-raised">
                 <div className="relative aspect-2/3">
                   <img src={g.cover || '/placeholder.svg'} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -167,11 +189,11 @@ export function SuggestVisual() {
 /* 04 — PLAY */
 export function PlayVisual() {
   const rsvps = [
-    { m: members[0], s: 'Going' },
-    { m: members[1], s: 'Going' },
-    { m: members[2], s: 'Maybe' },
-    { m: members[3], s: '—' },
-    { m: members[4], s: 'Going' },
+    { m: displayMembers[0], s: 'Going' },
+    { m: displayMembers[1], s: 'Going' },
+    { m: displayMembers[2], s: 'Maybe' },
+    { m: displayMembers[3], s: '—' },
+    { m: displayMembers[4], s: 'Going' },
   ]
   return (
     <Frame>
@@ -221,14 +243,14 @@ export function PlayVisual() {
         <div className="flex items-center gap-2 rounded-lg border border-primary/40 bg-primary/10 px-3 py-2">
           <div className="relative size-9 shrink-0 overflow-hidden rounded">
             <img
-              src={games[0].cover || '/placeholder.svg'}
+              src={displayGames[0].cover || '/placeholder.svg'}
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
           <div className="min-w-0">
             <p className="truncate text-[11px] font-semibold text-ink">
-              Winning vote: {games[0].title}
+              Winning vote: {displayGames[0].title}
             </p>
             <p className="font-mono text-[10px] text-primary">3 votes &middot; 94% match</p>
           </div>
