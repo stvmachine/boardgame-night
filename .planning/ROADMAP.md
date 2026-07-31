@@ -2,13 +2,14 @@
 
 ## Overview
 
-Boardgame-night is a Rails 8 API-only + Vue 3 SPA monorepo that rewrites `bggeek-shared-list` and collapses `bgg-graphql-proxy` into a single Kamal 2 deploy. v1.0 shipped the foundation (Rails + Vue monorepo shell), BGG integration, collection parity, and auth/friend groups with session lifecycle. v1.1 reskins the entire app with the "Tabletop Social" Stitch design system, adds the new Group Detail surface, and ships the poll-based suggestion engine so sessions can recommend games that fit the exact attendee count.
+Boardgame-night is a Rails 8 API-only + React SPA monorepo that collapses `bgg-graphql-proxy` into one Rails GraphQL service and one Kamal 2 deploy. v1.0 shipped the Rails/Vue foundation, BGG integration, collection parity, and friend-group session lifecycle. v1.1 completed the Tabletop Social redesign, Group Detail hub, poll-based suggestion engine, picking flow, and E2E hardening. The active v2.0 milestone completes and verifies the Vue-to-React replacement while preserving the carried Phase 12 development-blog work.
 
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-07-09)
-- 🚧 **v1.1 UI Redesign + Suggestion Engine** — Phases 5-11 (in progress)
-- 📋 **v2.0 Enhanced Game Night** — Deferred (ranked voting, 4-state RSVP, play logging, etc.)
+- ✅ **v1.1 UI Redesign + Suggestion Engine** — Phases 5-11 (completed 2026-07-20)
+- 🚧 **v2.0 React Migration & Parity** — Phases 12-13 (Phase 13 is the current execution target; Phase 12 remains pending carried scope)
+- 📋 **Enhanced Game Night** — Deferred future milestone (ranked voting, 4-state RSVP, play logging, etc.)
 
 ## Phases
 
@@ -29,7 +30,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Group Detail Surface** - Group hub with sessions, members, spotlight, invite link (completed 2026-07-15)
 - [x] **Phase 9: Home & Collection Redesign** - Dashboard hero, stats, trending, rich filters, game cards (completed 2026-07-17)
 - [x] **Phase 10: Picking a Game Redesign** - Session header, attendee-aware suggestions, pick cards (completed 2026-07-18)
-- [x] **Phase 11: Polish & E2E Hardening** - E2E in CI, solid_cable dev config, legacy cleanup, dark mode/responsive QA
+- [x] **Phase 11: Polish & E2E Hardening** - E2E in CI, solid_cable dev config, legacy cleanup, dark mode/responsive QA (completed 2026-07-20)
+- [ ] **Phase 12: Dev Blog Engine** - Carried pure-Ruby SSG, architecture posts, Kamal build integration, and subdomain routing
+- [ ] **Phase 13: React Migration Parity** - Complete and verify React parity, repair discovered defects, and remove the remaining Vue-era tooling
 
 ## Phase Details
 
@@ -361,7 +364,7 @@ Plans:
   4. REQUIREMENTS.md checkboxes are updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05).
   5. Dark mode and responsive layouts are verified across all redesigned surfaces.
 
-**Plans**: 3/5 plans executed
+**Plans**: 5/5 plans complete
 
 Plans:
 **Wave 1**
@@ -378,18 +381,18 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 11-04-PLAN.md — Correct GameCard ARIA and close responsive/dark acceptance with the final implementation gate (Wave 4)
+- [x] 11-04-PLAN.md — Correct GameCard ARIA and close responsive/dark acceptance with the final implementation gate (Wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 11-05-PLAN.md — Verify legacy BGG cleanup evidence and reconcile requirements metadata (Wave 5)
+- [x] 11-05-PLAN.md — Verify legacy BGG cleanup evidence and reconcile requirements metadata (Wave 5)
 
 **UI hint**: yes
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11
+Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 12 is independent carried work and remains pending; it does not block Phase 13.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -403,7 +406,9 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Group Detail Surface | 6/6 | Complete    | 2026-07-15 |
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
-| 11. Polish & E2E Hardening | 3/5 | In Progress|  |
+| 11. Polish & E2E Hardening | 5/5 | Complete | 2026-07-20 |
+| 12. Dev Blog Engine | 0/6 | Pending (carried) |  |
+| 13. React Migration Parity | 0/6 | Planned — ready to execute |  |
 
 ### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
 
@@ -432,7 +437,48 @@ Plans:
 
 **UI hint**: no
 
+### Phase 13: React Migration Parity
+
+**Goal:** Replace the Vue frontend with React while preserving the existing Tabletop Social experience and making every current product journey work end to end.
+**Mode:** standard
+**Depends on:** Phase 11 (completed product and E2E baseline). Phase 12 is independent carried documentation work and is not a technical dependency.
+**Requirements**: RMP-01, RMP-02, RMP-03, RMP-04, RMP-05
+**Success Criteria** (what must be TRUE):
+
+  1. Rails serves the React production build as the only deployed SPA; GraphQL codegen produces React Apollo hooks, and no Vue source, Vue codegen, or Vue runtime dependency remains (RMP-01, RMP-04).
+  2. Users can complete auth, username merge and anonymous quick-start, collection browse/filter/sort/group, group/invite management, session creation/scheduling, RSVP, attendee-aware suggestions, and host-only game picking in React (RMP-02).
+  3. Home, Collection, Group Detail, and Picking preserve Tabletop Social copy, responsive behavior, keyboard/ARIA contracts, light/dark themes, and safe BGG-link interaction (RMP-01, RMP-02).
+  4. Frontend or Rails/GraphQL defects proven by parity tests are fixed at their owning boundary without static production fixtures, client-side authorization, or weakened assertions (RMP-03).
+  5. `npm run typecheck`, `npm test`, `npm run build`, the Rails RSpec suite, and the serialized Playwright suite all pass against the React application (RMP-05).
+
+**Plans:** 0/6 plans executed
+
+Plans:
+
+**Wave 1**
+
+- [ ] 13-01-PLAN.md — React GraphQL codegen and deterministic TypeScript/Playwright toolchain contract
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 13-02-PLAN.md — Live Home/Hot surfaces, anonymous quick-start preservation, sample-data retirement, and dynamic mobile actions
+
+**Wave 3** *(both blocked on Wave 2; parallel with zero file overlap)*
+
+- [ ] 13-03-PLAN.md — Collection source routing, exact filter/sort/group/view parity, and rich card variants
+- [ ] 13-04-PLAN.md — Role-aware Group Detail hub, session creation, spotlight, member controls, and invitations
+
+**Wave 4** *(blocked on Group Detail)*
+
+- [ ] 13-05-PLAN.md — Past-session and invite/RSVP routes with normalized cache updates
+
+**Wave 5** *(blocked on all preceding parity slices)*
+
+- [ ] 13-06-PLAN.md — Draft-to-completed session lifecycle, explainable host-only picking, React cutover guard, and full verification
+
+**UI hint**: yes
+
 ---
 
-*Roadmap created: 2026-07-01; updated for v1.1 on 2026-07-13*
-*Granularity: coarse (4 v1.0 + 7 v1.1 phases) | Mode: mvp | Coverage: 31/31 v1.1 requirements mapped*
+*Roadmap created: 2026-07-01; reconciled for v2.0 React Migration & Parity on 2026-07-31*
+*Granularity: coarse | Phase 13 mode: standard | Active v2.0 coverage: 10/10 requirements mapped across Phases 12-13*

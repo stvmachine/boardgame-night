@@ -3,7 +3,8 @@
 **Project:** boardgame-night-rails-vue
 **Core Value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
 **Defined:** 2026-07-13
-**Source:** PROJECT.md + research/FEATURES.md (v1.1 UI Redesign + Suggestion Engine)
+**Updated:** 2026-07-31
+**Source:** PROJECT.md + research/FEATURES.md + Phase 13 React Migration Parity research
 
 ## v1.0 Requirements (Complete)
 
@@ -65,7 +66,19 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 - [x] **DEBT-03**: Legacy BGG classes removed (duplicate `app/jobs/import_collection_job.rb`, unsafe `Bgg::CollectionPersister#fetch_and_persist!`)
 - [x] **DEBT-04**: REQUIREMENTS.md checkboxes updated to reflect v1.0 implementation evidence (BGG-01, BGG-04, BGG-05, COLL-01, COLL-03, COLL-05)
 
-## v1.2 Requirements (Dev Blog & Architecture Docs)
+## v2.0 Requirements — React Migration & Parity
+
+Requirements for the active React Migration & Parity milestone. Each requirement maps to Phase 13 and preserves the completed Vue application's behavior, Tabletop Social design, accessibility, and responsive contracts while React becomes the only deployed frontend.
+
+- [ ] **RMP-01**: React fully replaces Vue while preserving every existing product journey and the Tabletop Social interface
+- [ ] **RMP-02**: Auth, collection merge/browse, groups, invitations, sessions, RSVP, suggestions, and game picking work end to end in React
+- [ ] **RMP-03**: Frontend and Rails/GraphQL defects exposed by parity verification are repaired without weakening the existing product contracts
+- [ ] **RMP-04**: React tests, GraphQL code generation, and production delivery replace Vue tooling; Vue source and dependencies are absent after parity is proven
+- [ ] **RMP-05**: The existing Playwright end-to-end acceptance suite passes against the React frontend
+
+## Carried v2.0 Requirements — Dev Blog & Architecture Docs
+
+BLOG-01 through BLOG-05 are preserved carried scope in Phase 12. They remain part of the v2.0 milestone but are independent of the Phase 13 React execution target.
 
 - [ ] **BLOG-01**: Research and ADR — choose a pure-Ruby static site generator engine for `docs/development/` markdown posts
 - [ ] **BLOG-02**: Build a pure-Ruby SSG engine that parses markdown frontmatter, builds an index, and renders static HTML
@@ -84,7 +97,9 @@ The following v1.0 requirements have implementation evidence verified against [v
 - [x] **COLL-03**: Fuzzy search, filter by players/time/complexity, sort by name/rating/year/complexity, and group by player-count/rating/best-players/none
 - [x] **COLL-05**: Hot/trending games on landing page with well-formed game cards (thumbnail, name, rating, players, time, complexity, owner avatars, click to BGG)
 
-## v2 Requirements (Deferred — Add After Validation)
+## Deferred Enhanced Game Night Requirements (Future Milestone)
+
+These ideas are not part of the active v2.0 React Migration & Parity milestone.
 
 - [ ] **VOTE-01**: Ranked voting on suggestion shortlist (Borda count or STV)
 - [ ] **VOTE-02**: Pick + "who brings it" assignment (assign picked game to the owner who will bring it)
@@ -155,20 +170,29 @@ The following v1.0 requirements have implementation evidence verified against [v
 | DEBT-02 | Phase 11 | Complete |
 | DEBT-03 | Phase 11 | Complete |
 | DEBT-04 | Phase 11 | Complete |
-| BLOG-01 | Phase 12 | In Progress |
-| BLOG-02 | Phase 12 | In Progress |
-| BLOG-03 | Phase 12 | In Progress |
-| BLOG-04 | Phase 12 | In Progress |
-| BLOG-05 | Phase 12 | In Progress |
+| BLOG-01 | Phase 12 | Planned |
+| BLOG-02 | Phase 12 | Planned |
+| BLOG-03 | Phase 12 | Planned |
+| BLOG-04 | Phase 12 | Planned |
+| BLOG-05 | Phase 12 | Planned |
+| RMP-01 | Phase 13 | Planned |
+| RMP-02 | Phase 13 | Planned |
+| RMP-03 | Phase 13 | Planned |
+| RMP-04 | Phase 13 | Planned |
+| RMP-05 | Phase 13 | Planned |
 
 **Coverage:**
 
 - v1.1 requirements: 31 total
 - Mapped to phases: 31 ✓
 - Unmapped: 0 ✓
-- v1.2 requirements: 5 total
+- Active v2.0 milestone requirements: 10 total (5 carried BLOG + 5 RMP)
 - Mapped to Phase 12: 5 ✓
+- Mapped to Phase 13: 5 ✓
+- Active v2.0 unmapped: 0 ✓
+- Active v2.0 complete: 0/10
+- Deferred Enhanced Game Night requirements: 10 (excluded from active milestone coverage)
 
 ---
-*Requirements defined: 2026-07-13*
-*Source: PROJECT.md v1.1 Active requirements + research/FEATURES.md v1.1 feature landscape*
+*Requirements defined: 2026-07-13; reconciled for v2.0 on 2026-07-31*
+*Source: PROJECT.md active milestone + research/FEATURES.md + Phase 13 RESEARCH.md derived RMP requirements*

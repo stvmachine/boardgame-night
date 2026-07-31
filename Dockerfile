@@ -2,7 +2,7 @@
 # check=error=true
 
 # Multi-stage Dockerfile for boardgame-night-rails-vue
-# Stage 1: Node build — compile Vue 3 SPA via Vite
+# Stage 1: Node build — compile React 19 SPA via Vite
 # Stage 2: Ruby runtime — Rails 8.1.3 serves the compiled SPA + GraphQL API
 #
 # Production usage:
@@ -16,7 +16,7 @@
 # No kamal deploy or docker push in Phase 1 — verify locally: docker build .
 
 # =============================================================================
-# Stage 1: Node 20 build stage — compile Vue SPA into public/vite/
+# Stage 1: Node 20 build stage — compile React SPA into public/vite/
 # =============================================================================
 
 FROM node:20-slim AS build

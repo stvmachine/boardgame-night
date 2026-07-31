@@ -1,4 +1,4 @@
-# Phase 13: React Migration Parity - Research
+# Phase 13: React Migration Parity — Research
 
 **Researched:** 2026-07-30
 **Domain:** React 19 SPA parity with Rails 8.1 GraphQL backend; completion of Vue-to-React migration
@@ -132,6 +132,8 @@ npx vite --version     # vite/6.4.3
 | @vitejs/plugin-react | npm | 2026-07-30 | 68M/wk | github.com/vitejs/vite-plugin-react | [SUS] | Already installed; too-new heuristic only — official Vite repo. Keep. |
 | lucide-react | npm | 2026-07-30 | 83M/wk | github.com/lucide-icons/lucide | [SUS] | Already installed; too-new heuristic only — official Lucide repo. Keep. |
 | @graphql-codegen/typescript-react-apollo | npm | 2026-04-19 | 1.8M/wk | github.com/dotansimha/graphql-code-generator-community | [OK] | Install if codegen is re-wired to React. |
+| @playwright/test | npm | established Microsoft package | 35M+/wk | github.com/microsoft/playwright | [OK] | Add as an explicit devDependency at the already researched `^1.61.1` pin; E2E files import it directly. |
+| @types/node | npm | established DefinitelyTyped package | 180M+/wk | github.com/DefinitelyTyped/DefinitelyTyped | [OK] | Add a Node 22-compatible devDependency so fixture guards and Playwright config type-check. |
 | clsx | npm | 2024-04-23 | 104M/wk | github.com/lukeed/clsx | [OK] | Already installed. |
 | tailwind-merge | npm | 2026-05-10 | 77M/wk | github.com/dcastil/tailwind-merge | [OK] | Already installed. |
 | class-variance-authority | npm | 2024-11-26 | 54M/wk | github.com/joe-bell/cva | [OK] | Already installed. |
@@ -574,11 +576,13 @@ function TrendingCard({ rank, name, thumbnail }: { rank: number; name: string; t
 | Bundler | Gem management | ✓ | 2.6.9 | — |
 | Vite | Frontend dev + build | ✓ | 6.4.3 | — |
 | Vitest | Unit/component tests | ✓ | 4.1.10 | — |
-| Playwright | E2E tests | ✓ | ^1.61.1 (per package.json) | — |
+| Playwright | E2E tests | ✗ | — | Phase 13 Plan 01 adds the researched `@playwright/test ^1.61.1` devDependency. |
+| Node type declarations | TypeScript checks for Node-based tests/config | ✗ | — | Phase 13 Plan 01 adds a Node 22-compatible `@types/node` devDependency. |
 | Installed Ruby gems | Rails server, RSpec, etc. | ✗ | — | Run `bundle install` (currently missing many gems on this machine) |
 
 **Missing dependencies with no fallback:**
 - Installed Ruby gems — `bundle install` is required to run Rails/RSpec locally. This blocks backend verification but does not block frontend parity work because the React app can be developed against a running Rails server once gems are installed.
+- `@playwright/test` and `@types/node` — both are package-legitimacy-audited `[OK]` dependencies owned by Plan 13-01; no human legitimacy checkpoint is required.
 
 **Missing dependencies with fallback:**
 - None.

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: React Migration & Parity
 status: active
-last_updated: "2026-07-30T20:20:00.000Z"
-last_activity: 2026-07-30
+last_updated: "2026-07-31T21:56:00.000Z"
+last_activity: 2026-07-31
 progress:
-  total_phases: 0
+  total_phases: 2
   completed_phases: 0
-  total_plans: 0
+  total_plans: 12
   completed_plans: 0
   percent: 0
 ---
@@ -20,20 +20,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** React Migration & Parity (v2.0) — anonymous group quick-start feature committed and backend/frontend test suites green
+**Current focus:** Phase 13 React Migration Parity — six plans reconciled and ready to execute; Phase 12 remains independent carried dev-blog work
 
 ## Current Position
 
-Phase: React Migration & Parity (v2.0) — anonymous quick-start feature committed
-Plan: —
-Status: Active development, backend and frontend test suites green
-Last activity: 2026-07-30 — Milestone v2.0 started
+Phase: 13 of 13 — React Migration Parity
+Plan: 0 of 6 executed
+Status: Planned — ready to execute
+Last activity: 2026-07-31 — Phase 13 plans and v2.0 tracking reconciled
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 52
+- Total plans completed: 57
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -45,19 +45,20 @@ Last activity: 2026-07-30 — Milestone v2.0 started
 | 2. BGG Integration Layer + Persistence | 3 | ~45m | 15 min |
 | 3. GraphQL API + Collection Surface (v1 Parity) | 11 | ~4h 30m | ~25 min |
 | 4. Auth + Friend Groups + Session Lifecycle | 4 | ~3h 6m | ~47 min |
-| 5. Design System Foundation | TBD | — | — |
+| 5. Design System Foundation | 4 | — | — |
 | 6. BGG Poll Data Layer | 3 | ~19m | ~6 min |
 | 7. Suggestion Engine Backend | 4 | ~1h 50m | ~28 min |
 | 8. Group Detail Surface | 6 | — | — |
 | 9. Home & Collection Redesign | 8 | — | — |
 | 10. Picking a Game Redesign | 6 | — | — |
-| 11. Polish & E2E Hardening | TBD | — | — |
-| 06 | 3 | - | - |
+| 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
+| 12. Dev Blog Engine | 0/6 | Pending carried scope | — |
+| 13. React Migration Parity | 0/6 | Ready to execute | — |
 
 **Recent Trend:**
 
 - v1.0 phase 4 velocity: ~47 min/plan (auth, groups, sessions are feature-dense)
-- Trend: Plan durations scale with UI + backend integration complexity; expect v1.1 UI phases to land in the 30-60 min/plan range
+- Trend: Plan durations scale with UI + backend integration complexity; Phase 13 preserves six bounded parity slices and one final integrated gate.
 
 | Phase 05 P01 | 45min | 8 tasks | 8 files |
 | Phase 05 P04 | 15min | 1 tasks | 90 files |
@@ -101,8 +102,10 @@ Recent decisions affecting current work:
 
 - **Milestone:** v1.1 roadmap splits into 7 phases (5-11) covering design system, poll data, suggestion engine, Group Detail, Home/Collection redesign, Picking a Game redesign, and E2E/debt hardening.
 - **Critical path:** Design tokens → primitives → suggestion engine → Picking a Game. Poll data backfill runs parallel to the design system but must finish before the engine.
-- **Architecture:** Keep v1.0 patterns: Rails 8 API-only + Vue 3 SPA monorepo, single GraphQL endpoint, dry-validation contracts, Solid Queue/Cache, no Redis, Apollo 3.x + @vue/apollo-composable 4.2.2.
-- **Stack pins:** Tailwind v4 CSS-first `@theme` for M3 tokens; Material Symbols Outlined; Inter font; indigo primary. Apollo 3.13.9 path remains stable (Apollo 4 + composable v5 still beta).
+- **Architecture:** Keep the Rails 8 API-only monorepo, single GraphQL endpoint, dry-validation contracts, Solid Queue/Cache, and no Redis; React 19 + Apollo Client 3 is now the sole deployed SPA stack.
+- **Stack pins:** React 19, React Router 7 library mode, Apollo Client 3.14, Vite 6, Tailwind v4 CSS-first semantic tokens, Inter, and the existing Tabletop Social indigo palette.
+- **Phase 13 execution:** React parity is independent of pending Phase 12 dev-blog work and executes from the completed Phase 11 product/E2E baseline.
+- **Phase 13 scope fence:** Preserve anonymous group quick-start and all shipped product journeys; do not introduce deferred voting, 4-state RSVP, recurring sessions, play logging, or other Enhanced Game Night scope.
 - [Phase ?]: Use shadcn-vue style 'reka-nova' (New York equivalent in shadcn-vue 2.x) because 'New York' is not a valid CLI option; M3 tokens override default colors anyway.
 - [Phase ?]: Uninstall @lucide/vue after shadcn-vue init because the project uses @iconify/vue + Material Symbols for icons, not Lucide.
 - [Phase ?]: Follow the plan's explicit Button/Badge sizes and variants rather than shadcn defaults; use only default, sm, lg, icon sizes and primary/secondary/outline/ghost/destructive + default/draft/invited/picking/completed variants
@@ -189,9 +192,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 10] Shared `GameCard` keeps a clickable card boundary around nested controls; review the cross-phase ARIA model during hardening.
-- [Phase 10] `SessionDetailsEditor` uses styled native textarea/date/number controls because dedicated design-system primitives do not yet exist.
-- Full-project `vue-tsc --noEmit` retains unrelated legacy diagnostics despite Phase 10-owned files being clean.
+- [Carried from Phase 10/11] The Vue `GameCard` ARIA defect was corrected in Phase 11; Phase 13 must reproduce the article + safe overlay-link + isolated nested-control contract in React.
+- [Carried from Phase 10] `SessionDetailsEditor` used styled native textarea/date/number controls because dedicated design-system primitives did not exist; React parity must preserve the approved accessible field/dialog behavior.
+- Full-project `tsc --noEmit` currently reports missing explicit `@types/node` / `@playwright/test` dependencies plus one stale adapter fixture type; Phase 13 Plan 01 owns this deterministic tooling repair.
+- Phase 12 dev-blog plans remain pending carried v2.0 scope, but no technical dependency blocks Phase 13.
 
 ### Quick Tasks Completed
 
@@ -218,8 +222,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-30T20:20:00.000Z
-Stopped at: Anonymous quick-start feature committed and test suites green — ready for next v2.0 parity work
+Last session: 2026-07-31
+Stopped at: Session resumed, proceeding to reconcile Phase 13 planning artifacts with ROADMAP.md and STATE.md
 Resume file: none
 
 ### Recent Session Activity

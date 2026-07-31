@@ -1,22 +1,47 @@
+<!-- ========================================================================= -->
+<!-- ACTIVE FRONTEND STACK — v2.0 OVERRIDE (read first)                        -->
+<!-- ========================================================================= -->
+
+> ## ACTIVE v2.0 FRONTEND STACK — OVERRIDES ALL VUE GUIDANCE BELOW
+>
+> The root frontend has been migrated from Vue to **React**. The Vue stack
+> research in the "Technology Stack" section further down this file is
+> **historical context only** and MUST NOT drive new implementation. Where
+> this override and that research disagree, this override wins.
+>
+> **Current root frontend stack (exact):**
+> - **React 19**
+> - **React Router 7** (library mode)
+> - **Apollo Client 3**
+> - **Vite 6**
+> - **TypeScript 5.9**
+> - **Tailwind CSS 4**
+> - **Vitest 4 + Testing Library**
+> - **Playwright**
+>
+> The backend remains Rails 8 (API-only) serving GraphQL via graphql-ruby;
+> the React SPA is built with Vite and served from `public/` in production.
+> See `.planning/phases/13-react-migration-parity/` for the migration plan.
+
 <!-- GSD:project-start source:PROJECT.md -->
 
 ## Project
 
 **boardgame-night-rails-vue**
 
-A board game collection and night-organizing app for groups of friends. Users create friend groups, link their BoardGameGeek (BGG) usernames, and the app merges everyone's collections into a shared deduplicated view. From there, any member can spin up a boardgame night session — invite group members, get game suggestions drawn from the shared pool (filtered by who's coming and player count), and pick what to play. Built as a monorepo with Ruby on Rails 8 (API-only) serving a GraphQL API consumed by a Vue.js 3 frontend.
+A board game collection and night-organizing app for groups of friends. Users create friend groups, link their BoardGameGeek (BGG) usernames, and the app merges everyone's collections into a shared deduplicated view. From there, any member can spin up a boardgame night session — invite group members, get game suggestions drawn from the shared pool (filtered by who's coming and player count), and pick what to play. Built as a monorepo with Ruby on Rails 8 (API-only) serving a GraphQL API consumed by a React 19 frontend.
 
 **Core Value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
 
 ### Constraints
 
-- **Tech stack**: Ruby on Rails (API-only mode) + Vue.js 3, in a single git repository (monorepo) — Rails serves the Vue build and exposes GraphQL; no separate proxy service.
+- **Tech stack**: Ruby on Rails (API-only mode) + React 19, in a single git repository (monorepo) — Rails serves the React build and exposes GraphQL; no separate proxy service.
 - **Ruby version management**: rbenv (pin a modern Ruby, e.g. 3.2+).
-- **API style**: GraphQL between Vue and Rails (Rails is the single GraphQL source of truth for the frontend).
+- **API style**: GraphQL between React and Rails (Rails is the single GraphQL source of truth for the frontend).
 - **BGG credentials**: API token loaded from `.env.bggeek` (not committed to git).
 - **BGG rate limits**: Must throttle to ~1 req/5s with retries and caching — BGG will 429/503 otherwise.
-- **Modern Rails**: Use current Rails conventions (Rails 7.1+ / 8.x), Hotwire is not needed (API-only + Vue), use `--api` scaffold.
-- **Frontend build**: Vue 3 with Vite, integrated into the Rails asset pipeline or served as a built SPA from `public/`.
+- **Modern Rails**: Use current Rails conventions (Rails 7.1+ / 8.x), Hotwire is not needed (API-only + React), use `--api` scaffold.
+- **Frontend build**: React 19 with Vite, integrated into the Rails asset pipeline or served as a built SPA from `public/`.
 
 <!-- GSD:project-end -->
 
