@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import {
   emptyFilters,
   applyFilters,
@@ -9,8 +11,19 @@ import {
   matches,
   facetCount,
 } from '@/lib/collection'
-import { games } from '@/lib/data'
 import type { Game } from '@/lib/data'
+import { games } from './fixtures/sample-data'
+
+describe('landing fixture boundaries', () => {
+  it.each([
+    'app/frontend/components/landing/hero-flow.tsx',
+    'app/frontend/components/landing/chapter-visuals.tsx',
+  ])('%s owns its decorative data', (path) => {
+    const source = readFileSync(resolve(process.cwd(), path), 'utf8')
+
+    expect(source).not.toMatch(/import\s+\{[^}]+\}\s+from\s+['"]@\/lib\/data['"]/)
+  })
+})
 
 describe('emptyFilters', () => {
   it('returns default filter state', () => {

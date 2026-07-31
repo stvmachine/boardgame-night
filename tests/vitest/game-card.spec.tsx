@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { GameCard } from '@/components/game-card'
-import { games } from '@/lib/data'
+import { games } from './fixtures/sample-data'
 
 const game = games[0] // Feathered Realms
 
