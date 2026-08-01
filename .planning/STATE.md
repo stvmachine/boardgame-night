@@ -20,7 +20,7 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-07-18)
+See: .planning/PROJECT.md (updated 2026-08-02)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
 **Current focus:** Phase 12 — Dev blog engine
@@ -225,8 +225,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Carried from Phase 10] `SessionDetailsEditor` used styled native textarea/date/number controls because dedicated design-system primitives did not exist; React parity must preserve the approved accessible field/dialog behavior.
-- Phase 12 dev-blog plans remain pending carried v2.0 scope, but no technical dependency blocks Phase 13.
+None.
 
 ### Quick Tasks Completed
 
@@ -253,8 +252,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-01T17:21:11.945Z
-Stopped at: Completed 13-06-PLAN.md
+Last session: 2026-08-02T00:00:00Z
+Stopped at: Phase 13 complete, ready to plan Phase 12
 Resume file: None
 
 ### Recent Session Activity
