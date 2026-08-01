@@ -88,6 +88,13 @@ export type MergedCollectionQueryVariables = Exact<{
 
 export type MergedCollectionQuery = { mergedCollection: { items: Array<{ id: string, objectid: string, name: string, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, minAge: number | null, image: string | null, thumbnail: string | null, description: string | null, average: number | null, bayesAverage: number | null, usersRated: number | null, averageWeight: number | null, isExpansion: boolean, bestPlayerCount: number | null, lastPlayedAt: unknown, owners: Array<{ bggUsername: string, avatar: string | null }>, polls: Array<{ id: string, name: string, title: string | null, totalVotes: number | null, results: Array<{ id: string, value: string, playerCount: number | null, numVotes: number }> }> }>, syncStatuses: Array<{ username: string, status: SyncStatus, error: string | null, gameCount: number | null, lastSyncedAt: unknown }> } };
 
+export type GroupCollectionQueryVariables = Exact<{
+  token: string;
+}>;
+
+
+export type GroupCollectionQuery = { group: { id: string, name: string, collection: { items: Array<{ id: string, objectid: string, name: string, yearPublished: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, minAge: number | null, image: string | null, thumbnail: string | null, description: string | null, average: number | null, bayesAverage: number | null, usersRated: number | null, averageWeight: number | null, isExpansion: boolean, bestPlayerCount: number | null, lastPlayedAt: unknown, owners: Array<{ bggUsername: string, avatar: string | null }>, polls: Array<{ id: string, name: string, title: string | null, totalVotes: number | null, results: Array<{ id: string, value: string, playerCount: number | null, numVotes: number }> }> }>, syncStatuses: Array<{ username: string, status: SyncStatus, error: string | null, gameCount: number | null, lastSyncedAt: unknown }> } } | null };
+
 export type HotItemsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -806,6 +813,96 @@ export type MergedCollectionQueryHookResult = ReturnType<typeof useMergedCollect
 export type MergedCollectionLazyQueryHookResult = ReturnType<typeof useMergedCollectionLazyQuery>;
 export type MergedCollectionSuspenseQueryHookResult = ReturnType<typeof useMergedCollectionSuspenseQuery>;
 export type MergedCollectionQueryResult = Apollo.QueryResult<MergedCollectionQuery, MergedCollectionQueryVariables>;
+export const GroupCollectionDocument = gql`
+    query GroupCollection($token: String!) {
+  group(token: $token) {
+    id
+    name
+    collection {
+      items {
+        id
+        objectid
+        name
+        yearPublished
+        minPlayers
+        maxPlayers
+        minPlaytime
+        maxPlaytime
+        minAge
+        image
+        thumbnail
+        description
+        average
+        bayesAverage
+        usersRated
+        averageWeight
+        isExpansion
+        bestPlayerCount
+        lastPlayedAt
+        owners {
+          bggUsername
+          avatar
+        }
+        polls {
+          id
+          name
+          title
+          totalVotes
+          results {
+            id
+            value
+            playerCount
+            numVotes
+          }
+        }
+      }
+      syncStatuses {
+        username
+        status
+        error
+        gameCount
+        lastSyncedAt
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGroupCollectionQuery__
+ *
+ * To run a query within a React component, call `useGroupCollectionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGroupCollectionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGroupCollectionQuery({
+ *   variables: {
+ *      token: // value for 'token'
+ *   },
+ * });
+ */
+export function useGroupCollectionQuery(baseOptions: Apollo.QueryHookOptions<GroupCollectionQuery, GroupCollectionQueryVariables> & ({ variables: GroupCollectionQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GroupCollectionQuery, GroupCollectionQueryVariables>(GroupCollectionDocument, options);
+      }
+export function useGroupCollectionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GroupCollectionQuery, GroupCollectionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GroupCollectionQuery, GroupCollectionQueryVariables>(GroupCollectionDocument, options);
+        }
+// @ts-ignore
+export function useGroupCollectionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GroupCollectionQuery, GroupCollectionQueryVariables>): Apollo.UseSuspenseQueryResult<GroupCollectionQuery, GroupCollectionQueryVariables>;
+export function useGroupCollectionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GroupCollectionQuery, GroupCollectionQueryVariables>): Apollo.UseSuspenseQueryResult<GroupCollectionQuery | undefined, GroupCollectionQueryVariables>;
+export function useGroupCollectionSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GroupCollectionQuery, GroupCollectionQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GroupCollectionQuery, GroupCollectionQueryVariables>(GroupCollectionDocument, options);
+        }
+export type GroupCollectionQueryHookResult = ReturnType<typeof useGroupCollectionQuery>;
+export type GroupCollectionLazyQueryHookResult = ReturnType<typeof useGroupCollectionLazyQuery>;
+export type GroupCollectionSuspenseQueryHookResult = ReturnType<typeof useGroupCollectionSuspenseQuery>;
+export type GroupCollectionQueryResult = Apollo.QueryResult<GroupCollectionQuery, GroupCollectionQueryVariables>;
 export const HotItemsDocument = gql`
     query HotItems {
   hotItems {

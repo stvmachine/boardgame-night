@@ -254,6 +254,61 @@ export const MERGED_COLLECTION = gql`
   }
 `
 
+export const GROUP_COLLECTION = gql`
+  query GroupCollection($token: String!) {
+    group(token: $token) {
+      id
+      name
+      collection {
+        items {
+          id
+          objectid
+          name
+          yearPublished
+          minPlayers
+          maxPlayers
+          minPlaytime
+          maxPlaytime
+          minAge
+          image
+          thumbnail
+          description
+          average
+          bayesAverage
+          usersRated
+          averageWeight
+          isExpansion
+          bestPlayerCount
+          lastPlayedAt
+          owners {
+            bggUsername
+            avatar
+          }
+          polls {
+            id
+            name
+            title
+            totalVotes
+            results {
+              id
+              value
+              playerCount
+              numVotes
+            }
+          }
+        }
+        syncStatuses {
+          username
+          status
+          error
+          gameCount
+          lastSyncedAt
+        }
+      }
+    }
+  }
+`
+
 export const HOT_ITEMS = gql`
   query HotItems {
     hotItems {
