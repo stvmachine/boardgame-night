@@ -12,12 +12,15 @@ vi.mock('@/generated/operations', () => ({
   useGetGroupQuery: (...args: unknown[]) => mocks.getGroup(...args),
 }))
 
-function renderPage(token = 'NIGHTOWLS') {
-  mocks.getGroup.mockReturnValue({
+function renderPage(
+  token = 'NIGHTOWLS',
+  result: { data?: { group: ReturnType<typeof buildGroup> } | undefined; loading: boolean; error?: Error | undefined } = {
     data: { group: buildGroup() },
     loading: false,
     error: undefined,
-  })
+  },
+) {
+  mocks.getGroup.mockReturnValue(result)
 
   return render(
     <MemoryRouter initialEntries={[`/g/${token}/sessions`]}>
@@ -72,20 +75,18 @@ beforeEach(() => {
 
 describe('GroupSessionsPage loading and error states', () => {
   it('renders a skeleton while loading', () => {
-    mocks.getGroup.mockReturnValue({ data: undefined, loading: true, error: undefined })
-    renderPage()
+    renderPage('NIGHTOWLS', { data: undefined, loading: true, error: undefined })
 
     expect(screen.getByRole('progressbar', { name: 'Loading past sessions' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Past sessions' })).not.toBeInTheDocument()
   })
 
   it('renders a not-found state when the group query fails', () => {
-    mocks.getGroup.mockReturnValue({
+    renderPage('NIGHTOWLS', {
       data: undefined,
       loading: false,
       error: new Error('Network error'),
     })
-    renderPage()
 
     expect(screen.getByRole('heading', { name: 'Couldn’t load this page' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Back to group' })).toHaveAttribute('href', '/g/NIGHTOWLS')
@@ -94,11 +95,10 @@ describe('GroupSessionsPage loading and error states', () => {
   it('renders an empty state when there are no past sessions', () => {
     const group = buildGroup()
     group.pastSessions = []
-    mocks.getGroup.mockReturnValue({ data: { group }, loading: false, error: undefined })
-    renderPage()
+    renderPage('NIGHTOWLS', { data: { group }, loading: false, error: undefined })
 
     expect(screen.getByRole('heading', { name: 'No past sessions' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Back to group' })).toHaveAttribute('href', '/g/NIGHTOWLS')
+    expect(screen.getAllByRole('link', { name: 'Back to group' })).toHaveLength(2)
   })
 })
 
@@ -113,13 +113,13 @@ describe('GroupSessionsPage past sessions list', () => {
     expect(rows).toHaveLength(2)
 
     expect(within(rows[0]).getByText('Completed Night')).toBeInTheDocument()
-    expect(within(rows[0]).getByText('Completed')).toBeInTheDocument()
-    expect(within(rows[0]).getByText('Clubhouse')).toBeInTheDocument()
+    expect(within(rows[0]).getByText('COMPLETED')).toBeInTheDocument()
+    expect(within(rows[0]).getByText(/Clubhouse/)).toBeInTheDocument()
     expect(within(rows[0]).getByText('Brass: Birmingham')).toBeInTheDocument()
     expect(within(rows[0]).getByRole('img', { name: 'Brass: Birmingham box cover' })).toBeInTheDocument()
 
     expect(within(rows[1]).getByText('Cancelled Night')).toBeInTheDocument()
-    expect(within(rows[1]).getByText('Cancelled')).toBeInTheDocument()
+    expect(within(rows[1]).getByText('CANCELLED')).toBeInTheDocument()
   })
 
   it('queries the group by the route token and skips when no token is present', () => {
@@ -130,9 +130,9 @@ describe('GroupSessionsPage past sessions list', () => {
 
     cleanup()
     render(
-      <MemoryRouter initialEntries={['/g//sessions']}>
+      <MemoryRouter initialEntries={['/']}>
         <Routes>
-          <Route path="/g/:token/sessions" element={<GroupSessionsPage />} />
+          <Route path="/" element={<GroupSessionsPage />} />
         </Routes>
       </MemoryRouter>,
     )

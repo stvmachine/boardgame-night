@@ -14,6 +14,7 @@ import { AccountPage } from '@/pages/AccountPage'
 import { SessionPage } from '@/pages/SessionPage'
 import { HotGamesPage } from '@/pages/HotGamesPage'
 import { PlaceholderPage } from '@/pages/PlaceholderPage'
+import { GroupSessionsPage } from '@/pages/GroupSessionsPage'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ActiveGroupProvider } from '@/contexts/ActiveGroupContext'
 
@@ -31,7 +32,7 @@ export default function App() {
               <Route path="/signup" element={<SignupPage />} />
               <Route path="/groups" element={<GroupsPage />} />
               <Route path="/g/:token" element={<GroupPage />} />
-              <Route path="/g/:token/sessions" element={<PlaceholderPage title="Past Sessions" />} />
+              <Route path="/g/:token/sessions" element={<GroupSessionsPage />} />
               <Route path="/s/:id" element={<SessionPage />} />
               <Route path="/invite/:token" element={<PlaceholderPage title="Invite" />} />
               <Route path="/account" element={<AccountPage />} />
