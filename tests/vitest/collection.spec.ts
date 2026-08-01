@@ -10,21 +10,11 @@ import {
   matches,
   toParams,
 } from '@/lib/collection'
+import type { Filters } from '@/lib/collection'
 import type { Game } from '@/lib/data'
 import { games } from './fixtures/sample-data'
 
-type DesiredFilters = {
-  q: string
-  players: { min: number; max: number } | null
-  times: number[]
-  complexity: 1 | 2 | 3 | null
-  owners: string[]
-  sort: 'name' | 'rating' | 'weight' | 'recent'
-  groupBy: 'none' | 'players' | 'rating' | 'bestPlayers' | 'owner'
-  view: 'grid' | 'list'
-}
-
-const desiredEmptyFilters: DesiredFilters = {
+const desiredEmptyFilters: Filters = {
   q: '',
   players: null,
   times: [],
@@ -35,8 +25,8 @@ const desiredEmptyFilters: DesiredFilters = {
   view: 'grid',
 }
 
-function asCurrentFilters(filters: DesiredFilters) {
-  return filters as never
+function asCurrentFilters(filters: Filters) {
+  return filters
 }
 
 function game(overrides: Partial<Game> & { lastPlayedAt?: string | null }): Game {
@@ -213,7 +203,7 @@ describe('collection sorting', () => {
 
 describe('collection URL codec', () => {
   it('round-trips the approved filter, sort, grouping, owner, and view state', () => {
-    const filters: DesiredFilters = {
+    const filters: Filters = {
       q: 'strategy',
       players: { min: 3, max: 5 },
       times: [1, 3],
@@ -274,7 +264,7 @@ describe('collection URL codec', () => {
 
   it('keeps the reserved group token outside the filter codec', () => {
     const params = new URLSearchParams('group=E2ENIGHTOWLS&groupBy=owner')
-    const filters = fromParams(params) as unknown as DesiredFilters
+    const filters = fromParams(params)
     const encoded = new URLSearchParams(toParams(asCurrentFilters(filters)))
 
     expect(filters.groupBy).toBe('owner')
