@@ -1,80 +1,301 @@
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { useMemo } from 'react'
-import { useQuery } from '@apollo/client'
-import { Clock, Users, Check, Star } from 'lucide-react'
-import { Eyebrow, Card, StateBadge, MemberAvatar, Progress } from '@/components/primitives'
-import { Scoreboard } from '@/components/scoreboard'
+import { Clock, MapPin, Users, Calendar, AlertCircle } from 'lucide-react'
+import {
+  useGetNightSessionQuery,
+  useScheduleSessionMutation,
+  useStartPickingMutation,
+  type GetNightSessionQuery,
+} from '@/generated/operations'
+import { useAuth } from '@/contexts/AuthContext'
+import { Card, EmptyState, Eyebrow, MemberAvatar, Progress, StateBadge } from '@/components/primitives'
+import { Button } from '@/components/ui/button'
 import { LinkButton } from '@/components/ui/link-button'
-import { GET_NIGHT_SESSION } from '@/lib/graphql/documents'
-import { toGame, toMember, toSuggestion } from '@/lib/graphql/adapters'
-import type { GqlNightSession, GqlSuggestion, GqlAttendance } from '@/lib/graphql/types'
-import type { Member, Game, Suggestion } from '@/lib/data'
-import type { ScoreEntry } from '@/components/scoreboard'
+import { toMember } from '@/lib/graphql/adapters'
+import type { SessionState } from '@/lib/data'
+
+type NightSession = NonNullable<GetNightSessionQuery['nightSession']>
+type Attendance = NightSession['attendances'][number]
+
+function formatSessionDate(value: unknown) {
+  if (!value) return null
+  const date = new Date(String(value))
+  if (Number.isNaN(date.getTime())) return null
+  return {
+    weekday: date.toLocaleDateString('en-US', { weekday: 'short' }),
+    month: date.toLocaleDateString('en-US', { month: 'short' }),
+    day: date.toLocaleDateString('en-US', { day: 'numeric' }),
+    time: date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+  }
+}
+
+function SessionHeader({
+  session,
+  children,
+}: {
+  session: NightSession
+  children?: React.ReactNode
+}) {
+  const date = formatSessionDate(session.scheduledAt)
+
+  return (
+    <div className="mb-8 rounded-xl border border-line bg-surface-container p-4 shadow-card md:p-6">
+      <Eyebrow>Session</Eyebrow>
+      <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-h1 text-ink">{session.title}</h1>
+            <StateBadge state={session.state as SessionState} />
+          </div>
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-secondary">
+            {date ? (
+              <>
+                <Calendar className="size-4" aria-hidden="true" />
+                <span>
+                  {date.weekday}, {date.month} {date.day} · {date.time}
+                </span>
+              </>
+            ) : (
+              <>
+                <Clock className="size-4" aria-hidden="true" />
+                <span>Date TBD</span>
+              </>
+            )}
+            <span className="text-ink-muted">·</span>
+            <MapPin className="size-4" aria-hidden="true" />
+            <span>{session.location || 'Location TBD'}</span>
+          </p>
+          <p className="mt-1 text-sm text-ink-secondary">Hosted by {session.host.displayName}</p>
+        </div>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function AttendeeList({ attendances }: { attendances: Attendance[] }) {
+  const goingCount = attendances.filter((a) => a.response === 'going').length
+  const members = useMemo(() => attendances.map((a) => toMember(a.user as Parameters<typeof toMember>[0])), [attendances])
+  const names = members.map((m) => m.name).join(', ')
+
+  if (members.length === 0) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-ink-secondary">
+        <Users className="size-4" aria-hidden="true" />
+        <span>No confirmed players yet</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="flex items-center" aria-label={`${goingCount} confirmed players${names ? `: ${names}` : ''}`}>
+        {members.slice(0, 5).map((member, index) => (
+          <span key={member.id} className={index > 0 ? '-ml-2' : ''}>
+            <MemberAvatar member={member} size="sm" showRing={false} />
+          </span>
+        ))}
+        {members.length > 5 && (
+          <span className="-ml-2 inline-flex size-8 items-center justify-center rounded-full bg-surface-raised text-[11px] font-semibold text-ink-secondary ring-2 ring-page">
+            +{members.length - 5}
+          </span>
+        )}
+      </div>
+      <span className="text-sm font-medium text-ink-secondary">
+        <span className="font-semibold text-ink">{goingCount}</span> going
+      </span>
+    </div>
+  )
+}
+
+function DraftScheduleForm({
+  session,
+  isHost,
+  onScheduled,
+}: {
+  session: NightSession
+  isHost: boolean
+  onScheduled(session: NightSession): void
+}) {
+  const [scheduleSession, { loading: scheduling }] = useScheduleSessionMutation()
+  const [error, setError] = useState<string | null>(null)
+  const [location, setLocation] = useState(session.location || '')
+  const [capacity, setCapacity] = useState(session.capacity?.toString() || '')
+
+  if (!isHost) return null
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setError(null)
+    try {
+      const result = await scheduleSession({
+        variables: {
+          sessionId: session.id,
+          location: location || undefined,
+          capacity: capacity ? parseInt(capacity, 10) : undefined,
+        },
+      })
+      const updated = result.data?.scheduleSession?.session
+      if (updated) {
+        onScheduled(updated as NightSession)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? `Could not schedule: ${err.message}` : 'Could not schedule the session.')
+    }
+  }
+
+  return (
+    <Card className="p-5">
+      <h2 className="mb-4 text-h2 text-ink">Schedule this night</h2>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <label htmlFor="session-location" className="text-sm font-medium text-ink">
+            Location
+          </label>
+          <input
+            id="session-location"
+            type="text"
+            value={location}
+            onChange={(event) => setLocation(event.target.value)}
+            placeholder="Where are you playing?"
+            className="h-10 w-full rounded-lg border border-line bg-surface-raised px-3 text-sm text-ink outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label htmlFor="session-capacity" className="text-sm font-medium text-ink">
+            Capacity
+          </label>
+          <input
+            id="session-capacity"
+            type="number"
+            min={1}
+            value={capacity}
+            onChange={(event) => setCapacity(event.target.value)}
+            placeholder="How many players?"
+            className="h-10 w-full rounded-lg border border-line bg-surface-raised px-3 text-sm text-ink outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <Button type="submit" disabled={scheduling} className="w-full sm:w-auto">
+            {scheduling ? 'Scheduling…' : 'Schedule & send invites'}
+          </Button>
+        </div>
+        {error ? (
+          <p className="sm:col-span-2 text-sm text-danger" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </form>
+    </Card>
+  )
+}
+
+function StartPickingButton({
+  session,
+  onStarted,
+}: {
+  session: NightSession
+  onStarted(session: NightSession): void
+}) {
+  const [startPicking, { loading: starting }] = useStartPickingMutation()
+  const [error, setError] = useState<string | null>(null)
+
+  const handleClick = async () => {
+    setError(null)
+    try {
+      const result = await startPicking({ variables: { sessionId: session.id } })
+      const updated = result.data?.startPicking?.session
+      if (updated) {
+        onStarted(updated as NightSession)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not start picking.')
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <Button type="button" onClick={handleClick} disabled={starting}>
+        {starting ? 'Starting…' : 'Start picking'}
+      </Button>
+      {error ? (
+        <p className="text-sm text-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+function SessionRsvpCard({ attendances }: { attendances: Attendance[] }) {
+  const going = attendances.filter((a) => a.response === 'going')
+  const members = useMemo(
+    () => attendances.map((a) => toMember(a.user as Parameters<typeof toMember>[0])),
+    [attendances],
+  )
+  const memberById = useMemo(() => new Map(members.map((m) => [m.id, m])), [members])
+
+  return (
+    <Card className="flex flex-col gap-4 p-5">
+      <h2 className="text-sm font-semibold text-ink">
+        <Users className="mr-1.5 inline size-4" aria-hidden="true" />
+        RSVPs ({going.length}/{attendances.length})
+      </h2>
+      <Progress
+        value={attendances.length > 0 ? (going.length / attendances.length) * 100 : 0}
+        barClassName="bg-success"
+        label="RSVP progress"
+      />
+      <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+        {attendances.map((a) => {
+          const m = memberById.get(a.user.id)
+          if (!m) return null
+          return (
+            <li key={m.id} className="flex flex-col items-center gap-1.5 rounded-lg bg-surface-raised px-2 py-3">
+              <MemberAvatar member={m} size="sm" />
+              <span className="text-xs font-medium text-ink">{m.name.split(' ')[0]}</span>
+              <span
+                className={
+                  a.response === 'going'
+                    ? 'text-[10px] font-semibold text-success'
+                    : a.response === 'maybe'
+                      ? 'text-[10px] font-semibold text-warning'
+                      : 'text-[10px] text-ink-muted'
+                }
+              >
+                {a.response === 'going' ? 'Going' : a.response === 'maybe' ? 'Maybe' : '—'}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+    </Card>
+  )
+}
 
 export function SessionPage() {
   const { id } = useParams<{ id: string }>()
-  const { data, loading, error } = useQuery(GET_NIGHT_SESSION, {
+  const { user, loading: authLoading } = useAuth()
+  const { data, loading, error } = useGetNightSessionQuery({
     variables: { id: id ?? '' },
     skip: !id,
   })
 
-  const nightSession: GqlNightSession | null = data?.nightSession ?? null
+  const session = data?.nightSession ?? null
+  const [displaySession, setDisplaySession] = useState<NightSession | null>(session)
 
-  const members: Member[] = useMemo(
-    () => (nightSession?.attendances ?? []).map((a) => toMember(a.user)),
-    [nightSession],
-  )
-
-  const memberById = useMemo(() => {
-    const map = new Map(members.map((m) => [m.id, m]))
-    return (id: string) => map.get(id)
-  }, [members])
-
-  const attendances: GqlAttendance[] = nightSession?.attendances ?? []
-  const going = attendances.filter((a) => a.response === 'going')
-
-  // Derive session metadata from the GQL session
-  const sessionMeta = useMemo(() => {
-    if (!nightSession) return null
-    const dt = nightSession.scheduledAt ? new Date(nightSession.scheduledAt) : null
-    return {
-      title: nightSession.title,
-      state: nightSession.state as import('@/lib/data').SessionState,
-      date: dt
-        ? dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-        : 'TBD',
-      time: dt ? dt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '',
-      location: nightSession.location || 'TBD',
-      gameId: nightSession.pickedGame?.objectid,
+  useEffect(() => {
+    if (session) {
+      setDisplaySession(session)
     }
-  }, [nightSession])
+  }, [session])
 
-  const pickedGame: Game | null = useMemo(
-    () => (nightSession?.pickedGame ? toGame(nightSession.pickedGame) : null),
-    [nightSession],
-  )
+  const isHost = Boolean(user && displaySession && user.id === displaySession.host.id)
 
-  const suggestions: Suggestion[] = useMemo(
-    () => (nightSession?.suggestions ?? []).map((s) => toSuggestion(s, attendances.length)),
-    [nightSession, attendances.length],
-  )
-
-  const scores: ScoreEntry[] = useMemo(
-    () =>
-      (nightSession?.scores ?? []).map((s) => ({
-        userId: s.user.id,
-        displayName: s.user.displayName,
-        avatar: s.user.avatar,
-        score: s.score,
-        rank: s.rank,
-      })),
-    [nightSession],
-  )
-
-  if (loading) {
+  if (loading || authLoading) {
     return (
-      <div className="mx-auto w-full max-w-3xl px-4 pt-24 pb-20 sm:px-6">
-        <div className="skeleton mb-8 h-32 rounded-xl" />
+      <div className="mx-auto w-full max-w-7xl px-4 pt-24 pb-20 sm:px-6" aria-busy="true">
+        <div role="progressbar" aria-label="Loading session" className="skeleton mb-8 h-32 rounded-xl" />
         <div className="flex flex-col gap-6">
           <div className="skeleton h-48 rounded-xl" />
           <div className="skeleton h-48 rounded-xl" />
@@ -83,106 +304,62 @@ export function SessionPage() {
     )
   }
 
-  if (error || !nightSession || !sessionMeta) {
+  if (error || !displaySession) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 pt-24 pb-20 sm:px-6">
-        <Card className="flex flex-col items-center gap-3 p-12 text-center">
-          <p className="text-ink-secondary">Session not found.</p>
-          <LinkButton to="/" variant="outline" size="lg">Back home</LinkButton>
-        </Card>
+        <EmptyState
+          icon={<AlertCircle className="size-5" />}
+          title="Session not found"
+          description={
+            error
+              ? 'Please check your connection and try again.'
+              : 'This session doesn’t exist or you don’t have access to it.'
+          }
+          action={
+            <LinkButton to="/" variant="outline" size="lg">
+              Back home
+            </LinkButton>
+          }
+        />
       </div>
     )
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pt-24 pb-20 sm:px-6">
-      <div className="mb-8 flex flex-col gap-3">
-        <Eyebrow>Session</Eyebrow>
-        <div className="flex items-center justify-between">
-          <h1 className="text-h1 text-ink">{sessionMeta.title}</h1>
-          <StateBadge state={sessionMeta.state} />
-        </div>
-        <p className="flex items-center gap-2 text-sm text-ink-secondary">
-          <Clock className="size-4" />
-          {sessionMeta.date} &middot; {sessionMeta.time} &middot; {sessionMeta.location}
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-7xl px-4 pt-24 pb-20 sm:px-6">
+      <SessionHeader session={displaySession}>
+        {displaySession.state === 'INVITED' && isHost ? (
+          <StartPickingButton session={displaySession} onStarted={setDisplaySession} />
+        ) : null}
+      </SessionHeader>
 
       <div className="flex flex-col gap-6">
-        <Card className="flex flex-col gap-4 p-5">
-          <h2 className="text-sm font-semibold text-ink">
-            <Users className="mr-1.5 inline size-4" />
-            RSVPs ({going.length}/{attendances.length})
-          </h2>
-          <Progress
-            value={attendances.length > 0 ? (going.length / attendances.length) * 100 : 0}
-            barClassName="bg-success"
-            label="RSVP progress"
-          />
-          <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5">
-            {attendances.map((a) => {
-              const m = memberById(a.user.id)
-              if (!m) return null
-              return (
-                <li key={m.id} className="flex flex-col items-center gap-1.5 rounded-lg bg-surface-raised px-2 py-3">
-                  <MemberAvatar member={m} size="sm" />
-                  <span className="text-xs font-medium text-ink">{m.name.split(' ')[0]}</span>
-                  <span
-                    className={
-                      a.response === 'going'
-                        ? 'text-[10px] font-semibold text-success'
-                        : a.response === 'maybe'
-                          ? 'text-[10px] font-semibold text-warning'
-                          : 'text-[10px] text-ink-muted'
-                    }
-                  >
-                    {a.response === 'going' ? 'Going' : a.response === 'maybe' ? 'Maybe' : '—'}
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
-        </Card>
+        {displaySession.state === 'DRAFT' ? (
+          <>
+            <Card className="p-5">
+              <h2 className="mb-3 text-h2 text-ink">Who&apos;s coming</h2>
+              <AttendeeList attendances={displaySession.attendances} />
+            </Card>
+            <DraftScheduleForm session={displaySession} isHost={isHost} onScheduled={setDisplaySession} />
+          </>
+        ) : null}
 
-        {suggestions.length > 0 && (
-          <Card className="flex flex-col gap-4 p-5">
-            <h2 className="text-sm font-semibold text-ink">
-              <Star className="mr-1.5 inline size-4 text-star" />
-              Suggested games
-            </h2>
-            <ul className="flex flex-col gap-3">
-              {suggestions.map((s, i) => {
-                const g = pickedGame?.id === s.gameId ? pickedGame : null
-                // Find the thing from the GQL suggestion data for richer display
-                const thing = nightSession.suggestions?.[i]
-                const gameTitle = thing?.thing?.name
-                return (
-                  <li key={s.gameId} className="flex items-center gap-3 rounded-lg bg-surface-raised p-3">
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
-                      {i + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-ink">{gameTitle ?? s.gameId}</p>
-                      <p className="font-mono text-xs text-accent-teal">
-                        {s.match}% match &middot; {s.votes} votes
-                      </p>
-                    </div>
-                    {i === 0 && (
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-success text-white">
-                        <Check className="size-4" />
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
-          </Card>
-        )}
+        {displaySession.state === 'INVITED' ? <SessionRsvpCard attendances={displaySession.attendances} /> : null}
 
-        {sessionMeta.state === 'COMPLETED' && pickedGame && (
-          <Scoreboard scores={scores} pickedGameName={pickedGame.title} />
-        )}
+        {displaySession.state === 'PICKING' || displaySession.state === 'COMPLETED' ? (
+          <PickingPlaceholder session={displaySession} isHost={isHost} />
+        ) : null}
       </div>
     </div>
+  )
+}
+
+function PickingPlaceholder({ session, isHost }: { session: NightSession; isHost: boolean }) {
+  void isHost
+  return (
+    <Card className="p-5">
+      <h2 className="text-h2 text-ink">Game Suggestions (Filtered for {session.attendeeCount} Players)</h2>
+      <p className="mt-2 text-sm text-ink-secondary">Picking flow coming next.</p>
+    </Card>
   )
 }
