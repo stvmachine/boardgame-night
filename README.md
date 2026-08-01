@@ -2,13 +2,13 @@
 
 A board game collection and night-organizing app for groups of friends. Users create friend groups, link their BoardGameGeek (BGG) usernames, and the app merges everyone's collections into a shared deduplicated view. From there, any member can spin up a boardgame night session — invite group members, get game suggestions drawn from the shared pool, and pick what to play.
 
-Built as a monorepo with Ruby on Rails 8 (API-only) serving a GraphQL API consumed by a Vue.js 3 frontend.
+Built as a monorepo with Ruby on Rails 8 (API-only) serving a GraphQL API consumed by a React 19 frontend.
 
 ## Tech Stack
 
 - **Backend:** Ruby on Rails 8.1 API-only, SQLite, Solid Queue, Solid Cache
-- **Frontend:** Vue 3 + Vite + TypeScript + Tailwind CSS v4
-- **API:** GraphQL via `graphql-ruby` and `@apollo/client` / `@vue/apollo-composable`
+- **Frontend:** React 19 + Vite + TypeScript + Tailwind CSS v4
+- **API:** GraphQL via `graphql-ruby` and `@apollo/client`
 - **Deployment:** Kamal 2 (single container)
 
 ## Prerequisites
@@ -83,7 +83,7 @@ npx playwright test tests/e2e/collection.spec.ts
 
 ## Deployment
 
-Deployment is handled by Kamal 2. Rails serves the built Vue SPA from `public/` as a single container, so there is no separate frontend deploy. Build the production assets locally to verify:
+Deployment is handled by Kamal 2. Rails serves the built React SPA from `public/` as a single container, so there is no separate frontend deploy. Build the production assets locally to verify:
 
 ```bash
 bin/vite build
