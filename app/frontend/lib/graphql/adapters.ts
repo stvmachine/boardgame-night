@@ -32,7 +32,7 @@ export function toGame(thing: GqlMergedThing): Game {
     weight: thing.averageWeight ?? 0,
     rating: thing.average ?? 0,
     categories: extractCategories(thing),
-    owners: thing.owners.map((o) => o.bggUsername),
+    owners: thing.owners?.map((o) => o.bggUsername) ?? [],
     addedAt: thing.lastPlayedAt || '',
     description: thing.description,
     lastPlayedAt: thing.lastPlayedAt,
@@ -101,6 +101,7 @@ export function toSuggestion(
     gameId: s.thing.objectid,
     match: Math.round(s.score * 100),
     votes: attendeeCount,
+    confidence: s.confidence,
     reasons: [
       ...(s.breakdown.playerCountFit > 0
         ? [{ ok: true, label: 'Fits player count' }]

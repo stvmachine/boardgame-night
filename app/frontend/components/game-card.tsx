@@ -1,6 +1,8 @@
-import { Clock, Dumbbell, Star, Users } from 'lucide-react'
-import type { Game } from '@/lib/data'
+import { ChevronDown, Clock, Dumbbell, Star, Users } from 'lucide-react'
+import { useState } from 'react'
+import type { Game, Suggestion } from '@/lib/data'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 export type GameCardVariant = 'grid' | 'list'
 
@@ -54,16 +56,119 @@ function GameStats({ game }: { game: Game }) {
   )
 }
 
+function SuggestionReasons({ reasons }: { reasons: Suggestion['reasons'] }) {
+  const [expanded, setExpanded] = useState(false)
+  const visible = expanded ? reasons : reasons.slice(0, 3)
+  const hasMore = reasons.length > 3
+
+  return (
+    <div className="flex flex-col gap-2">
+      <ul className="flex flex-wrap gap-1.5" aria-label="Match reasons">
+        {visible.map((reason, index) => (
+          <li
+            key={`${reason.label}-${index}`}
+            className={cn(
+              'rounded-full px-2 py-0.5 text-[11px] font-medium',
+              reason.ok
+                ? 'bg-success/10 text-success'
+                : 'bg-danger/10 text-danger',
+            )}
+          >
+            {reason.label}
+          </li>
+        ))}
+      </ul>
+      {hasMore && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-expanded={expanded}
+          onClick={(event) => {
+            event.stopPropagation()
+            setExpanded((value) => !value)
+          }}
+        >
+          <ChevronDown
+            className={cn('size-3.5 transition-transform', expanded && 'rotate-180')}
+            aria-hidden="true"
+          />
+          Show more reasons
+        </Button>
+      )}
+    </div>
+  )
+}
+
+function SuggestionActions({
+  suggestion,
+  isHost,
+  onPick,
+  picking,
+  pickError,
+}: {
+  suggestion: Suggestion
+  isHost?: boolean
+  onPick?: () => void
+  picking?: boolean
+  pickError?: string | null
+}) {
+  return (
+    <div className="pointer-events-auto relative z-20 flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary-container px-2 py-0.5 text-[11px] font-semibold text-on-primary-container">
+          Score {suggestion.match}
+        </span>
+        <span className="text-[11px] font-medium text-ink-secondary">
+          {suggestion.confidence
+            ? `${suggestion.confidence.charAt(0)}${suggestion.confidence.slice(1).toLowerCase()} confidence`
+            : null}
+        </span>
+      </div>
+      <SuggestionReasons reasons={suggestion.reasons} />
+      {isHost ? (
+        <Button
+          type="button"
+          disabled={picking}
+          onClick={(event) => {
+            event.stopPropagation()
+            onPick?.()
+          }}
+        >
+          {picking ? 'Picking…' : 'Pick this game'}
+        </Button>
+      ) : (
+        <p className="text-sm text-ink-secondary">The host will choose the game.</p>
+      )}
+      {pickError ? (
+        <p className="text-sm text-danger" role="alert">
+          {pickError}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
 export function GameCard({
   game,
   variant = 'grid',
   actions,
+  suggestion,
+  isHost,
+  onPick,
+  picking,
+  pickError,
   className,
   style,
 }: {
   game: Game
   variant?: GameCardVariant
   actions?: React.ReactNode
+  suggestion?: Suggestion
+  isHost?: boolean
+  onPick?: () => void
+  picking?: boolean
+  pickError?: string | null
   className?: string
   style?: React.CSSProperties
 }) {
@@ -123,6 +228,18 @@ export function GameCard({
           >
             {game.description}
           </p>
+        )}
+
+        {suggestion && (
+          <div className="pointer-events-auto relative z-20">
+            <SuggestionActions
+              suggestion={suggestion}
+              isHost={isHost}
+              onPick={onPick}
+              picking={picking}
+              pickError={pickError}
+            />
+          </div>
         )}
 
         <div className={cn('mt-auto flex items-end gap-3', list ? 'justify-between' : 'flex-col items-stretch')}>
