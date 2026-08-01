@@ -102,6 +102,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mocks.authUser = null
   mocks.authLoading = false
+  mocks.rsvpMutation.mockReturnValue([vi.fn(), { loading: false, error: undefined, data: undefined }])
 })
 
 describe('InvitePage loading and invalid states', () => {
@@ -150,8 +151,8 @@ describe('InvitePage signed-out viewer', () => {
 
     expect(screen.getByRole('heading', { name: 'Friday Games' })).toBeInTheDocument()
     expect(screen.getByText('Night Owls')).toBeInTheDocument()
-    expect(screen.getByText('Alice Host')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Sign in to RSVP/i })).toHaveAttribute('href', '/login')
+    expect(screen.getByText(/Alice Host/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Sign in to RSVP/i })).toHaveAttribute('href', '/login?return=%2Finvite%2FABC123')
     expect(screen.queryByRole('button', { name: 'Going' })).not.toBeInTheDocument()
   })
 })
