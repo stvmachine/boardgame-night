@@ -1,4 +1,4 @@
-import { LayoutGrid, List, SearchX, SlidersHorizontal, X } from 'lucide-react'
+import { ChevronDown, LayoutGrid, List, SearchX, SlidersHorizontal, X } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { FilterPanel } from '@/components/collection/filter-panel'
@@ -34,6 +34,70 @@ import {
   type MergedCollectionQuery,
 } from '@/generated/operations'
 
+function SelectControl<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: T
+  options: Array<{ value: T; label: string }>
+  onChange: (value: T) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const selectedLabel = options.find((option) => option.value === value)?.label ?? value
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        role="combobox"
+        aria-label={label}
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') setOpen(false)
+        }}
+        className="flex h-11 min-w-40 items-center justify-between gap-2 rounded-lg border border-line bg-surface px-3 text-sm text-ink-secondary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      >
+        <span>{selectedLabel}</span>
+        <ChevronDown
+          aria-hidden="true"
+          className={cn('size-4 shrink-0 transition-transform', open && 'rotate-180')}
+        />
+      </button>
+      {open && (
+        <div
+          role="listbox"
+          aria-label={label}
+          className="absolute top-full left-0 z-40 mt-1 min-w-full rounded-lg border border-line bg-surface-overlay p-1 shadow-modal"
+        >
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="option"
+              aria-selected={option.value === value}
+              onClick={() => {
+                onChange(option.value)
+                setOpen(false)
+              }}
+              className={cn(
+                'block w-full rounded-md px-3 py-2 text-left text-sm whitespace-nowrap hover:bg-surface-raised focus-visible:ring-2 focus-visible:ring-primary',
+                option.value === value && 'bg-surface-raised text-ink',
+              )}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const COLOR_PALETTE = [
   '#6366f1',
   '#ec4899',
@@ -56,6 +120,12 @@ type CollectionSource =
   | { kind: 'merged'; usernames: string[] }
   | { kind: 'none' }
 
+export type GameGroup = {
+  key: string
+  label: string
+  games: Game[]
+}
+
 export function resolveCollectionSource({
   routeGroupToken,
   routeUsernames,
@@ -73,6 +143,64 @@ export function resolveCollectionSource({
   if (activeGroupToken?.trim()) return { kind: 'group', token: activeGroupToken.trim() }
   if (currentUserBgg?.trim()) return { kind: 'merged', usernames: [currentUserBgg.trim()] }
   return { kind: 'none' }
+}
+
+function ratingBucket(rating: number) {
+  if (rating <= 0) return 'Unrated'
+  if (rating >= 9) return '9.0+'
+  if (rating >= 8) return '8.0–8.9'
+  if (rating >= 7) return '7.0–7.9'
+  if (rating >= 6) return '6.0–6.9'
+  return 'Below 6.0'
+}
+
+function groupLabel(game: Game, groupBy: GroupBy) {
+  switch (groupBy) {
+    case 'players':
+      return game.minPlayers === game.maxPlayers
+        ? `${game.minPlayers} players`
+        : `${game.minPlayers}–${game.maxPlayers} players`
+    case 'rating':
+      return ratingBucket(game.rating)
+    case 'bestPlayers':
+      return `Best with ${game.bestAt || game.minPlayers} players`
+    case 'owner':
+      return [...game.owners].sort((a, b) => a.localeCompare(b)).join(', ') || 'Unknown owner'
+    default:
+      return 'All Games'
+  }
+}
+
+function groupOrder(label: string, groupBy: GroupBy) {
+  if (groupBy === 'rating') {
+    const order = ['9.0+', '8.0–8.9', '7.0–7.9', '6.0–6.9', 'Below 6.0', 'Unrated']
+    return order.indexOf(label)
+  }
+  if (groupBy === 'players' || groupBy === 'bestPlayers') {
+    return Number(label.match(/\d+/)?.[0] ?? 0)
+  }
+  return 0
+}
+
+export function groupGames(games: Game[], groupBy: GroupBy): GameGroup[] {
+  if (groupBy === 'none') return [{ key: 'all', label: 'All Games', games }]
+
+  const groups = new Map<string, Game[]>()
+  for (const game of games) {
+    const label = groupLabel(game, groupBy)
+    const group = groups.get(label) ?? []
+    group.push(game)
+    groups.set(label, group)
+  }
+
+  return Array.from(groups.entries())
+    .map(([label, groupedGames]) => ({ key: label, label, games: groupedGames }))
+    .sort((a, b) => {
+      if (groupBy === 'players' || groupBy === 'bestPlayers' || groupBy === 'rating') {
+        return groupOrder(a.label, groupBy) - groupOrder(b.label, groupBy)
+      }
+      return a.label.localeCompare(b.label)
+    })
 }
 
 function normalizeUsernames(value: string) {
@@ -190,6 +318,10 @@ export function CollectionBrowser() {
   const setFilters = (next: Partial<Filters>) =>
     setFiltersState((current) => ({ ...current, ...next }))
   const results = useMemo(() => applyFilters(games, filters), [games, filters])
+  const groupedResults = useMemo(
+    () => groupGames(results, filters.groupBy),
+    [filters.groupBy, results],
+  )
   const active = activeCount(filters)
 
   function refetchCollection() {
@@ -300,39 +432,25 @@ export function CollectionBrowser() {
 
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <label className="sr-only" htmlFor="sort">
-              Sort
-            </label>
-            <select
-              id="sort"
-              aria-label="Sort"
+            <SelectControl
+              label="Sort"
               value={filters.sort}
-              onChange={(event) => setFilters({ sort: event.target.value as SortKey })}
-              className="h-11 rounded-lg border border-line bg-surface px-3 text-sm text-ink-secondary focus:border-primary focus:outline-none"
-            >
-              {Object.entries(sortLabels).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              options={Object.entries(sortLabels).map(([value, label]) => ({
+                value: value as SortKey,
+                label,
+              }))}
+              onChange={(sort) => setFilters({ sort })}
+            />
 
-            <label className="sr-only" htmlFor="group-by">
-              Group by
-            </label>
-            <select
-              id="group-by"
-              aria-label="Group by"
+            <SelectControl
+              label="Group by"
               value={filters.groupBy}
-              onChange={(event) => setFilters({ groupBy: event.target.value as GroupBy })}
-              className="h-11 rounded-lg border border-line bg-surface px-3 text-sm text-ink-secondary focus:border-primary focus:outline-none"
-            >
-              {Object.entries(groupByLabels).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
+              options={Object.entries(groupByLabels).map(([value, label]) => ({
+                value: value as GroupBy,
+                label,
+              }))}
+              onChange={(groupBy) => setFilters({ groupBy })}
+            />
 
             <div className="flex items-center gap-1 rounded-lg border border-line bg-surface p-1">
               <button
@@ -404,7 +522,7 @@ export function CollectionBrowser() {
         </div>
 
         {loading ? (
-          <SkeletonGrid count={12} />
+          <SkeletonGrid count={12} variant={filters.view} />
         ) : error ? (
           <EmptyState
             icon={<SearchX className="size-5" />}
@@ -439,22 +557,11 @@ export function CollectionBrowser() {
             }
           />
         ) : (
-          <div
-            className={cn(
-              filters.view === 'grid'
-                ? 'grid grid-cols-[repeat(auto-fill,minmax(min(160px,100%),1fr))] gap-5 sm:grid-cols-[repeat(auto-fill,minmax(min(200px,100%),1fr))]'
-                : 'grid grid-cols-1 gap-4',
-            )}
-          >
-            {results.map((game, index) => (
-              <GameCard
-                key={game.id}
-                game={game}
-                className="fade-up"
-                style={{ animationDelay: `${Math.min(index * 80, 640)}ms` }}
-              />
-            ))}
-          </div>
+          <CollectionResults
+            groups={groupedResults}
+            groupBy={filters.groupBy}
+            view={filters.view}
+          />
         )}
       </div>
 
@@ -494,6 +601,73 @@ export function CollectionBrowser() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function CardList({ games, view }: { games: Game[]; view: Filters['view'] }) {
+  return (
+    <div
+      className={cn(
+        view === 'grid'
+          ? 'grid grid-cols-[repeat(auto-fill,minmax(min(160px,100%),1fr))] gap-5 sm:grid-cols-[repeat(auto-fill,minmax(min(200px,100%),1fr))]'
+          : 'grid grid-cols-1 gap-4',
+      )}
+    >
+      {games.map((game, index) => (
+        <GameCard
+          key={game.id}
+          game={game}
+          variant={view}
+          className="fade-up"
+          style={{ animationDelay: `${Math.min(index * 80, 640)}ms` }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function CollectionGroup({ group, view }: { group: GameGroup; view: Filters['view'] }) {
+  const [open, setOpen] = useState(true)
+  return (
+    <section className="grid gap-4">
+      <h2 className="text-base font-semibold text-ink">
+        <button
+          type="button"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+          className="flex w-full items-center justify-between rounded-lg bg-surface-raised px-3 py-2 text-left focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
+          <span>
+            {group.label} <span className="text-sm font-normal text-ink-muted">({group.games.length})</span>
+          </span>
+          <ChevronDown
+            aria-hidden="true"
+            className={cn('size-4 transition-transform', open && 'rotate-180')}
+          />
+        </button>
+      </h2>
+      {open && <CardList games={group.games} view={view} />}
+    </section>
+  )
+}
+
+function CollectionResults({
+  groups,
+  groupBy,
+  view,
+}: {
+  groups: GameGroup[]
+  groupBy: GroupBy
+  view: Filters['view']
+}) {
+  if (groupBy === 'none') return <CardList games={groups[0]?.games ?? []} view={view} />
+
+  return (
+    <div className="grid gap-8">
+      {groups.map((group) => (
+        <CollectionGroup key={group.key} group={group} view={view} />
+      ))}
     </div>
   )
 }

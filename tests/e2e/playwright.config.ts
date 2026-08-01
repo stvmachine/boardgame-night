@@ -33,7 +33,9 @@ export default defineConfig({
   ],
   webServer: {
     command: 'bash -c "cd ' + repoRoot + ' && exec ./bin/dev-e2e"',
-    url: 'http://localhost:5173',
+    // Vite is ready before Rails on a cold start. Waiting for the Rails health
+    // endpoint prevents the first browser GraphQL request from racing Puma.
+    url: 'http://localhost:3000/up',
     reuseExistingServer: true,
     timeout: 60_000
   }

@@ -19,6 +19,8 @@ export type Game = {
   categories: string[]
   owners: string[]
   addedAt: string
+  description?: string | null
+  lastPlayedAt?: string | null
 }
 
 export type RsvpStatus = 'going' | 'maybe' | 'none' | 'no'

@@ -34,6 +34,8 @@ export function toGame(thing: GqlMergedThing): Game {
     categories: extractCategories(thing),
     owners: thing.owners.map((o) => o.bggUsername),
     addedAt: thing.lastPlayedAt || '',
+    description: thing.description,
+    lastPlayedAt: thing.lastPlayedAt,
   }
 }
 
