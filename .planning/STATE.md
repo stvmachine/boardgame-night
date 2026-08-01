@@ -3,17 +3,17 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: React Migration & Parity
 current_phase: 12
-current_phase_name: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
+current_phase_name: dev-blog-engine
 status: executing
-stopped_at: Phase 12 context gathered
-last_updated: "2026-08-01T22:04:22.358Z"
+stopped_at: Completed 12-01-PLAN.md
+last_updated: "2026-08-01T22:33:37.613Z"
 last_activity: 2026-08-02
-last_activity_desc: Phase 13 complete, transitioned to Phase 12
+last_activity_desc: Phase 12 execution started
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 69
-  completed_plans: 63
+  completed_plans: 64
 ---
 
 # Project State
@@ -23,14 +23,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-02)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 12 — Dev blog engine
+**Current focus:** Phase 12 — dev-blog-engine
 
 ## Current Position
 
-Phase: 12 — Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
-Plan: Not started
+Phase: 12 (dev-blog-engine) — EXECUTING
+Plan: 2 of 6
 Status: Ready to execute
-Last activity: 2026-08-02 — Phase 13 complete, transitioned to Phase 12
+Last activity: 2026-08-02 — Phase 12 execution started
 
 ## Performance Metrics
 
@@ -105,6 +105,7 @@ Last activity: 2026-08-02 — Phase 13 complete, transitioned to Phase 12
 | Phase 13 P04 | 22 min | 3 tasks | 2 files |
 | Phase 13-react-migration-parity P05 | 69 min | 2 tasks | 5 files |
 | Phase 13-react-migration-parity P06 | 151 | 3 tasks | 30 files |
+| Phase 12-dev-blog-engine P01 | 11min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -218,6 +219,9 @@ Recent decisions affecting current work:
 - [Phase ?]: Default app theme is light to match E2E accessibility contracts; users can switch to dark or system
 - [Phase ?]: Auth state is data-driven via useEffect on currentUserData; token is only cleared when server explicitly returns currentUser: null
 - [Phase ?]: E2E fixtures are read dynamically after reseed so static import caching cannot use stale IDs
+- [Phase ?]: Refreshed ADR-014 in place for React 19 and /blog delivery instead of recreating the ADR.
+- [Phase ?]: Added DevBlog::HtmlSanitizer to escape raw HTML nodes and strip event-handler attributes from kramdown output.
+- [Phase ?]: Pinned patched loofah, rails-html-sanitizer, rails, and graphql to pass bundler-audit rather than leaving pre-existing transitive advisories unaddressed.
 
 ### Pending Todos
 
@@ -252,9 +256,9 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-01T18:12:52.445Z
-Stopped at: Phase 12 context gathered
-Resume file: .planning/phases/12-dev-blog-engine/12-CONTEXT.md
+Last session: 2026-08-01T22:33:37.597Z
+Stopped at: Completed 12-01-PLAN.md
+Resume file: None
 
 ### Recent Session Activity
 

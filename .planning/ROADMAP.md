@@ -407,7 +407,7 @@ Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 1
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
 | 11. Polish & E2E Hardening | 5/5 | Complete | 2026-07-20 |
-| 12. Dev Blog Engine | 0/6 | Pending (replanned) |  |
+| 12. Dev Blog Engine | 1/6 | In Progress|  |
 | 13. React Migration Parity | 6/6 | Complete    | 2026-08-02 |
 
 ### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
@@ -424,12 +424,12 @@ Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 1
   4. The static site is built into the production Docker image and reachable on a subdomain routed from the same Kamal VPS (BLOG-04)
   5. The build is verified in CI and the deployment is documented for maintainers (BLOG-05)
 
-**Plans:** 6 plans
+**Plans:** 1/6 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 12-01-PLAN.md — Production tracer from markdown through generated HTML to `/blog`, plus React-era ADR-014 reconciliation (Wave 1)
+- [x] 12-01-PLAN.md — Production tracer from markdown through generated HTML to `/blog`, plus React-era ADR-014 reconciliation (Wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
