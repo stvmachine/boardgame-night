@@ -5,15 +5,15 @@ milestone_name: React Migration & Parity
 current_phase: 13
 current_phase_name: react-migration-parity
 status: executing
-stopped_at: Completed 13-02-PLAN.md
-last_updated: "2026-07-31T23:35:58.314Z"
+stopped_at: Completed 13-03-PLAN.md
+last_updated: "2026-08-01T12:05:55.951Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed Phase 13 Plan 02 live Home and Hot parity
+last_activity_desc: Completed Phase 13 Plan 03 collection parity
 progress:
   total_phases: 13
   completed_phases: 11
   total_plans: 69
-  completed_plans: 59
+  completed_plans: 60
 ---
 
 # Project State
@@ -28,15 +28,15 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 ## Current Position
 
 Phase: 13 (react-migration-parity) — EXECUTING
-Plan: 3 of 6
-Status: Ready to execute Plan 13-03
-Last activity: 2026-08-01 — Completed Phase 13 Plan 02 live Home and Hot parity
+Plan: 4 of 6
+Status: Ready to execute Plan 13-04
+Last activity: 2026-08-01 — Completed Phase 13 Plan 03 collection parity
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 59
+- Total plans completed: 60
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -56,7 +56,7 @@ Last activity: 2026-08-01 — Completed Phase 13 Plan 02 live Home and Hot parit
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
 | 12. Dev Blog Engine | 0/6 | Pending carried scope | — |
-| 13. React Migration Parity | 2/6 | 24 min | 12 min |
+| 13. React Migration Parity | 3/6 | 67 min | ~22 min |
 
 **Recent Trend:**
 
@@ -101,6 +101,7 @@ Last activity: 2026-08-01 — Completed Phase 13 Plan 02 live Home and Hot parit
 |------|----------|-------|-------|
 | Phase 13 P01 | 6 min | 2 tasks | 9 files |
 | Phase 13 P02 | 18 min | 3 tasks | 16 files |
+| Phase 13 P03 | 43 min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -199,6 +200,10 @@ Recent decisions affecting current work:
 - [Phase 13]: Keep collection merge and anonymous group quick-start as separate Home journeys. — The merge permalink and createAnonymousGroup mutation have different authority and navigation contracts; retaining both preserves shipped account-free behavior.
 - [Phase 13]: Use generated DashboardStats and HotItems hooks without static product fallbacks. — Authorization-scoped GraphQL data remains the sole product source of truth; missing data renders neutral states rather than fabricated metrics.
 - [Phase 13]: Permalink usernames outrank ambient collection fallbacks and survive filter URL synchronization. — Shareable collection links must remain deterministic even when active-group or signed-in-user state exists.
+- [Phase 13-03]: Resolve collection sources in explicit group, explicit usernames, active group, then signed-in BGG username order, with only the selected Apollo hook enabled.
+- [Phase 13-03]: Keep reserved group and usernames source parameters outside the filter codec; serialize presentation grouping only as groupBy.
+- [Phase 13-03]: Use source-owned ARIA combobox/listbox controls so browser-visible options satisfy the established acceptance contract.
+- [Phase 13-03]: Preserve backend BGG usernames for owner labels and persisted object identity for isolated external card links.
 
 ### Pending Todos
 
@@ -206,7 +211,6 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Carried from Phase 10/11] The Vue `GameCard` ARIA defect was corrected in Phase 11; Phase 13 must reproduce the article + safe overlay-link + isolated nested-control contract in React.
 - [Carried from Phase 10] `SessionDetailsEditor` used styled native textarea/date/number controls because dedicated design-system primitives did not exist; React parity must preserve the approved accessible field/dialog behavior.
 - Phase 12 dev-blog plans remain pending carried v2.0 scope, but no technical dependency blocks Phase 13.
 
@@ -235,8 +239,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-07-31T23:35:58.297Z
-Stopped at: Completed 13-02-PLAN.md
+Last session: 2026-08-01T12:05:55.929Z
+Stopped at: Completed 13-03-PLAN.md
 Resume file: None
 
 ### Recent Session Activity

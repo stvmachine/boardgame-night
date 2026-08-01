@@ -408,7 +408,7 @@ Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 1
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
 | 11. Polish & E2E Hardening | 5/5 | Complete | 2026-07-20 |
 | 12. Dev Blog Engine | 0/6 | Pending (carried) |  |
-| 13. React Migration Parity | 2/6 | In Progress|  |
+| 13. React Migration Parity | 3/6 | In Progress|  |
 
 ### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
 
@@ -451,7 +451,7 @@ Plans:
   4. Frontend or Rails/GraphQL defects proven by parity tests are fixed at their owning boundary without static production fixtures, client-side authorization, or weakened assertions (RMP-03).
   5. `npm run typecheck`, `npm test`, `npm run build`, the Rails RSpec suite, and the serialized Playwright suite all pass against the React application (RMP-05).
 
-**Plans:** 2/6 plans executed
+**Plans:** 3/6 plans executed
 
 Plans:
 
@@ -465,7 +465,7 @@ Plans:
 
 **Wave 3** *(both blocked on Wave 2; parallel with zero file overlap)*
 
-- [ ] 13-03-PLAN.md — Collection source routing, exact filter/sort/group/view parity, and rich card variants
+- [x] 13-03-PLAN.md — Collection source routing, exact filter/sort/group/view parity, and rich card variants
 - [ ] 13-04-PLAN.md — Role-aware Group Detail hub, session creation, spotlight, member controls, and invitations
 
 **Wave 4** *(blocked on Group Detail)*

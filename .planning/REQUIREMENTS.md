@@ -70,11 +70,11 @@ Requirements for the UI Redesign + Suggestion Engine milestone. Each maps to roa
 
 Requirements for the active React Migration & Parity milestone. Each requirement maps to Phase 13 and preserves the completed Vue application's behavior, Tabletop Social design, accessibility, and responsive contracts while React becomes the only deployed frontend.
 
-- [ ] **RMP-01**: React fully replaces Vue while preserving every existing product journey and the Tabletop Social interface
-- [ ] **RMP-02**: Auth, collection merge/browse, groups, invitations, sessions, RSVP, suggestions, and game picking work end to end in React
-- [ ] **RMP-03**: Frontend and Rails/GraphQL defects exposed by parity verification are repaired without weakening the existing product contracts
+- [x] **RMP-01**: React fully replaces Vue while preserving every existing product journey and the Tabletop Social interface
+- [x] **RMP-02**: Auth, collection merge/browse, groups, invitations, sessions, RSVP, suggestions, and game picking work end to end in React
+- [x] **RMP-03**: Frontend and Rails/GraphQL defects exposed by parity verification are repaired without weakening the existing product contracts
 - [ ] **RMP-04**: React tests, GraphQL code generation, and production delivery replace Vue tooling; Vue source and dependencies are absent after parity is proven
-- [ ] **RMP-05**: The existing Playwright end-to-end acceptance suite passes against the React frontend
+- [x] **RMP-05**: The existing Playwright end-to-end acceptance suite passes against the React frontend
 
 ## Carried v2.0 Requirements — Dev Blog & Architecture Docs
 
@@ -175,11 +175,11 @@ These ideas are not part of the active v2.0 React Migration & Parity milestone.
 | BLOG-03 | Phase 12 | Planned |
 | BLOG-04 | Phase 12 | Planned |
 | BLOG-05 | Phase 12 | Planned |
-| RMP-01 | Phase 13 | Planned |
-| RMP-02 | Phase 13 | Planned |
-| RMP-03 | Phase 13 | Planned |
+| RMP-01 | Phase 13 | Complete |
+| RMP-02 | Phase 13 | Complete |
+| RMP-03 | Phase 13 | Complete |
 | RMP-04 | Phase 13 | Planned |
-| RMP-05 | Phase 13 | Planned |
+| RMP-05 | Phase 13 | Complete |
 
 **Coverage:**
 
