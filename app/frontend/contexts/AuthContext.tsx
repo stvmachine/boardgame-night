@@ -31,30 +31,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [token, setTokenState] = useState(localStorage.getItem(TOKEN_KEY))
 
-  // Query current user on mount if token exists
-  const { loading: queryLoading } = useQuery(CURRENT_USER, {
+  const {
+    data: currentUserData,
+    loading: queryLoading,
+  } = useQuery(CURRENT_USER, {
     fetchPolicy: 'cache-and-network',
-    skip: !localStorage.getItem(TOKEN_KEY),
-    onCompleted: (data) => {
-      if (data?.currentUser) {
-        setUser(data.currentUser)
-      }
-      setLoading(false)
-    },
-    onError: () => {
-      // Token invalid or expired
-      localStorage.removeItem(TOKEN_KEY)
-      setLoading(false)
-    },
+    skip: !token,
   })
 
-  // If no token, skip loading
   useEffect(() => {
-    if (!localStorage.getItem(TOKEN_KEY)) {
+    if (queryLoading) {
+      setLoading(true)
+    }
+  }, [queryLoading])
+
+  useEffect(() => {
+    if (currentUserData?.currentUser) {
+      setUser(currentUserData.currentUser)
+      setLoading(false)
+    } else if (currentUserData && !queryLoading) {
+      // Token was present but server returned no user — treat as signed out
+      localStorage.removeItem(TOKEN_KEY)
+      setTokenState(null)
+      setUser(null)
       setLoading(false)
     }
-  }, [])
+  }, [currentUserData, queryLoading])
+
+  useEffect(() => {
+    if (!token) {
+      setUser(null)
+      setLoading(false)
+    }
+  }, [token])
 
   const [signInMutation] = useMutation(SIGN_IN)
   const [signUpMutation] = useMutation(SIGN_UP)
@@ -66,8 +77,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await signInMutation({ variables: { email, password } })
       const { token, user: userData } = data.signIn
       localStorage.setItem(TOKEN_KEY, token)
+      setTokenState(token)
       setUser(userData)
-      // Reset Apollo cache to refetch all data with new auth
       await apolloClient.resetStore()
     } catch (err: any) {
       const message = err?.graphQLErrors?.[0]?.message || err?.message || 'Sign in failed'
@@ -81,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data } = await signUpMutation({ variables: { email, password, username } })
       const { token, user: userData } = data.signUp
       localStorage.setItem(TOKEN_KEY, token)
+      setTokenState(token)
       setUser(userData)
       await apolloClient.resetStore()
     } catch (err: any) {
@@ -96,18 +108,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Sign out even if the mutation fails (clear local state)
     }
     localStorage.removeItem(TOKEN_KEY)
+    setTokenState(null)
     setUser(null)
     await apolloClient.resetStore()
   }, [signOutMutation])
 
   const clearError = useCallback(() => setError(null), [])
-
-  // Sync loading state with query loading
-  useEffect(() => {
-    if (queryLoading && localStorage.getItem(TOKEN_KEY)) {
-      setLoading(true)
-    }
-  }, [queryLoading])
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, error, clearError }}>
@@ -118,6 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+  if (!ctx) {
+    throw new Error('useAuth must be used within an AuthProvider')
+  }
   return ctx
 }

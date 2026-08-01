@@ -147,8 +147,8 @@ export function SiteNav() {
         </div>
       </nav>
 
-      {open && (
-        <div className="border-t border-line bg-page/95 px-4 py-4 backdrop-blur-xl md:hidden">
+    {open && (
+      <div data-testid="mobile-menu" className="border-t border-line bg-page/95 px-4 py-4 backdrop-blur-xl md:hidden">
           <ul className="flex flex-col gap-1">
             {links.map((l) => (
               <li key={l.href}>

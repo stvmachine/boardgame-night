@@ -23,6 +23,12 @@ export const CURRENT_USER = gql`
   }
 `
 
+export const HEALTH_CHECK = gql`
+  query HealthCheck {
+    health
+  }
+`
+
 export const DASHBOARD_STATS = gql`
   query DashboardStats {
     dashboardStats {

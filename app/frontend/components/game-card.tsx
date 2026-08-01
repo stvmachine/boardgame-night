@@ -179,6 +179,7 @@ export function GameCard({
       data-testid="game-card"
       data-slot="card"
       data-variant={variant}
+      role="article"
       style={style}
       className={cn(
         'group/card relative overflow-hidden rounded-xl border border-line bg-surface shadow-card transition-[transform,box-shadow,background-color] duration-200 hover:-translate-y-[3px] hover:bg-surface-raised hover:shadow-card-hover',
@@ -187,6 +188,7 @@ export function GameCard({
       )}
     >
       <a
+        data-testid="game-card-link"
         href={`https://boardgamegeek.com/boardgame/${encodeURIComponent(game.id)}`}
         target="_blank"
         rel="noopener noreferrer"

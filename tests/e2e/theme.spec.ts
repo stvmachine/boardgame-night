@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
@@ -6,9 +7,16 @@ import { dirname } from 'path'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
-const groupFixture = JSON.parse(
-  readFileSync(resolve(__dirname, 'fixtures', 'e2e_group.json'), 'utf-8')
-)
+const repoRoot = resolve(__dirname, '../../')
+
+let groupFixture: any
+
+test.beforeAll(() => {
+  execSync('bin/e2e-seed', { cwd: repoRoot, stdio: 'ignore' })
+  groupFixture = JSON.parse(
+    readFileSync(resolve(__dirname, 'fixtures', 'e2e_group.json'), 'utf-8')
+  )
+})
 
 async function signIn(page: Page, email: string, password: string) {
   await page.goto('/login', { waitUntil: 'networkidle' })
@@ -72,7 +80,7 @@ test('persists an accessible appearance choice before mount', async ({ page }) =
 
   await signIn(page, 'e2e_alice@example.com', 'password')
 
-  await page.getByRole('link', { name: 'Settings' }).click()
+  await page.getByRole('link', { name: 'Account', exact: true }).click()
   await expect(page).toHaveURL('/account')
 
   await expect(page.getByText('Appearance')).toBeVisible({ timeout: 10_000 })
@@ -96,7 +104,7 @@ test('persists an accessible appearance choice before mount', async ({ page }) =
 
   await page.goto('/')
   await expect(page).toHaveURL('/')
-  await page.getByRole('link', { name: 'Settings' }).click()
+  await page.getByRole('link', { name: 'Account', exact: true }).click()
   await expect(page).toHaveURL('/account')
 
   await expect(page.locator('html')).toHaveClass(/dark/)
@@ -152,10 +160,10 @@ test('keeps redesigned surfaces usable in both themes', async ({ browser }) => {
         await expect(page.getByText('Merge collections').first()).toBeVisible({ timeout: 10_000 })
         await assertRouteThemeOverflow(page, theme)
         if (vp.width < 768) {
-          await expect(page.getByRole('button', { name: 'Open navigation' }).first()).toBeVisible()
+          await expect(page.getByRole('button', { name: 'Open menu' }).first()).toBeVisible()
         } else {
-          await expect(page.getByRole('link', { name: 'Collection' })).toBeVisible()
-          await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible()
+          await expect(page.getByRole('link', { name: 'Collection', exact: true })).toBeVisible()
+          await expect(page.getByRole('link', { name: 'Account', exact: true })).toBeVisible()
         }
 
         // ── Collection ──
@@ -188,9 +196,9 @@ test('keeps redesigned surfaces usable in both themes', async ({ browser }) => {
     // — Navigation: mobile drawer open/close —
     await page.setViewportSize({ width: 375, height: 812 })
     await page.goto('/')
-    await page.getByRole('button', { name: 'Open navigation' }).first().click()
-    await expect(page.getByRole('link', { name: 'Account' })).toBeVisible()
-    await page.getByRole('button', { name: 'Close navigation' }).click()
+    await page.getByRole('button', { name: 'Open menu' }).first().click()
+    await expect(page.getByRole('link', { name: 'Account', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Close menu' }).click()
 
     // — Full-card BGG overlay click via non-control card area —
     await page.setViewportSize({ width: 1280, height: 800 })

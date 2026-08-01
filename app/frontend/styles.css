@@ -64,29 +64,8 @@
   --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Dark is the default theme */
+/* Light is the default theme; .dark overrides for dark mode */
 :root {
-  color-scheme: dark;
-  --page: #0f0f12;
-  --surface: #1a1a20;
-  --surface-raised: #24242e;
-  --surface-overlay: #2e2e3a;
-  --ink: #e8e8ed;
-  --ink-secondary: #9c9cb0;
-  --ink-muted: #6b6b80;
-  --line: #2e2e3a;
-  --brand: #6366f1;
-  --brand-foreground: #ffffff;
-  --accent-rose: #fb7185;
-  --accent-teal: #2dd4bf;
-  --success: #4ade80;
-  --warning: #fbbf24;
-  --danger: #f87171;
-  --info: #60a5fa;
-  --star: #eab308;
-}
-
-.light {
   color-scheme: light;
   --page: #f8f7f4;
   --surface: #ffffff;
@@ -105,6 +84,31 @@
   --danger: #dc2626;
   --info: #2563eb;
   --star: #b8860b;
+
+  /* Material 3 semantic aliases used by E2E theme assertions */
+  --md-sys-color-surface: var(--surface);
+  --md-sys-color-on-surface: var(--ink);
+}
+
+.dark {
+  color-scheme: dark;
+  --page: #0f0f12;
+  --surface: #1a1a20;
+  --surface-raised: #24242e;
+  --surface-overlay: #2e2e3a;
+  --ink: #e8e8ed;
+  --ink-secondary: #9c9cb0;
+  --ink-muted: #6b6b80;
+  --line: #2e2e3a;
+  --brand: #6366f1;
+  --brand-foreground: #ffffff;
+  --accent-rose: #fb7185;
+  --accent-teal: #2dd4bf;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #60a5fa;
+  --star: #eab308;
 }
 
 @layer base {

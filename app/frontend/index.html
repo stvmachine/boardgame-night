@@ -18,12 +18,16 @@
             theme = raw;
           }
         } catch(e) {}
-        if (!theme) theme = 'dark';
+        if (!theme) theme = 'light';
         var resolved = theme === 'system'
           ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
           : theme;
         if (resolved === 'light') {
           document.documentElement.classList.add('light');
+          document.documentElement.classList.remove('dark');
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light');
         }
         document.documentElement.style.colorScheme = resolved;
       })();

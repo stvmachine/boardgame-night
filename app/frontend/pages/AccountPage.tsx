@@ -3,10 +3,12 @@ import { useQuery, useMutation } from '@apollo/client'
 import { Eyebrow, Card } from '@/components/primitives'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { CURRENT_USER, BIND_BGG_USERNAME, IMPORT_COLLECTION } from '@/lib/graphql/documents'
 
 export function AccountPage() {
   const { user, signOut } = useAuth()
+  const { theme, setTheme } = useTheme()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [bggUsername, setBggUsername] = useState('')
@@ -72,6 +74,38 @@ export function AccountPage() {
 
       <form onSubmit={handleSave}>
         <Card className="flex flex-col gap-5 p-6">
+          <div>
+            <h2 className="text-lg font-semibold text-ink">Appearance</h2>
+            <p className="text-sm text-ink-secondary">Choose how the app looks.</p>
+          </div>
+          <div
+            role="group"
+            aria-label="Appearance"
+            className="inline-flex gap-1 rounded-lg border border-line bg-surface-raised p-1"
+          >
+            {(['light', 'dark', 'system'] as const).map((t) => {
+              const active = theme === t
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  data-slot="toggle-group-item"
+                  data-state={active ? 'on' : 'off'}
+                  onClick={() => setTheme(t)}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    active
+                      ? 'bg-surface text-ink shadow-sm'
+                      : 'text-ink-secondary hover:text-ink'
+                  }`}
+                >
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </button>
+              )
+            })}
+          </div>
+
+          <hr className="border-line" />
+
           {saveError && (
             <div className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-sm text-danger">
               {saveError}

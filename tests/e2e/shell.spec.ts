@@ -9,54 +9,51 @@ async function signIn(page: Page, email: string, password: string) {
   await page.waitForURL(/^(?!.*\/login).*$/, { timeout: 30_000 })
 }
 
-test('desktop sidebar shows 280px nav shell with New Session and nav items', async ({ page }) => {
+test('desktop top nav shows logo, nav items, and logout', async ({ page }) => {
   await signIn(page, 'e2e_alice@example.com', 'password')
   await page.setViewportSize({ width: 1280, height: 720 })
   await page.goto('/')
 
-  const sidebar = page.locator('[data-testid="desktop-sidebar"]')
-  await expect(sidebar).toBeVisible()
-  await expect(sidebar).toHaveCSS('width', '280px')
-
-  await expect(page.getByRole('button', { name: 'New Session' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Collection' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Hot' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Groups' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Account' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Settings' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Logout' })).toBeVisible()
+  const nav = page.getByRole('navigation', { name: 'Main' })
+  await expect(nav).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'BoardGameNight' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Collection', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Groups', exact: true })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Account', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Log out', exact: true })).toBeVisible()
 })
 
 test('clicking Collection nav item navigates to /collection', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 })
   await page.goto('/')
 
-  await page.getByRole('link', { name: 'Collection' }).click()
+  await page.getByRole('link', { name: 'Collection', exact: true }).click()
 
   await expect(page).toHaveURL('/collection')
 })
 
-test('mobile hides sidebar and opens sheet drawer from hamburger toggle', async ({ page }) => {
+test('mobile hides desktop links and opens menu from hamburger toggle', async ({ page }) => {
+  await signIn(page, 'e2e_alice@example.com', 'password')
   await page.setViewportSize({ width: 375, height: 667 })
   await page.goto('/')
 
-  await expect(page.locator('[data-testid="desktop-sidebar"]')).not.toBeVisible()
+  await expect(page.getByTestId('mobile-menu')).toHaveCount(0)
 
-  const toggle = page.getByRole('button', { name: 'Open navigation' })
+  const toggle = page.getByRole('button', { name: 'Open menu' })
   await expect(toggle).toBeVisible()
 
   await toggle.click()
 
-  await expect(page.getByRole('link', { name: 'Home' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Collection' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'New Session' })).toBeVisible()
+  const mobileMenu = page.getByTestId('mobile-menu')
+  await expect(mobileMenu).toBeVisible()
+  await expect(mobileMenu.getByRole('link', { name: 'Collection', exact: true })).toBeVisible()
+  await expect(mobileMenu.getByRole('link', { name: 'Groups', exact: true })).toBeVisible()
 })
 
-test('active nav item has primary-container background', async ({ page }) => {
+test('active nav item uses primary text color', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 })
   await page.goto('/collection')
 
-  const collectionLink = page.getByRole('link', { name: 'Collection' })
-  await expect(collectionLink).toHaveClass(/bg-primary-container/)
+  const collectionLink = page.getByRole('link', { name: 'Collection', exact: true })
+  await expect(collectionLink).toHaveClass(/text-primary/)
 })

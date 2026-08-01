@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
@@ -6,10 +7,9 @@ import { dirname } from 'path'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+const repoRoot = resolve(__dirname, '../../')
 
-const fixture = JSON.parse(
-  readFileSync(resolve(__dirname, 'fixtures', 'e2e_group.json'), 'utf-8')
-)
+let fixture: any
 
 async function signIn(page: Page, email: string, password: string) {
   await page.goto('/login')
@@ -19,6 +19,15 @@ async function signIn(page: Page, email: string, password: string) {
   await page.getByRole('button', { name: 'Log in' }).click()
   await page.waitForURL(/^(?!.*\/login).*$/, { timeout: 30_000 })
 }
+
+test.beforeAll(() => {
+  // Reseed before this file so earlier tests (e.g. full_user_flow) don't pollute the group.
+  execSync('bin/e2e-seed', { cwd: repoRoot, stdio: 'ignore' })
+  // Read fixture after reseed so IDs match the freshly seeded database.
+  fixture = JSON.parse(
+    readFileSync(resolve(__dirname, 'fixtures', 'e2e_group.json'), 'utf-8')
+  )
+})
 
 test.describe('group detail', () => {
   test('owner sees header, ordered sessions, and can create a night', async ({ page }) => {
@@ -107,7 +116,7 @@ test.describe('group detail', () => {
     await page.goto(`/g/${inviteCode}`)
 
     await expect(page.getByRole('button', { name: 'Create a night' })).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByText('e2e Night Owls')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'e2e Night Owls', exact: true })).toBeVisible()
     await expect(page.getByText('Upcoming sessions')).toBeVisible()
     await expect(page.getByText('Shared collection spotlight')).toBeVisible()
     await expect(page.getByText('Members').first()).toBeVisible()

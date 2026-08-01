@@ -33,15 +33,16 @@ test.describe('signup flow', () => {
   test('signup → create group → verify group page', async ({ page }) => {
     // 1. Sign up a fresh user
     await page.goto('/signup')
-    await page.waitForSelector('label:has-text("Username")', { timeout: 10_000 })
-    await page.getByLabel('Username').fill(NEW_USER.username)
+    await page.waitForSelector('label:has-text("Email")', { timeout: 10_000 })
+    await page.getByLabel('Name', { exact: true }).fill(NEW_USER.username)
     await page.getByLabel('Email').fill(NEW_USER.email)
     await page.getByLabel('Password').fill(NEW_USER.password)
-    await page.getByRole('button', { name: 'Sign up' }).click()
+    await page.getByLabel('BoardGameGeek username', { exact: true }).fill(NEW_USER.username)
+    await page.getByRole('button', { name: 'Create account' }).click()
     await page.waitForURL(/^(?!.*\/signup).*$/, { timeout: 30_000 })
 
-    // 2. Should land on home page
-    await expect(page).toHaveURL('/', { timeout: 10_000 })
+    // 2. Should land on collection onboarding page
+    await expect(page).toHaveURL('/collection', { timeout: 10_000 })
 
     // 3. Navigate to groups page and create a group
     await page.goto('/groups')
@@ -93,7 +94,7 @@ test.describe('create and schedule session', () => {
     await expect(page.getByText('PICKING', { exact: true })).toBeVisible({ timeout: 10_000 })
 
     // 8. GamePicker should render but show empty state (0 attendees → no suggestions)
-    await expect(page.getByText(/No confirmed players yet|No games fit this night|Game Suggestions/)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('No confirmed players yet')).toBeVisible({ timeout: 10_000 })
   })
 })
 
