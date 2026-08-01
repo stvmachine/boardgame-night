@@ -79,7 +79,7 @@ export type GetNightSessionQueryVariables = Exact<{
 }>;
 
 
-export type GetNightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, timeBudgetMinutes: number, complexityPreference: string, attendeeCount: number, host: { id: string, displayName: string, avatar: string | null }, group: { id: string, name: string }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, displayName: string, avatar: string | null, bggUsername: string | null } }>, pickedGame: { id: string, objectid: string, name: string, thumbnail: string | null, average: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, averageWeight: number | null, bestPlayerCount: number | null } | null, suggestions: Array<{ score: number, confidence: ConfidenceLevel, reasons: Array<string>, breakdown: { playerCountFit: number, timeFit: number, complexityFit: number, communityRating: number, ownershipBonus: number }, thing: { id: string, objectid: string, name: string, thumbnail: string | null, average: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, averageWeight: number | null, bestPlayerCount: number | null } }> | null, scores: Array<{ id: string, score: number, rank: number | null, user: { id: string, displayName: string, avatar: string | null } }> } | null };
+export type GetNightSessionQuery = { nightSession: { id: string, title: string, description: string | null, state: SessionState, scheduledAt: unknown, location: string | null, capacity: number | null, timeBudgetMinutes: number, complexityPreference: string, attendeeCount: number, host: { id: string, displayName: string, avatar: string | null }, group: { id: string, name: string }, attendances: Array<{ id: string, response: string, respondedAt: unknown, user: { id: string, username: string | null, displayName: string, avatar: string | null, bggUsername: string | null } }>, pickedGame: { id: string, objectid: string, name: string, thumbnail: string | null, average: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, averageWeight: number | null, bestPlayerCount: number | null } | null, suggestions: Array<{ score: number, confidence: ConfidenceLevel, reasons: Array<string>, breakdown: { playerCountFit: number, timeFit: number, complexityFit: number, communityRating: number, ownershipBonus: number }, thing: { id: string, objectid: string, name: string, thumbnail: string | null, average: number | null, minPlayers: number | null, maxPlayers: number | null, minPlaytime: number | null, maxPlaytime: number | null, averageWeight: number | null, bestPlayerCount: number | null } }> | null, scores: Array<{ id: string, score: number, rank: number | null, user: { id: string, displayName: string, avatar: string | null } }> } | null };
 
 export type MergedCollectionQueryVariables = Exact<{
   usernames: Array<string> | string;
@@ -635,6 +635,7 @@ export const GetNightSessionDocument = gql`
       respondedAt
       user {
         id
+        username
         displayName
         avatar
         bggUsername

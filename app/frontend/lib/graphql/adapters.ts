@@ -10,11 +10,12 @@ import type { Game, Session, Group, Member, Suggestion } from '@/lib/data'
 
 // Map GqlUser → Member (for UI components expecting Member)
 export function toMember(user: GqlUser): Member {
+  const handle = user.username || user.displayName || user.id || ''
   return {
     id: user.id,
     name: user.displayName,
     bgg: user.bggUsername || '',
-    color: stringToColor(user.username),
+    color: stringToColor(handle),
     online: true,
   }
 }

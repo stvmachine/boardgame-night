@@ -391,6 +391,7 @@ describe('toSuggestion', () => {
 
     expect(result).toEqual({
       gameId: 'feathered-realms',
+      confidence: 'HIGH',
       match: 94,
       votes: 4,
       reasons: expect.arrayContaining([

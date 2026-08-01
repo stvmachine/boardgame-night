@@ -140,7 +140,7 @@ function DraftScheduleForm({
       })
       const updated = result.data?.scheduleSession?.session
       if (updated) {
-        onScheduled(updated as NightSession)
+        onScheduled({ ...session, ...updated } as NightSession)
       }
     } catch (err) {
       setError(err instanceof Error ? `Could not schedule: ${err.message}` : 'Could not schedule the session.')
@@ -209,7 +209,7 @@ function StartPickingButton({
       const result = await startPicking({ variables: { sessionId: session.id } })
       const updated = result.data?.startPicking?.session
       if (updated) {
-        onStarted(updated as NightSession)
+        onStarted({ ...session, ...updated } as NightSession)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not start picking.')
@@ -240,10 +240,16 @@ function SessionRsvpCard({ attendances }: { attendances: Attendance[] }) {
 
   return (
     <Card className="flex flex-col gap-4 p-5">
-      <h2 className="text-sm font-semibold text-ink">
-        <Users className="mr-1.5 inline size-4" aria-hidden="true" />
-        RSVPs ({going.length}/{attendances.length})
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-ink">
+          <Users className="mr-1.5 inline size-4" aria-hidden="true" />
+          RSVPs ({going.length}/{attendances.length})
+        </h2>
+        <div className="flex items-center gap-1.5 text-sm text-ink-secondary">
+          <span className="font-semibold text-ink">{going.length}</span>
+          <span>going</span>
+        </div>
+      </div>
       <Progress
         value={attendances.length > 0 ? (going.length / attendances.length) * 100 : 0}
         barClassName="bg-success"
@@ -427,7 +433,7 @@ function SessionDetailsEditor({
       })
       const updated = result.data?.updateSessionDetails?.session
       if (updated) {
-        onUpdated(updated as NightSession)
+        onUpdated({ ...session, ...updated } as NightSession)
         setIsOpen(false)
       }
     } catch (err) {
@@ -604,7 +610,7 @@ function PickingView({
       const result = await pickGame({ variables: { sessionId: session.id, gameId } })
       const updated = result.data?.pickGame?.session
       if (updated) {
-        onPicked(updated as NightSession)
+        onPicked({ ...session, ...updated } as NightSession)
       }
     } catch (err) {
       setPickError(err instanceof Error ? err.message : 'Could not pick game.')
@@ -651,7 +657,7 @@ function PickingView({
                   game={game}
                   suggestion={uiSuggestion}
                   isHost={isHost}
-                  onPick={() => handlePick(game.id)}
+                  onPick={() => handlePick(suggestion.thing.id)}
                   picking={picking}
                   pickError={index === 0 ? pickError : null}
                 />

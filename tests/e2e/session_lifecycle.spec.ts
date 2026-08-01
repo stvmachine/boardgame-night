@@ -51,7 +51,7 @@ test('picking lifecycle: host edits, member views, host picks, completed summary
     await hostPage.reload()
     await expect(hostPage.getByText('1', { exact: true })).toBeVisible({ timeout: 10_000 })
     await hostPage.getByRole('button', { name: 'Start picking' }).click()
-    await expect(hostPage.getByText('Picking', { exact: true })).toBeVisible({ timeout: 10_000 })
+    await expect(hostPage.getByText('PICKING', { exact: true })).toBeVisible({ timeout: 10_000 })
     await expect(hostPage.getByRole('heading', { name: /Game Suggestions \(Filtered for \d+ Players\)/ })).toBeVisible()
     await expect(hostPage.getByText('Up to 120 min', { exact: true })).toBeVisible()
     await expect(hostPage.getByText('Any complexity', { exact: true })).toBeVisible()
@@ -95,7 +95,7 @@ test('picking lifecycle: host edits, member views, host picks, completed summary
     await hostPage.getByRole('button', { name: 'Save details' }).click()
     await expect(hostPage.getByRole('dialog', { name: 'Edit session details' })).not.toBeVisible()
     await expect(hostPage.getByRole('heading', { name: 'Updated Picking Night' })).toBeVisible()
-    await expect(hostPage.getByText('Picking', { exact: true })).toBeVisible()
+    await expect(hostPage.getByText('PICKING', { exact: true })).toBeVisible()
 
     // Host opens the reason disclosure with the keyboard
     const wingspanCard = hostPage.locator('[data-testid="game-card"]', { has: hostPage.getByRole('heading', { name: 'Wingspan' }) })

@@ -90,7 +90,7 @@ test.describe('create and schedule session', () => {
 
     // 7. Start picking (as host) — no suggestions yet since no attendees RSVPed
     await page.getByRole('button', { name: 'Start picking' }).click()
-    await expect(page.getByText('Picking', { exact: true })).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('PICKING', { exact: true })).toBeVisible({ timeout: 10_000 })
 
     // 8. GamePicker should render but show empty state (0 attendees → no suggestions)
     await expect(page.getByText(/No confirmed players yet|No games fit this night|Game Suggestions/)).toBeVisible({ timeout: 10_000 })
@@ -110,7 +110,7 @@ test.describe('pick game from seeded session', () => {
     await page.goto(`/s/${pickingId}`)
 
     // 3. Should show PICKING state with suggestions (alice+bob have collection items)
-    await expect(page.getByText('Picking', { exact: true })).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText('PICKING', { exact: true })).toBeVisible({ timeout: 10_000 })
     await expect(page.getByRole('heading', { name: /Game Suggestions/ })).toBeVisible({ timeout: 10_000 })
 
     // 4. Pick the first suggested game

@@ -1,13 +1,13 @@
 {
-  "group_id": "32",
+  "group_id": "33",
   "invite_code": "E2ENIGHTOWLS",
   "owner_email": "e2e_alice@example.com",
   "member_email": "e2e_bob@example.com",
   "session_ids": {
-    "picking": "32",
-    "invited": "31",
-    "draft": "33",
-    "completed": "34",
-    "cancelled": "35"
+    "picking": "165",
+    "invited": "164",
+    "draft": "166",
+    "completed": "167",
+    "cancelled": "168"
   }
 }

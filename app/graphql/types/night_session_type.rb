@@ -36,6 +36,10 @@ module Types
       end
     end
 
+    def scores
+      object.game_scores.includes(:user).to_a
+    end
+
     def suggestions
       require_authentication!
       raise GraphQL::ExecutionError, "Unauthorized" unless group_member?(context[:current_user])

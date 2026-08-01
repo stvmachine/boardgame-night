@@ -146,6 +146,7 @@ export const GET_NIGHT_SESSION = gql`
         respondedAt
         user {
           id
+          username
           displayName
           avatar
           bggUsername

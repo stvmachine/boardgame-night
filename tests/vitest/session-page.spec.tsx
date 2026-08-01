@@ -503,7 +503,7 @@ describe('SessionPage PICKING state', () => {
 
     await user.click(screen.getByRole('button', { name: 'Pick this game' }))
 
-    await waitFor(() => expect(mutate).toHaveBeenCalledWith(expect.objectContaining({ variables: { sessionId: 'session-1', gameId: '12345' } })))
+    await waitFor(() => expect(mutate).toHaveBeenCalledWith(expect.objectContaining({ variables: { sessionId: 'session-1', gameId: 'game-1' } })))
     await waitFor(() => expect(screen.getByText('COMPLETED')).toBeInTheDocument())
     expect(screen.getByText('Picked game')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Wingspan' })).toBeInTheDocument()
