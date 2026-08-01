@@ -1,91 +1,121 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it, vi } from 'vitest'
 import { GameCard } from '@/components/game-card'
 import { games } from './fixtures/sample-data'
 
-const game = games[0] // Feathered Realms
+const game = {
+  ...games[0],
+  description: 'Build a thriving preserve with cards & clever combos.',
+  lastPlayedAt: '2026-07-18T18:00:00Z',
+}
 
 describe('GameCard', () => {
-  it('renders game title', () => {
+  it.each(['grid', 'list'] as const)(
+    'renders complete rich-card anatomy in the %s variant',
+    (variant) => {
+      render(<GameCard game={game} variant={variant} />)
+
+      const card = screen.getByTestId('game-card')
+      expect(card).toHaveAttribute('data-variant', variant)
+      expect(card.tagName).toBe('ARTICLE')
+      expect(within(card).getByRole('img')).toHaveAttribute('src', game.cover)
+      expect(within(card).getByRole('img')).toHaveAttribute(
+        'alt',
+        'Feathered Realms box cover',
+      )
+      expect(within(card).getByTestId('game-description')).toHaveTextContent(game.description)
+      expect(within(card).getByLabelText('Owned by alex, sam, jordan')).toBeInTheDocument()
+
+      const footer = within(card).getByTestId('game-card-footer')
+      expect(within(footer).getByText('1–5')).toBeInTheDocument()
+      expect(within(footer).getByText('60m')).toBeInTheDocument()
+      expect(within(footer).getByText('2.4')).toBeInTheDocument()
+    },
+  )
+
+  it('uses one isolated overlay link with the real BGG identity', () => {
     render(<GameCard game={game} />)
-    expect(screen.getByText('Feathered Realms')).toBeInTheDocument()
-  })
 
-  it('renders cover image with alt text', () => {
-    render(<GameCard game={game} />)
-    const img = screen.getByRole('img')
-    expect(img).toHaveAttribute('src', game.cover)
-    expect(img).toHaveAttribute('alt', 'Feathered Realms box cover')
-  })
+    const card = screen.getByTestId('game-card')
+    const link = within(card).getByRole('link', {
+      name: 'View Feathered Realms on BoardGameGeek',
+    })
 
-  it('renders fallback placeholder when cover is empty', () => {
-    const noCover = { ...game, cover: '' }
-    render(<GameCard game={noCover} />)
-    const img = screen.getByRole('img')
-    expect(img).toHaveAttribute('src', '/placeholder.svg')
-  })
-
-  it('renders player count range', () => {
-    render(<GameCard game={game} />)
-    expect(screen.getByText('1–5')).toBeInTheDocument()
-  })
-
-  it('renders play time', () => {
-    render(<GameCard game={game} />)
-    expect(screen.getByText('60m')).toBeInTheDocument()
-  })
-
-  it('renders rating', () => {
-    render(<GameCard game={game} />)
-    expect(screen.getByText('8.1')).toBeInTheDocument()
-  })
-
-  it('renders category pills (first two categories)', () => {
-    render(<GameCard game={game} />)
-    expect(screen.getByText('Strategy')).toBeInTheDocument()
-    expect(screen.getByText('Engine Building')).toBeInTheDocument()
-  })
-
-  it('renders "+N" for extra categories beyond two', () => {
-    // Feathered Realms has 3 categories: Strategy, Engine Building, Nature
-    render(<GameCard game={game} />)
-    expect(screen.getByText('+1')).toBeInTheDocument()
-  })
-
-  it('does not render "+N" when 2 or fewer categories', () => {
-    const twoCat = games.find((g) => g.categories.length === 2)!
-    render(<GameCard game={twoCat} />)
-    expect(screen.queryByText(/^\+\d+$/)).not.toBeInTheDocument()
-  })
-
-  it('renders "Owned" badge when owned is true', () => {
-    render(<GameCard game={game} owned={true} />)
-    expect(screen.getByText('Owned')).toBeInTheDocument()
-  })
-
-  it('does not render "Owned" badge when owned is false', () => {
-    render(<GameCard game={game} owned={false} />)
-    expect(screen.queryByText('Owned')).not.toBeInTheDocument()
-  })
-
-  it('does not render "Owned" badge by default', () => {
-    render(<GameCard game={game} />)
-    expect(screen.getByText('Owned')).toBeInTheDocument() // owned defaults to true
-  })
-
-  it('accepts and applies className', () => {
-    const { container } = render(
-      <GameCard game={game} className="custom-class" />,
+    expect(card).not.toHaveAttribute('role', 'button')
+    expect(card).not.toHaveAttribute('tabindex')
+    expect(within(card).getAllByRole('link')).toHaveLength(1)
+    expect(link).toHaveAttribute(
+      'href',
+      `https://boardgamegeek.com/boardgame/${encodeURIComponent(game.id)}`,
     )
-    const article = container.querySelector('article')
-    expect(article?.className).toContain('custom-class')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
-  it('accepts and applies style prop', () => {
-    const { container } = render(
-      <GameCard game={game} style={{ opacity: 0.5 }} />,
+  it('keeps nested controls independently keyboard operable', async () => {
+    const user = userEvent.setup()
+    const onAction = vi.fn()
+    render(
+      <GameCard
+        game={game}
+        actions={
+          <button type="button" onClick={onAction}>
+            Save game
+          </button>
+        }
+      />,
     )
-    const article = container.querySelector('article')
-    expect(article?.style.opacity).toBe('0.5')
+
+    const card = screen.getByTestId('game-card')
+    const link = within(card).getByRole('link')
+    const button = within(card).getByRole('button', { name: 'Save game' })
+
+    expect(link.contains(button)).toBe(false)
+    await user.tab()
+    expect(link).toHaveFocus()
+    await user.tab()
+    expect(button).toHaveFocus()
+    await user.keyboard('{Enter}')
+    expect(onAction).toHaveBeenCalledOnce()
+  })
+
+  it('renders description as escaped plain text', () => {
+    const { container } = render(
+      <GameCard game={{ ...game, description: '<strong>Not markup</strong>' }} />,
+    )
+
+    expect(screen.getByTestId('game-description')).toHaveTextContent(
+      '<strong>Not markup</strong>',
+    )
+    expect(container.querySelector('strong')).toBeNull()
+  })
+
+  it('renders a visible image fallback without changing its accessible name', () => {
+    render(<GameCard game={{ ...game, cover: '' }} />)
+
+    expect(screen.getByRole('img', { name: 'Feathered Realms box cover' })).toHaveAttribute(
+      'src',
+      '/placeholder.svg',
+    )
+  })
+
+  it('caps the visible owner stack and announces overflow', () => {
+    render(
+      <GameCard
+        game={{ ...game, owners: ['alex', 'sam', 'jordan', 'riley', 'casey'] }}
+      />,
+    )
+
+    const owners = screen.getByLabelText('Owned by alex, sam, jordan, riley, casey')
+    expect(within(owners).getByText('+2')).toBeInTheDocument()
+  })
+
+  it('accepts className and style props on the article', () => {
+    render(<GameCard game={game} className="custom-class" style={{ opacity: 0.5 }} />)
+
+    const card = screen.getByTestId('game-card')
+    expect(card).toHaveClass('custom-class')
+    expect(card).toHaveStyle({ opacity: 0.5 })
   })
 })
