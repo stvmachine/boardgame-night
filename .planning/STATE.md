@@ -5,15 +5,15 @@ milestone_name: React Migration & Parity
 current_phase: 13
 current_phase_name: react-migration-parity
 status: executing
-stopped_at: Completed 13-04-PLAN.md
-last_updated: "2026-08-01T12:46:28.140Z"
+stopped_at: Completed 13-05-PLAN.md
+last_updated: "2026-08-01T14:32:21.364Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed Phase 13 Plan 04 Group Detail parity
+last_activity_desc: Completed Phase 13 Plan 05 past-session and invite RSVP parity
 progress:
   total_phases: 13
   completed_phases: 11
   total_plans: 69
-  completed_plans: 61
+  completed_plans: 62
 ---
 
 # Project State
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 ## Current Position
 
 Phase: 13 (react-migration-parity) — EXECUTING
-Plan: 5 of 6
-Status: Ready to execute Plan 13-05
-Last activity: 2026-08-01 — Completed Phase 13 Plan 04 Group Detail parity
+Plan: 6 of 6
+Status: Ready to execute Plan 13-06
+Last activity: 2026-08-01 — Completed Phase 13 Plan 05 past-session and invite RSVP parity
 
 ## Performance Metrics
 
@@ -103,6 +103,7 @@ Last activity: 2026-08-01 — Completed Phase 13 Plan 04 Group Detail parity
 | Phase 13 P02 | 18 min | 3 tasks | 16 files |
 | Phase 13 P03 | 43 min | 3 tasks | 12 files |
 | Phase 13 P04 | 22 min | 3 tasks | 2 files |
+| Phase 13-react-migration-parity P05 | 69 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -209,6 +210,10 @@ Recent decisions affecting current work:
 - [Phase 13-04]: Preserve backend session order and role-filtered visibility instead of duplicating sorting or authorization in React.
 - [Phase 13-04]: Allow admins to remove non-owner peers, including other admins, while reserving role changes for owners and re-authorizing every mutation on Rails.
 - [Phase 13-04]: Keep Play History after the five required coordination sections so it remains reachable without displacing the approved hub order.
+- [Phase ?]: [Phase 13-05] Kept past-session list in server order rather than re-sorting client-side, matching Group Detail session-list behavior.
+- [Phase ?]: [Phase 13-05] Used title-case 'Going' / 'Not Going' UI labels while sending lowercase 'going' / 'not_going' response values to Rails.
+- [Phase ?]: [Phase 13-05] Stored successful RSVP response in local component state derived from the mutation return instead of manual cache writes.
+- [Phase ?]: [Phase 13-05] Showed sign-in link with return-path query parameter for signed-out invite viewers rather than auto-redirecting.
 
 ### Pending Todos
 
@@ -244,8 +249,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-01T12:46:28.123Z
-Stopped at: Completed 13-04-PLAN.md
+Last session: 2026-08-01T14:32:21.348Z
+Stopped at: Completed 13-05-PLAN.md
 Resume file: None
 
 ### Recent Session Activity
