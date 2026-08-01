@@ -5,8 +5,8 @@ milestone_name: React Migration & Parity
 current_phase: 12
 current_phase_name: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
 status: planning
-stopped_at: Completed 13-06-PLAN.md
-last_updated: "2026-08-01T18:02:53.915Z"
+stopped_at: Phase 12 context gathered
+last_updated: "2026-08-01T18:12:52.463Z"
 last_activity: 2026-08-02
 last_activity_desc: Phase 13 complete, transitioned to Phase 12
 progress:
@@ -252,9 +252,9 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-02T00:00:00Z
-Stopped at: Phase 13 complete, ready to plan Phase 12
-Resume file: None
+Last session: 2026-08-01T18:12:52.445Z
+Stopped at: Phase 12 context gathered
+Resume file: .planning/phases/12-dev-blog-engine/12-CONTEXT.md
 
 ### Recent Session Activity
 
