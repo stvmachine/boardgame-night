@@ -18,13 +18,10 @@ Let a group of friends merge their BGG collections and pick games everyone can p
 - ✓ Tabletop Social design system and responsive app shell provide Material 3 tokens, shared primitives, navigation, badges, avatars, and skeletons — Phase 5
 - ✓ Home and Collection deliver the merge dashboard, personal stats, persisted trending games, rich filters, exact sorting, grid/list cards, and view-matched loading states — Phase 9
 - ✓ Picking a Game delivers the responsive session header, host-only ordinary-details editing, attendee-aware top-eight explainable suggestions, role-correct pick controls, and normalized completion — Phase 10
+- ✓ React 19 is the sole deployed frontend; auth, collection, group, invitation, RSVP, session, suggestion, and game-picking journeys retain Tabletop Social parity with React tooling and no Vue runtime/source remaining — Phase 13
 
 ### Active
 
-- [ ] React fully replaces Vue while preserving every existing product journey and the Tabletop Social interface
-- [ ] Auth, collection merge/browse, groups, invitations, sessions, RSVP, suggestions, and game picking work end to end in React
-- [ ] Frontend and Rails/GraphQL defects exposed by parity verification are repaired
-- [ ] React tests and production delivery replace Vue tooling; Vue source and dependencies are removed after parity is proven
 - [ ] Dev blog (`docs/development/`) ships with a pure-Ruby SSG, architecture posts, Kamal build integration, and subdomain routing
 
 ### Out of Scope
@@ -78,7 +75,7 @@ For this rewrite:
 | v1.1 = UI redesign + suggestion engine | Reskin with Stitch "Tabletop Social" design, build Group Detail surface, ship poll-based suggestion engine | — In progress |
 | Vue 3.5 SPA with Apollo 3.13 + @vue/apollo-composable 4.2.2 | Apollo 4 + composable v5 still in beta (incompatible) | ⚠️ Superseded in v2.0 by the approved full React replacement |
 | Deterministic poll-based suggestion scoring | Keep rankings reproducible and explainable with fixed player/time/complexity/rating/ownership weights | ✅ Phase 7 — GraphQL exposes an authenticated, attendee-aware top-eight shortlist from persisted BGG data with no live BGG calls |
-| v2.0 = complete React replacement with Vue parity | React must become the sole frontend without regressing the shipped product, design system, responsive behavior, or accessibility | — Pending |
+| v2.0 = complete React replacement with Vue parity | React must become the sole frontend without regressing the shipped product, design system, responsive behavior, or accessibility | ✅ Phase 13 — React-only delivery and full parity verified |
 | Carry unfinished v1.2 dev-blog work into v2.0 | Preserve BLOG-01 through BLOG-05 instead of discarding the planned documentation capability | — Pending |
 
 ## Current Milestone: v2.0 React Migration & Parity
@@ -111,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-07-30 after milestone v2.0 started (React Migration & Parity)*
+*Last updated: 2026-08-02 after Phase 13 React Migration Parity completion*

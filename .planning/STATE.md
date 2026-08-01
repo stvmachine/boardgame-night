@@ -57,7 +57,6 @@ Last activity: 2026-08-02 — Phase 13 complete, transitioned to Phase 12
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
 | 12. Dev Blog Engine | 0/6 | Pending carried scope | — |
 | 13. React Migration Parity | 6/6 | 309 min | ~52 min |
-| 13 | 6 | - | - |
 
 **Recent Trend:**
 
