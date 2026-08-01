@@ -198,6 +198,8 @@ describe('toGame', () => {
       categories: [],
       owners: ['alex123', 'samplays'],
       addedAt: '2026-07-18',
+      description: 'A game about birds',
+      lastPlayedAt: '2026-07-18',
     })
   })
 
