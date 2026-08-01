@@ -1,7 +1,10 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.1.3"
+gem "rails", "~> 8.1.3", ">= 8.1.3.1"
+# Pull patched transitive sanitizer/loofah versions surfaced by bundler-audit.
+gem "rails-html-sanitizer", ">= 1.7.1"
+gem "loofah", ">= 2.25.2"
 # Use sqlite3 as the database for Active Record
 gem "sqlite3", ">= 2.1"
 # Use the Puma web server [https://github.com/puma/puma]
@@ -53,7 +56,7 @@ end
 
 gem "vite_rails", "~> 3.11"
 
-gem "graphql", "~> 2.6"
+gem "graphql", "~> 2.6", ">= 2.6.6"
 
 gem "bcrypt", "~> 3.1"
 

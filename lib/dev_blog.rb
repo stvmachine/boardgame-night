@@ -5,6 +5,7 @@ require "date"
 require "erb"
 require "fileutils"
 require "kramdown"
+require "nokogiri"
 require "pathname"
 require "psych"
 
@@ -89,11 +90,42 @@ module DevBlog
     end
   end
 
+  class HtmlSanitizer
+    UNSAFE_TAGS = %w[script style iframe object embed form input textarea button].freeze
+    EVENT_ATTR_PATTERN = /\Aon/i
+
+    def self.sanitize(html)
+      fragment = Nokogiri::HTML5.fragment(html)
+      sanitize_node(fragment)
+      fragment.to_html
+    end
+
+    def self.sanitize_node(node)
+      node.children.each do |child|
+        if child.element?
+          if UNSAFE_TAGS.include?(child.name)
+            child.replace(Nokogiri::HTML5.fragment(escape_text(child.to_html)))
+          else
+            child.attribute_nodes.each do |attr|
+              child.remove_attribute(attr.name) if attr.name.match?(EVENT_ATTR_PATTERN)
+            end
+            sanitize_node(child)
+          end
+        end
+      end
+    end
+
+    def self.escape_text(text)
+      text.gsub(/[<>&"]/) { |char| "&##{char.ord};" }
+    end
+  end
+
   class MarkdownConverter
     UNSAFE_SCHEMES = %w[javascript data vbscript file].freeze
 
     def self.convert(markdown)
       html = Kramdown::Document.new(markdown, kramdown_options).to_html
+      html = HtmlSanitizer.sanitize(html)
       sanitize_links(html)
     end
 
