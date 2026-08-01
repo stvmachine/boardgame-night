@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   updateRoleMutation: vi.fn(),
   inviteHook: vi.fn(),
   inviteMutation: vi.fn(),
+  clipboardWrite: vi.fn(),
   setActiveGroup: vi.fn(),
   currentUserId: 'owner-user',
 }))
@@ -161,6 +162,11 @@ beforeEach(() => {
   mocks.currentUserId = 'owner-user'
   mocks.createOptions = null
   mocks.removeOptions = null
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText: mocks.clipboardWrite },
+  })
+  mocks.clipboardWrite.mockResolvedValue(undefined)
   mocks.createMutation.mockResolvedValue({
     data: {
       createNightSession: {
@@ -191,6 +197,18 @@ beforeEach(() => {
     },
   })
   mocks.updateRoleHook.mockReturnValue([mocks.updateRoleMutation, { loading: false, error: undefined }])
+  mocks.inviteMutation.mockResolvedValue({
+    data: {
+      inviteToGroup: {
+        inviteToken: {
+          id: 'invite-1',
+          token: 'invite-token',
+          email: 'friend@example.com',
+          status: 'PENDING',
+        },
+      },
+    },
+  })
   mocks.inviteHook.mockReturnValue([mocks.inviteMutation, { loading: false, error: undefined }])
 })
 
@@ -400,5 +418,103 @@ describe('GroupPage collection spotlight and members', () => {
 
     expect(await screen.findByText('Removal failed')).toBeInTheDocument()
     expect(screen.getByRole('alert')).toHaveTextContent('Remove Bob Member?')
+  })
+})
+
+describe('GroupPage invitations and integrated order', () => {
+  it('shows manager invitation controls with the canonical link and hides them from members', () => {
+    renderGroup()
+
+    expect(screen.getByRole('heading', { name: 'Invite people' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Invite link')).toHaveValue(
+      `${window.location.origin}/g/NIGHTOWLS`,
+    )
+    expect(screen.getByRole('button', { name: 'Copy' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Admin' })).toBeInTheDocument()
+
+    cleanup()
+    mocks.currentUserId = 'member-user'
+    renderGroup(buildGroup('MEMBER'))
+    expect(screen.queryByRole('heading', { name: 'Invite people' })).not.toBeInTheDocument()
+  })
+
+  it('copies the canonical group URL and announces success politely', async () => {
+    const user = userEvent.setup()
+    renderGroup()
+
+    await user.click(screen.getByRole('button', { name: 'Copy' }))
+
+    expect(mocks.clipboardWrite).toHaveBeenCalledWith(`${window.location.origin}/g/NIGHTOWLS`)
+    const copied = await screen.findByText('Copied!')
+    expect(copied).toBeInTheDocument()
+    expect(copied.closest('[aria-live="polite"]')).not.toBeNull()
+  })
+
+  it('validates email, sends the owner-selected role, and resets only after success', async () => {
+    const user = userEvent.setup()
+    renderGroup()
+
+    await user.click(screen.getByRole('button', { name: 'Send invite' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('Enter an email address.')
+    expect(mocks.inviteMutation).not.toHaveBeenCalled()
+
+    const email = screen.getByPlaceholderText('Email address')
+    const role = screen.getByLabelText('Role')
+    await user.type(email, 'friend@example.com')
+    await user.selectOptions(role, 'ADMIN')
+    await user.click(screen.getByRole('button', { name: 'Send invite' }))
+
+    expect(mocks.inviteMutation).toHaveBeenCalledWith({
+      variables: { email: 'friend@example.com', groupId: 'group-1', role: 'ADMIN' },
+    })
+    await waitFor(() => {
+      expect(email).toHaveValue('')
+      expect(role).toHaveValue('MEMBER')
+    })
+  })
+
+  it('limits admins to member invitations and preserves form values after an error', async () => {
+    const user = userEvent.setup()
+    mocks.currentUserId = 'admin-user'
+    const group = buildGroup('ADMIN')
+    addAdmin(group)
+    mocks.inviteMutation.mockRejectedValueOnce(new Error('Invite failed'))
+    renderGroup(group)
+
+    expect(screen.queryByRole('option', { name: 'Admin' })).not.toBeInTheDocument()
+    const email = screen.getByPlaceholderText('Email address')
+    const role = screen.getByLabelText('Role')
+    await user.type(email, 'friend@example.com')
+    await user.click(screen.getByRole('button', { name: 'Send invite' }))
+
+    expect(mocks.inviteMutation).toHaveBeenCalledWith({
+      variables: { email: 'friend@example.com', groupId: 'group-1', role: 'MEMBER' },
+    })
+    expect(await screen.findByRole('alert')).toHaveTextContent('Invite failed')
+    expect(email).toHaveValue('friend@example.com')
+    expect(role).toHaveValue('MEMBER')
+  })
+
+  it('keeps the five coordination sections in mobile source order before Play History', () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 375 })
+    window.dispatchEvent(new Event('resize'))
+    renderGroup()
+
+    const page = screen.getByTestId('group-page')
+    expect(page).toHaveClass('min-w-0', 'overflow-x-clip')
+
+    const sectionHeadings = [
+      screen.getByRole('heading', { name: 'Upcoming sessions' }),
+      screen.getByRole('heading', { name: 'Shared collection spotlight' }),
+      screen.getByRole('heading', { name: 'Members' }),
+      screen.getByRole('heading', { name: 'Invite people' }),
+      screen.getByRole('heading', { name: 'Play History' }),
+    ]
+    sectionHeadings.slice(0, -1).forEach((heading, index) => {
+      expect(
+        heading.compareDocumentPosition(sectionHeadings[index + 1]) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy()
+    })
   })
 })
