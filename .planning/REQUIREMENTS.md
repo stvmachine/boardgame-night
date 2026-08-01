@@ -73,7 +73,7 @@ Requirements for the active React Migration & Parity milestone. Each requirement
 - [x] **RMP-01**: React fully replaces Vue while preserving every existing product journey and the Tabletop Social interface
 - [x] **RMP-02**: Auth, collection merge/browse, groups, invitations, sessions, RSVP, suggestions, and game picking work end to end in React
 - [x] **RMP-03**: Frontend and Rails/GraphQL defects exposed by parity verification are repaired without weakening the existing product contracts
-- [ ] **RMP-04**: React tests, GraphQL code generation, and production delivery replace Vue tooling; Vue source and dependencies are absent after parity is proven
+- [x] **RMP-04**: React tests, GraphQL code generation, and production delivery replace Vue tooling; Vue source and dependencies are absent after parity is proven
 - [x] **RMP-05**: The existing Playwright end-to-end acceptance suite passes against the React frontend
 
 ## Carried v2.0 Requirements — Dev Blog & Architecture Docs

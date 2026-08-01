@@ -4,16 +4,16 @@ milestone: v2.0
 milestone_name: React Migration & Parity
 current_phase: 13
 current_phase_name: react-migration-parity
-status: executing
-stopped_at: Completed 13-05-PLAN.md
-last_updated: "2026-08-01T14:32:21.364Z"
-last_activity: 2026-08-01
-last_activity_desc: Completed Phase 13 Plan 05 past-session and invite RSVP parity
+status: ready_for_verification
+stopped_at: Completed 13-06-PLAN.md
+last_updated: "2026-08-01T17:21:11.963Z"
+last_activity: 2026-08-02
+last_activity_desc: Completed Phase 13 Plan 06 React session lifecycle and cutover parity
 progress:
   total_phases: 13
-  completed_phases: 11
+  completed_phases: 12
   total_plans: 69
-  completed_plans: 62
+  completed_plans: 63
 ---
 
 # Project State
@@ -27,10 +27,10 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 
 ## Current Position
 
-Phase: 13 (react-migration-parity) — EXECUTING
-Plan: 6 of 6
-Status: Ready to execute Plan 13-06
-Last activity: 2026-08-01 — Completed Phase 13 Plan 05 past-session and invite RSVP parity
+Phase: 13 (react-migration-parity) — READY FOR VERIFICATION
+Plan: 6 of 6 (all complete)
+Status: Completed Plan 13-06 — React session lifecycle & cutover
+Last activity: 2026-08-02 — Completed Phase 13 Plan 06 React session lifecycle and cutover parity
 
 ## Performance Metrics
 
@@ -104,6 +104,7 @@ Last activity: 2026-08-01 — Completed Phase 13 Plan 05 past-session and invite
 | Phase 13 P03 | 43 min | 3 tasks | 12 files |
 | Phase 13 P04 | 22 min | 3 tasks | 2 files |
 | Phase 13-react-migration-parity P05 | 69 min | 2 tasks | 5 files |
+| Phase 13-react-migration-parity P06 | 151 | 3 tasks | 30 files |
 
 ## Accumulated Context
 
@@ -214,6 +215,9 @@ Recent decisions affecting current work:
 - [Phase ?]: [Phase 13-05] Used title-case 'Going' / 'Not Going' UI labels while sending lowercase 'going' / 'not_going' response values to Rails.
 - [Phase ?]: [Phase 13-05] Stored successful RSVP response in local component state derived from the mutation return instead of manual cache writes.
 - [Phase ?]: [Phase 13-05] Showed sign-in link with return-path query parameter for signed-out invite viewers rather than auto-redirecting.
+- [Phase ?]: Default app theme is light to match E2E accessibility contracts; users can switch to dark or system
+- [Phase ?]: Auth state is data-driven via useEffect on currentUserData; token is only cleared when server explicitly returns currentUser: null
+- [Phase ?]: E2E fixtures are read dynamically after reseed so static import caching cannot use stale IDs
 
 ### Pending Todos
 
@@ -249,8 +253,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-01T14:32:21.348Z
-Stopped at: Completed 13-05-PLAN.md
+Last session: 2026-08-01T17:21:11.945Z
+Stopped at: Completed 13-06-PLAN.md
 Resume file: None
 
 ### Recent Session Activity
