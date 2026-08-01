@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   createOptions: null as any,
   removeHook: vi.fn(),
   removeMutation: vi.fn(),
+  removeOptions: null as any,
   updateRoleHook: vi.fn(),
   updateRoleMutation: vi.fn(),
   inviteHook: vi.fn(),
@@ -122,6 +123,17 @@ function buildGroup(role: 'OWNER' | 'ADMIN' | 'MEMBER' = 'OWNER') {
   }
 }
 
+function addAdmin(group: ReturnType<typeof buildGroup>, id = 'admin-user', name = 'Annie Admin') {
+  group.members.push({
+    id,
+    displayName: name,
+    bggUsername: 'annie',
+    avatar: null,
+    isProvisional: false,
+  })
+  group.memberships.push({ id: `membership-${id}`, role: 'ADMIN', user: { id } })
+}
+
 function LocationProbe() {
   const location = useLocation()
   return <output>{`${location.pathname}${location.search}`}</output>
@@ -148,6 +160,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mocks.currentUserId = 'owner-user'
   mocks.createOptions = null
+  mocks.removeOptions = null
   mocks.createMutation.mockResolvedValue({
     data: {
       createNightSession: {
@@ -159,7 +172,24 @@ beforeEach(() => {
     mocks.createOptions = options
     return [mocks.createMutation, { loading: false, error: undefined }]
   })
-  mocks.removeHook.mockReturnValue([mocks.removeMutation, { loading: false, error: undefined }])
+  mocks.removeMutation.mockResolvedValue({
+    data: { removeGroupMember: { success: true, removedMembershipId: 'membership-member' } },
+  })
+  mocks.removeHook.mockImplementation((options) => {
+    mocks.removeOptions = options
+    return [mocks.removeMutation, { loading: false, error: undefined }]
+  })
+  mocks.updateRoleMutation.mockResolvedValue({
+    data: {
+      updateGroupMemberRole: {
+        membership: {
+          id: 'membership-member',
+          role: 'ADMIN',
+          user: { id: 'member-user', displayName: 'Bob Member' },
+        },
+      },
+    },
+  })
   mocks.updateRoleHook.mockReturnValue([mocks.updateRoleMutation, { loading: false, error: undefined }])
   mocks.inviteHook.mockReturnValue([mocks.inviteMutation, { loading: false, error: undefined }])
 })
@@ -239,5 +269,136 @@ describe('GroupPage header and upcoming sessions', () => {
         ['alice', 'bob'],
       )
     })
+  })
+})
+
+describe('GroupPage collection spotlight and members', () => {
+  it('renders up to four server-returned spotlight games with owner attribution and safe links', () => {
+    const group = buildGroup() as any
+    group.collectionSpotlight = Array.from({ length: 5 }, (_, index) => ({
+      id: `thing-${index + 1}`,
+      objectid: String(100 + index),
+      name: index === 0 ? 'Brass: Birmingham' : `Game ${index + 1}`,
+      thumbnail: index === 0 ? 'https://example.com/brass.jpg' : null,
+      average: index === 0 ? 8.6 : 7.2,
+      owners: [{ bggUsername: 'alice' }, { bggUsername: 'bob' }],
+    }))
+
+    renderGroup(group)
+
+    expect(screen.getByRole('heading', { name: 'Shared collection spotlight' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Browse Library' })).toHaveAttribute(
+      'href',
+      '/collection?group=NIGHTOWLS',
+    )
+    expect(screen.getAllByTestId('spotlight-game')).toHaveLength(4)
+    expect(screen.getAllByText('alice')).not.toHaveLength(0)
+    const brassLink = screen.getByRole('link', {
+      name: 'Brass: Birmingham on BoardGameGeek (opens in a new tab)',
+    })
+    expect(brassLink).toHaveAttribute('href', 'https://boardgamegeek.com/boardgame/100')
+    expect(brassLink).toHaveAttribute('target', '_blank')
+    expect(brassLink).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('renders the approved spotlight empty state', () => {
+    renderGroup()
+
+    expect(screen.getByRole('heading', { name: 'The shared library is empty' })).toBeInTheDocument()
+    expect(
+      screen.getByText('Members’ collections will appear once they bind their BGG usernames.'),
+    ).toBeInTheDocument()
+  })
+
+  it('shows owner role changes and removals while keeping owner rows protected', async () => {
+    const user = userEvent.setup()
+    const group = buildGroup()
+    addAdmin(group)
+    renderGroup(group)
+
+    expect(screen.getByRole('heading', { name: 'Members' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Actions for Alice Owner' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Bob Member' }))
+    await user.click(screen.getByRole('button', { name: 'Make admin' }))
+    expect(mocks.updateRoleMutation).toHaveBeenCalledWith({
+      variables: { groupId: 'group-1', userId: 'member-user', role: 'ADMIN' },
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Annie Admin' }))
+    expect(screen.getByRole('button', { name: 'Change role to member' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remove from group' })).toBeInTheDocument()
+  })
+
+  it('allows admins to remove non-owners but never change roles, and hides member controls', async () => {
+    const user = userEvent.setup()
+    const adminGroup = buildGroup('ADMIN')
+    addAdmin(adminGroup)
+    addAdmin(adminGroup, 'other-admin', 'Alex Admin')
+    mocks.currentUserId = 'admin-user'
+    renderGroup(adminGroup)
+
+    expect(screen.queryByRole('button', { name: 'Actions for Alice Owner' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Actions for Annie Admin' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Bob Member' }))
+    expect(screen.getByRole('button', { name: 'Remove from group' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Make admin' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Alex Admin' }))
+    expect(screen.getByRole('button', { name: 'Remove from group' })).toBeInTheDocument()
+
+    const memberGroup = buildGroup('MEMBER')
+    mocks.currentUserId = 'member-user'
+    renderGroup(memberGroup)
+    expect(screen.queryByRole('button', { name: /Actions for/ })).not.toBeInTheDocument()
+  })
+
+  it('focuses Cancel for inline removal and reconciles the returned membership id', async () => {
+    const user = userEvent.setup()
+    renderGroup()
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Bob Member' }))
+    await user.click(screen.getByRole('button', { name: 'Remove from group' }))
+
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent(
+      'Remove Bob Member? They will be removed from the group and their games will no longer appear in the shared collection.',
+    )
+    expect(within(alert).getByRole('button', { name: 'Cancel' })).toHaveFocus()
+
+    await user.click(within(alert).getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByText('Remove Bob Member?')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Bob Member' }))
+    await user.click(screen.getByRole('button', { name: 'Remove from group' }))
+    await user.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Remove' }))
+    expect(mocks.removeMutation).toHaveBeenCalledWith({
+      variables: { groupId: 'group-1', userId: 'member-user' },
+    })
+
+    const cache = {
+      identify: vi.fn().mockReturnValue('Group:group-1'),
+      modify: vi.fn(),
+    }
+    mocks.removeOptions.update(cache, {
+      data: {
+        removeGroupMember: { success: true, removedMembershipId: 'membership-member' },
+      },
+    })
+    expect(cache.modify).toHaveBeenCalledWith(expect.objectContaining({ id: 'Group:group-1' }))
+  })
+
+  it('keeps the confirmation open and reports a removal mutation error', async () => {
+    const user = userEvent.setup()
+    mocks.removeMutation.mockRejectedValueOnce(new Error('Removal failed'))
+    renderGroup()
+
+    await user.click(screen.getByRole('button', { name: 'Actions for Bob Member' }))
+    await user.click(screen.getByRole('button', { name: 'Remove from group' }))
+    await user.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Remove' }))
+
+    expect(await screen.findByText('Removal failed')).toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Remove Bob Member?')
   })
 })
