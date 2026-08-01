@@ -8,6 +8,7 @@ require "pathname"
 require_relative "dev_blog/post"
 require_relative "dev_blog/post_parser"
 require_relative "dev_blog/markdown_converter"
+require_relative "dev_blog/template_renderer"
 
 module DevBlog
   class Builder
