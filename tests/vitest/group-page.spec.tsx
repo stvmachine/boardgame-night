@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -348,6 +348,7 @@ describe('GroupPage collection spotlight and members', () => {
     await user.click(screen.getByRole('button', { name: 'Actions for Alex Admin' }))
     expect(screen.getByRole('button', { name: 'Remove from group' })).toBeInTheDocument()
 
+    cleanup()
     const memberGroup = buildGroup('MEMBER')
     mocks.currentUserId = 'member-user'
     renderGroup(memberGroup)
@@ -370,7 +371,6 @@ describe('GroupPage collection spotlight and members', () => {
     await user.click(within(alert).getByRole('button', { name: 'Cancel' }))
     expect(screen.queryByText('Remove Bob Member?')).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Actions for Bob Member' }))
     await user.click(screen.getByRole('button', { name: 'Remove from group' }))
     await user.click(within(screen.getByRole('alert')).getByRole('button', { name: 'Remove' }))
     expect(mocks.removeMutation).toHaveBeenCalledWith({
