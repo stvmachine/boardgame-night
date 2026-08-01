@@ -440,11 +440,12 @@ describe('GroupPage invitations and integrated order', () => {
 
   it('copies the canonical group URL and announces success politely', async () => {
     const user = userEvent.setup()
+    const clipboardWrite = vi.spyOn(navigator.clipboard, 'writeText')
     renderGroup()
 
     await user.click(screen.getByRole('button', { name: 'Copy' }))
 
-    expect(mocks.clipboardWrite).toHaveBeenCalledWith(`${window.location.origin}/g/NIGHTOWLS`)
+    expect(clipboardWrite).toHaveBeenCalledWith(`${window.location.origin}/g/NIGHTOWLS`)
     const copied = await screen.findByText('Copied!')
     expect(copied).toBeInTheDocument()
     expect(copied.closest('[aria-live="polite"]')).not.toBeNull()

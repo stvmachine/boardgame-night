@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { CalendarDays, EllipsisVertical, LibraryBig, Plus, Star, Users } from 'lucide-react'
+import { CalendarDays, Copy, EllipsisVertical, LibraryBig, Plus, Star, Users } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Card, EmptyState, StateBadge } from '@/components/primitives'
 import { PlaysHistory, ImportPlaysButton } from '@/components/plays-history'
@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import {
   useCreateNightSessionMutation,
   useGetGroupQuery,
+  useInviteToGroupMutation,
   useRemoveGroupMemberMutation,
   useUpdateGroupMemberRoleMutation,
   type GetGroupQuery,
@@ -46,6 +47,11 @@ function SessionRow({ session }: { session: GroupSession }) {
   const navigate = useNavigate()
   const date = formatSessionDate(session.scheduledAt)
   const cta = session.state === 'PICKING' ? 'Choose a game' : 'View details'
+  const scheduleDetails = date
+    ? `${date.time}${session.location ? ` · ${session.location}` : ''}`
+    : session.location && session.location.toUpperCase() !== 'TBD'
+      ? session.location
+      : 'Schedule to be decided'
   const goToSession = useCallback(() => navigate(`/s/${session.id}`), [navigate, session.id])
 
   return (
@@ -81,10 +87,7 @@ function SessionRow({ session }: { session: GroupSession }) {
           <p className="truncate font-semibold text-ink">{session.title}</p>
           <StateBadge state={session.state as SessionState} />
         </div>
-        <p className="text-sm text-ink-secondary">
-          {date ? date.time : 'Time TBD'}
-          {session.location ? ` · ${session.location}` : ''}
-        </p>
+        <p className="text-sm text-ink-secondary">{scheduleDetails}</p>
       </div>
 
       <div className="flex shrink-0 items-center justify-between gap-3 sm:justify-end">
@@ -429,6 +432,124 @@ function MembersPanel({ group }: { group: Group }) {
   )
 }
 
+function InvitePeopleCard({ group }: { group: Group }) {
+  const [email, setEmail] = useState('')
+  const [role, setRole] = useState<'MEMBER' | 'ADMIN'>('MEMBER')
+  const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const copyFeedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [inviteToGroup, { loading: inviting }] = useInviteToGroupMutation()
+  const groupToken = group.inviteCode ?? group.id
+  const inviteLink = `${window.location.origin}/g/${encodeURIComponent(groupToken)}`
+
+  useEffect(
+    () => () => {
+      if (copyFeedbackTimer.current) clearTimeout(copyFeedbackTimer.current)
+    },
+    [],
+  )
+
+  const handleCopy = async () => {
+    setCopyError(null)
+    try {
+      await navigator.clipboard.writeText(inviteLink)
+      setCopied(true)
+      if (copyFeedbackTimer.current) clearTimeout(copyFeedbackTimer.current)
+      copyFeedbackTimer.current = setTimeout(() => setCopied(false), 2_000)
+    } catch {
+      setCopied(false)
+      setCopyError('Could not copy the invite link.')
+    }
+  }
+
+  const handleInvite = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const normalizedEmail = email.trim()
+    setInviteError(null)
+    if (!normalizedEmail) {
+      setInviteError('Enter an email address.')
+      return
+    }
+
+    try {
+      await inviteToGroup({
+        variables: { email: normalizedEmail, groupId: group.id, role },
+      })
+      setEmail('')
+      setRole('MEMBER')
+    } catch (error) {
+      setInviteError(error instanceof Error ? error.message : 'Could not send this invitation.')
+    }
+  }
+
+  return (
+    <Card className="p-5">
+      <h2 className="mb-4 text-h2 text-ink">Invite people</h2>
+
+      <div>
+        <label htmlFor="group-invite-link" className="mb-1.5 block text-sm font-medium text-ink">
+          Invite link
+        </label>
+        <div className="flex min-w-0 gap-2">
+          <input
+            id="group-invite-link"
+            aria-label="Invite link"
+            readOnly
+            value={inviteLink}
+            className="h-9 min-w-0 flex-1 rounded-lg border border-line bg-surface-raised px-3 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          />
+          <Button type="button" variant="outline" size="icon-lg" aria-label="Copy" onClick={handleCopy}>
+            <Copy className="size-4" aria-hidden="true" />
+          </Button>
+        </div>
+        <div className="mt-2 min-h-5 text-sm" aria-live="polite">
+          {copied ? <span className="font-medium text-primary">Copied!</span> : null}
+          {copyError ? <span className="text-danger">{copyError}</span> : null}
+        </div>
+      </div>
+
+      <form className="mt-4 space-y-3 border-t border-line pt-4" onSubmit={handleInvite} noValidate>
+        <label htmlFor="group-invite-email" className="sr-only">
+          Email address
+        </label>
+        <input
+          id="group-invite-email"
+          type="email"
+          placeholder="Email address"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          className="h-9 w-full min-w-0 rounded-lg border border-line bg-surface-raised px-3 text-sm text-ink outline-none placeholder:text-ink-muted focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        />
+
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
+          <label className="min-w-0 text-sm font-medium text-ink">
+            <span className="sr-only">Role</span>
+            <select
+              aria-label="Role"
+              value={role}
+              onChange={(event) => setRole(event.target.value as 'MEMBER' | 'ADMIN')}
+              className="h-9 w-full min-w-0 rounded-lg border border-line bg-surface-raised px-3 text-sm text-ink outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
+              <option value="MEMBER">Member</option>
+              {group.myRole === 'OWNER' ? <option value="ADMIN">Admin</option> : null}
+            </select>
+          </label>
+          <Button type="submit" disabled={inviting}>
+            {inviting ? 'Sending…' : 'Send invite'}
+          </Button>
+        </div>
+
+        {inviteError ? (
+          <p className="text-sm text-danger" role="alert">
+            {inviteError}
+          </p>
+        ) : null}
+      </form>
+    </Card>
+  )
+}
+
 export function GroupPage() {
   const { token } = useParams<{ token: string }>()
   const navigate = useNavigate()
@@ -523,7 +644,10 @@ export function GroupPage() {
   }
 
   return (
-    <div className="w-full min-w-0 px-4 pt-24 pb-20 sm:px-6">
+    <div
+      data-testid="group-page"
+      className="w-full min-w-0 overflow-x-clip px-4 pt-24 pb-20 sm:px-6"
+    >
       <header className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
@@ -568,6 +692,7 @@ export function GroupPage() {
         </main>
         <aside className="min-w-0 space-y-6 lg:col-span-4 lg:self-start lg:sticky lg:top-6">
           <MembersPanel group={group} />
+          {canManage ? <InvitePeopleCard group={group} /> : null}
         </aside>
       </div>
 
