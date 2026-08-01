@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 10: Picking a Game Redesign** - Session header, attendee-aware suggestions, pick cards (completed 2026-07-18)
 - [x] **Phase 11: Polish & E2E Hardening** - E2E in CI, solid_cable dev config, legacy cleanup, dark mode/responsive QA (completed 2026-07-20)
 - [ ] **Phase 12: Dev Blog Engine** - Carried pure-Ruby SSG, architecture posts, Kamal build integration, and subdomain routing
-- [ ] **Phase 13: React Migration Parity** - Complete and verify React parity, repair discovered defects, and remove the remaining Vue-era tooling
+- [x] **Phase 13: React Migration Parity** - Complete and verify React parity, repair discovered defects, and remove the remaining Vue-era tooling (completed 2026-08-02)
 
 ## Phase Details
 
@@ -408,7 +408,7 @@ Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 1
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
 | 11. Polish & E2E Hardening | 5/5 | Complete | 2026-07-20 |
 | 12. Dev Blog Engine | 0/6 | Pending (carried) |  |
-| 13. React Migration Parity | 6/6 | In Progress|  |
+| 13. React Migration Parity | 6/6 | Complete    | 2026-08-02 |
 
 ### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
 
@@ -451,7 +451,7 @@ Plans:
   4. Frontend or Rails/GraphQL defects proven by parity tests are fixed at their owning boundary without static production fixtures, client-side authorization, or weakened assertions (RMP-03).
   5. `npm run typecheck`, `npm test`, `npm run build`, the Rails RSpec suite, and the serialized Playwright suite all pass against the React application (RMP-05).
 
-**Plans:** 6/6 plans executed
+**Plans:** 6/6 plans complete
 
 Plans:
 

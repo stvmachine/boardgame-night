@@ -178,7 +178,7 @@ These ideas are not part of the active v2.0 React Migration & Parity milestone.
 | RMP-01 | Phase 13 | Complete |
 | RMP-02 | Phase 13 | Complete |
 | RMP-03 | Phase 13 | Complete |
-| RMP-04 | Phase 13 | Planned |
+| RMP-04 | Phase 13 | Complete |
 | RMP-05 | Phase 13 | Complete |
 
 **Coverage:**
@@ -190,7 +190,7 @@ These ideas are not part of the active v2.0 React Migration & Parity milestone.
 - Mapped to Phase 12: 5 ✓
 - Mapped to Phase 13: 5 ✓
 - Active v2.0 unmapped: 0 ✓
-- Active v2.0 complete: 0/10
+- Active v2.0 complete: 5/10
 - Deferred Enhanced Game Night requirements: 10 (excluded from active milestone coverage)
 
 ---

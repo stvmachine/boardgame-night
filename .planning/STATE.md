@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: React Migration & Parity
-current_phase: 13
-current_phase_name: react-migration-parity
-status: ready_for_verification
+current_phase: 12
+current_phase_name: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
+status: planning
 stopped_at: Completed 13-06-PLAN.md
-last_updated: "2026-08-01T17:21:11.963Z"
+last_updated: "2026-08-01T18:02:53.915Z"
 last_activity: 2026-08-02
-last_activity_desc: Completed Phase 13 Plan 06 React session lifecycle and cutover parity
+last_activity_desc: Phase 13 complete, transitioned to Phase 12
 progress:
   total_phases: 13
   completed_phases: 12
@@ -23,20 +23,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-07-18)
 
 **Core value:** Let a group of friends merge their BGG collections and pick games everyone can play for boardgame night.
-**Current focus:** Phase 13 — react-migration-parity
+**Current focus:** Phase 12 — Dev blog engine
 
 ## Current Position
 
-Phase: 13 (react-migration-parity) — READY FOR VERIFICATION
-Plan: 6 of 6 (all complete)
-Status: Completed Plan 13-06 — React session lifecycle & cutover
-Last activity: 2026-08-02 — Completed Phase 13 Plan 06 React session lifecycle and cutover parity
+Phase: 12 — Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-08-02 — Phase 13 complete, transitioned to Phase 12
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 61
+- Total plans completed: 63
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -56,7 +56,8 @@ Last activity: 2026-08-02 — Completed Phase 13 Plan 06 React session lifecycle
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
 | 12. Dev Blog Engine | 0/6 | Pending carried scope | — |
-| 13. React Migration Parity | 4/6 | 89 min | ~22 min |
+| 13. React Migration Parity | 6/6 | 309 min | ~52 min |
+| 13 | 6 | - | - |
 
 **Recent Trend:**
 
