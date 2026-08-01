@@ -34,6 +34,35 @@ vi.mock('@/generated/operations', () => ({
   usePickGameMutation: () => mocks.pickGame(),
 }))
 
+type GameShape = {
+  id: string
+  objectid: string
+  name: string
+  thumbnail: string | null
+  average: number | null
+  minPlayers: number | null
+  maxPlayers: number | null
+  minPlaytime: number | null
+  maxPlaytime: number | null
+  averageWeight: number | null
+  bestPlayerCount: number | null
+  description?: string | null
+}
+
+type SuggestionShape = {
+  score: number
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW'
+  reasons: string[]
+  breakdown: {
+    playerCountFit: number
+    timeFit: number
+    complexityFit: number
+    communityRating: number
+    ownershipBonus: number
+  }
+  thing: GameShape
+}
+
 type SessionShape = {
   id: string
   title: string
@@ -53,8 +82,8 @@ type SessionShape = {
     respondedAt: string | null
     user: { id: string; displayName: string; avatar: string | null; bggUsername: string | null }
   }>
-  pickedGame: null
-  suggestions: null
+  pickedGame: GameShape | null
+  suggestions: SuggestionShape[] | null
   scores: never[]
 }
 
@@ -68,6 +97,41 @@ function buildMember(id: string, name: string, response: string) {
     response,
     respondedAt: '2026-08-01T12:00:00Z',
     user: { id, displayName: name, avatar: null, bggUsername: null },
+  }
+}
+
+function buildGame(overrides: Partial<GameShape> = {}): GameShape {
+  return {
+    id: 'game-1',
+    objectid: '12345',
+    name: 'Wingspan',
+    thumbnail: null,
+    average: 8.1,
+    minPlayers: 1,
+    maxPlayers: 5,
+    minPlaytime: 40,
+    maxPlaytime: 70,
+    averageWeight: 2.4,
+    bestPlayerCount: 3,
+    description: 'A relaxing engine-builder about birds.',
+    ...overrides,
+  }
+}
+
+function buildSuggestion(overrides: Partial<SuggestionShape> = {}): SuggestionShape {
+  return {
+    score: 0.87,
+    confidence: 'HIGH',
+    reasons: ['Fits player count', 'Fits time budget', 'Best at 3 players'],
+    breakdown: {
+      playerCountFit: 1,
+      timeFit: 1,
+      complexityFit: 0.8,
+      communityRating: 0.9,
+      ownershipBonus: 0.5,
+    },
+    thing: buildGame(),
+    ...overrides,
   }
 }
 
@@ -241,5 +305,207 @@ describe('SessionPage INVITED state', () => {
 
     await waitFor(() => expect(mutate).toHaveBeenCalledWith(expect.objectContaining({ variables: { sessionId: 'session-1' } })))
     await waitFor(() => expect(screen.getByText('PICKING')).toBeInTheDocument())
+  })
+})
+
+describe('SessionPage PICKING state', () => {
+  it('shows suggestions, budget, complexity, and Edit Details for the host', () => {
+    renderPage(
+      'session-1',
+      {
+        data: {
+          nightSession: buildSession({
+            state: 'PICKING',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            attendeeCount: 3,
+            suggestions: [buildSuggestion()],
+          }),
+        },
+        loading: false,
+      },
+    )
+
+    expect(screen.getByText('PICKING')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Game Suggestions \(Filtered for 3 Players\)/ })).toBeInTheDocument()
+    expect(screen.getByText(/Up to 120 min/)).toBeInTheDocument()
+    expect(screen.getByText(/Any complexity/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Edit Details' })).toBeInTheDocument()
+    expect(screen.getByTestId('suggestion-grid')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pick this game' })).toBeInTheDocument()
+  })
+
+  it('hides host controls from members and shows the host-will-choose message', () => {
+    renderPage(
+      'session-1',
+      {
+        data: {
+          nightSession: buildSession({
+            state: 'PICKING',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            attendeeCount: 3,
+            suggestions: [buildSuggestion()],
+          }),
+        },
+        loading: false,
+      },
+      { id: 'member-1', displayName: 'Bob Member' },
+    )
+
+    expect(screen.queryByRole('button', { name: 'Edit Details' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Pick this game' })).not.toBeInTheDocument()
+    expect(screen.getByText('The host will choose the game.')).toBeInTheDocument()
+  })
+
+  it('shows an empty state when there are no confirmed players', () => {
+    renderPage(
+      'session-1',
+      {
+        data: {
+          nightSession: buildSession({
+            state: 'PICKING',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            attendeeCount: 0,
+            suggestions: [],
+          }),
+        },
+        loading: false,
+      },
+    )
+
+    expect(screen.getByText('No confirmed players yet')).toBeInTheDocument()
+  })
+
+  it('shows an empty state when no games fit the night', () => {
+    renderPage(
+      'session-1',
+      {
+        data: {
+          nightSession: buildSession({
+            state: 'PICKING',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            attendeeCount: 3,
+            suggestions: [],
+          }),
+        },
+        loading: false,
+      },
+    )
+
+    expect(screen.getByText('No games fit this night')).toBeInTheDocument()
+  })
+
+  it('lets the host edit ordinary details without changing preferences', async () => {
+    const mutate = vi.fn().mockResolvedValue({
+      data: {
+        updateSessionDetails: {
+          session: buildSession({
+            state: 'PICKING',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            title: 'Updated Picking Night',
+            description: 'Updated description',
+            location: 'Updated Hall',
+            capacity: 8,
+          }),
+        },
+      },
+    })
+    mocks.updateSessionDetails.mockReturnValue([mutate, { loading: false, error: undefined, data: undefined }])
+
+    const user = userEvent.setup()
+    renderPage(
+      'session-1',
+      {
+        data: {
+          nightSession: buildSession({
+            state: 'PICKING',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            attendeeCount: 3,
+            suggestions: [buildSuggestion()],
+          }),
+        },
+        loading: false,
+      },
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Edit Details' }))
+    expect(screen.getByRole('dialog', { name: 'Edit session details' })).toBeInTheDocument()
+    expect(screen.getByText('Game preferences stay locked while picking.')).toBeInTheDocument()
+
+    await user.clear(screen.getByLabelText('Title'))
+    await user.type(screen.getByLabelText('Title'), 'Updated Picking Night')
+    await user.click(screen.getByRole('button', { name: 'Save details' }))
+
+    await waitFor(() => expect(mutate).toHaveBeenCalled())
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Edit session details' })).not.toBeInTheDocument())
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Updated Picking Night')
+  })
+
+  it('preserves edit form values when the mutation fails', async () => {
+    const mutate = vi.fn().mockRejectedValue(new Error('Update failed'))
+    mocks.updateSessionDetails.mockReturnValue([mutate, { loading: false, error: undefined, data: undefined }])
+
+    const user = userEvent.setup()
+    renderPage(
+      'session-1',
+      {
+        data: {
+          nightSession: buildSession({
+            state: 'PICKING',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            attendeeCount: 3,
+            suggestions: [buildSuggestion()],
+          }),
+        },
+        loading: false,
+      },
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Edit Details' }))
+    await user.clear(screen.getByLabelText('Title'))
+    await user.type(screen.getByLabelText('Title'), 'Updated Picking Night')
+    await user.click(screen.getByRole('button', { name: 'Save details' }))
+
+    await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent(/could not save/i))
+    expect(screen.getByLabelText('Title')).toHaveValue('Updated Picking Night')
+  })
+
+  it('transitions to COMPLETED when the host picks a game', async () => {
+    const mutate = vi.fn().mockResolvedValue({
+      data: {
+        pickGame: {
+          session: buildSession({
+            state: 'COMPLETED',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            attendeeCount: 3,
+            pickedGame: buildGame({ name: 'Wingspan' }),
+            suggestions: null,
+          }),
+        },
+      },
+    })
+    mocks.pickGame.mockReturnValue([mutate, { loading: false, error: undefined, data: undefined }])
+
+    const user = userEvent.setup()
+    renderPage(
+      'session-1',
+      {
+        data: {
+          nightSession: buildSession({
+            state: 'PICKING',
+            scheduledAt: '2026-08-07T18:00:00Z',
+            attendeeCount: 3,
+            suggestions: [buildSuggestion({ thing: buildGame({ name: 'Wingspan', objectid: '12345' }) })],
+          }),
+        },
+        loading: false,
+      },
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Pick this game' }))
+
+    await waitFor(() => expect(mutate).toHaveBeenCalledWith(expect.objectContaining({ variables: { sessionId: 'session-1', gameId: '12345' } })))
+    await waitFor(() => expect(screen.getByText('COMPLETED')).toBeInTheDocument())
+    expect(screen.getByText('Picked game')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Wingspan' })).toBeInTheDocument()
   })
 })

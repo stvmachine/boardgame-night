@@ -63,5 +63,6 @@ export type Suggestion = {
   gameId: string
   match: number
   votes: number
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW' | string
   reasons: { ok: boolean; label: string }[]
 }
