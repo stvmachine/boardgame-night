@@ -44,20 +44,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (queryLoading) {
       setLoading(true)
+      return
     }
-  }, [queryLoading])
 
-  useEffect(() => {
     if (currentUserData?.currentUser) {
       setUser(currentUserData.currentUser)
-      setLoading(false)
-    } else if (currentUserData && !queryLoading) {
-      // Token was present but server returned no user — treat as signed out
+    } else if (currentUserData?.currentUser === null) {
+      // Token was present but the server explicitly returned no user.
       localStorage.removeItem(TOKEN_KEY)
       setTokenState(null)
       setUser(null)
-      setLoading(false)
     }
+
+    setLoading(false)
   }, [currentUserData, queryLoading])
 
   useEffect(() => {
@@ -125,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const ctx = useContext(AuthContext)
   if (!ctx) {
-    throw new Error('useAuth must be used within an AuthProvider')
+    throw new Error('useAuth must be used within AuthProvider')
   }
   return ctx
 }

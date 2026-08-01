@@ -17,6 +17,8 @@ let rejectSignOut: ((error: Error) => void) | null = null
 let querySkip = true
 let queryOnCompleted: ((data: any) => void) | null = null
 let queryOnError: ((error: any) => void) | null = null
+let queryData: any = null
+let queryError: any = null
 
 vi.mock('@apollo/client', async () => {
   const actual = await vi.importActual('@apollo/client')
@@ -28,9 +30,7 @@ vi.mock('@apollo/client', async () => {
       querySkip = skip
       queryOnCompleted = options?.onCompleted ?? null
       queryOnError = options?.onError ?? null
-      // Return loading=false always so the AuthProvider doesn't
-      // get stuck. Tests manually trigger onCompleted/onError as needed.
-      return { loading: false, data: null, error: null }
+      return { loading: false, data: queryData, error: queryError }
     },
     useMutation: (_mutation: any) => {
       const name = _mutation?.definitions?.[0]?.name?.value ?? ''
@@ -124,6 +124,11 @@ describe('AuthProvider + useAuth', () => {
     rejectSignIn = null
     resolveSignOut = null
     rejectSignOut = null
+    queryData = null
+    queryError = null
+    querySkip = true
+    queryOnCompleted = null
+    queryOnError = null
   })
 
   it('renders children', () => {
@@ -142,30 +147,22 @@ describe('AuthProvider + useAuth', () => {
     })
   })
 
-  it('calls onCompleted when query succeeds with user data', async () => {
+  it('hydrates user when currentUser query returns data', async () => {
     localStorage.setItem(TOKEN_KEY, 'existing-token')
+    queryData = { currentUser: mockUser }
     renderProvider()
-
-    // The component renders (useQuery called with skip=false)
-    // Manually trigger the onCompleted to simulate query success
-    await act(async () => {
-      queryOnCompleted?.({ currentUser: mockUser })
-    })
 
     await waitFor(() => {
       expect(screen.getByTestId('user-id')).toBeInTheDocument()
     })
   })
 
-  it('calls onError when query fails', async () => {
+  it('does not clear token on transient query error', async () => {
     localStorage.setItem(TOKEN_KEY, 'existing-token')
+    queryError = new Error('Network error')
     renderProvider()
 
-    await act(async () => {
-      queryOnError?.(new Error('Invalid token'))
-    })
-
-    expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
+    expect(localStorage.getItem(TOKEN_KEY)).toBe('existing-token')
     await waitFor(() => {
       expect(screen.getByTestId('no-user')).toBeInTheDocument()
     })
@@ -198,13 +195,10 @@ describe('AuthProvider + useAuth', () => {
   it('signOut clears user and removes token', async () => {
     // Seed state as if user is logged in
     localStorage.setItem(TOKEN_KEY, 'fake-token')
+    queryData = { currentUser: mockUser }
     renderProvider()
 
-    // Simulate loading the user from the existing token
-    await act(async () => {
-      queryOnCompleted?.({ currentUser: mockUser })
-    })
-
+    // Wait for the user to hydrate from the existing token
     await waitFor(() => {
       expect(screen.getByTestId('user-id')).toBeInTheDocument()
     })
