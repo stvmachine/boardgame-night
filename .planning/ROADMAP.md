@@ -407,7 +407,7 @@ Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 1
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
 | 11. Polish & E2E Hardening | 5/5 | Complete | 2026-07-20 |
-| 12. Dev Blog Engine | 0/6 | Pending (carried) |  |
+| 12. Dev Blog Engine | 0/6 | Pending (replanned) |  |
 | 13. React Migration Parity | 6/6 | Complete    | 2026-08-02 |
 
 ### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
@@ -427,13 +427,29 @@ Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 1
 **Plans:** 6 plans
 
 Plans:
+**Wave 1**
 
-- [ ] 12-01-PLAN.md — Research and ADR: choose a pure-Ruby SSG engine (Wave 1)
-- [ ] 12-02-PLAN.md — Engine core: Post, PostParser, MarkdownConverter, Site, TemplateRenderer (Wave 2)
-- [ ] 12-03-PLAN.md — Builder and templates: Builder, ERB templates, stylesheet, CLI, Rake task (Wave 3)
-- [ ] 12-04-PLAN.md — First real posts and content pipeline (Wave 4)
-- [ ] 12-05-PLAN.md — Kamal deploy integration and subdomain routing (Wave 5)
-- [ ] 12-06-PLAN.md — Verification and documentation (Wave 6)
+- [ ] 12-01-PLAN.md — Production tracer from markdown through generated HTML to `/blog`, plus React-era ADR-014 reconciliation (Wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 12-02-PLAN.md — Safe Post, frontmatter, markdown, and TemplateRenderer primitives with focused security specs (Wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 12-03-PLAN.md — Deterministic Builder, dual-mount templates/CSS, canonical CLI, Rake wrapper, and ignored-output contract (Wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 12-04-PLAN.md — React-current authentication correction, four architecture posts, and corpus-to-output verification (Wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 12-05-PLAN.md — Exact host/path routing, existing-image Docker/Kamal integration, and Ruby CI enforcement (Wave 5)
+
+**Wave 6** *(blocked on Wave 5 completion)*
+
+- [ ] 12-06-PLAN.md — Maintainer runbook, integrated evidence, and blocking real DNS/TLS/Kamal reachability checkpoint (Wave 6)
 
 **UI hint**: no
 
