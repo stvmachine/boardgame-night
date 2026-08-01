@@ -5,15 +5,15 @@ milestone_name: React Migration & Parity
 current_phase: 13
 current_phase_name: react-migration-parity
 status: executing
-stopped_at: Completed 13-03-PLAN.md
-last_updated: "2026-08-01T12:05:55.951Z"
+stopped_at: Completed 13-04-PLAN.md
+last_updated: "2026-08-01T12:46:28.140Z"
 last_activity: 2026-08-01
-last_activity_desc: Completed Phase 13 Plan 03 collection parity
+last_activity_desc: Completed Phase 13 Plan 04 Group Detail parity
 progress:
   total_phases: 13
   completed_phases: 11
   total_plans: 69
-  completed_plans: 60
+  completed_plans: 61
 ---
 
 # Project State
@@ -28,15 +28,15 @@ See: .planning/PROJECT.md (updated 2026-07-18)
 ## Current Position
 
 Phase: 13 (react-migration-parity) — EXECUTING
-Plan: 4 of 6
-Status: Ready to execute Plan 13-04
-Last activity: 2026-08-01 — Completed Phase 13 Plan 03 collection parity
+Plan: 5 of 6
+Status: Ready to execute Plan 13-05
+Last activity: 2026-08-01 — Completed Phase 13 Plan 04 Group Detail parity
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 60
+- Total plans completed: 61
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -56,7 +56,7 @@ Last activity: 2026-08-01 — Completed Phase 13 Plan 03 collection parity
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
 | 12. Dev Blog Engine | 0/6 | Pending carried scope | — |
-| 13. React Migration Parity | 3/6 | 67 min | ~22 min |
+| 13. React Migration Parity | 4/6 | 89 min | ~22 min |
 
 **Recent Trend:**
 
@@ -102,6 +102,7 @@ Last activity: 2026-08-01 — Completed Phase 13 Plan 03 collection parity
 | Phase 13 P01 | 6 min | 2 tasks | 9 files |
 | Phase 13 P02 | 18 min | 3 tasks | 16 files |
 | Phase 13 P03 | 43 min | 3 tasks | 12 files |
+| Phase 13 P04 | 22 min | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -204,6 +205,10 @@ Recent decisions affecting current work:
 - [Phase 13-03]: Keep reserved group and usernames source parameters outside the filter codec; serialize presentation grouping only as groupBy.
 - [Phase 13-03]: Use source-owned ARIA combobox/listbox controls so browser-visible options satisfy the established acceptance contract.
 - [Phase 13-03]: Preserve backend BGG usernames for owner labels and persisted object identity for isolated external card links.
+- [Phase 13-04]: Keep Group Detail on generated GetGroup and group mutation hooks, using raw query fields where adapters lose attendee or role data.
+- [Phase 13-04]: Preserve backend session order and role-filtered visibility instead of duplicating sorting or authorization in React.
+- [Phase 13-04]: Allow admins to remove non-owner peers, including other admins, while reserving role changes for owners and re-authorizing every mutation on Rails.
+- [Phase 13-04]: Keep Play History after the five required coordination sections so it remains reachable without displacing the approved hub order.
 
 ### Pending Todos
 
@@ -239,8 +244,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-01T12:05:55.929Z
-Stopped at: Completed 13-03-PLAN.md
+Last session: 2026-08-01T12:46:28.123Z
+Stopped at: Completed 13-04-PLAN.md
 Resume file: None
 
 ### Recent Session Activity
