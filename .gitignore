@@ -48,6 +48,9 @@ config/credentials.yml.enc
 # Ignore Vite build output (generated during Docker build, not committed).
 /public/vite
 
+# Ignore generated dev-blog output (rebuilt from docs/development/ in CI/image build).
+/public/dev-blog
+
 # Ignore Docker-related files.
 .dockerignore
 

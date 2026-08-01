@@ -79,6 +79,9 @@ gem "faraday", "~> 2.14"
 gem "faraday-retry", "~> 2.4"
 gem "nokogiri", "~> 1.19"
 
+# Dev blog: pure-Ruby markdown-to-HTML engine (Psych + kramdown + ERB)
+gem "kramdown", "~> 2.5"
+
 gem "dry-rails", "~> 0.7"
 
 # Rate limiting for auth endpoints (T-04-01)

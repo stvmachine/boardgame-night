@@ -13,6 +13,9 @@ Rails.application.routes.draw do
   # Action Cable — mount before SPA wildcard so WebSocket upgrades route correctly.
   mount ActionCable.server => "/cable"
 
+  # Dev blog generated site — served before the SPA catch-all.
+  get "blog", to: "dev_blog#index", as: :dev_blog
+
   # SPA catch-all: serve the SPA for any HTML request that isn't handled above
   root "spa#index"
   get "*path", to: "spa#index", constraints: ->(req) { req.format == :html }
