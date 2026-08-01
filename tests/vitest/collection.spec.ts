@@ -1,18 +1,50 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import {
-  emptyFilters,
-  applyFilters,
   activeCount,
+  applyFilters,
+  emptyFilters,
   fromParams,
-  toParams,
   inTimeBucket,
   matches,
-  facetCount,
+  toParams,
 } from '@/lib/collection'
 import type { Game } from '@/lib/data'
 import { games } from './fixtures/sample-data'
+
+type DesiredFilters = {
+  q: string
+  players: { min: number; max: number } | null
+  times: number[]
+  complexity: 1 | 2 | 3 | null
+  owners: string[]
+  sort: 'name' | 'rating' | 'weight' | 'recent'
+  groupBy: 'none' | 'players' | 'rating' | 'bestPlayers' | 'owner'
+  view: 'grid' | 'list'
+}
+
+const desiredEmptyFilters: DesiredFilters = {
+  q: '',
+  players: null,
+  times: [],
+  complexity: null,
+  owners: [],
+  sort: 'name',
+  groupBy: 'none',
+  view: 'grid',
+}
+
+function asCurrentFilters(filters: DesiredFilters) {
+  return filters as never
+}
+
+function game(overrides: Partial<Game> & { lastPlayedAt?: string | null }): Game {
+  return {
+    ...games[0],
+    ...overrides,
+  }
+}
 
 describe('landing fixture boundaries', () => {
   it.each([
@@ -25,287 +57,232 @@ describe('landing fixture boundaries', () => {
   })
 })
 
-describe('emptyFilters', () => {
-  it('returns default filter state', () => {
-    expect({ ...emptyFilters }).toEqual({
-      q: '',
-      players: [],
-      times: [],
-      weight: [1, 5],
-      rating: 0,
-      categories: [],
-      owners: [],
-      sort: 'name',
+describe('collection filter contract', () => {
+  it('uses only the approved filter state', () => {
+    expect(emptyFilters).toEqual(desiredEmptyFilters)
+    expect(emptyFilters).not.toHaveProperty('rating')
+    expect(emptyFilters).not.toHaveProperty('categories')
+    expect(emptyFilters).not.toHaveProperty('weight')
+  })
+
+  it('publishes exactly four product-facing sort labels', async () => {
+    const collection = await import('@/lib/collection')
+
+    expect(Reflect.get(collection, 'sortLabels')).toEqual({
+      name: 'Name A–Z',
+      rating: 'Rating High–Low',
+      weight: 'Weight Light–Heavy',
+      recent: 'Recently Played',
     })
   })
 
-  it('has expected default values', () => {
-    expect(emptyFilters.q).toBe('')
-    expect(emptyFilters.players).toEqual([])
-    expect(emptyFilters.weight).toEqual([1, 5])
-  })
-})
+  it('matches games that support the complete requested player range', () => {
+    const supportsOneToFive = game({ minPlayers: 1, maxPlayers: 5 })
 
-describe('inTimeBucket', () => {
-  it('classifies under 30m', () => {
-    expect(inTimeBucket(25, '<30')).toBe(true)
-    expect(inTimeBucket(30, '<30')).toBe(false)
-  })
-
-  it('classifies 30–60m', () => {
-    expect(inTimeBucket(30, '30-60')).toBe(true)
-    expect(inTimeBucket(45, '30-60')).toBe(true)
-    expect(inTimeBucket(60, '30-60')).toBe(true)
-    expect(inTimeBucket(29, '30-60')).toBe(false)
-    expect(inTimeBucket(61, '30-60')).toBe(false)
+    expect(
+      matches(
+        supportsOneToFive,
+        asCurrentFilters({ ...desiredEmptyFilters, players: { min: 2, max: 5 } }),
+      ),
+    ).toBe(true)
+    expect(
+      matches(
+        supportsOneToFive,
+        asCurrentFilters({ ...desiredEmptyFilters, players: { min: 2, max: 6 } }),
+      ),
+    ).toBe(false)
   })
 
-  it('classifies 60–90m', () => {
-    expect(inTimeBucket(61, '60-90')).toBe(true)
-    expect(inTimeBucket(90, '60-90')).toBe(true)
-    expect(inTimeBucket(60, '60-90')).toBe(false)
-    expect(inTimeBucket(91, '60-90')).toBe(false)
+  it('treats an untouched 1–10 range as no restriction', () => {
+    expect(
+      matches(
+        game({ minPlayers: 2, maxPlayers: 4 }),
+        asCurrentFilters({ ...desiredEmptyFilters, players: { min: 1, max: 10 } }),
+      ),
+    ).toBe(true)
+    expect(
+      toParams(
+        asCurrentFilters({ ...desiredEmptyFilters, players: { min: 1, max: 10 } }),
+      ),
+    ).toBe('')
   })
 
-  it('classifies 90m+', () => {
-    expect(inTimeBucket(91, '90+')).toBe(true)
-    expect(inTimeBucket(90, '90+')).toBe(false)
-  })
-})
-
-describe('matches', () => {
-  const game = games[0] // Feathered Realms
-
-  it('matches by title search', () => {
-    expect(matches(game, { ...emptyFilters, q: 'feathered' })).toBe(true)
-    expect(matches(game, { ...emptyFilters, q: 'zzztop' })).toBe(false)
+  it('implements the four approved play-time buckets', () => {
+    expect(inTimeBucket(29, 1 as never)).toBe(true)
+    expect(inTimeBucket(30, 1 as never)).toBe(false)
+    expect(inTimeBucket(30, 2 as never)).toBe(true)
+    expect(inTimeBucket(60, 2 as never)).toBe(true)
+    expect(inTimeBucket(61, 3 as never)).toBe(true)
+    expect(inTimeBucket(119, 3 as never)).toBe(true)
+    expect(inTimeBucket(120, 4 as never)).toBe(true)
   })
 
-  it('matches by category search', () => {
-    expect(matches(game, { ...emptyFilters, q: 'Engine' })).toBe(true)
-    expect(matches(game, { ...emptyFilters, q: 'Party' })).toBe(false)
+  it('uses OR semantics within time buckets', () => {
+    expect(
+      matches(
+        game({ minutes: 150 }),
+        asCurrentFilters({ ...desiredEmptyFilters, times: [1, 4] }),
+      ),
+    ).toBe(true)
+    expect(
+      matches(
+        game({ minutes: 75 }),
+        asCurrentFilters({ ...desiredEmptyFilters, times: [1, 4] }),
+      ),
+    ).toBe(false)
   })
 
-  it('matches by player count', () => {
-    expect(matches(game, { ...emptyFilters, players: [3] })).toBe(true)
-    expect(matches(game, { ...emptyFilters, players: [6] })).toBe(false)
+  it.each([
+    [1, 1.9, true],
+    [1, 2, false],
+    [2, 2.5, true],
+    [2, 3, false],
+    [3, 3, true],
+    [3, 4.8, true],
+  ] as const)('filters complexity bucket %s at weight %s', (complexity, weight, expected) => {
+    expect(
+      matches(
+        game({ weight }),
+        asCurrentFilters({ ...desiredEmptyFilters, complexity }),
+      ),
+    ).toBe(expected)
   })
 
-  it('matches by time bucket', () => {
-    expect(matches(game, { ...emptyFilters, times: ['30-60'] })).toBe(true)
-    expect(matches(game, { ...emptyFilters, times: ['<30'] })).toBe(false)
-  })
-
-  it('matches by weight range', () => {
-    expect(matches(game, { ...emptyFilters, weight: [2, 3] })).toBe(true)
-    expect(matches(game, { ...emptyFilters, weight: [3, 5] })).toBe(false)
-  })
-
-  it('matches by rating threshold', () => {
-    expect(matches(game, { ...emptyFilters, rating: 8 })).toBe(true)
-    expect(matches(game, { ...emptyFilters, rating: 9 })).toBe(false)
-  })
-
-  it('skips rating check when rating is 0', () => {
-    expect(matches(game, { ...emptyFilters, rating: 0 })).toBe(true)
-  })
-
-  it('matches by categories', () => {
-    expect(matches(game, { ...emptyFilters, categories: ['Strategy'] })).toBe(true)
-    expect(matches(game, { ...emptyFilters, categories: ['Party'] })).toBe(false)
-  })
-
-  it('matches by owners', () => {
-    expect(matches(game, { ...emptyFilters, owners: ['alex'] })).toBe(true)
-    expect(matches(game, { ...emptyFilters, owners: ['nobody'] })).toBe(false)
-  })
-})
-
-describe('applyFilters', () => {
-  it('returns all games sorted by name by default', () => {
-    const result = applyFilters(games, emptyFilters)
-    expect(result).toHaveLength(games.length)
-    expect(result[0].title.localeCompare(result[1].title)).toBeLessThanOrEqual(0)
-  })
-
-  it('filters by search query', () => {
-    const result = applyFilters(games, { ...emptyFilters, q: 'azulejo' })
-    expect(result).toHaveLength(1)
-    expect(result[0].title).toBe('Azulejo')
-  })
-
-  it('filters by player count', () => {
-    const result = applyFilters(games, { ...emptyFilters, players: [7] })
-    expect(result.length).toBeGreaterThanOrEqual(2)
-    result.forEach((g) => {
-      expect(g.minPlayers <= 7 && g.maxPlayers >= 7).toBe(true)
-    })
-  })
-
-  it('filters by time bucket', () => {
-    const result = applyFilters(games, { ...emptyFilters, times: ['<30'] })
-    expect(result.length).toBeGreaterThan(0)
-    result.forEach((g) => expect(g.minutes < 30).toBe(true))
-  })
-
-  it('filters by weight range', () => {
-    const result = applyFilters(games, { ...emptyFilters, weight: [4, 5] })
-    expect(result.length).toBeGreaterThan(0)
-    result.forEach((g) => expect(g.weight).toBeGreaterThanOrEqual(4))
-  })
-
-  it('filters by rating', () => {
-    const result = applyFilters(games, { ...emptyFilters, rating: 8 })
-    result.forEach((g) => expect(g.rating).toBeGreaterThanOrEqual(8))
-  })
-
-  it('filters by categories', () => {
-    const result = applyFilters(games, { ...emptyFilters, categories: ['Party'] })
-    result.forEach((g) => expect(g.categories).toContain('Party'))
-  })
-
-  it('filters by owners', () => {
-    const result = applyFilters(games, { ...emptyFilters, owners: ['riley'] })
-    result.forEach((g) => expect(g.owners).toContain('riley'))
-  })
-
-  it('sorts by rating descending', () => {
-    const result = applyFilters(games, { ...emptyFilters, sort: 'rating' })
-    for (let i = 1; i < result.length; i++) {
-      expect(result[i - 1].rating).toBeGreaterThanOrEqual(result[i].rating)
-    }
-  })
-
-  it('sorts by players ascending', () => {
-    const result = applyFilters(games, { ...emptyFilters, sort: 'players' })
-    for (let i = 1; i < result.length; i++) {
-      const prev = result[i - 1]
-      const curr = result[i]
-      expect(
-        prev.maxPlayers < curr.maxPlayers ||
-        (prev.maxPlayers === curr.maxPlayers && prev.minPlayers <= curr.minPlayers),
-      ).toBe(true)
-    }
-  })
-
-  it('sorts by time ascending', () => {
-    const result = applyFilters(games, { ...emptyFilters, sort: 'time' })
-    for (let i = 1; i < result.length; i++) {
-      expect(result[i - 1].minutes).toBeLessThanOrEqual(result[i].minutes)
-    }
-  })
-
-  it('sorts by recent (addedAt descending)', () => {
-    const result = applyFilters(games, { ...emptyFilters, sort: 'recent' })
-    for (let i = 1; i < result.length; i++) {
-      const cmp = result[i - 1].addedAt.localeCompare(result[i].addedAt)
-      expect(cmp).toBeGreaterThanOrEqual(0)
-    }
-  })
-
-  it('applies multiple filters together (AND)', () => {
-    const result = applyFilters(games, {
-      ...emptyFilters,
-      players: [4],
-      times: ['60-90'],
-      categories: ['Strategy'],
-    })
-    result.forEach((g) => {
-      expect(g.minPlayers <= 4 && g.maxPlayers >= 4).toBe(true)
-      expect(g.minutes > 60 && g.minutes <= 90).toBe(true)
-      expect(g.categories).toContain('Strategy')
-    })
-  })
-
-  it('returns empty array when no games match', () => {
-    const result = applyFilters(games, { ...emptyFilters, q: 'xyznonexistent' })
-    expect(result).toHaveLength(0)
-  })
-})
-
-describe('facetCount', () => {
-  it('counts games matching a predicate ignoring one facet', () => {
-    const count = facetCount(games, { ...emptyFilters, q: 'party' }, 'q', (g) =>
-      g.categories.includes('Party'),
-    )
-    expect(count).toBeGreaterThan(0)
-  })
-})
-
-describe('activeCount', () => {
-  it('returns 0 when all filters are default', () => {
-    expect(activeCount(emptyFilters)).toBe(0)
-  })
-
-  it('counts non-empty query', () => {
-    expect(activeCount({ ...emptyFilters, q: 'hello' })).toBe(1)
-  })
-
-  it('counts selected player values (each value counts)', () => {
-    expect(activeCount({ ...emptyFilters, players: [3, 4] })).toBe(2)
-  })
-
-  it('counts multiple non-default facets', () => {
-    const f = { ...emptyFilters, q: 'game', players: [4], rating: 7, weight: [2, 4] as [number, number] }
-    expect(activeCount(f)).toBe(4)
-  })
-
-  it('counts weight when different from default [1,5]', () => {
-    expect(activeCount({ ...emptyFilters, weight: [2, 4] })).toBe(1)
-    expect(activeCount({ ...emptyFilters, weight: [1, 5] })).toBe(0)
-  })
-
-  it('does not count default rating=0', () => {
-    expect(activeCount({ ...emptyFilters, rating: 0 })).toBe(0)
-  })
-})
-
-describe('toParams / fromParams round-trip', () => {
-  it('serializes and deserializes filters', () => {
-    const f = {
-      q: 'strategy',
-      players: [3, 4],
-      times: ['30-60', '60-90'] as Array<'30-60' | '60-90'>,
-      weight: [2, 4] as [number, number],
-      rating: 7,
-      categories: ['Strategy'],
+  it('filters by selected owners and counts only active facets', () => {
+    const filters = {
+      ...desiredEmptyFilters,
+      q: 'feathered',
       owners: ['alex'],
-      sort: 'rating' as const,
+      complexity: 2 as const,
     }
 
-    const paramsStr = toParams(f)
-    const sp = new URLSearchParams(paramsStr)
-    const restored = fromParams(sp)
+    expect(matches(games[0], asCurrentFilters(filters))).toBe(true)
+    expect(activeCount(asCurrentFilters(filters))).toBe(3)
+  })
+})
 
-    expect(restored).toEqual(f)
+describe('collection sorting', () => {
+  const unsorted = [
+    game({ id: '2', title: 'Beta', rating: 8, weight: 2 }),
+    game({ id: '3', title: 'Alpha', rating: 9, weight: 3 }),
+    game({ id: '1', title: 'Alpha', rating: 9, weight: 2 }),
+  ]
+
+  it('sorts by name with an id tie-breaker', () => {
+    expect(applyFilters(unsorted, asCurrentFilters(desiredEmptyFilters)).map(({ id }) => id)).toEqual([
+      '1',
+      '3',
+      '2',
+    ])
   })
 
-  it('handles empty filters round-trip', () => {
-    const paramsStr = toParams(emptyFilters)
-    const sp = new URLSearchParams(paramsStr)
-    const restored = fromParams(sp)
-    expect(restored).toEqual(emptyFilters)
+  it('sorts rating high-to-low with deterministic name and id tie-breakers', () => {
+    expect(
+      applyFilters(
+        unsorted,
+        asCurrentFilters({ ...desiredEmptyFilters, sort: 'rating' }),
+      ).map(({ id }) => id),
+    ).toEqual(['1', '3', '2'])
   })
 
-  it('handles partial search params', () => {
-    const sp = new URLSearchParams('q=hello&players=3,4&sort=rating')
-    const result = fromParams(sp)
-
-    expect(result.q).toBe('hello')
-    expect(result.players).toEqual([3, 4])
-    expect(result.sort).toBe('rating')
-    expect(result.weight).toEqual([1, 5])
-    expect(result.rating).toBe(0)
+  it('sorts weight light-to-heavy with deterministic name and id tie-breakers', () => {
+    expect(
+      applyFilters(
+        unsorted,
+        asCurrentFilters({ ...desiredEmptyFilters, sort: 'weight' }),
+      ).map(({ id }) => id),
+    ).toEqual(['1', '2', '3'])
   })
 
-  it('handles empty query string', () => {
-    const sp = new URLSearchParams('')
-    const result = fromParams(sp)
-    expect(result).toEqual(emptyFilters)
+  it('sorts recently played dates descending and null/invalid dates last', () => {
+    const withHistory = [
+      game({ id: '4', title: 'Zulu', lastPlayedAt: null }),
+      game({ id: '3', title: 'Alpha', lastPlayedAt: 'not-a-date' }),
+      game({ id: '2', title: 'Beta', lastPlayedAt: '2026-07-10T12:00:00Z' }),
+      game({ id: '1', title: 'Alpha', lastPlayedAt: '2026-07-12T12:00:00Z' }),
+    ]
+
+    expect(
+      applyFilters(
+        withHistory,
+        asCurrentFilters({ ...desiredEmptyFilters, sort: 'recent' }),
+      ).map(({ id }) => id),
+    ).toEqual(['1', '2', '3', '4'])
+  })
+})
+
+describe('collection URL codec', () => {
+  it('round-trips the approved filter, sort, grouping, owner, and view state', () => {
+    const filters: DesiredFilters = {
+      q: 'strategy',
+      players: { min: 3, max: 5 },
+      times: [1, 3],
+      complexity: 2,
+      owners: ['alex', 'sam'],
+      sort: 'weight',
+      groupBy: 'owner',
+      view: 'list',
+    }
+
+    const params = new URLSearchParams(toParams(asCurrentFilters(filters)))
+
+    expect(params.get('players')).toBe('3-5')
+    expect(params.get('owners')).toBe('alex,sam')
+    expect(params.has('owner')).toBe(false)
+    expect(fromParams(params)).toEqual(filters)
   })
 
-  it('omits default values from params', () => {
-    const paramsStr = toParams(emptyFilters)
-    expect(paramsStr).toBe('')
+  it('round-trips players=4 as a single-value range', () => {
+    expect(fromParams(new URLSearchParams('players=4'))).toEqual({
+      ...desiredEmptyFilters,
+      players: { min: 4, max: 4 },
+    })
+  })
+
+  it('clamps and orders numeric player ranges', () => {
+    expect(fromParams(new URLSearchParams('players=12-0')).players).toEqual({ min: 1, max: 10 })
+  })
+
+  it('allowlists enum and numeric values and resets malformed input safely', () => {
+    expect(
+      fromParams(
+        new URLSearchParams(
+          'players=nope&time=1,7,wat&complexity=9&sort=unknown&groupBy=bad&view=table',
+        ),
+      ),
+    ).toEqual({
+      ...desiredEmptyFilters,
+      times: [1],
+    })
+  })
+
+  it.each([
+    ['name_asc', 'name'],
+    ['name_desc', 'name'],
+    ['rating_asc', 'rating'],
+    ['rating_desc', 'rating'],
+    ['year_asc', 'name'],
+    ['year_desc', 'name'],
+    ['weight_asc', 'weight'],
+    ['weight_desc', 'weight'],
+    ['complexity_asc', 'weight'],
+    ['complexity_desc', 'weight'],
+    ['recently_played', 'recent'],
+  ])('migrates legacy sort %s to %s', (legacy, expected) => {
+    expect(fromParams(new URLSearchParams(`sort=${legacy}`)).sort).toBe(expected)
+  })
+
+  it('keeps the reserved group token outside the filter codec', () => {
+    const params = new URLSearchParams('group=E2ENIGHTOWLS&groupBy=owner')
+    const filters = fromParams(params) as unknown as DesiredFilters
+    const encoded = new URLSearchParams(toParams(asCurrentFilters(filters)))
+
+    expect(filters.groupBy).toBe('owner')
+    expect(encoded.get('groupBy')).toBe('owner')
+    expect(encoded.has('group')).toBe(false)
+  })
+
+  it('omits default values', () => {
+    expect(toParams(asCurrentFilters(desiredEmptyFilters))).toBe('')
   })
 })
