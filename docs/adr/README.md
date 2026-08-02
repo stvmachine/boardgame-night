@@ -13,13 +13,13 @@ This directory contains the architecture decision records (ADRs) for the boardga
 | [ADR-005](./005-bgg-collection-import-pipeline.md) | Async BGG Collection Import Pipeline | accepted | 2026-07-07 |
 | [ADR-006](./006-vue-apollo-normalized-cache.md) | Apollo Client 3.x with Normalized Cache in Vue | accepted | 2026-07-07 |
 | [ADR-007](./007-dry-rails-validation-contracts.md) | dry-rails/dry-validation as the Single Mutation Validation Boundary | accepted | 2026-07-07 |
-| [ADR-008](./008-authentication-session-strategy.md) | Authentication Session Strategy for API-Only Rails + Vue SPA | accepted | 2026-07-09 |
+| [ADR-008](./008-authentication-session-strategy.md) | Authentication Session Strategy | accepted | 2026-07-09 |
 | [ADR-009](./009-provisional-user-accounts-rsvp.md) | Provisional User Accounts for No-Account RSVP | accepted | 2026-07-09 |
 | [ADR-010](./010-group-invitation-tokens.md) | Group Invitation Tokens | accepted | 2026-07-09 |
-| [ADR-011](./011-group-collection-view.md) | Group Collection View via Dynamic Computation | accepted | 2026-07-09 |
+| [ADR-011](./011-group-collection-view.md) | Group Collection View | accepted | 2026-07-09 |
 | [ADR-012](./012-session-lifecycle-state-machine.md) | Session Lifecycle State Machine | accepted | 2026-07-09 |
 | [ADR-013](./013-rubocop-indentation-cops.md) | Re-enable RuboCop Indentation Cops Over rails-omakase Defaults | accepted | 2026-07-20 |
-| [ADR-014](./014-dev-blog-engine.md) | Pure-Ruby SSG for Dev Blog | accepted | 2026-07-21 |
+| [ADR-014](./014-dev-blog-engine.md) | Pure-Ruby Static Site Generator for the Dev Blog | accepted | 2026-07-21 |
 
 ## Status Key
 
