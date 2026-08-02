@@ -424,7 +424,7 @@ Phases 1-11 and 13 are complete. Phase 12 is the remaining independent carried v
   4. The static site is built into the production Docker image and reachable on a subdomain routed from the same Kamal VPS (BLOG-04)
   5. The complete post/ADR build is verified in CI and the deployment is documented for maintainers (BLOG-05)
 
-**Plans:** 2/7 plans executed
+**Plans:** 3/7 plans executed
 
 Plans:
 **Wave 1**
@@ -437,7 +437,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 12-03-PLAN.md — Deterministic Builder, dual-mount templates/CSS, canonical CLI, Rake wrapper, and ignored-output contract (Wave 3)
+- [x] 12-03-PLAN.md — Deterministic Builder, dual-mount templates/CSS, canonical CLI, Rake wrapper, and ignored-output contract (Wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 

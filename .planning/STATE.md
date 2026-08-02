@@ -5,15 +5,15 @@ milestone_name: React Migration & Parity
 current_phase: 12
 current_phase_name: dev-blog-engine
 status: executing
-stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-08-01T23:59:44.594Z"
+stopped_at: Completed 12-03-PLAN.md; ready for 12-04
+last_updated: "2026-08-02T10:48:24.198Z"
 last_activity: 2026-08-02
-last_activity_desc: Phase 12 execution started
+last_activity_desc: Completed deterministic dev-blog Builder, CLI, Rake wrapper, and safety verification
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 70
-  completed_plans: 65
+  completed_plans: 66
 ---
 
 # Project State
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-08-02)
 ## Current Position
 
 Phase: 12 (dev-blog-engine) — EXECUTING
-Plan: 3 of 7
-Status: Ready to execute
-Last activity: 2026-08-02 — Phase 12 execution started
+Plan: 4 of 7
+Status: Ready to execute Plan 12-04
+Last activity: 2026-08-02 — Completed Plan 12-03 Builder/CLI/Rake pipeline
 
 ## Performance Metrics
 
@@ -55,7 +55,7 @@ Last activity: 2026-08-02 — Phase 12 execution started
 | 9. Home & Collection Redesign | 8 | — | — |
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
-| 12. Dev Blog Engine | 2/7 | In Progress | — |
+| 12. Dev Blog Engine | 3/7 | In Progress | — |
 | 13. React Migration Parity | 6/6 | 309 min | ~52 min |
 
 **Recent Trend:**
@@ -106,6 +106,8 @@ Last activity: 2026-08-02 — Phase 12 execution started
 | Phase 13-react-migration-parity P05 | 69 min | 2 tasks | 5 files |
 | Phase 13-react-migration-parity P06 | 151 | 3 tasks | 30 files |
 | Phase 12-dev-blog-engine P01 | 11min | 2 tasks | 9 files |
+| Phase 12-dev-blog-engine P02 | 20min | 2 tasks | 7 files |
+| Phase 12-dev-blog-engine P03 | 35min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -256,8 +258,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-01T23:59:44.577Z
-Stopped at: Completed 12-02-PLAN.md
+Last session: 2026-08-02T10:48:24.198Z
+Stopped at: Session resumed; Plan 12-03 is complete and Plan 12-04 accepted-ADR publication is next
 Resume file: None
 
 ### Recent Session Activity
