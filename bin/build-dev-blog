@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "optparse"
+require "pathname"
+
+project_root = Pathname.new(File.expand_path("..", __dir__)).realpath
+$LOAD_PATH.unshift(project_root.join("lib").to_s)
+
+require "dev_blog"
+
+options = {
+  source: project_root.join("docs", "development"),
+  output: project_root.join("public", "dev-blog"),
+  include_drafts: false
+}
+
+resolve_from_root = lambda do |value|
+  path = Pathname.new(value)
+  path.absolute? ? path : project_root.join(path)
+end
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: bin/build-dev-blog [options]"
+
+  opts.on("--source DIR", "Markdown source directory (default: docs/development)") do |value|
+    options[:source] = resolve_from_root.call(value)
+  end
+  opts.on("--output DIR", "Generated site directory (default: public/dev-blog)") do |value|
+    options[:output] = resolve_from_root.call(value)
+  end
+  opts.on("--include-drafts", "Include posts whose frontmatter has draft: true") do
+    options[:include_drafts] = true
+  end
+  opts.on("-h", "--help", "Show this help") do
+    puts opts
+    exit 0
+  end
+end
+
+begin
+  parser.parse!(ARGV)
+  raise OptionParser::ParseError, "unexpected arguments: #{ARGV.join(' ')}" unless ARGV.empty?
+
+  result = DevBlog::Builder.build(
+    project_root: project_root,
+    source_dir: options.fetch(:source),
+    output_dir: options.fetch(:output),
+    include_drafts: options.fetch(:include_drafts)
+  )
+
+  puts "Built #{result.posts_count} post#{'s' unless result.posts_count == 1} in #{result.output_dir}"
+rescue OptionParser::ParseError => e
+  warn "dev-blog options error: #{e.message}"
+  warn parser
+  exit 2
+rescue DevBlog::BuildError, DevBlog::InvalidPost => e
+  warn "dev-blog build failed: #{e.message}"
+  exit 1
+end
