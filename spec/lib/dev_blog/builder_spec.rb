@@ -42,7 +42,8 @@ RSpec.describe DevBlog::Builder do
     defaults = {
       project_root: project_root,
       source_dir: source_dir,
-      output_dir: output_dir
+      output_dir: output_dir,
+      adr_catalog_path: nil
     }
     described_class.build(**defaults.merge(kwargs))
   end
@@ -85,6 +86,50 @@ RSpec.describe DevBlog::Builder do
       expect(post).to include('href="../../"')
       expect(post).to include("<h1>Hello</h1>")
       expect(post).to include("<div class=\"post-body\"")
+    end
+
+    it "builds an accepted catalog ADR through the static lane" do
+      adr_dir = project_root.join("docs", "adr")
+      adr_dir.mkpath
+      adr_dir.join("README.md").write(<<~MARKDOWN)
+        # Architecture Decision Records
+
+        ## Index
+
+        | ADR | Title | Status | Date |
+        |-----|-------|--------|------|
+        | [ADR-001](./001-monorepo-rails-api-vue-spa.md) | Monorepo with Rails 8 API-only and Vue 3 Vite SPA | accepted | 2026-07-07 |
+
+        ## Status Key
+      MARKDOWN
+      adr_dir.join("001-monorepo-rails-api-vue-spa.md").write(<<~MARKDOWN)
+        # ADR-001: Monorepo with Rails 8 API-only and Vue 3 Vite SPA
+
+        ## Status
+
+        accepted
+
+        ## Context
+
+        Historical body.
+      MARKDOWN
+      write_post("2026-08-01-hello.md", "title: Hello\ndate: 2026-08-01", "body")
+
+      result = build(adr_catalog_path: adr_dir.join("README.md"))
+
+      expect(result).to be_a(DevBlog::BuildResult)
+      expect(result.adrs_count).to eq(1)
+      index = output_dir.join("index.html").read
+      expect(index).to include("<h2>Architecture Decisions</h2>")
+      expect(index).to include('href="./adrs/001-monorepo-rails-api-vue-spa/"')
+
+      adr_page = output_dir.join("adrs", "001-monorepo-rails-api-vue-spa", "index.html").read
+      expect(adr_page).to include("Architecture Decision Record 001")
+      expect(adr_page).to include("<h1>Monorepo with Rails 8 API-only and Vue 3 Vite SPA</h1>")
+      expect(adr_page).to include("Historical body")
+      expect(adr_page).to include("This decision record captures the reasoning at a point in time")
+      expect(adr_page).to include('href="../../styles.css"')
+      expect(adr_page).to include('href="../../"')
     end
 
     it "excludes drafts by default and includes them with include_drafts: true" do

@@ -11,15 +11,17 @@ require_relative "dev_blog/post"
 require_relative "dev_blog/post_parser"
 require_relative "dev_blog/markdown_converter"
 require_relative "dev_blog/template_renderer"
+require_relative "dev_blog/adr_catalog"
 
 module DevBlog
   class BuildError < StandardError; end
 
   class BuildResult
-    attr_reader :posts, :output_dir, :generated_files
+    attr_reader :posts, :adrs, :output_dir, :generated_files
 
-    def initialize(posts:, output_dir:, generated_files:)
+    def initialize(posts:, adrs:, output_dir:, generated_files:)
       @posts = posts.dup.freeze
+      @adrs = adrs.dup.freeze
       @output_dir = Pathname.new(output_dir)
       @generated_files = generated_files.to_h do |path, bytes|
         [ path.dup.freeze, bytes.dup.freeze ]
@@ -29,6 +31,10 @@ module DevBlog
 
     def posts_count
       posts.size
+    end
+
+    def adrs_count
+      adrs.size
     end
   end
 
@@ -40,13 +46,14 @@ module DevBlog
     DATED_POST_PATTERN = /\A\d{4}-\d{2}-\d{2}-.*\.md\z/.freeze
     ASSETS = %w[styles.css].freeze
 
-    def self.build(source_dir:, output_dir:, project_root: nil, include_drafts: false)
+    def self.build(source_dir:, output_dir:, project_root: nil, include_drafts: false, adr_catalog_path: nil)
       if project_root
         build_with_root(
           source_dir: source_dir,
           output_dir: output_dir,
           project_root: project_root,
-          include_drafts: include_drafts
+          include_drafts: include_drafts,
+          adr_catalog_path: adr_catalog_path
         )
       else
         build_legacy(
@@ -63,7 +70,7 @@ module DevBlog
       renderer.render_index(posts: posts)
     end
 
-    def self.build_with_root(source_dir:, output_dir:, project_root:, include_drafts:)
+    def self.build_with_root(source_dir:, output_dir:, project_root:, include_drafts:, adr_catalog_path: nil)
       root_path = canonical_project_root(project_root)
       source_path = resolve_path(source_dir, root_path, "source_dir")
       output_path = resolve_path(output_dir, root_path, "output_dir")
@@ -83,8 +90,10 @@ module DevBlog
       posts = posts.reject(&:draft?) unless include_drafts
       posts = posts.sort
 
+      adrs = load_adrs(adr_catalog_path, root_path)
+
       check_duplicates(posts)
-      generated_files = build_file_map(posts, renderer, assets_path)
+      generated_files = build_file_map(posts, renderer, assets_path, adrs)
 
       output_path.parent.mkpath
       staged_path = Pathname.new(Dir.mktmpdir(".dev-blog-staged-", output_path.parent.to_s))
@@ -97,6 +106,7 @@ module DevBlog
 
       BuildResult.new(
         posts: posts,
+        adrs: adrs,
         output_dir: output_path,
         generated_files: generated_files
       )
@@ -128,9 +138,16 @@ module DevBlog
 
       BuildResult.new(
         posts: posts,
+        adrs: [],
         output_dir: output_path,
         generated_files: generated_files
       )
+    end
+
+    def self.load_adrs(adr_catalog_path, project_root)
+      return [] if adr_catalog_path.nil?
+
+      AdrCatalog.load(index_path: adr_catalog_path, project_root: project_root)
     end
 
     def self.discover_dated_posts(source_path)
@@ -156,23 +173,35 @@ module DevBlog
       end
     end
 
-    def self.build_file_map(posts, renderer, assets_path)
+    def self.build_file_map(posts, renderer, assets_path, adrs = [])
       files = {}
 
-      files["index.html"] = renderer.render_index(posts: posts).b
+      add_file(files, "index.html", renderer.render_index(posts: posts, adrs: adrs).b)
 
       posts.each do |post|
-        files["posts/#{post.slug}/index.html"] = renderer.render_post(post: post).b
+        add_file(files, "posts/#{post.slug}/index.html", renderer.render_post(post: post).b)
+      end
+
+      adrs.each do |adr|
+        add_file(files, "adrs/#{adr.output_slug}/index.html", renderer.render_adr(adr: adr).b)
       end
 
       ASSETS.each do |name|
         asset_path = assets_path.join(name)
         raise BuildError, "required blog asset not found: #{asset_path}" unless asset_path.file?
 
-        files[name] = asset_path.binread
+        add_file(files, name, asset_path.binread)
       end
 
       files
+    end
+
+    def self.add_file(files, relative_path, bytes)
+      if files.key?(relative_path)
+        raise BuildError, "generated output path collision: #{relative_path}"
+      end
+
+      files[relative_path] = bytes
     end
 
     def self.write_staged(staging_path, generated_files)

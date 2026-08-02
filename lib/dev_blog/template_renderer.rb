@@ -6,7 +6,7 @@ require "pathname"
 
 module DevBlog
   class TemplateRenderer
-    ALLOWED_TEMPLATES = %w[index.html.erb post.html.erb].freeze
+    ALLOWED_TEMPLATES = %w[index.html.erb post.html.erb adr.html.erb].freeze
 
     attr_reader :templates_dir
 
@@ -20,12 +20,13 @@ module DevBlog
       @templates_dir = path
     end
 
-    def render_index(posts:)
+    def render_index(posts:, adrs: [])
       render(
         template_name: "index.html.erb",
         site_title: "Boardgame Night Engineering Blog",
         site_description: "Notes on building the boardgame-night Rails + React app.",
-        posts: posts
+        posts: posts,
+        adrs: adrs
       )
     end
 
@@ -34,6 +35,14 @@ module DevBlog
         template_name: "post.html.erb",
         post: post,
         body_html: post.body_html
+      )
+    end
+
+    def render_adr(adr:)
+      render(
+        template_name: "adr.html.erb",
+        adr: adr,
+        body_html: adr.body_html
       )
     end
 
