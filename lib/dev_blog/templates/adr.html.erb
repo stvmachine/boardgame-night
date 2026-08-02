@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= h(adr.title) %></title>
+  <meta name="description" content="<%= h(adr.title) %>">
+  <link rel="stylesheet" href="../../styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav aria-label="Site">
+      <a class="back" href="../../">Back to the engineering journal</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <article class="post adr">
+      <header class="post-header">
+        <p class="meta">
+          <span class="adr-identifier">Architecture Decision Record <%= h(adr.number.to_s.rjust(3, '0')) %></span>
+          <time datetime="<%= adr.date.iso8601 %>"><%= adr.date.strftime("%B %-d, %Y") %></time>
+          <span class="tags" aria-label="Status">
+            <span class="tag"><%= h(adr.status) %></span>
+          </span>
+        </p>
+
+        <h1><%= h(adr.title) %></h1>
+      </header>
+
+      <aside class="historical-notice" role="note">
+        <p><strong>Historical note:</strong> This decision record captures the reasoning at a point in time. The current implementation may have evolved, and references to older frontend stacks (such as Vue) describe the historical context rather than the present system.</p>
+      </aside>
+
+      <div class="post-body">
+        <%= body_html %>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <p><a href="../../">Back to the engineering journal</a></p>
+  </footer>
+</body>
+</html>

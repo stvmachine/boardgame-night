@@ -51,6 +51,35 @@
         </ol>
       <% end %>
     </section>
+
+    <% if respond_to?(:adrs) && adrs %>
+      <section class="adrs">
+        <h2>Architecture Decisions</h2>
+
+        <% if adrs.empty? %>
+          <p>No architecture decisions yet.</p>
+        <% else %>
+          <ol class="post-list">
+            <% adrs.each do |adr| %>
+              <li>
+                <article class="post-summary adr-summary">
+                  <h2>
+                    <a href="./adrs/<%= adr.output_slug %>/">ADR-<%= h(adr.number.to_s.rjust(3, '0')) %>: <%= h(adr.title) %></a>
+                  </h2>
+
+                  <p class="meta">
+                    <time datetime="<%= adr.date.iso8601 %>"><%= adr.date.strftime("%B %-d, %Y") %></time>
+                    <span class="tags" aria-label="Status">
+                      <span class="tag"><%= h(adr.status) %></span>
+                    </span>
+                  </p>
+                </article>
+              </li>
+            <% end %>
+          </ol>
+        <% end %>
+      </section>
+    <% end %>
   </main>
 
   <footer class="site-footer">
