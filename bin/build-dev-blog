@@ -12,7 +12,8 @@ require "dev_blog"
 options = {
   source: project_root.join("docs", "development"),
   output: project_root.join("public", "dev-blog"),
-  include_drafts: false
+  include_drafts: false,
+  adr_catalog_path: project_root.join("docs", "adr", "README.md")
 }
 
 resolve_from_root = lambda do |value|
@@ -29,8 +30,14 @@ parser = OptionParser.new do |opts|
   opts.on("--output DIR", "Generated site directory (default: public/dev-blog)") do |value|
     options[:output] = resolve_from_root.call(value)
   end
+  opts.on("--adr-catalog PATH", "ADR catalog README path (default: docs/adr/README.md)") do |value|
+    options[:adr_catalog_path] = resolve_from_root.call(value)
+  end
   opts.on("--include-drafts", "Include posts whose frontmatter has draft: true") do
     options[:include_drafts] = true
+  end
+  opts.on("--no-adrs", "Skip architecture-decision pages") do
+    options[:adr_catalog_path] = nil
   end
   opts.on("-h", "--help", "Show this help") do
     puts opts
@@ -46,10 +53,13 @@ begin
     project_root: project_root,
     source_dir: options.fetch(:source),
     output_dir: options.fetch(:output),
-    include_drafts: options.fetch(:include_drafts)
+    include_drafts: options.fetch(:include_drafts),
+    adr_catalog_path: options.fetch(:adr_catalog_path)
   )
 
-  puts "Built #{result.posts_count} post#{'s' unless result.posts_count == 1} in #{result.output_dir}"
+  post_word = result.posts_count == 1 ? "post" : "posts"
+  adr_word = result.adrs_count == 1 ? "ADR" : "ADRs"
+  puts "Built #{result.posts_count} #{post_word} and #{result.adrs_count} #{adr_word} in #{result.output_dir}"
 rescue OptionParser::ParseError => e
   warn "dev-blog options error: #{e.message}"
   warn parser

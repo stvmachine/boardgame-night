@@ -46,14 +46,23 @@ module DevBlog
     DATED_POST_PATTERN = /\A\d{4}-\d{2}-\d{2}-.*\.md\z/.freeze
     ASSETS = %w[styles.css].freeze
 
-    def self.build(source_dir:, output_dir:, project_root: nil, include_drafts: false, adr_catalog_path: nil)
+    def self.build(source_dir:, output_dir:, project_root: nil, include_drafts: false, adr_catalog_path: :default)
       if project_root
+        resolved_catalog_path = case adr_catalog_path
+                                when :default
+                                  Pathname.new(project_root).join("docs", "adr", "README.md")
+                                when nil
+                                  nil
+                                else
+                                  adr_catalog_path
+                                end
+
         build_with_root(
           source_dir: source_dir,
           output_dir: output_dir,
           project_root: project_root,
           include_drafts: include_drafts,
-          adr_catalog_path: adr_catalog_path
+          adr_catalog_path: resolved_catalog_path
         )
       else
         build_legacy(

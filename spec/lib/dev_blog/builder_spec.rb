@@ -452,6 +452,172 @@ RSpec.describe DevBlog::Builder do
     end
   end
 
+  describe "ADR-aware build" do
+    let(:real_project_root) { DevBlog.project_root }
+
+    it "builds all accepted ADR pages from the real catalog" do
+      source_dir.mkpath
+      copy_templates_and_assets
+      write_post("2026-08-01-hello.md", "title: Hello\ndate: 2026-08-01", "body")
+
+      result = described_class.build(
+        project_root: real_project_root,
+        source_dir: source_dir,
+        output_dir: output_dir,
+        adr_catalog_path: real_project_root.join("docs", "adr", "README.md")
+      )
+
+      expect(result.adrs_count).to eq(14)
+      index = output_dir.join("index.html").read
+
+      result.adrs.each do |adr|
+        expect(index).to include("ADR-#{adr.number.to_s.rjust(3, '0')}: #{adr.title}")
+        expect(index).to include("./adrs/#{adr.output_slug}/")
+        expect(output_dir.join("adrs", adr.output_slug, "index.html")).to be_file
+      end
+
+      first = result.adrs.first
+      expect(first.number).to eq(1)
+      expect(first.title).to eq("Monorepo with Rails 8 API-only and Vue 3 Vite SPA")
+    end
+
+    it "renders the historical notice and preserves body text on representative ADRs" do
+      source_dir.mkpath
+      copy_templates_and_assets
+      write_post("2026-08-01-hello.md", "title: Hello\ndate: 2026-08-01", "body")
+
+      described_class.build(
+        project_root: real_project_root,
+        source_dir: source_dir,
+        output_dir: output_dir,
+        adr_catalog_path: real_project_root.join("docs", "adr", "README.md")
+      )
+
+      adr001 = output_dir.join("adrs", "001-monorepo-rails-api-vue-spa", "index.html").read
+      expect(adr001).to include("This decision record captures the reasoning at a point in time")
+      expect(adr001).to include("A Rails API-only backend combined with a Vue 3 SPA")
+
+      adr006 = output_dir.join("adrs", "006-vue-apollo-normalized-cache", "index.html").read
+      expect(adr006).to include("This decision record captures the reasoning at a point in time")
+      expect(adr006).to include("Apollo Client 3.14.x")
+
+      adr014 = output_dir.join("adrs", "014-dev-blog-engine", "index.html").read
+      expect(adr014).to include("This decision record captures the reasoning at a point in time")
+      expect(adr014).to include("Pure-Ruby Static Site Generator for the Dev Blog")
+    end
+
+    it "removes stale ADR pages on a successful second build" do
+      adr_dir = project_root.join("docs", "adr")
+      adr_dir.mkpath
+      adr_dir.join("README.md").write(<<~MARKDOWN)
+        # Architecture Decision Records
+
+        ## Index
+
+        | ADR | Title | Status | Date |
+        |-----|-------|--------|------|
+        | [ADR-001](./001-keep.md) | Keep | accepted | 2026-08-01 |
+        | [ADR-002](./002-remove.md) | Remove | accepted | 2026-08-02 |
+
+        ## Status Key
+      MARKDOWN
+      adr_dir.join("001-keep.md").write(<<~MARKDOWN)
+        # ADR-001: Keep
+
+        ## Status
+
+        accepted
+      MARKDOWN
+      adr_dir.join("002-remove.md").write(<<~MARKDOWN)
+        # ADR-002: Remove
+
+        ## Status
+
+        accepted
+      MARKDOWN
+      source_dir.mkpath
+      copy_templates_and_assets
+
+      build(adr_catalog_path: adr_dir.join("README.md"))
+      expect(output_dir.join("adrs", "002-remove", "index.html")).to be_file
+
+      adr_dir.join("README.md").write(<<~MARKDOWN)
+        # Architecture Decision Records
+
+        ## Index
+
+        | ADR | Title | Status | Date |
+        |-----|-------|--------|------|
+        | [ADR-001](./001-keep.md) | Keep | accepted | 2026-08-01 |
+
+        ## Status Key
+      MARKDOWN
+
+      build(adr_catalog_path: adr_dir.join("README.md"))
+      expect(output_dir.join("adrs", "002-remove", "index.html")).not_to exist
+      expect(output_dir.join("adrs", "001-keep", "index.html")).to be_file
+    end
+
+    it "produces deterministic ADR output across rebuilds" do
+      adr_dir = project_root.join("docs", "adr")
+      adr_dir.mkpath
+      adr_dir.join("README.md").write(<<~MARKDOWN)
+        # Architecture Decision Records
+
+        ## Index
+
+        | ADR | Title | Status | Date |
+        |-----|-------|--------|------|
+        | [ADR-001](./001-hello.md) | Hello | accepted | 2026-08-01 |
+
+        ## Status Key
+      MARKDOWN
+      adr_dir.join("001-hello.md").write(<<~MARKDOWN)
+        # ADR-001: Hello
+
+        ## Status
+
+        accepted
+      MARKDOWN
+      source_dir.mkpath
+      copy_templates_and_assets
+
+      build(adr_catalog_path: adr_dir.join("README.md"))
+      index_hash = Digest::SHA256.file(output_dir.join("index.html")).hexdigest
+      adr_hash = Digest::SHA256.file(output_dir.join("adrs", "001-hello", "index.html")).hexdigest
+
+      build(adr_catalog_path: adr_dir.join("README.md"))
+      expect(Digest::SHA256.file(output_dir.join("index.html")).hexdigest).to eq(index_hash)
+      expect(Digest::SHA256.file(output_dir.join("adrs", "001-hello", "index.html")).hexdigest).to eq(adr_hash)
+    end
+
+    it "does not leak sentinel credential names or values into ADR output" do
+      source_dir.mkpath
+      copy_templates_and_assets
+
+      ENV["BGG_TOKEN"] = "phase12-secret-token-value"
+      ENV["DOTENV_PRIVATE_KEY_BGGEEK"] = "phase12-secret-key-value"
+
+      result = described_class.build(
+        project_root: real_project_root,
+        source_dir: source_dir,
+        output_dir: output_dir,
+        adr_catalog_path: real_project_root.join("docs", "adr", "README.md")
+      )
+
+      result.generated_files.each do |_, bytes|
+        text = bytes.dup.force_encoding("UTF-8")
+        expect(text).not_to include("BGG_TOKEN")
+        expect(text).not_to include("DOTENV_PRIVATE_KEY_BGGEEK")
+        expect(text).not_to include("phase12-secret-token-value")
+        expect(text).not_to include("phase12-secret-key-value")
+      end
+    ensure
+      ENV.delete("BGG_TOKEN")
+      ENV.delete("DOTENV_PRIVATE_KEY_BGGEEK")
+    end
+  end
+
   describe "tracer compatibility" do
     it "still supports the Plan 12-01 source_dir:/output_dir: keyword call" do
       source_dir.mkpath
