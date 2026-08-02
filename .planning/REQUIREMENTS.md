@@ -84,7 +84,7 @@ BLOG-01 through BLOG-05 are preserved carried scope in Phase 12. They remain par
 - [x] **BLOG-02**: Build a pure-Ruby SSG engine that parses markdown frontmatter, builds an index, and renders static HTML
 - [ ] **BLOG-03**: Produce the first agent-drafted architecture posts in `docs/development/`
 - [ ] **BLOG-04**: Integrate the static blog build into the existing Kamal 2 single-container deploy and route it to a subdomain
-- [ ] **BLOG-05**: Verify the generated blog and document usage for maintainers
+- [x] **BLOG-05**: Verify the generated blog and document usage for maintainers
 
 ### Restored v1.0 Implementation Evidence
 
