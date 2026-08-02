@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= h(site_title) %></title>
+  <meta name="description" content="<%= h(site_description) %>">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav aria-label="Site">
+      <a class="site-title" href="./"><%= h(site_title) %></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="posts">
+      <h1>Engineering posts</h1>
+
+      <% if posts.empty? %>
+        <p>No posts yet.</p>
+      <% else %>
+        <ol class="post-list" reversed>
+          <% posts.each do |post| %>
+            <li>
+              <article class="post-summary">
+                <h2>
+                  <a href="./posts/<%= post.slug %>/"><%= h(post.title) %></a>
+                </h2>
+
+                <p class="meta">
+                  <time datetime="<%= post.date.iso8601 %>"><%= post.date.strftime("%B %-d, %Y") %></time>
+                  <% if post.tags.any? %>
+                    <span class="tags" aria-label="Tags">
+                      <% post.tags.each do |tag| %>
+                        <span class="tag"><%= h(tag) %></span>
+                      <% end %>
+                    </span>
+                  <% end %>
+                </p>
+
+                <% if post.description && !post.description.empty? %>
+                  <p><%= h(post.description) %></p>
+                <% end %>
+              </article>
+            </li>
+          <% end %>
+        </ol>
+      <% end %>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>A repository-owned engineering journal.</p>
+  </footer>
+</body>
+</html>
