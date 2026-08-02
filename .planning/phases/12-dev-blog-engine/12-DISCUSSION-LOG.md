@@ -94,6 +94,23 @@
 - Exact prose and excerpts after source verification.
 - Rake/CLI delegation shape.
 
+---
+
+## Accepted ADR Publishing Amendment
+
+**Date:** 2026-08-02
+**User amendment:** “adr can be part of the blog too please”
+
+| Interpretation | Description | Selected |
+|----------------|-------------|----------|
+| Publish the canonical accepted catalog | Render every accepted ADR indexed by `docs/adr/README.md`, preserve ADR files, add historical framing and stable ADR pages | ✓ |
+| Copy ADR prose into development posts | Duplicate each ADR under `docs/development/` | |
+| Publish only React-current ADRs | Omit accepted Vue-era records rather than label them historical | |
+| Add a documentation platform | Add search/feed/tags/CMS/runtime features with ADR publication | |
+
+**User's choice:** Publish ADRs as a first-class blog section while retaining their canonical historical text.
+**Notes:** Current catalog coverage is ADR-001 through ADR-014. Generated pages use `adrs/<zero-padded-number>-<slug>/index.html`; malformed catalog/file/status relationships fail closed. Every ADR page carries a visible point-in-time historical notice so accepted Vue-era records do not contradict the current React frontend. Plans 12-01 and 12-02 remain complete and unchanged; remaining plans are resliced to insert a bounded ADR lane.
+
 ## Deferred Ideas
 
 - RSS/Atom, tag archives, search, comments, pagination, analytics, CMS/admin authoring, and optional syntax highlighting.

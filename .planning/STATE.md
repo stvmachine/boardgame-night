@@ -12,7 +12,7 @@ last_activity_desc: Phase 12 execution started
 progress:
   total_phases: 13
   completed_phases: 12
-  total_plans: 69
+  total_plans: 70
   completed_plans: 65
 ---
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-08-02)
 ## Current Position
 
 Phase: 12 (dev-blog-engine) — EXECUTING
-Plan: 3 of 6
+Plan: 3 of 7
 Status: Ready to execute
 Last activity: 2026-08-02 — Phase 12 execution started
 
@@ -55,7 +55,7 @@ Last activity: 2026-08-02 — Phase 12 execution started
 | 9. Home & Collection Redesign | 8 | — | — |
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
-| 12. Dev Blog Engine | 0/6 | Pending carried scope | — |
+| 12. Dev Blog Engine | 2/7 | In Progress | — |
 | 13. React Migration Parity | 6/6 | 309 min | ~52 min |
 
 **Recent Trend:**

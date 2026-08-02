@@ -8,7 +8,7 @@ Boardgame-night is a Rails 8 API-only + React SPA monorepo that collapses `bgg-g
 
 - ✅ **v1.0 MVP** — Phases 1-4 (shipped 2026-07-09)
 - ✅ **v1.1 UI Redesign + Suggestion Engine** — Phases 5-11 (completed 2026-07-20)
-- 🚧 **v2.0 React Migration & Parity** — Phases 12-13 (Phase 13 is the current execution target; Phase 12 remains pending carried scope)
+- 🚧 **v2.0 React Migration & Parity** — Phases 12-13 (Phase 13 is complete; Phase 12 carried dev-blog work is in progress)
 - 📋 **Enhanced Game Night** — Deferred future milestone (ranked voting, 4-state RSVP, play logging, etc.)
 
 ## Phases
@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 9: Home & Collection Redesign** - Dashboard hero, stats, trending, rich filters, game cards (completed 2026-07-17)
 - [x] **Phase 10: Picking a Game Redesign** - Session header, attendee-aware suggestions, pick cards (completed 2026-07-18)
 - [x] **Phase 11: Polish & E2E Hardening** - E2E in CI, solid_cable dev config, legacy cleanup, dark mode/responsive QA (completed 2026-07-20)
-- [ ] **Phase 12: Dev Blog Engine** - Carried pure-Ruby SSG, architecture posts, Kamal build integration, and subdomain routing
+- [ ] **Phase 12: Dev Blog Engine** - Carried pure-Ruby SSG, architecture posts, accepted ADR publication, Kamal build integration, and subdomain routing
 - [x] **Phase 13: React Migration Parity** - Complete and verify React parity, repair discovered defects, and remove the remaining Vue-era tooling (completed 2026-08-02)
 
 ## Phase Details
@@ -392,7 +392,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 12 is independent carried work and remains pending; it does not block Phase 13.
+Phases 1-11 and 13 are complete. Phase 12 is the remaining independent carried v2.0 work and is currently executing.
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -407,24 +407,24 @@ Phases 1-11 are complete. Phase 13 is the current v2.0 execution target. Phase 1
 | 9. Home & Collection Redesign | 8/8 | Complete    | 2026-07-17 |
 | 10. Picking a Game Redesign | 6/6 | Complete    | 2026-07-18 |
 | 11. Polish & E2E Hardening | 5/5 | Complete | 2026-07-20 |
-| 12. Dev Blog Engine | 2/6 | In Progress|  |
+| 12. Dev Blog Engine | 2/7 | In Progress|  |
 | 13. React Migration Parity | 6/6 | Complete    | 2026-08-02 |
 
-### Phase 12: Dev blog engine — pure-Ruby SSG for docs/development/ markdown posts
+### Phase 12: Dev blog engine — pure-Ruby SSG for engineering posts and accepted ADRs
 
-**Goal:** Publish a `docs/development/` blog — built with a pure-Ruby static site generator, served from the same Kamal VPS on a subdomain — that explains how the app was made.
+**Goal:** Publish current `docs/development/` engineering posts plus the canonical accepted `docs/adr/` catalog through a pure-Ruby static site generator, served from the same Kamal VPS at `/blog` and a configurable subdomain, so readers can understand how the app was made and the historical decisions behind it.
 **Mode:** standard
 **Depends on:** Phase 11
 **Requirements**: BLOG-01, BLOG-02, BLOG-03, BLOG-04, BLOG-05
 **Success Criteria** (what must be TRUE):
 
   1. A pure-Ruby SSG engine is chosen and documented in ADR-014 (BLOG-01)
-  2. The engine parses markdown frontmatter, builds an index page, and renders individual post pages to static HTML (BLOG-02)
+  2. The engine parses markdown frontmatter and the accepted ADR catalog, builds separate Engineering Posts and Architecture Decisions index sections, and renders stable post/ADR pages to static HTML (BLOG-02)
   3. At least four agent-drafted architecture posts exist in `docs/development/` and are included in the generated site (BLOG-03)
   4. The static site is built into the production Docker image and reachable on a subdomain routed from the same Kamal VPS (BLOG-04)
-  5. The build is verified in CI and the deployment is documented for maintainers (BLOG-05)
+  5. The complete post/ADR build is verified in CI and the deployment is documented for maintainers (BLOG-05)
 
-**Plans:** 2/6 plans executed
+**Plans:** 2/7 plans executed
 
 Plans:
 **Wave 1**
@@ -441,15 +441,19 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 12-04-PLAN.md — React-current authentication correction, four architecture posts, and corpus-to-output verification (Wave 4)
+- [ ] 12-04-PLAN.md — Strict accepted-ADR catalog, historical ADR pages, Architecture Decisions index, and deterministic corpus coverage (Wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
-- [ ] 12-05-PLAN.md — Exact host/path routing, existing-image Docker/Kamal integration, and Ruby CI enforcement (Wave 5)
+- [ ] 12-05-PLAN.md — React-current authentication correction, four architecture posts, and corpus-to-output verification (Wave 5)
 
 **Wave 6** *(blocked on Wave 5 completion)*
 
-- [ ] 12-06-PLAN.md — Maintainer runbook, integrated evidence, and blocking real DNS/TLS/Kamal reachability checkpoint (Wave 6)
+- [ ] 12-06-PLAN.md — Exact post/ADR host/path routing, existing-image Docker/Kamal integration, and Ruby CI enforcement (Wave 6)
+
+**Wave 7** *(blocked on Wave 6 completion)*
+
+- [ ] 12-07-PLAN.md — Maintainer runbook, integrated post/ADR evidence, and blocking real DNS/TLS/Kamal reachability checkpoint (Wave 7)
 
 **UI hint**: no
 
