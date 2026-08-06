@@ -5,15 +5,15 @@ milestone_name: React Migration & Parity
 current_phase: 12
 current_phase_name: dev-blog-engine
 status: executing
-stopped_at: Completed 12-03-PLAN.md; ready for 12-04
-last_updated: "2026-08-02T10:48:24.198Z"
+stopped_at: Completed 12-04-PLAN.md; ready for 12-05
+last_updated: "2026-08-02T21:35:00.000Z"
 last_activity: 2026-08-02
-last_activity_desc: Completed deterministic dev-blog Builder, CLI, Rake wrapper, and safety verification
+last_activity_desc: Published accepted ADR catalog with strict validation and CLI integration
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 70
-  completed_plans: 66
+  completed_plans: 67
 ---
 
 # Project State
@@ -28,9 +28,9 @@ See: .planning/PROJECT.md (updated 2026-08-02)
 ## Current Position
 
 Phase: 12 (dev-blog-engine) — EXECUTING
-Plan: 4 of 7
-Status: Ready to execute Plan 12-04
-Last activity: 2026-08-02 — Completed Plan 12-03 Builder/CLI/Rake pipeline
+Plan: 5 of 7
+Status: Ready to execute Plan 12-05
+Last activity: 2026-08-02 — Published accepted ADR catalog with strict validation and CLI integration
 
 ## Performance Metrics
 
@@ -108,6 +108,7 @@ Last activity: 2026-08-02 — Completed Plan 12-03 Builder/CLI/Rake pipeline
 | Phase 12-dev-blog-engine P01 | 11min | 2 tasks | 9 files |
 | Phase 12-dev-blog-engine P02 | 20min | 2 tasks | 7 files |
 | Phase 12-dev-blog-engine P03 | 35min | 2 tasks | 8 files |
+| Phase 12-dev-blog-engine P04 | 65min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -258,8 +259,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-02T10:48:24.198Z
-Stopped at: Session resumed; Plan 12-03 is complete and Plan 12-04 accepted-ADR publication is next
+Last session: 2026-08-02T21:35:00.000Z
+Stopped at: Plan 12-04 complete; ready to execute Plan 12-05
 Resume file: None
 
 ### Recent Session Activity
@@ -273,3 +274,8 @@ Resume file: None
 - Committed two checkpoints:
   - `d831454` — ✨ feat(anonymous-group): quick-start group creation without account
   - `11d577f` — ♻️ refactor(tests): remove legacy Vue specs and fix React test suite
+- [Phase 12-04]: Kept DevBlog::Adr distinct from Post because architecture decisions and current engineering posts have different metadata, framing, and publication rules.
+- [Phase 12-04]: Validated the entire README catalog before filtering accepted rows so structural problems in proposed/deprecated rows cannot pass silently.
+- [Phase 12-04]: Rejected all ADR catalog symlinks rather than only escape cases to keep "regular file" enforcement unambiguous.
+- [Phase 12-04]: Reconciled only README title cells, not ADR bodies, to satisfy strict catalog/body validation without rewriting canonical decision records.
+- [Phase 12-04]: Added ADR pages to the existing staged generated-file map rather than introducing a second output writer, preserving deterministic stale cleanup and collision checks.
