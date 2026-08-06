@@ -1,15 +1,15 @@
 ---
 title: "Authentication with Rails Built-Ins: Bearer Tokens over GraphQL"
 date: 2026-07-21
-description: "Why this app signs users in with has_secure_password and a database-backed Bearer token instead of Devise, JWT, or cookie sessions — and how the flow works end to end."
+description: "Why this app signs users in with has_secure_password and a database-backed Bearer token instead of Devise, JWT, or cookie sessions — and how the React + Apollo Client flow works end to end."
 tags: [rails, authentication, graphql, architecture]
 ---
 
 ## The problem
 
-This app is a Rails 8 API-only backend serving a Vue 3 single-page application through one `/graphql` endpoint. That shape creates an awkward authentication constraint. In production the SPA is compiled into `public/` and served from the same origin as Rails, so cookie sessions would work. In development the SPA runs on Vite at `localhost:5173` while Rails listens on `localhost:3000`, so every request is cross-origin and cookie-based auth pulls us into `credentials: 'include'` and CORS edge cases inside Apollo Client.
+This app is a Rails 8 API-only backend serving a React 19 single-page application through one `/graphql` endpoint. That shape creates an awkward authentication constraint. In production the SPA is compiled into `public/` and served from the same origin as Rails, so cookie sessions would work. In development the SPA runs on Vite at `localhost:5173` while Rails listens on `localhost:3000`, so every request is cross-origin and cookie-based auth pulls us into `credentials: 'include'` and CORS edge cases inside Apollo Client.
 
-We needed a session strategy that keeps users logged in across page loads, works over GraphQL, supports logout from any page, and behaves identically in both environments without environment-specific cookie configuration. ADR-008 records the decision; this post walks through what we actually built.
+We needed a session strategy that keeps users logged in across page loads, works over GraphQL, supports logout from any page, and behaves identically in both environments without environment-specific cookie configuration. [ADR-008](https://github.com/stvmachine/boardgame-night-ror-vue/blob/main/docs/adr/008-authentication-session-strategy.md) records the original decision; this post walks through what we actually shipped after the React migration.
 
 ## The decision: Rails 8 built-ins, adapted for Bearer tokens
 
@@ -23,6 +23,7 @@ class User < ApplicationRecord
   has_many :bgg_collections, dependent: :destroy
   has_many :bgg_things, through: :bgg_collections
   has_many :sessions, dependent: :destroy
+end
 ```
 
 Sessions are database rows. The whole model is twelve lines:
@@ -64,19 +65,7 @@ Three lines of real logic. Strip the `Bearer` prefix, look up an active session 
 
 Because auth travels in a header rather than a cookie, there is no CSRF surface to mitigate and no cross-origin credential negotiation in development.
 
-## Why not the alternatives
-
-We considered three other approaches and wrote the reasoning into ADR-008.
-
-**Devise** is a full-stack authentication engine. It ships controllers, views, flash messages, and responder logic built for server-rendered apps. In an API-only app serving a SPA we would disable or bypass most of it, and what remains — password hashing, session tracking — is exactly what the Rails 8 generator already gives us. For friend-group accounts with email and password, Devise is machinery without a job.
-
-**JWT access + refresh tokens** was the more serious contender. We rejected it because the costs are real and the benefits do not apply at our scale. JWT brings algorithm-confusion risk, refresh-token rotation, and the awkward fact that stateless tokens cannot be revoked without reintroducing server-side state — usually a denylist, which is a database lookup wearing a different hat. A `Session` row gives us revocation for free: destroy the row and the token is dead. When you are going to hit the database on every authenticated request anyway, the statelessness JWT offers is not buying anything.
-
-**Cookie sessions** work for the same-origin production case but fail our dev/prod parity requirement and offer no per-device revocation.
-
-The trade-off we accepted is explicit: one indexed `Session` lookup per authenticated request. At v1 scale — a handful of friend groups — that is negligible, and it purchases immediate revocation, per-device sessions, and a future "sign out everywhere" feature.
-
-## The GraphQL flow
+## The React + Apollo Client flow
 
 Sign-in is a mutation, not a separate REST endpoint, so the frontend has exactly one API surface to think about. Input is validated by a dry-validation contract before we touch the database, then a session is created with a thirty-day expiry:
 
@@ -96,23 +85,59 @@ Sign-in is a mutation, not a separate REST endpoint, so the frontend has exactly
     end
 ```
 
-`signUp` follows the same shape — contract first, create the user with `provisional: false`, create the session, return `{ token, user }`. Note the error handling: a wrong email and a wrong password produce the same "Invalid credentials" message, so the endpoint does not reveal which accounts exist.
+`signUp` follows the same shape — contract first, create the user, create the session, return `{ token, user }`. Note the error handling: a wrong email and a wrong password produce the same "Invalid credentials" message, so the endpoint does not reveal which accounts exist.
 
-On the frontend, an Apollo `setContext` link attaches the token to every request:
+The React side stores the token in `localStorage` under a single key and hydrates the current user on mount:
+
+```tsx
+const AuthContext = createContext<AuthContextType | null>(null)
+
+const TOKEN_KEY = 'bgg-night-token'
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [token, setTokenState] = useState(localStorage.getItem(TOKEN_KEY))
+
+  const { data: currentUserData, loading: queryLoading } = useQuery(CURRENT_USER, {
+    fetchPolicy: 'cache-and-network',
+    skip: !token,
+  })
+
+  useEffect(() => {
+    if (queryLoading) {
+      setLoading(true)
+      return
+    }
+
+    if (currentUserData?.currentUser) {
+      setUser(currentUserData.currentUser)
+    } else if (currentUserData?.currentUser === null) {
+      localStorage.removeItem(TOKEN_KEY)
+      setTokenState(null)
+      setUser(null)
+    }
+
+    setLoading(false)
+  }, [currentUserData, queryLoading])
+```
+
+Apollo Client attaches the token to every HTTP request through a `setContext` link:
 
 ```ts
 const authLink = setContext((_, { headers }) => {
-  const token = useAuthStore().token
+  const token = localStorage.getItem('bgg-night-token')
   return {
     headers: {
       ...headers,
-      Authorization: token ? `Bearer ${token}` : '',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   }
 })
 ```
 
-The token lives in the Pinia auth store, not `localStorage`. That was a deliberate choice in ADR-008: a token in `localStorage` is readable by any JavaScript that runs on the page, while a module-scoped store value is gone on a full page reload — a smaller blast radius for XSS at the price of re-authenticating after closing the tab.
+We chose `localStorage` for reload persistence: closing and reopening the tab keeps the session. The trade-off is explicit: any JavaScript that runs on the page can read the token, so a cross-site scripting vulnerability would have a larger blast radius than a memory-only store. We mitigate that with strict content-security policies, escaped output in the dev blog, and the short path from "token compromised" to "revoke the session" described below.
 
 Sign-out is where the database-backed model pays off. The whole mutation:
 
@@ -131,7 +156,23 @@ module Mutations
 end
 ```
 
-One `destroy` and the token stops resolving on the very next request. No denylist, no expiry-window guessing, no waiting for a short-lived token to age out.
+One `destroy` and the token stops resolving on the very next request. The React side then clears local state and resets Apollo's normalized cache so stale user data does not linger:
+
+```tsx
+  const signOut = useCallback(async () => {
+    try {
+      await signOutMutation()
+    } catch {
+      // Sign out even if the mutation fails (clear local state)
+    }
+    localStorage.removeItem(TOKEN_KEY)
+    setTokenState(null)
+    setUser(null)
+    await apolloClient.resetStore()
+  }, [signOutMutation])
+```
+
+No denylist, no expiry-window guessing, no waiting for a short-lived token to age out.
 
 ## Guests without accounts
 
