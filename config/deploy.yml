@@ -64,8 +64,8 @@ registry:
   # TODO: Configure GitHub personal access token with write:packages scope.
   # Set KAMAL_REGISTRY_PASSWORD in your shell environment or .kamal/secrets.
   username: <%= ENV.fetch("KAMAL_REGISTRY_USERNAME", "youruser").inspect %>
-  # password:
-  #   - KAMAL_REGISTRY_PASSWORD
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:

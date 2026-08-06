@@ -74,6 +74,18 @@ jobs:
         with:
           bundler-cache: true
 
+      - name: Build and verify development blog
+        env:
+          DEV_BLOG_HOST: blog.example.test
+        run: |
+          bin/build-dev-blog
+          test -f public/dev-blog/index.html
+          test -f public/dev-blog/styles.css
+          test -n "$(find public/dev-blog/posts -name index.html)"
+          expected=$(ruby -Ilib -rdev_blog -e 'puts DevBlog::AdrCatalog.load(index_path: Pathname("docs/adr/README.md"), project_root: Pathname(".")).length')
+          test "$(find public/dev-blog/adrs -name index.html | wc -l)" -eq "$expected"
+          bundle exec rspec spec/lib/dev_blog spec/requests/dev_blog_controller_spec.rb
+
       - name: Run RSpec tests
         env:
           RAILS_ENV: test

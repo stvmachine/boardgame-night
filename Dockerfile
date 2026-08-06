@@ -8,8 +8,8 @@
 # Production usage:
 #   docker build -t boardgame-night .
 #   docker run -d -p 3000:3000 \
-#     -e DOTENV_PRIVATE_KEY_BGGEEK=<key> \
-#     -e RAILS_MASTER_KEY=<key> \
+#     -e DOTENV_PRIVATE_KEY_BGGEEK <key> \
+#     -e RAILS_MASTER_KEY <key> \
 #     boardgame-night
 #
 # Kamal handles the env secret injection at deploy time (config/deploy.yml env.secret).

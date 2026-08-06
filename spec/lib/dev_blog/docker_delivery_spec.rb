@@ -6,6 +6,8 @@ require "open3"
 require "yaml"
 require "pathname"
 
+require "erb"
+
 RSpec.describe "DevBlog Docker delivery" do
   IMAGE_TAG = "boardgame-night-dev-blog:phase12".freeze
   KAMAL_TIMEOUT = 60
@@ -18,6 +20,22 @@ RSpec.describe "DevBlog Docker delivery" do
     end
 
     [stdout, stderr]
+  end
+
+  def rendered_deploy_config(env: {})
+    template = ERB.new(Rails.root.join("config/deploy.yml").read)
+    old_values = {}
+    begin
+      env.each do |key, value|
+        key = key.to_s
+        old_values[key] = ENV[key] if ENV.key?(key)
+        ENV[key] = value
+      end
+      YAML.safe_load(template.result)
+    ensure
+      old_values.each { |key, value| ENV[key] = value }
+      env.each_key { |key| ENV.delete(key.to_s) unless old_values.key?(key.to_s) }
+    end
   end
 
   describe "Dockerfile" do
@@ -47,15 +65,16 @@ RSpec.describe "DevBlog Docker delivery" do
 
   describe "Kamal configuration" do
     it "renders a single proxy with both hosts when APP_HOST and DEV_BLOG_HOST are set" do
-      stdout, _stderr = run!(
-        "bin/kamal", "config",
-        env: {
-          "APP_HOST" => "app.example.test",
-          "DEV_BLOG_HOST" => "blog.example.test"
-        }
-      )
+      env = {
+        "APP_HOST" => "app.example.test",
+        "DEV_BLOG_HOST" => "blog.example.test",
+        "KAMAL_REGISTRY_PASSWORD" => "phase12-registry-sentinel"
+      }
 
-      config = YAML.safe_load(stdout, permitted_classes: [Symbol])
+      # bin/kamal config must succeed, but its stdout is Kamal's internal runtime
+      # configuration. We assert on the ERB-rendered deploy.yml directly.
+      run!("bin/kamal", "config", env: env)
+      config = rendered_deploy_config(env: env)
 
       expect(config["proxy"]).to be_a(Hash)
       expect(config["proxy"]["ssl"]).to eq(true)
@@ -66,12 +85,10 @@ RSpec.describe "DevBlog Docker delivery" do
     end
 
     it "remains valid YAML when APP_HOST and DEV_BLOG_HOST are unset" do
-      env = ENV.to_h.dup
-      env.delete("APP_HOST")
-      env.delete("DEV_BLOG_HOST")
+      env = { "KAMAL_REGISTRY_PASSWORD" => "phase12-registry-sentinel" }
 
-      stdout, _stderr = run!("bin/kamal", "config", env: env)
-      config = YAML.safe_load(stdout, permitted_classes: [Symbol])
+      run!("bin/kamal", "config", env: env)
+      config = rendered_deploy_config(env: env)
 
       expect(config).to be_a(Hash)
       expect(config).not_to have_key("proxy")

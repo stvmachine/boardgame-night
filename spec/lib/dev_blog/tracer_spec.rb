@@ -87,29 +87,33 @@ RSpec.describe DevBlog do
   end
 
   describe "GET /blog" do
-    it "returns the generated index and routes before the SPA wildcard" do
+    it "redirects /blog to /blog/ and routes before the SPA wildcard" do
       write_post(temp_dir, "route.md", "title: Routed\ndate: 2026-08-01\ndescription: x", "body")
       public_dir = Pathname.new(temp_dir).join("public")
       DevBlog::Builder.build(source_dir: temp_dir, output_dir: public_dir.join("dev-blog"))
 
       allow(Rails).to receive(:public_path).and_return(public_dir)
 
-      response = Rack::MockRequest.new(Rails.application).get("/blog")
+      redirect = Rack::MockRequest.new(Rails.application).get("/blog")
+      expect(redirect.status).to eq(301)
+      expect(redirect.headers["Location"]).to end_with("/blog/")
+
+      response = Rack::MockRequest.new(Rails.application).get("/blog/")
       expect(response.status).to eq(200)
       expect(response.body).to include("Routed")
       expect(response["Content-Type"]).to include("text/html")
 
-      route = Rails.application.routes.recognize_path("/blog")
+      route = Rails.application.routes.recognize_path("/blog/")
       expect(route[:controller]).to eq("dev_blog")
-      expect(route[:action]).to eq("index")
+      expect(route[:action]).to eq("blog_entry")
     end
 
-    it "returns 404 when the generated index is missing" do
+    it "returns 404 when /blog/ generated index is missing" do
       empty_public = Pathname.new(temp_dir).join("public")
       empty_public.mkpath
       allow(Rails).to receive(:public_path).and_return(empty_public)
 
-      response = Rack::MockRequest.new(Rails.application).get("/blog")
+      response = Rack::MockRequest.new(Rails.application).get("/blog/")
       expect(response.status).to eq(404)
     end
   end
