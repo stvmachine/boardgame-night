@@ -1,3 +1,17 @@
+<%
+  app_host = ENV.fetch("APP_HOST", "").strip
+  dev_blog_host = ENV.fetch("DEV_BLOG_HOST", "").strip
+
+  blog_host_regexp = %r{
+    \A
+    (?=.{1,253}\z)
+    (?: [A-Za-z0-9] (?: [A-Za-z0-9-]{0,61} [A-Za-z0-9] )? \. )+
+    [A-Za-z0-9] (?: [A-Za-z0-9-]{0,61} [A-Za-z0-9] )?
+    \z
+  }x
+
+  configured_hosts = (blog_host_regexp.match?(app_host) && blog_host_regexp.match?(dev_blog_host))
+%>
 # Name of your application. Used to uniquely configure containers.
 service: boardgame-night
 
@@ -15,6 +29,21 @@ servers:
   #     - 192.168.0.1
   #   cmd: bin/jobs
 
+<% if configured_hosts %>
+# Enable SSL auto certification via Let's Encrypt and route both the primary
+# application host and the blog host through the same service container.
+#
+# DNS A/AAAA records for both APP_HOST and DEV_BLOG_HOST must resolve to the
+# server(s) listed above, and ports 80/443 must be reachable, before
+# certificate issuance can succeed.
+proxy:
+  hosts:
+    - <%= app_host.inspect %>
+    - <%= dev_blog_host.inspect %>
+  ssl: true
+  healthcheck:
+    path: "/up"
+<% else %>
 # Enable SSL auto certification via Let's Encrypt and allow for multiple apps on a single web server.
 # If used with Cloudflare, set encryption mode in SSL/TLS setting to "Full" to enable CF-to-app encryption.
 #
@@ -25,15 +54,16 @@ servers:
 # proxy:
 #   ssl: true
 #   host: app.example.com
+<% end %>
 
 # Where you keep your container images.
 registry:
-  # Use GitHub Container Registry (ghcr.io).
-  server: ghcr.io
+  # Use GitHub Container Registry (ghcr).
+  server: ghcr
 
   # TODO: Configure GitHub personal access token with write:packages scope.
   # Set KAMAL_REGISTRY_PASSWORD in your shell environment or .kamal/secrets.
-  # username: youruser
+  username: <%= ENV.fetch("KAMAL_REGISTRY_USERNAME", "youruser").inspect %>
   # password:
   #   - KAMAL_REGISTRY_PASSWORD
 
@@ -58,6 +88,12 @@ env:
 
     # Log everything from Rails
     RAILS_LOG_LEVEL: debug
+
+<% if configured_hosts %>
+    # Public host names used by the Rails blog host constraint and by Kamal proxy.
+    APP_HOST: <%= app_host.inspect %>
+    DEV_BLOG_HOST: <%= dev_blog_host.inspect %>
+<% end %>
 
 # Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
 # "bin/kamal logs -r job" will tail logs from the first server in the job section.

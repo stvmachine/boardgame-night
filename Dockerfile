@@ -68,6 +68,15 @@ RUN bundle install --without development test
 # Copy entire app from build stage — includes compiled public/vite/ + public/index.html
 COPY --from=build /app /app
 
+# Generate the static engineering blog into the image. This runs plain Ruby and
+# requires no Rails boot, BGG token, or dotenv private key.
+RUN bin/build-dev-blog && \
+    test -f public/dev-blog/index.html && \
+    test -f public/dev-blog/styles.css && \
+    [ -n "$(find public/dev-blog/posts -name index.html)" ] && \
+    expected=$(ruby -Ilib -rdev_blog -e 'puts DevBlog::AdrCatalog.load(index_path: Pathname("docs/adr/README.md"), project_root: Pathname(".")).length') && \
+    [ "$(find public/dev-blog/adrs -name index.html | wc -l)" -eq "$expected" ]
+
 EXPOSE 3000
 
 # Start Rails server via dotenvx for .env.bggeek decryption
