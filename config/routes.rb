@@ -1,4 +1,27 @@
 Rails.application.routes.draw do
+  # Configurable exact-host blog routes — must appear before /graphql and the SPA
+  # catch-all so that unknown traffic on the blog host fails closed here.
+  constraints DevBlogHostConstraint.new do
+    get "up" => "rails/health#show", as: :blog_host_health_check
+
+    get "/" => "dev_blog#index", as: :dev_blog_host_root
+    get "styles.css" => "dev_blog#stylesheet", as: :dev_blog_host_styles
+
+    get "posts/:slug",
+        to: "dev_blog#post",
+        as: :dev_blog_host_post,
+        constraints: { slug: /[a-z0-9]+(?:-[a-z0-9]+)*/ },
+        format: false
+
+    get "adrs/:adr_slug",
+        to: "dev_blog#adr",
+        as: :dev_blog_host_adr,
+        constraints: { adr_slug: /[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*/ },
+        format: false
+
+    match "*unmatched", to: "dev_blog#not_found", via: :all
+  end
+
   post "/graphql", to: "graphql#execute"
 
   # GraphiQL explorer for development
@@ -13,8 +36,25 @@ Rails.application.routes.draw do
   # Action Cable — mount before SPA wildcard so WebSocket upgrades route correctly.
   mount ActionCable.server => "/cable"
 
-  # Dev blog generated site — served before the SPA catch-all.
-  get "blog", to: "dev_blog#index", as: :dev_blog
+  # Primary-host blog routes — /blog canonicalizes to /blog/, then allowlisted
+  # generated resources are served before the SPA fallback.
+  get "blog", to: "dev_blog#blog_entry", as: :dev_blog_root
+
+  get "blog/styles.css" => "dev_blog#stylesheet", as: :dev_blog_styles
+
+  get "blog/posts/:slug",
+      to: "dev_blog#post",
+      as: :dev_blog_post,
+      constraints: { slug: /[a-z0-9]+(?:-[a-z0-9]+)*/ },
+      format: false
+
+  get "blog/adrs/:adr_slug",
+      to: "dev_blog#adr",
+      as: :dev_blog_adr,
+      constraints: { adr_slug: /[0-9]{3}-[a-z0-9]+(?:-[a-z0-9]+)*/ },
+      format: false
+
+  match "blog/*unmatched", to: "dev_blog#not_found", via: :all
 
   # SPA catch-all: serve the SPA for any HTML request that isn't handled above
   root "spa#index"
