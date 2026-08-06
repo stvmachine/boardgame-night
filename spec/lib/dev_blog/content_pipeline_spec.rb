@@ -7,6 +7,7 @@ require "fileutils"
 
 RSpec.describe "DevBlog content pipeline" do
   EXPECTED_POSTS = %w[
+    graphql-api-guide
     board-game-night-lifecycle
     challenges-and-decisions
     graphql-wiring-react-to-rails
@@ -37,9 +38,9 @@ RSpec.describe "DevBlog content pipeline" do
     ENV.delete("DOTENV_PRIVATE_KEY_BGGEEK")
   end
 
-  it "builds a result with five dated posts and all accepted ADRs" do
+  it "builds a result with six dated posts and all accepted ADRs" do
     expect(@result).to be_a(DevBlog::BuildResult)
-    expect(@result.posts_count).to eq(5)
+    expect(@result.posts_count).to eq(6)
     expect(@result.adrs_count).to be >= 14
   end
 
@@ -134,7 +135,7 @@ RSpec.describe "DevBlog content pipeline" do
       .children
       .select { |path| path.file? && path.basename.to_s.match?(/\A\d{4}-\d{2}-\d{2}-.*\.md\z/) }
 
-    expect(dated_posts.size).to eq(5)
+    expect(dated_posts.size).to eq(6)
 
     dated_posts.each do |path|
       body = DevBlog::PostParser.parse(path).body
