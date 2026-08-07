@@ -5,15 +5,15 @@ milestone_name: React Migration & Parity
 current_phase: 12
 current_phase_name: dev-blog-engine
 status: executing
-stopped_at: Completed 12-04-PLAN.md; ready for 12-05
-last_updated: "2026-08-02T21:35:00.000Z"
-last_activity: 2026-08-02
-last_activity_desc: Published accepted ADR catalog with strict validation and CLI integration
+stopped_at: Plan 12-07 Task 1 complete; Task 2 human checkpoint (DNS/TLS/Kamal reachability)
+last_updated: "2026-08-07T00:00:00.000Z"
+last_activity: 2026-08-07
+last_activity_desc: Created maintainer runbook and pre-deployment evidence for Plan 12-07 Task 1
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 70
-  completed_plans: 67
+  completed_plans: 68
 ---
 
 # Project State
@@ -28,15 +28,15 @@ See: .planning/PROJECT.md (updated 2026-08-02)
 ## Current Position
 
 Phase: 12 (dev-blog-engine) — EXECUTING
-Plan: 6 of 7
-Status: Plan 12-05 complete; ready to execute Plan 12-06
-Last activity: 2026-08-06 — Published React-era architecture corpus and added content-pipeline verification gate
+Plan: 7 of 7
+Status: Plan 12-07 Task 1 complete; Task 2 is a blocking human checkpoint
+Last activity: 2026-08-07 — Created `docs/development/README.md` maintainer runbook and `12-DEPLOYMENT-EVIDENCE.md` pre-deployment evidence record.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 63
+- Total plans completed: 68
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -55,46 +55,9 @@ Last activity: 2026-08-06 — Published React-era architecture corpus and added 
 | 9. Home & Collection Redesign | 8 | — | — |
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
-| 12. Dev Blog Engine | 3/7 | In Progress | — |
+| 12. Dev Blog Engine | 4/7 | In Progress | — |
 | 13. React Migration Parity | 6/6 | 309 min | ~52 min |
 
-**Recent Trend:**
-
-- v1.0 phase 4 velocity: ~47 min/plan (auth, groups, sessions are feature-dense)
-- Trend: Plan durations scale with UI + backend integration complexity; Phase 13 preserves six bounded parity slices and one final integrated gate.
-
-| Phase 05 P01 | 45min | 8 tasks | 8 files |
-| Phase 05 P04 | 15min | 1 tasks | 90 files |
-| Phase 05 P03 | 15min | 2 tasks | 18 files |
-| Phase 06-bgg-poll-data-layer P01 | 7min | 2 tasks | 10 files |
-| Phase 06 P02 | 8min | 2 tasks | 9 files |
-| Phase 06-bgg-poll-data-layer P03 | 4 min | 2 tasks | 11 files |
-| Phase 07 P01 | 40min | 3 tasks | 11 files |
-| Phase 07-suggestion-engine-backend P02 | 40min | 3 tasks | 14 files |
-| Phase 07-suggestion-engine-backend P03 | 15min | 3 tasks | 8 files |
-| Phase 07 P04 | 15min | 2 tasks | 7 files |
-| Phase 08-group-detail-surface P01 | 35min | 3 tasks | 11 files |
-| Phase 08 P02 | 17min | 2 tasks | 7 files |
-| Phase 08-group-detail-surface P03 | 14min | 3 tasks | 11 files |
-| Phase 08 P04 | 14min | 2 tasks | 5 files |
-| Phase 09 P01 | 1207 | 3 tasks | 14 files |
-| Phase 09-home-collection-redesign P02 | 113min | 3 tasks | 10 files |
-| Phase 09-home-collection-redesign P03 | 10min | 3 tasks | 10 files |
-| Phase 09-home-collection-redesign P04 | 20 | 3 tasks | 10 files |
-| Phase 09-home-collection-redesign P05 | 16m 24s | 3 tasks | 13 files |
-| Phase 09 P06 | 15min | 3 tasks | 10 files |
-| Phase 09 P07 | 13m | 2 tasks | 7 files |
-| Phase 10 P01 | 3h 55m | 2 tasks | 5 files |
-| Phase 10-picking-a-game-redesign P02 | 15min | 2 tasks | 7 files |
-| Phase 10-picking-a-game-redesign P04 | 15min | 2 tasks | 4 files |
-| Phase 10-picking-a-game-redesign P03 | 14min | 2 tasks | 4 files |
-| Phase 10 P05 | 33min | 2 tasks | 5 files |
-| Phase 10-picking-a-game-redesign P06 | 1min | 1 tasks | 0 files |
-| Phase 11 P01 | 18min | 3 tasks | 7 files |
-| Phase 11 P02 | 24min | 2 tasks | 9 files |
-| Phase 11 P03 | 10min | 2 tasks | 4 files |
-| Phase 11 P04 | 35min | 2 tasks | 6 files |
-| Phase 11 P05 | 12min | 2 tasks | 2 files |
 **Per-Plan Metrics:**
 
 | Plan | Duration | Tasks | Files |
@@ -109,6 +72,8 @@ Last activity: 2026-08-06 — Published React-era architecture corpus and added 
 | Phase 12-dev-blog-engine P02 | 20min | 2 tasks | 7 files |
 | Phase 12-dev-blog-engine P03 | 35min | 2 tasks | 8 files |
 | Phase 12-dev-blog-engine P04 | 65min | 3 tasks | 5 files |
+| Phase 12-dev-blog-engine P06 | 90min | 3 tasks | 10 files |
+| Phase 12-dev-blog-engine P07 | 45min | 1 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -135,7 +100,7 @@ Recent decisions affecting current work:
 - [Phase 06-bgg-poll-data-layer]: Added nullable level column to bgg_poll_results for forward compatibility — Avoids a future migration if language_dependence or other polls need a level field
 - [Phase 06-bgg-poll-data-layer]: poll_data_fetched_at is stamped even when a thing has no suggested_numplayers poll — Prevents infinite backfill loops for games that genuinely lack poll data
 - [Phase 06-bgg-poll-data-layer]: PollPersister implemented as class methods matching Bgg::PollPersister.persist_from_thing_xml behavior — Simpler caller API with no instance state needed; aligns with plan specification
-- [Phase ?]: Rescued Bgg::ResourceNotFound at batch level in enrichment/backfill jobs so a single missing batch does not discard the entire job. — Follows D-08 skip-and-continue pattern and keeps partial backfill progress even when one batch returns 404.
+- [Phase ?]: Rescued Bgg::ResourceNotFound at batch level in enrichment/backfill jobs so a single missing batch does not return the entire job. — Follows D-08 skip-and-continue pattern and keeps partial backfill progress even when one batch returns 404.
 - [Phase ?]: Backfill logs missing IDs and leaves poll_data_fetched_at nil, allowing retry on the next backfill run. — Matches Open Question 2 resolution: do not mark missing IDs as fetched so a subsequent backfill can retry them.
 - [Phase 06-bgg-poll-data-layer]: Used GraphQL::Dataloader::Source for poll loading to keep collection list queries O(1) in database round-trips.
 - [Phase 06-bgg-poll-data-layer]: Chose the lower player count on a tie for bestPlayerCount so the suggestion engine favors more inclusive options.
@@ -158,14 +123,14 @@ Recent decisions affecting current work:
 - [Phase ?]: Migrate GamePicker to useGroupCollectionQuery to preserve the full collection consumer without changing filtering or pick behavior.
 - [Phase 08]: Use a single GroupDetail container so GroupView only owns route-level loading/error/not-found states. — Keeps route view thin and state isolated.
 - [Phase 08]: Keep session rows compact with title/time/badge/CTA rather than full cards to match UI-SPEC density. — Matches the approved UI-SPEC list density.
-- [Phase 08]: Create a night persists via existing mutation, updates Apollo Group cache, and navigates to /s/:id. — Reuses existing backend mutation and avoids refetching the group query.
+- [Phase 08]: Create a night persists via existing mutation, updates Apollo Group cache, and navigates to /s/:id. — Reuses existing backend mutation and avoids refetching the group group query.
 - [Phase 08]: E2E seed pins E2ENIGHTOWLS group and deterministic sessions for stable browser assertions. — Deterministic fixtures make browser tests repeatable across runs.
 - [Phase ?]: Use a dedicated GroupSpotlightThing wrapper to carry immutable group-member ids for scoped owner loading, keeping the type independent of MergedThingType. — Isolates spotlight owner scope from the global MergedThingType/OwnersLoader contract.
 - [Phase ?]: Extend OwnersLoader with an optional immutable user-id scope while preserving exact unscoped behavior for existing consumers. — Avoids breaking collection and suggestion surfaces that rely on the existing unscoped loader.
 - [Phase ?]: Apply viewer_role guard to both collection_spotlight and collection resolvers to prevent outsider shelf disclosure. — Closes the path where a known invite code could leak the full merged collection.
 - [Phase ?]: Clamp collectionSpotlight(limit:) to 1..12 at the resolver boundary with a database LIMIT. — Mitigates DoS from an unbounded GraphQL argument.
 - [Phase ?]: Use RouterLink for Browse Library and window.open with noopener,noreferrer for spotlight card BGG activation. — Matches UI-SPEC link behavior while keeping external navigation isolated.
-- [Phase 08]: Used an exact allowlist (players, rating, bestPlayers, owner) to identify legacy grouping values, so any other group value is preserved as an invite token. — Narrows the legacy grouping migration to known values only and prevents real group tokens from being misinterpreted as grouping state.
+- [Phase 08]: Used an exact allowlist (players, rating, bestPlayers, owner) to identify legacy grouping values, so any other group value is preserved as an invite token. — Narrows the legacy grouping migration to known known values only and prevents real group tokens from being misinterpreted as grouping state.
 - [Phase 08]: Normalized group collection items into MergedThing by adding missing optional fields rather than duplicating the collection pipeline. — Keeps the existing filter, sort, grouping, and grid components unchanged while supporting the group query shape.
 - [Phase 08]: Used Apollo's reactive enabled option so merged and group queries are mutually exclusive. — Prevents both queries from running simultaneously, avoiding duplicate network requests and DoS risk.
 - [Phase 08]: Added a minimal error EmptyState to expose server query errors through the existing collection surface. — Surfaces GraphQL failures to users without adding a new route or collection component.
@@ -176,7 +141,7 @@ Recent decisions affecting current work:
 - [Phase 09]: Route dev/test Solid Cache to the cache database during e2e runs — Development default uses :memory_store, which does not persist across the e2e:seed process and the web server; using the cache database lets the seeded BGG hot list be shared by both processes.
 - [Phase 09-home-collection-redesign]: Attach immutable scope to each collection item rather than storing it in mutable query context; this survives lazy field resolution and GraphQL multiplexing.
 - [Phase 09-home-collection-redesign]: Expose objectid as a first-class MergedThing field so cards and external links use the true BGG identity, not the internal database id.
-- [Phase 09-home-collection-redesign]: Return null lastPlayedAt for raw BggThing consumers (suggestions, hot enrichment) and for anonymous requests; only signed-in users or authorized group members see scoped history.
+- [Phase 09-home-collection-redesign]: Return null lastPlayedAt for raw BggThing consumers (suggestions, hot enrichment) and anonymous requests; only signed-in users or authorized group members see scoped history.
 - [Phase 09-home-collection-redesign]: Keep the sort contract narrow to four product-facing options with deterministic name/id tie-breaks and null-last missing values. — Matches D-17 and keeps the UI surface small and predictable.
 - [Phase 09-home-collection-redesign]: Use reka-ui Select primitives for Sort and Group-by so controls are keyboard/portal accessible and match the design system. — Replaces native selects with the source-owned accessible primitive required by 09-UI-SPEC.
 - [Phase 09-home-collection-redesign]: Preserve description and lastPlayedAt when normalizing group collection items rather than nulling description. — Lets the redesigned cards use both fields without an extra data pass and keeps the scoped history signal intact.
@@ -184,7 +149,7 @@ Recent decisions affecting current work:
 - [Phase 09-home-collection-redesign]: Projected legacy playerCount/timeBucket as writable computed shims in the filter store to avoid rewriting unrelated CollectionFilters and CollectionView specs mid-phase.
 - [Phase 09-home-collection-redesign]: Mapped the full 1–10 slider range back to null so an untouched slider means no restriction, matching the URL omission contract.
 - [Phase 09]: Keep shadcn-vue primitives source-owned; avoid external icon-only dependencies. — Generator dependency drift destabilizes lockfiles; vendored source gives full control.
-- [Phase 09]: Use v-model plus modelValue pattern on collection filter controls; emit option lists from panels. — Parents bind arrays; child components expose typed option sets and emit minimal deltas.
+- [Phase 09]: Use v-model plus modelValue pattern on collection filter controls; emit option lists from panels. — Parents bind arrays; child components expose typed option lists and emit minimal option lists and emit minimal deltas.
 - [Phase 09]: Adopt source slots for Material Symbols icons in shadcn-vue primitives; no lucide-only icon dependency. — Project icon contract is Material Symbols; primitives use slot placeholders so callers supply the correct icon font.
 - [Phase 09]: Implemented ActiveFilterChips as a standalone toolbar component rather than embedding chips inside CollectionFilterPanel.
 - [Phase 09]: Used reka-ui DialogPortal for Sheet content so tests query document to verify title/description copy.
@@ -196,7 +161,7 @@ Recent decisions affecting current work:
 - [Phase 10]: Responsive DOM order preserved with flex-wrap and order utilities
 - [Phase 10]: Avatar group uses one aria-label and aria-hidden individual avatars to avoid duplicate screen-reader announcements
 - [Phase 10]: GameCard suggestion context is strictly additive; collection rendering is unchanged when score/confidence/reasons props are absent.
-- [Phase 10]: GamePicker consumes only session.suggestions, preserves server order, and caps display at eight with no client ranking, search, or Browse All fallback.
+- [Phase 10]: GamePicker consumes only session.suggestions, preserves server order, and caps display at eight with no client ranking, search, or browse All fallback.
 - [Phase 10]: Pick action is host-only, guarded against concurrent submissions, and emits the picked game name from the mutation result so Apollo normalized state drives the completed transition.
 - [Phase ?]: Test decision
 - [Phase ?]: Back up and restore fixture JSON files inside Playwright globalSetup so tracked files stay unchanged across every E2E run.
@@ -213,18 +178,24 @@ Recent decisions affecting current work:
 - [Phase 13-03]: Preserve backend BGG usernames for owner labels and persisted object identity for isolated external card links.
 - [Phase 13-04]: Keep Group Detail on generated GetGroup and group mutation hooks, using raw query fields where adapters lose attendee or role data.
 - [Phase 13-04]: Preserve backend session order and role-filtered visibility instead of duplicating sorting or authorization in React.
-- [Phase 13-04]: Allow admins to remove non-owner peers, including other admins, while reserving role changes for owners and re-authorizing every mutation on Rails.
+- [Phase 13-04]: Create a night persists via existing mutation, updates Apollo Group cache, and navigates to /s/:id. — Reuses existing backend mutation and avoids refetching the group query.
+- [Phase 13-04]: Allow admins to remove non-owner peers, including other admins, while reserving role changes for owners and re-authoring every mutation on Rails.
 - [Phase 13-04]: Keep Play History after the five required coordination sections so it remains reachable without displacing the approved hub order.
-- [Phase ?]: [Phase 13-05] Kept past-session list in server order rather than re-sorting client-side, matching Group Detail session-list behavior.
-- [Phase ?]: [Phase 13-05] Used title-case 'Going' / 'Not Going' UI labels while sending lowercase 'going' / 'not_going' response values to Rails.
-- [Phase ?]: [Phase 13-05] Stored successful RSVP response in local component state derived from the mutation return instead of manual cache writes.
-- [Phase ?]: [Phase 13-05] Showed sign-in link with return-path query parameter for signed-out invite viewers rather than auto-redirecting.
+- [Phase 13-05]: Kept past-session list in server order rather than re-sorting client-side, matching Group detail session-list behavior.
+- [Phase 13-05]: Used title-case 'Going' / 'Not Going' UI labels while sending lowercase 'going' / 'not_going' response values to Rails.
+- [Phase 13-05]: Stored successful RSVP response in local component state derived from the mutation return instead of manual cache writes.
+- [Phase 13-05]: Showed sign-in link with return-path query parameter for signed-out invite viewers rather than auto-redirecting.
 - [Phase ?]: Default app theme is light to match E2E accessibility contracts; users can switch to dark or system
 - [Phase ?]: Auth state is data-driven via useEffect on currentUserData; token is only cleared when server explicitly returns currentUser: null
 - [Phase ?]: E2E fixtures are read dynamically after reseed so static import caching cannot use stale IDs
 - [Phase ?]: Refreshed ADR-014 in place for React 19 and /blog delivery instead of recreating the ADR.
 - [Phase ?]: Added DevBlog::HtmlSanitizer to escape raw HTML nodes and strip event-handler attributes from kramdown output.
-- [Phase ?]: Pinned patched loofah, rails-html-sanitizer, rails, and graphql to pass bundler-audit rather than leaving pre-existing transitive advisories unaddressed.
+- [Phase ?]: Pinned patched loofah, rails-html-sanitizer, rails, and graphql to pass bundler-audit rather than leaving pre-existing transitive advisories unpaused.
+- [Phase 12-06]: Build dev-blog output under Rails.root (tmp/dev-blog-delivery-*) so spec output passes path-safety checks without leaving generated files outside the repo.
+- [Phase 12-06]: Read Kamal registry password from KAMAL_REGISTRY_PASSWORD env so bin/kamal config can render for verification without hardcoding credentials.
+- [Phase 12-06]: Test the ERB-rendered deploy.yml directly for proxy/env assertions because bin/kamal config emits Kamal's internal runtime configuration, not the raw YAML.
+- [Phase 12-07]: Documented the working focused RSpec command without setting RAILS_MASTER_KEY because the repository uses config/master.key and an invalid env value would fail Rails boot.
+- [Phase 12-07]: Left Docker image build and external DNS/TLS/proxy reachability as explicit human checkpoints per D-19 and the plan's non-autonomous Task 2.
 
 ### Pending Todos
 
@@ -232,7 +203,8 @@ None yet.
 
 ### Blockers/Concerns
 
-None.
+- Plan 12-07 Task 2 requires operator-controlled DNS/TLS/VPS/registry credentials. The executor cannot complete this gate.
+- Docker image build was not verified locally due to a 20-minute timeout; CI or a dedicated longer local run is needed.
 
 ### Quick Tasks Completed
 
@@ -259,8 +231,8 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 
 ## Session Continuity
 
-Last session: 2026-08-06T00:00:00.000Z
-Stopped at: Plan 12-05 executing; dispatched to fixer (ses_02b26896fffeG2dBwex4p68kPb)
+Last session: 2026-08-07
+Stopped at: Plan 12-07 Task 1 committed; awaiting human checkpoint for DNS/TLS/Kamal external reachability
 Resume file: None
 
 ### Recent Session Activity
@@ -279,3 +251,5 @@ Resume file: None
 - [Phase 12-04]: Rejected all ADR catalog symlinks rather than only escape cases to keep "regular file" enforcement unambiguous.
 - [Phase 12-04]: Reconciled only README title cells, not ADR bodies, to satisfy strict catalog/body validation without rewriting canonical decision records.
 - [Phase 12-04]: Added ADR pages to the existing staged generated-file map rather than introducing a second output writer, preserving deterministic stale cleanup and collision checks.
+- [Phase 12-06]: Committed fixes for delivery_spec (build under Rails.root/tmp), tracer_spec (canonical /blog redirect), docker_delivery_spec (ERB-rendered deploy.yml assertions + KAMAL_REGISTRY_PASSWORD), deploy.yml (registry password from env), and Dockerfile (comments avoid secret-name= patterns).
+- [Phase 12-07]: Committed maintainer runbook (`docs/development/README.md`) and pre-deployment evidence record (`.planning/phases/12-dev-blog-engine/12-DEPLOYMENT-EVIDENCE.md`).
