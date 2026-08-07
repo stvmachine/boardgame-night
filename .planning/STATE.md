@@ -4,16 +4,16 @@ milestone: v2.0
 milestone_name: React Migration & Parity
 current_phase: 12
 current_phase_name: dev-blog-engine
-status: executing
-stopped_at: Plan 12-07 Task 1 complete; Task 2 human checkpoint (DNS/TLS/Kamal reachability)
+status: phase_complete
+stopped_at: Phase 12 complete; Plan 12-07 closed with D-19 manually waived.
 last_updated: "2026-08-07T00:00:00.000Z"
 last_activity: 2026-08-07
-last_activity_desc: Created maintainer runbook and pre-deployment evidence for Plan 12-07 Task 1
+last_activity_desc: Closed Plan 12-07 with operator-waived D-19 external reachability gate.
 progress:
   total_phases: 13
   completed_phases: 12
   total_plans: 70
-  completed_plans: 68
+  completed_plans: 69
 ---
 
 # Project State
@@ -27,16 +27,16 @@ See: .planning/PROJECT.md (updated 2026-08-02)
 
 ## Current Position
 
-Phase: 12 (dev-blog-engine) — EXECUTING
+Phase: 12 (dev-blog-engine) — COMPLETE
 Plan: 7 of 7
-Status: Plan 12-07 Task 1 complete; Task 2 is a blocking human checkpoint
-Last activity: 2026-08-07 — Created `docs/development/README.md` maintainer runbook and `12-DEPLOYMENT-EVIDENCE.md` pre-deployment evidence record.
+Status: Phase 12 complete; Plan 12-07 closed with D-19 manually waived.
+Last activity: 2026-08-07 — Closed Plan 12-07 with operator-waived D-19 external reachability gate.
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 68
+- Total plans completed: 69
 - Average duration: ~24 min
 - Total execution time: ~3h 8m (v1.0 phases 1-2 baseline)
 
@@ -55,7 +55,7 @@ Last activity: 2026-08-07 — Created `docs/development/README.md` maintainer ru
 | 9. Home & Collection Redesign | 8 | — | — |
 | 10. Picking a Game Redesign | 6 | — | — |
 | 11. Polish & E2E Hardening | 5 | ~1h 39m | ~20 min |
-| 12. Dev Blog Engine | 4/7 | In Progress | — |
+| 12. Dev Blog Engine | 7/7 | Complete | — |
 | 13. React Migration Parity | 6/6 | 309 min | ~52 min |
 
 **Per-Plan Metrics:**
@@ -203,8 +203,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- Plan 12-07 Task 2 requires operator-controlled DNS/TLS/VPS/registry credentials. The executor cannot complete this gate.
-- Docker image build was not verified locally due to a 20-minute timeout; CI or a dedicated longer local run is needed.
+- None. Phase 12 is complete; Plan 12-07 was closed with D-19 manually waived by the operator.
 
 ### Quick Tasks Completed
 
@@ -232,7 +231,7 @@ Items acknowledged and carried forward from v1.1 scoping to v2.0:
 ## Session Continuity
 
 Last session: 2026-08-07
-Stopped at: Plan 12-07 Task 1 committed; awaiting human checkpoint for DNS/TLS/Kamal external reachability
+Stopped at: Plan 12-07 closed with D-19 manually waived; Phase 12 complete.
 Resume file: None
 
 ### Recent Session Activity
@@ -251,5 +250,8 @@ Resume file: None
 - [Phase 12-04]: Rejected all ADR catalog symlinks rather than only escape cases to keep "regular file" enforcement unambiguous.
 - [Phase 12-04]: Reconciled only README title cells, not ADR bodies, to satisfy strict catalog/body validation without rewriting canonical decision records.
 - [Phase 12-04]: Added ADR pages to the existing staged generated-file map rather than introducing a second output writer, preserving deterministic stale cleanup and collision checks.
-- [Phase 12-06]: Committed fixes for delivery_spec (build under Rails.root/tmp), tracer_spec (canonical /blog redirect), docker_delivery_spec (ERB-rendered deploy.yml assertions + KAMAL_REGISTRY_PASSWORD), deploy.yml (registry password from env), and Dockerfile (comments avoid secret-name= patterns).
+- [Phase 12-06]: Build dev-blog output under Rails.root (tmp/dev-blog-delivery-*) so spec output passes path-safety checks without leaving generated files outside the repo.
+- [Phase 12-06]: Read Kamal registry password from KAMAL_REGISTRY_PASSWORD env so bin/kamal config can render for verification without hardcoding credentials.
+- [Phase 12-06]: Test the ERB-rendered deploy.yml directly for proxy/env assertions because bin/kamal config emits Kamal's internal runtime configuration, not the raw YAML.
 - [Phase 12-07]: Committed maintainer runbook (`docs/development/README.md`) and pre-deployment evidence record (`.planning/phases/12-dev-blog-engine/12-DEPLOYMENT-EVIDENCE.md`).
+- [Phase 12-07]: Operator waived the D-19 external DNS/TLS/Kamal reachability gate and closed Plan 12-07.

@@ -1,6 +1,6 @@
 # Phase 12 Plan 07: Dev Blog Deployment Evidence
 
-This document records the automated pre-deployment evidence for Plan 12-07 Task 1 and leaves the real DNS/TLS/Kamal-proxy reachability gate open for human action.
+This document records the automated pre-deployment evidence for Plan 12-07 Task 1 and closes the plan with a manually waived D-19 reachability gate.
 
 ## Source revision
 
@@ -110,9 +110,15 @@ The full `docker build` of the Rails + React image is slow on this machine and w
 
 ## External reachability
 
-Status: **awaiting human action**
+Status: **manually waived by operator decision on 2026-08-07**
 
-Real DNS, TLS, and Kamal-proxy verification cannot be completed by automation without operator-controlled infrastructure. The operator must:
+The operator elected to close Plan 12-07 on the pre-deployment evidence already recorded above (focused RSpec suites, plain-Ruby build, Kamal config rendering, and Dockerfile review) rather than complete real DNS/TLS/VPS-based public reachability verification. No real hostname, IP, or credential was used or recorded.
+
+### Waiver rationale
+
+D-19 requires operator-controlled DNS/TLS/VPS credentials to prove the public host-root and `/blog/` mounts. Those credentials were not available in the executor environment, and the operator chose to accept the existing automated and code-review evidence as sufficient for this phase. The remaining verification steps are preserved below for future reference if the operator later decides to exercise the public deployment path.
+
+The remaining steps to perform a real public reachability check are:
 
 1. Export real `APP_HOST` and `DEV_BLOG_HOST` hostnames.
 2. Create/confirm A/AAAA records for both hosts pointing to the Kamal VPS.

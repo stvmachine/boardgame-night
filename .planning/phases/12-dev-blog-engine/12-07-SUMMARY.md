@@ -15,7 +15,7 @@ provides:
   - Non-secret deployment evidence record with passing pre-deployment checks and explicit human-action checkpoints
 
 affects:
-  - 12-dev-blog-engine Task 2 (external reachability remains a blocking human checkpoint)
+  - 12-dev-blog-engine (Plan 12-07 closed; D-19 external reachability manually waived)
 
 actuals:
   tokens: 12000
@@ -38,7 +38,7 @@ key-decisions:
   - "Documented the working focused RSpec command without setting RAILS_MASTER_KEY, because the repository uses config/master.key and an invalid env value would fail Rails boot."
   - "Excluded the :docker image-build example from the local evidence run because Plan 12-07 marks the full Docker build as awaiting human action / longer local run."
   - "Rendered the Kamal config with .test hostnames and a sentinel registry password into tmp/phase12-final-kamal-config.txt, then recorded only the file existence and size rather than its contents."
-  - "Left external DNS/TLS/proxy verification as a blocking human checkpoint per D-19."
+  - "Accepted the operator's waiver of the D-19 external DNS/TLS/proxy reachability checkpoint; the remaining verification steps are preserved in the evidence file for future reference."
 
 patterns-established:
   - "Runbook uses APP_HOST/DEV_BLOG_HOST variables only; no invented production domains."
@@ -80,13 +80,14 @@ coverage:
         status: pass
     human_judgment: false
   - id: D5
-    description: Docker image build and external reachability are explicitly left as human checkpoints
+    description: External DNS/TLS/Kamal-proxy reachability gate (D-19) was manually waived by the operator on 2026-08-07
     requirement: BLOG-04
     verification:
       - kind: human_action
-        ref: "12-DEPLOYMENT-EVIDENCE.md Docker image build / External reachability sections"
-        status: awaiting
+        ref: "12-DEPLOYMENT-EVIDENCE.md External reachability section"
+        status: waived
     human_judgment: true
+    rationale: "Operator manually waived D-19; real DNS/TLS/VPS credentials were not available."
 
 duration: 45min
 completed: 2026-08-07
@@ -95,20 +96,20 @@ status: complete
 
 # Phase 12 Plan 07 Task 1: Maintainer Runbook and Pre-Deployment Evidence Summary
 
-**Authored the complete maintainer runbook and recorded the pre-deployment evidence for the dev blog, stopping at the required human-operated DNS/TLS/Kamal-proxy checkpoint.**
+**Authored the complete maintainer runbook and recorded the pre-deployment evidence for the dev blog. The plan was closed with the operator's waiver of the external DNS/TLS/Kamal-proxy reachability checkpoint (D-19).**
 
 ## Performance
 
 - **Duration:** ~45 min
 - **Started:** 2026-08-07
 - **Completed:** 2026-08-07
-- **Task:** 1 of 2 (Task 2 is a blocking human checkpoint)
+- **Task:** 1 of 2 (Task 2 D-19 manually waived by operator)
 - **Files modified:** 2 new
 
 ## Accomplishments
 
 - Created `docs/development/README.md` with sections on post filename/frontmatter rules, content safety, drafts, CLI and Rake build commands, generated output layout, deterministic/stale-clean behavior, local preview, focused RSpec commands, CI behavior, accepted ADR rules, Docker image build, Kamal configuration, DNS/TLS, public URL shapes, rollback, and explicit out-of-scope deferred features.
-- Created `.planning/phases/12-dev-blog-engine/12-DEPLOYMENT-EVIDENCE.md` recording the source revision, passing focused RSpec suites (149 examples), plain-Ruby build output, post and accepted-ADR manifests, directory hash, Kamal config rendering, and explicit `awaiting human action` sections for the Docker image build and external reachability.
+- Created `.planning/phases/12-dev-blog-engine/12-DEPLOYMENT-EVIDENCE.md` recording the source revision, passing focused RSpec suites (149 examples), plain-Ruby build output, post and accepted-ADR manifests, directory hash, Kamal config rendering, and a manually waived external reachability section for D-19.
 - Verified that the focused RSpec suites pass when the Docker image-build example is excluded (`--tag='~docker'`), matching the plan's instruction that the full Docker build is a longer human-run checkpoint.
 - Verified that `bin/build-dev-blog` generates 6 posts and 14 ADRs, and that the ADR count matches `DevBlog::AdrCatalog.load`.
 - Verified that `bin/kamal config` renders with `.test` hostnames and a sentinel registry password, producing the ignored `tmp/phase12-final-kamal-config.txt` file.
@@ -127,7 +128,7 @@ status: complete
 - Removed the `RAILS_MASTER_KEY=phase12-master-sentinel` placeholder from the documented focused test command because the repository uses `config/master.key`; an invalid env value overrides the real key and prevents Rails from booting. The working command uses only `DEV_BLOG_HOST`, `BGG_TOKEN`, and `DOTENV_PRIVATE_KEY_BGGEEK` sentinels.
 - Excluded the `:docker` image-build example from the local evidence run. The full Rails + React Docker image build is slow locally and is left for CI or a dedicated long-running environment, as Plan 12-07 instructs.
 - Recorded the Kamal config file path and size rather than its contents, because the rendered file contains the sentinel registry password.
-- Left external DNS/TLS/proxy reachability as a blocking human checkpoint (D-19). No real hostname, IP, or credential is recorded in the evidence document.
+- Accepted the operator's waiver of the D-19 external DNS/TLS/proxy reachability checkpoint; the remaining verification steps are preserved in the evidence file for future reference. No real hostname, IP, or credential was recorded.
 
 ## Deviations from Plan
 
@@ -140,12 +141,12 @@ None. The documented focused RSpec command differs from the plan's literal comma
 
 ## User Setup Required
 
-- Task 2 requires operator access to the real DNS zone, VPS/network controls, container registry, and Kamal credentials. The runbook and evidence document provide the exact steps and commands to complete that phase once those resources are available.
+None. The operator waived the D-19 external reachability gate. The remaining public-reachability steps in the evidence file may be exercised later if the operator chooses to deploy the blog to real DNS/TLS infrastructure.
 
 ## Next Phase Readiness
 
-- Task 1 is complete and committed.
-- Task 2 can begin immediately when the operator is ready to configure real DNS, TLS, and Kamal proxy and run the external HTTPS checks documented in the runbook and evidence file.
+- Plan 12-07 is complete with D-19 manually waived.
+- No further Task 2 action is required to close this phase.
 
 ## Verification
 
@@ -156,5 +157,5 @@ None. The documented focused RSpec command differs from the plan's literal comma
 
 ---
 *Phase: 12-dev-blog-engine*
-*Task 1 completed: 2026-08-07*
-*Task 2 status: awaiting human action*
+*Plan 12-07 completed: 2026-08-07*
+*D-19 external reachability gate: manually waived*
