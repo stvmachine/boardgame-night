@@ -394,47 +394,8 @@ export const GET_USER = gql`
 
 // --- MUTATIONS ---
 
-export const SIGN_IN = gql`
-  mutation SignIn($email: String!, $password: String!) {
-    signIn(email: $email, password: $password) {
-      token
-      user {
-        id
-        username
-        email
-        displayName
-        bggUsername
-        avatar
-        isProvisional
-      }
-    }
-  }
-`
-
-export const SIGN_UP = gql`
-  mutation SignUp($email: String!, $password: String!, $username: String!) {
-    signUp(email: $email, password: $password, username: $username) {
-      token
-      user {
-        id
-        username
-        email
-        displayName
-        bggUsername
-        avatar
-        isProvisional
-      }
-    }
-  }
-`
-
-export const SIGN_OUT = gql`
-  mutation SignOut {
-    signOut {
-      success
-    }
-  }
-`
+// Sign in / sign up / sign out moved to REST (authentication-zero, --api).
+// See app/frontend/contexts/AuthContext.tsx.
 
 export const BIND_BGG_USERNAME = gql`
   mutation BindBggUsername($username: String!) {

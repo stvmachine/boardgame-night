@@ -1,22 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor, act } from '@testing-library/react'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
-// Mock apollo client module
+// AuthContext calls apolloClient.resetStore() after auth changes.
 vi.mock('@/lib/graphql/apollo', () => ({
   apolloClient: { resetStore: vi.fn().mockResolvedValue(undefined) },
 }))
 
-// Controlled mutation promises
-let resolveSignIn: ((result: any) => void) | null = null
-let rejectSignIn: ((error: Error) => void) | null = null
-let resolveSignOut: ((result: any) => void) | null = null
-let rejectSignOut: ((error: Error) => void) | null = null
-
-// Controlled query state
-let querySkip = true
-let queryOnCompleted: ((data: any) => void) | null = null
-let queryOnError: ((error: any) => void) | null = null
+// Controlled CURRENT_USER hydration query. Sign in/up/out now go through fetch
+// (REST), so only the hydration query still touches Apollo.
 let queryData: any = null
 let queryError: any = null
 
@@ -24,43 +16,13 @@ vi.mock('@apollo/client', async () => {
   const actual = await vi.importActual('@apollo/client')
   return {
     ...actual,
-    gql: actual.gql,
-    useQuery: (_query: any, options: any) => {
-      const skip = options?.skip ?? false
-      querySkip = skip
-      queryOnCompleted = options?.onCompleted ?? null
-      queryOnError = options?.onError ?? null
-      return { loading: false, data: queryData, error: queryError }
-    },
-    useMutation: (_mutation: any) => {
-      const name = _mutation?.definitions?.[0]?.name?.value ?? ''
-
-      if (name === 'SignIn') {
-        const mutateFn = vi.fn().mockImplementation(() => {
-          return new Promise((resolve, reject) => {
-            resolveSignIn = resolve
-            rejectSignIn = reject
-          })
-        })
-        return [mutateFn]
-      }
-
-      if (name === 'SignOut') {
-        const mutateFn = vi.fn().mockImplementation(() => {
-          return new Promise((resolve, reject) => {
-            resolveSignOut = resolve
-            rejectSignOut = reject
-          })
-        })
-        return [mutateFn]
-      }
-
-      return [vi.fn().mockResolvedValue({})]
-    },
+    useQuery: () => ({ loading: false, data: queryData, error: queryError }),
   }
 })
 
 const TOKEN_KEY = 'bgg-night-token'
+const SESSION_ID_KEY = 'bgg-night-session-id'
+
 const mockUser = {
   id: 'user-1',
   username: 'alex',
@@ -69,6 +31,15 @@ const mockUser = {
   displayName: 'Alex Rivera',
   avatar: null,
   isProvisional: false,
+}
+
+/** Queue one fetch response (status + JSON body), matching AuthContext's text()+JSON.parse read. */
+function mockFetchOnce(status: number, body: unknown) {
+  ;(global.fetch as any).mockResolvedValueOnce({
+    ok: status >= 200 && status < 300,
+    status,
+    text: async () => (body === undefined ? '' : JSON.stringify(body)),
+  })
 }
 
 function TestConsumer() {
@@ -87,10 +58,10 @@ function TestConsumer() {
       ) : (
         <div data-testid="no-user">No user</div>
       )}
-      <button data-testid="signin-btn" onClick={() => signIn('a@b.com', 'p')}>
+      <button data-testid="signin-btn" onClick={() => void signIn('a@b.com', 'p').catch(() => {})}>
         Sign In
       </button>
-      <button data-testid="signout-btn" onClick={() => signOut()}>
+      <button data-testid="signout-btn" onClick={() => void signOut()}>
         Sign Out
       </button>
       <button data-testid="clear-error-btn" onClick={() => clearError()}>
@@ -101,14 +72,6 @@ function TestConsumer() {
 }
 
 function renderProvider() {
-  resolveSignIn = null
-  rejectSignIn = null
-  resolveSignOut = null
-  rejectSignOut = null
-  querySkip = true
-  queryOnCompleted = null
-  queryOnError = null
-
   return render(
     <AuthProvider>
       <TestConsumer />
@@ -116,19 +79,17 @@ function renderProvider() {
   )
 }
 
-describe('AuthProvider + useAuth', () => {
+describe('AuthProvider + useAuth (REST)', () => {
   beforeEach(() => {
     localStorage.clear()
     vi.clearAllMocks()
-    resolveSignIn = null
-    rejectSignIn = null
-    resolveSignOut = null
-    rejectSignOut = null
     queryData = null
     queryError = null
-    querySkip = true
-    queryOnCompleted = null
-    queryOnError = null
+    global.fetch = vi.fn()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('renders children', () => {
@@ -168,89 +129,72 @@ describe('AuthProvider + useAuth', () => {
     })
   })
 
-  it('signIn sets user and stores token', async () => {
+  it('signIn POSTs /sign_in, stores token + session id, and sets the user', async () => {
     renderProvider()
+    await waitFor(() => expect(screen.getByTestId('no-user')).toBeInTheDocument())
 
-    await waitFor(() => {
-      expect(screen.getByTestId('no-user')).toBeInTheDocument()
-    })
+    mockFetchOnce(201, { token: 'fake-token', sessionId: 'sess-9', user: mockUser })
 
-    // Click sign-in + resolve mutation in one act chain
     await act(async () => {
       screen.getByTestId('signin-btn').click()
-      // Yield to let click handler start
       await new Promise((r) => setTimeout(r, 0))
-      resolveSignIn?.({
-        data: {
-          signIn: { token: 'fake-token', user: mockUser },
-        },
-      })
     })
 
+    expect(global.fetch).toHaveBeenCalledWith('/sign_in', expect.objectContaining({ method: 'POST' }))
     expect(screen.getByTestId('user-id')).toHaveTextContent('user-1')
-    expect(screen.getByTestId('user-name')).toHaveTextContent('alex')
     expect(localStorage.getItem(TOKEN_KEY)).toBe('fake-token')
+    expect(localStorage.getItem(SESSION_ID_KEY)).toBe('sess-9')
   })
 
-  it('signOut clears user and removes token', async () => {
-    // Seed state as if user is logged in
+  it('signOut DELETEs the session and clears local state', async () => {
     localStorage.setItem(TOKEN_KEY, 'fake-token')
+    localStorage.setItem(SESSION_ID_KEY, 'sess-9')
     queryData = { currentUser: mockUser }
     renderProvider()
+    await waitFor(() => expect(screen.getByTestId('user-id')).toBeInTheDocument())
 
-    // Wait for the user to hydrate from the existing token
-    await waitFor(() => {
-      expect(screen.getByTestId('user-id')).toBeInTheDocument()
-    })
+    mockFetchOnce(204, undefined)
 
-    // Click sign-out + resolve in one act chain
     await act(async () => {
       screen.getByTestId('signout-btn').click()
       await new Promise((r) => setTimeout(r, 0))
-      resolveSignOut?.({ data: { signOut: { success: true } } })
     })
 
+    expect(global.fetch).toHaveBeenCalledWith('/sessions/sess-9', expect.objectContaining({ method: 'DELETE' }))
     expect(screen.getByTestId('no-user')).toBeInTheDocument()
     expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
+    expect(localStorage.getItem(SESSION_ID_KEY)).toBeNull()
   })
 
-  it('signIn sets error on failure', async () => {
+  it('signIn sets a humanized error on a 401 failure', async () => {
     renderProvider()
+    await waitFor(() => expect(screen.getByTestId('no-user')).toBeInTheDocument())
 
-    await waitFor(() => {
-      expect(screen.getByTestId('no-user')).toBeInTheDocument()
-    })
+    mockFetchOnce(401, { error: 'Invalid credentials' })
 
     await act(async () => {
       screen.getByTestId('signin-btn').click()
       await new Promise((r) => setTimeout(r, 0))
-      rejectSignIn?.(new Error('Invalid credentials'))
     })
 
     expect(screen.getByTestId('error')).toHaveTextContent('Invalid credentials')
+    expect(localStorage.getItem(TOKEN_KEY)).toBeNull()
   })
 
   it('clearError resets the error state', async () => {
     renderProvider()
+    await waitFor(() => expect(screen.getByTestId('no-user')).toBeInTheDocument())
 
-    await waitFor(() => {
-      expect(screen.getByTestId('no-user')).toBeInTheDocument()
-    })
-
-    // Trigger error
+    mockFetchOnce(401, { error: 'Invalid credentials' })
     await act(async () => {
       screen.getByTestId('signin-btn').click()
       await new Promise((r) => setTimeout(r, 0))
-      rejectSignIn?.(new Error('Something went wrong'))
     })
-
     expect(screen.getByTestId('error')).toBeInTheDocument()
 
-    // Clear error
     await act(async () => {
       screen.getByTestId('clear-error-btn').click()
     })
-
     await waitFor(() => {
       expect(screen.queryByTestId('error')).not.toBeInTheDocument()
     })
@@ -258,11 +202,7 @@ describe('AuthProvider + useAuth', () => {
 
   it('throws when useAuth is used outside AuthProvider', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-
-    expect(() => render(<TestConsumer />)).toThrow(
-      'useAuth must be used within AuthProvider',
-    )
-
+    expect(() => render(<TestConsumer />)).toThrow('useAuth must be used within AuthProvider')
     consoleSpy.mockRestore()
   })
 })
