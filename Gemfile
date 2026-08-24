@@ -52,6 +52,10 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
   gem "foreman", require: false
+
+  # Generator-only: scaffolds REST auth (sessions/registrations/passwords/identity).
+  # Used to bootstrap the auth-zero migration; can be removed once generation is done.
+  gem "authentication-zero", "~> 4.0", require: false
 end
 
 gem "vite_rails", "~> 3.11"

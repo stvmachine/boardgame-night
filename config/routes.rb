@@ -1,4 +1,20 @@
 Rails.application.routes.draw do
+  # REST authentication (authentication-zero, --api). The bearer token these
+  # endpoints mint also authorizes /graphql and /cable. API-only: no HTML
+  # :new/:edit actions.
+  post "sign_in", to: "sessions#create"
+  post "sign_up", to: "registrations#create"
+  resource  :sudo,     only: :create
+  resource  :password, only: :update
+  resources :sessions, only: [ :index, :show, :destroy ]
+  namespace :identity do
+    resource :email,              only: :update
+    resource :email_verification, only: [ :show, :create ]
+    resource :password_reset,     only: [ :create, :update ]
+  end
+  namespace :authentications do
+    resources :events, only: :index
+  end
   # Configurable exact-host blog routes — must appear before /graphql and the SPA
   # catch-all so that unknown traffic on the blog host fails closed here.
   constraints DevBlogHostConstraint.new do

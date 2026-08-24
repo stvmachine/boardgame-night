@@ -12,6 +12,16 @@ if Rails.env.development?
       resource "/graphql",
                headers: :any,
                methods: [ :post, :options ]
+
+      # REST authentication endpoints (sign_in/sign_up/sessions/password/identity/*).
+      resource "/sign_in",  headers: :any, methods: [ :post, :options ]
+      resource "/sign_up",  headers: :any, methods: [ :post, :options ]
+      resource "/sudo",     headers: :any, methods: [ :post, :options ]
+      resource "/password", headers: :any, methods: [ :patch, :put, :options ]
+      resource "/sessions", headers: :any, methods: [ :get, :options ]
+      resource "/sessions/*", headers: :any, methods: [ :get, :delete, :options ]
+      resource "/identity/*", headers: :any, methods: [ :get, :post, :patch, :put, :options ]
+      resource "/authentications/*", headers: :any, methods: [ :get, :options ]
     end
   end
 end

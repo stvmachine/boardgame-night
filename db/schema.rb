@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_29_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_24_020002) do
   create_table "attendances", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -121,6 +121,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000001) do
     t.index ["poll_data_fetched_at"], name: "index_bgg_things_on_poll_data_fetched_at"
   end
 
+  create_table "events", force: :cascade do |t|
+    t.string "action", null: false
+    t.datetime "created_at", null: false
+    t.string "ip_address"
+    t.datetime "updated_at", null: false
+    t.string "user_agent"
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_events_on_user_id"
+  end
+
   create_table "game_scores", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "night_session_id", null: false
@@ -200,8 +210,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000001) do
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
+    t.string "ip_address"
+    t.datetime "sudo_at"
     t.string "token", null: false
     t.datetime "updated_at", null: false
+    t.string "user_agent"
     t.integer "user_id", null: false
     t.index ["token"], name: "index_sessions_on_token", unique: true
     t.index ["user_id"], name: "index_sessions_on_user_id"
@@ -220,6 +233,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000001) do
     t.datetime "sync_requested_at"
     t.datetime "updated_at", null: false
     t.string "username"
+    t.boolean "verified", default: false, null: false
     t.index ["bgg_username"], name: "index_users_on_bgg_username"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["invite_token"], name: "index_users_on_invite_token", unique: true
@@ -229,6 +243,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_29_000001) do
   add_foreign_key "bgg_plays", "users"
   add_foreign_key "bgg_poll_results", "bgg_polls"
   add_foreign_key "bgg_polls", "bgg_things"
+  add_foreign_key "events", "users"
   add_foreign_key "game_scores", "night_sessions"
   add_foreign_key "game_scores", "users"
   add_foreign_key "group_memberships", "groups"
