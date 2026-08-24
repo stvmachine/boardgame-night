@@ -23,6 +23,7 @@ class RegistrationsController < Auth::BaseController
 
     if user.save
       session = user.sessions.create!(expires_at: 30.days.from_now)
+      log_event("registered", user: user)
       UserMailer.with(user: user).email_verification.deliver_later
       render json: { token: session.token, sessionId: session.id.to_s, user: user_json(user) },
              status: :created

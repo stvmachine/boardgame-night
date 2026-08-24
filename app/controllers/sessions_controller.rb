@@ -21,6 +21,7 @@ class SessionsController < Auth::BaseController
 
     if user
       session = user.sessions.create!(expires_at: 30.days.from_now)
+      log_event("signed_in", user: user)
       render json: { token: session.token, sessionId: session.id.to_s, user: user_json(user) },
              status: :created
     else
@@ -31,6 +32,7 @@ class SessionsController < Auth::BaseController
   # Sign out (or revoke another device from the session-management UI).
   def destroy
     @session.destroy
+    log_event("signed_out")
     head :no_content
   end
 

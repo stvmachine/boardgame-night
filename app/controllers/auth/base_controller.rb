@@ -10,6 +10,12 @@ module Auth
 
     private
 
+      # Record an activity-log event (a-zero "trackable"). ip/user_agent are
+      # stamped by Event#before_create from Current.
+      def log_event(action, user: Current.user)
+        user&.events&.create!(action: action.to_s)
+      end
+
       # Gate sensitive changes (password/email) behind a recent re-authentication.
       # The SPA responds to 403 by prompting for the password and POSTing /sudo.
       def require_sudo
