@@ -60,8 +60,8 @@ Rails.application.configure do
   config.action_dispatch.verbose_redirect_logs = true
 
   # Use Solid Queue in development for the same backend behavior as production.
+  # Solid Queue uses the primary database (its tables live there).
   config.active_job.queue_adapter = :solid_queue
-  config.solid_queue.connects_to = { database: { writing: :queue } }
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true

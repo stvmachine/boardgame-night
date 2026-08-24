@@ -5,8 +5,9 @@ gem "rails", "~> 8.1.3", ">= 8.1.3.1"
 # Pull patched transitive sanitizer/loofah versions surfaced by bundler-audit.
 gem "rails-html-sanitizer", ">= 1.7.1"
 gem "loofah", ">= 2.25.2"
-# Use sqlite3 as the database for Active Record
-gem "sqlite3", ">= 2.1"
+# PostgreSQL in production (Render managed Postgres). SQLite is used only in
+# development and test — see the :development, :test group below.
+gem "pg", "~> 1.5", group: :production
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Build JSON APIs with ease [https://github.com/rails/jbuilder]
@@ -39,6 +40,9 @@ gem "image_processing", "~> 1.2"
 # gem "rack-cors"
 
 group :development, :test do
+  # Use sqlite3 as the database for Active Record in local development and test.
+  gem "sqlite3", ">= 2.1"
+
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
 

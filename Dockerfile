@@ -46,7 +46,7 @@ FROM ruby:3.4.9-slim
 # Install system dependencies needed for Ruby gem native extensions and dotenvx
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
-    build-essential curl git libjemalloc2 libreadline-dev libssl-dev \
+    build-essential curl git libjemalloc2 libpq-dev libreadline-dev libssl-dev \
     libvips libyaml-dev nodejs npm pkg-config sqlite3 zlib1g-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
