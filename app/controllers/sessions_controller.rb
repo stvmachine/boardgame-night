@@ -3,15 +3,11 @@
 class SessionsController < Auth::BaseController
   skip_before_action :authenticate, only: :create
   before_action :require_authentication, except: :create
-  before_action :set_session, only: %i[show destroy]
+  before_action :set_session, only: :destroy
 
   # List the signed-in user's active sessions (session-management UI).
   def index
     render json: Current.user.sessions.active.order(created_at: :desc).map { |s| session_json(s) }
-  end
-
-  def show
-    render json: session_json(@session)
   end
 
   # Sign in: authenticate credentials and mint the existing DB-backed bearer

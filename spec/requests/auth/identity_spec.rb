@@ -49,6 +49,41 @@ RSpec.describe "REST auth: identity + sudo + password", type: :request do
     end
   end
 
+  describe "POST /identity/email_verification (resend)" do
+    it "re-sends the verification email to the signed-in user" do
+      headers = sign_in_as(user)
+      expect {
+        post "/identity/email_verification", headers: headers
+      }.to have_enqueued_mail(UserMailer, :email_verification)
+      expect(response).to have_http_status(:accepted)
+    end
+
+    it "requires authentication" do
+      post "/identity/email_verification"
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
+
+  describe "PATCH /identity/email (sudo-gated)" do
+    it "changes the email, un-verifies, and re-sends verification when sudo is fresh" do
+      headers = sign_in_as(user, sudo: true)
+      expect {
+        patch "/identity/email", params: { email: "new@example.com" }, headers: headers
+      }.to have_enqueued_mail(UserMailer, :email_verification)
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload.email).to eq("new@example.com")
+      expect(user.verified).to be false
+    end
+
+    it "returns 403 without a fresh sudo window" do
+      headers = sign_in_as(user, sudo: false)
+      patch "/identity/email", params: { email: "new@example.com" }, headers: headers
+      expect(response).to have_http_status(:forbidden)
+      expect(user.reload.email).to eq("alex@example.com")
+    end
+  end
+
   describe "sudo gating on PATCH /password" do
     it "returns 403 without a fresh sudo window" do
       headers = sign_in_as(user, sudo: false)

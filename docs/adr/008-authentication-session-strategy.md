@@ -2,7 +2,12 @@
 
 ## Status
 
-accepted
+superseded by [ADR-015](./015-authentication-zero-rest-migration.md)
+
+The DB-backed Bearer-token mechanism decided here is retained, but sign up / log in /
+log out moved from GraphQL mutations to REST controllers via authentication-zero, and
+the account-security surface (password reset, email verification, session tracking,
+sudo, lockout) was added. See ADR-015.
 
 ## Context
 
