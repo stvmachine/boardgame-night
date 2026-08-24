@@ -9,6 +9,11 @@ log out moved from GraphQL mutations to REST controllers via authentication-zero
 the account-security surface (password reset, email verification, session tracking,
 sudo, lockout) was added. See ADR-015.
 
+> **Correction:** the "Decision" below says the token is kept in a Pinia store *not*
+> `localStorage` and the frontend is Vue. Neither held: the SPA is **React**
+> ([ADR-016](./016-frontend-spa-react-not-vue.md)) and the token lives in
+> **`localStorage`** (key `bgg-night-token`), attached via an Apollo `setContext` link.
+
 ## Context
 
 Phase 4 introduces user accounts (sign up, log in, log out, BGG username binding). The project is a Rails 8 API-only application serving a Vue 3 SPA. In production the SPA is served from the same origin (`public/`), so cookie-based sessions would work; in development the SPA runs on `localhost:5173` and Rails on `localhost:3000`, so cross-origin credentials are required for cookie sessions.

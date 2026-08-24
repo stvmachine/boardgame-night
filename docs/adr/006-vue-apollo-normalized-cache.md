@@ -4,6 +4,12 @@
 
 accepted
 
+> **Correction ([ADR-016](./016-frontend-spa-react-not-vue.md)):** the frontend is
+> **React**, not Vue. The client is `@apollo/client`'s **React hooks** (not
+> `@vue/apollo-composable`), and UI-only state uses **React state / Context** (not
+> Pinia). The substantive decision here — Apollo Client 3.x with a normalized cache as
+> the single source of truth, never duplicating server data into client state — stands.
+
 ## Context
 
 The Vue frontend needs a GraphQL client that supports batched queries, subscriptions, and a normalized cache so that the same entity (e.g., a `MergedThing` or `UserSyncStatus`) is shared across all active components. Apollo Client 4.x and the matching `@vue/apollo-composable` v5 were in beta as of mid-2026 and reported incompatible with each other.

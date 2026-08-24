@@ -4,6 +4,11 @@
 
 accepted
 
+> **Correction ([ADR-016](./016-frontend-spa-react-not-vue.md)):** the SPA is
+> implemented in **React 19**, not Vue 3 — read every "Vue" below as "React". The
+> monorepo, Rails API-only, single-`/graphql`-surface, `vite_rails`, and Kamal
+> deploy decisions in this ADR are unaffected.
+
 ## Context
 
 The project is a rewrite of an existing stack consisting of a separate Node/Apollo Server GraphQL proxy (`bgg-graphql-proxy`) and a Next.js frontend (`bggeek-shared-list`). Maintaining two repositories, two deploys, and CORS between them adds operational overhead that is disproportionate for a single-user-persona friend-group app. The team wants the API and frontend to stay in sync and deploy atomically.
