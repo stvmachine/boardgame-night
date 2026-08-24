@@ -270,6 +270,23 @@ RSpec.describe Bgg::Client, :bgg do
       expect { client.thing(174430) }.to raise_error(Bgg::ServerError)
     end
 
+    it "raises Bgg::AccessDeniedError on 401 (BGG WAF block)" do
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
+        .with(query: hash_including(id: "174430"))
+        .to_return(status: 401, body: "")
+
+      expect { client.thing(174430) }
+        .to raise_error(Bgg::AccessDeniedError, /denied API access/i)
+    end
+
+    it "raises Bgg::AccessDeniedError on 403" do
+      stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
+        .with(query: hash_including(id: "174430"))
+        .to_return(status: 403, body: "")
+
+      expect { client.thing(174430) }.to raise_error(Bgg::AccessDeniedError)
+    end
+
     it "raises Bgg::NetworkError on timeout", :focus_fast do
       stub_request(:get, /boardgamegeek.com\/xmlapi2\/thing/)
         .with(query: hash_including(id: "174430"))

@@ -35,6 +35,18 @@ RSpec.describe Bgg::CollectionPersister, type: :service do
       expect(gloomhaven.average_weight).to eq(3.8)
     end
 
+    it "counts re-synced items as updated, not added" do
+      collection = Bgg::Normalizer.normalize_collection(Nokogiri::XML(collection_xml))
+      subject.persist_collection!(collection)
+
+      # Re-importing the same collection should report the games as updated so
+      # the sync broadcast reflects the real count instead of 0.
+      result = subject.persist_collection!(collection)
+      expect(result[:added]).to eq(0)
+      expect(result[:updated]).to eq(3)
+      expect(user.bgg_things.count).to eq(3)
+    end
+
     it "handles empty collections" do
       empty_doc = Nokogiri::XML("<items></items>")
       collection = Bgg::Normalizer.normalize_collection(empty_doc)

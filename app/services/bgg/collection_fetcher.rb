@@ -52,6 +52,11 @@ module Bgg
       def fetch_with_fallback(username)
         merged_doc = fetch_with_workaround(username)
         @normalizer.normalize_collection(merged_doc)
+      rescue Bgg::AccessDeniedError
+        # BGG rejected our credentials (401/403 — missing/invalid Bearer token).
+        # The fallback call carries the same token and fails identically, so
+        # retrying it is pointless — surface the auth failure instead of masking it.
+        raise
       rescue Bgg::ClientError, Bgg::ServerError, Bgg::NetworkError => e
         message = "[Bgg::CollectionFetcher] Workaround failed for '#{username}': #{e.message}. Falling back to single call."
         Rails.logger.warn(message)

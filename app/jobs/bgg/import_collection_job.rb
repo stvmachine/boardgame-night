@@ -30,6 +30,18 @@ class Bgg::ImportCollectionJob < ApplicationJob
   # D-12: Permanent failures — discard immediately (no retry)
   # Bgg::ResourceNotFound = BGG returned 404 (invalid endpoint)
   discard_on Bgg::ResourceNotFound
+  # Bgg::AccessDeniedError = BGG rejected our Bearer token (401/403). Since late
+  # 2025 the XML API requires a registered token (ENV["BGG_TOKEN"]); if it is
+  # missing, still encrypted, or invalid, every call fails identically. Retrying
+  # won't help until the token/DOTENV_PRIVATE_KEY_BGGEEK config is fixed, so
+  # discard after surfacing the error (the ERROR sync-status broadcast still
+  # fires in #perform).
+  discard_on Bgg::AccessDeniedError do |job, error|
+    username = job.arguments.first
+    Rails.logger.error(
+      "[Bgg::ImportCollectionJob] Access denied importing '#{username}': #{error.message}"
+    )
+  end
   # InvalidUsernameError = BGG confirmed user doesn't exist
   discard_on Bgg::InvalidUsernameError
   # Deserialization error = job payload corrupted

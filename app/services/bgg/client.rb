@@ -87,6 +87,8 @@ module Bgg
           sleep(5)
         rescue Faraday::ResourceNotFound => e
           raise Bgg::ResourceNotFound, e.message
+        rescue Faraday::UnauthorizedError, Faraday::ForbiddenError => e
+          raise Bgg::AccessDeniedError, access_denied_message(e)
         rescue Faraday::ClientError => e
           raise Bgg::ClientError, e.message
         rescue Faraday::ServerError => e
@@ -144,12 +146,29 @@ module Bgg
         yield
             rescue Faraday::ResourceNotFound => e
               raise Bgg::ResourceNotFound, e.message
+            rescue Faraday::UnauthorizedError, Faraday::ForbiddenError => e
+              raise Bgg::AccessDeniedError, access_denied_message(e)
             rescue Faraday::ClientError => e
               raise Bgg::ClientError, e.message
             rescue Faraday::ServerError => e
               raise Bgg::ServerError, e.message
             rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
               raise Bgg::NetworkError, e.message
+      end
+
+      def access_denied_message(error)
+        status = error.response&.dig(:status)
+        token_state =
+          if ENV["BGG_TOKEN"].blank?
+            "BGG_TOKEN is not set"
+          elsif ENV["BGG_TOKEN"].start_with?("encrypted:")
+            "BGG_TOKEN is still encrypted (dotenvx did not decrypt it — check DOTENV_PRIVATE_KEY_BGGEEK)"
+          else
+            "BGG_TOKEN is set but was rejected (expired or invalid registration)"
+          end
+        "BGG denied API access (HTTP #{status || "401/403"}). Since late 2025 the XML API " \
+        "requires a registered Bearer token: #{token_state}. See " \
+        "https://boardgamegeek.com/using_the_xml_api"
       end
   end
 end

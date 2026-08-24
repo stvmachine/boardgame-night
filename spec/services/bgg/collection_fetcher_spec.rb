@@ -127,6 +127,25 @@ RSpec.describe Bgg::CollectionFetcher, type: :service do
       end
     end
 
+    context "when BGG denies API access (401/403)" do
+      before do
+        allow(client).to receive(:request_with_202_retry)
+          .with(:collection, hash_including(excludesubtype: "boardgameexpansion"))
+          .and_raise(Bgg::AccessDeniedError, "BGG denied API access (HTTP 401).")
+      end
+
+      it "does not attempt the fallback call (it hits the same block)" do
+        expect(client).not_to receive(:request_with_202_retry)
+          .with(:collection, hash_excluding(:excludesubtype, :subtype))
+        expect { fetcher.fetch(username) }.to raise_error(Bgg::AccessDeniedError)
+      end
+
+      it "re-raises the access-denied error" do
+        expect { fetcher.fetch(username) }
+          .to raise_error(Bgg::AccessDeniedError, /denied API access/i)
+      end
+    end
+
     context "when both workaround AND fallback fail" do
       before do
         allow(client).to receive(:request_with_202_retry)

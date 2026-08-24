@@ -16,9 +16,13 @@ module Bgg
       normalized_items.each do |item|
         begin
           thing = upsert_thing!(item)
-          BggCollection.find_or_create_by!(user: user, bgg_thing: thing) do |col|
-            col.quantity = item[:quantity] || 1
+          collection = BggCollection.find_or_initialize_by(user: user, bgg_thing: thing)
+          if collection.new_record?
+            collection.quantity = item[:quantity] || 1
+            collection.save!
             result[:added] += 1
+          else
+            result[:updated] += 1
           end
         rescue ActiveRecord::RecordInvalid, ActiveRecord::RecordNotUnique => e
           result[:errors] << { objectid: item[:id], error: e.message }
