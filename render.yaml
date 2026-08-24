@@ -20,13 +20,11 @@ services:
     healthCheckPath: /up
     autoDeployTrigger: commit
 
-    # Free instances don't support preDeployCommand, so migrations run at startup.
-    # db:prepare is idempotent (creates the DB on first boot, then only applies
-    # pending migrations across primary + cache/queue/cable). Wrapped in dotenvx
-    # so the encrypted .env.bggeek (BGG token + SECRET_KEY_BASE) is decrypted first.
-    dockerCommand: >-
-      dotenvx run -f .env.bggeek --
-      bash -c "./bin/rails db:prepare && ./bin/rails server -b 0.0.0.0 -p ${PORT:-3000}"
+    # Free instances don't support preDeployCommand, so migrations run at startup
+    # inside bin/render-start (db:prepare, then Puma). Wrapped in dotenvx so the
+    # encrypted .env.bggeek (BGG token + SECRET_KEY_BASE) is decrypted first.
+    # The logic lives in a script to avoid shell-quoting pitfalls in YAML.
+    dockerCommand: dotenvx run -f .env.bggeek -- bin/render-start
 
     envVars:
       - key: RAILS_ENV

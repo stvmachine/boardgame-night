@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Render start command: prepare the database, then boot Puma.
+#
+# Invoked as `dotenvx run -f .env.bggeek -- bin/render-start` so decrypted
+# secrets (SECRET_KEY_BASE, BGG token) are present in the environment. Keeping
+# the `&&`, quoting, and ${PORT} expansion inside a real script avoids the
+# shell-parsing pitfalls of inlining a multi-command string in render.yaml.
+set -euo pipefail
+
+# db:prepare is idempotent: creates the database on first boot (loading
+# db/schema.rb, incl. the Solid tables), then applies any pending migrations.
+./bin/rails db:prepare
+
+exec ./bin/rails server -b 0.0.0.0 -p "${PORT:-3000}"
