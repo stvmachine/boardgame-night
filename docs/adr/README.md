@@ -22,6 +22,7 @@ This directory contains the architecture decision records (ADRs) for the boardga
 | [ADR-014](./014-dev-blog-engine.md) | Pure-Ruby Static Site Generator for the Dev Blog | accepted | 2026-07-21 |
 | [ADR-015](./015-authentication-zero-rest-migration.md) | Migrate Authentication to authentication-zero (`--api`) over the Existing Token | accepted | 2026-08-24 |
 | [ADR-016](./016-frontend-spa-react-not-vue.md) | Frontend SPA Implemented in React 19, Not Vue 3 | accepted | 2026-08-24 |
+| [ADR-017](./017-oxfmt-javascript-formatter.md) | Adopt oxfmt (Oxc) as the JavaScript/TypeScript Formatter | accepted | 2026-08-24 |
 
 ## Status Key
 

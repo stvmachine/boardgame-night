@@ -7,7 +7,9 @@
     "build": "vite build",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "e2e": "playwright test --config=tests/e2e/playwright.config.ts"
+    "e2e": "playwright test --config=tests/e2e/playwright.config.ts",
+    "fmt": "oxfmt app/frontend tests vite.config.ts codegen.ts",
+    "fmt:check": "oxfmt --check app/frontend tests vite.config.ts codegen.ts"
   },
   "dependencies": {
     "@apollo/client": "^3.14.1",
@@ -39,6 +41,7 @@
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "jsdom": "^29.1.1",
+    "oxfmt": "^0.64.0",
     "tailwindcss": "^4.3.2",
     "typescript": "~5.9",
     "vite": "^6.0.0",
