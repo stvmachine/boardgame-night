@@ -39,165 +39,144 @@ end
 # ---------------------------------------------------------------------------
 
 games_data = [
-  # [objectid, name, year, min, max, min_play, max_play, avg, avg_weight, bayes_avg, thumbnail, description]
-  [174430, "Catan", 1995, 3, 4, 60, 120, 7.1, 2.32, 6.89,
-   "https://cf.geekdo-images.com/S3ybV1LAp-8SnHIXLLjVqA__imagepage/img/leVGlz6A-83CvNmbq0FfR2jLbmg=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2419375.jpg",
-   "In Catan, players try to be the dominant force on the island of Catan by building settlements, cities, and roads."],
+  [13, "Catan", 1995, 3, 4, 60, 120, 7.09, 2.28, 6.9,
+   "https://cf.geekdo-images.com/0XODRpReiZBFUffEcqT5-Q__small/img/SNVfF23OQafv3u8xdFolJnMkBoM=/fit-in/200x150/filters:strip_icc()/pic9156909.png",
+   "In CATAN (formerly The Settlers of Catan), players try to be the dominant force on the island of Catan by building settlements, cities and roads."],
 
-  [161936, "Caverna: Cave Farmers", 2013, 1, 7, 30, 150, 8.1, 3.88, 7.62,
-   "https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__imagepage/img/FpEYH61M6x9vFhMfaG2b0RwJYqU=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1690888.jpg",
-   "Caverna is a worker placement game that takes place in a small farm in the woods."],
+  [822, "Carcassonne", 2000, 2, 5, 30, 45, 7.42, 1.88, 7.3,
+   "https://cf.geekdo-images.com/peUgu3A20LRmAXAMyDQfpQ__small/img/oEEslN-EGqh82sNI6Aj4_MFXYg0=/fit-in/200x150/filters:strip_icc()/pic8621446.jpg",
+   "Carcassonne is a tile placement game in which the players draw and place a tile with a piece of southern French landscape represented on it."],
 
-  [224517, "Brass: Birmingham", 2018, 2, 4, 60, 120, 8.6, 3.86, 8.12,
-   "https://cf.geekdo-images.com/DUO2hz9AlLOH8p9ED-lCWg__imagepage/img/HdgbYJ4iTjiWnMYCn8WiH15YFgk=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3490053.jpg",
-   "Brass: Birmingham is an economic strategy game about building industries during the Industrial Revolution."],
+  [30549, "Pandemic", 2008, 2, 4, 45, 45, 7.51, 2.39, 7.4,
+   "https://cf.geekdo-images.com/S3ybV1LAp-8SnHIXLLjVqA__small/img/oqViRj6nVxK3m36NluTxU1PZkrk=/fit-in/200x150/filters:strip_icc()/pic1534148.jpg",
+   "In Pandemic, several virulent diseases have broken out simultaneously all over the world! The players are disease-fighting specialists whose mission is to treat disease hotspots wh…"],
 
-  [233078, "Spirit Island", 2017, 1, 4, 90, 120, 8.3, 4.07, 7.80,
-   "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__imagepage/img/fE91HnE14MF1YJ4a4vJl-zZbUTM=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3615739.jpg",
-   "Spirit Island is a complex and thematic cooperative strategy game where you play as spirits defending the island from colonizers."],
+  [68448, "7 Wonders", 2010, 2, 7, 30, 30, 7.66, 2.31, 7.55,
+   "https://cf.geekdo-images.com/35h9Za_JvMMMtx_92kT0Jg__small/img/BUOso8b0M1aUOkU80FWlhE8uuxc=/fit-in/200x150/filters:strip_icc()/pic7149798.jpg",
+   "You are the leader of one of the 7 great cities of the Ancient World. Gather resources, develop commercial routes, and affirm your military supremacy."],
 
-  [167791, "Terraforming Mars", 2016, 1, 5, 120, 180, 8.4, 3.26, 8.01,
-   "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__imagepage/img/fE91HnE14MF1YJ4a4vJl-zZbUTM=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3536616.jpg",
-   "In Terraforming Mars, you play a corporation trying to terraform the planet Mars by raising the temperature, adding oxygen, and creating oceans."],
+  [9209, "Ticket to Ride", 2004, 2, 5, 30, 60, 7.38, 1.82, 7.26,
+   "https://cf.geekdo-images.com/kdWYkW-7AqG63HhqPL6ekA__small/img/5G46jv8MFh_BfX67iMSouTMhKxc=/fit-in/200x150/filters:strip_icc()/pic8937637.jpg",
+   "With elegantly simple gameplay, Ticket to Ride can be learned in under 15 minutes."],
 
-  [342942, "Ark Nova", 2021, 1, 4, 90, 150, 8.6, 3.76, 8.09,
-   "https://cf.geekdo-images.com/SoU8p28Sk1s8MSvoM4N8pQ__imagepage/img/hk_swzohRpG9fRqe9gKNbJf4qjE=/fit-in/900x600/filters:no_upscale():strip_icc()/pic6293412.jpg",
-   "In Ark Nova, you will plan and design a modern, scientifically managed zoo with the goal of making it the best zoo in the world."],
+  [36218, "Dominion", 2008, 2, 4, 30, 30, 7.6, 2.34, 7.47,
+   "https://cf.geekdo-images.com/j6iQpZ4XkemZP07HNCODBA__small/img/B2u2ghwlmI_qsUtCwuvcbnBcIqU=/fit-in/200x150/filters:strip_icc()/pic394356.jpg",
+   "\"You are a monarch, like your parents before you, a ruler of a small pleasant kingdom of rivers and evergreens."],
 
-  [291457, "Gloomhaven", 2017, 1, 4, 60, 150, 8.5, 3.90, 8.06,
-   "https://cf.geekdo-images.com/sZYp_3BTDGjh2unaZfZmuA__imagepage/img/7d-lj5Gd1e8PFnD97LYFah2Y-l0=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2437871.jpg",
+  [40692, "Small World", 2009, 2, 5, 40, 80, 7.19, 2.35, 7.08,
+   "https://cf.geekdo-images.com/aoPM07XzoceB-RydLh08zA__small/img/o3Bw9heVDJRgPYlI_PksCvLAgnM=/fit-in/200x150/filters:strip_icc()/pic428828.jpg",
+   "In Small World, players vie for conquest and control of a world that is simply too small to accommodate them all."],
+
+  [2651, "Power Grid", 2004, 2, 6, 120, 120, 7.8, 3.25, 7.68,
+   "https://cf.geekdo-images.com/yd6LuatytHRhcFCxCf-EEg__small/img/jWTonZ5oYNlPzpELKHIJGWSS0Y8=/fit-in/200x150/filters:strip_icc()/pic4459753.jpg",
+   "Power Grid is the updated release of the Friedemann Friese crayon game Funkenschlag."],
+
+  [3076, "Puerto Rico", 2002, 3, 5, 90, 150, 7.9, 3.27, 7.75,
+   "https://cf.geekdo-images.com/QFiIRd2kimaMqTyWsX0aUg__small/img/5fLo89ChZH6Wzukk36bhZ-EpBS0=/fit-in/200x150/filters:strip_icc()/pic158548.jpg",
+   "In Puerto Rico, players assume the roles of colonial governors on the island of Puerto Rico."],
+
+  [31260, "Agricola", 2007, 1, 5, 30, 150, 7.85, 3.64, 7.72,
+   "https://cf.geekdo-images.com/3L6ZtOll9W5O6-3-EwSMyw__small/img/TpNF65wCIb1n3EGW18eJJ3MlRMo=/fit-in/200x150/filters:strip_icc()/pic1899157.jpg",
+   "In Agricola, you're a farmer in a wooden shack with your spouse and little else."],
+
+  [34635, "Stone Age", 2008, 2, 4, 60, 90, 7.51, 2.46, 7.38,
+   "https://cf.geekdo-images.com/elmZegVZ6gp4_5izUgxGQQ__small/img/MXq3DEKWIozO-PmB4S64BiE5fd0=/fit-in/200x150/filters:strip_icc()/pic1632539.jpg",
+   "The \"Stone Age\" times were hard indeed."],
+
+  [148228, "Splendor", 2014, 2, 4, 30, 30, 7.42, 1.77, 7.29,
+   "https://cf.geekdo-images.com/vNFe4JkhKAERzi4T0Ntwpw__small/img/KKU_42Uswt4tKCpf1zY5kTzgr-g=/fit-in/200x150/filters:strip_icc()/pic8234167.png",
+   "Splendor is a game of chip-collecting and card development."],
+
+  [70323, "King of Tokyo", 2011, 2, 6, 30, 30, 7.11, 1.48, 7.01,
+   "https://cf.geekdo-images.com/m_RzXpHURC0_xLkvRSR_sw__small/img/OfgWmkGJj5BgOO0zFHEtP5CHfbU=/fit-in/200x150/filters:strip_icc()/pic3043734.jpg",
+   "In King of Tokyo, you play mutant monsters, gigantic robots, and strange aliens&mdash;all of whom are destroying Tokyo and whacking each other in order to become the one and only K…"],
+
+  [167791, "Terraforming Mars", 2016, 1, 5, 120, 120, 8.33, 3.27, 8.18,
+   "https://cf.geekdo-images.com/wg9oOLcsKvDesSUdZQ4rxw__small/img/BTxqxgYay5tHJfVoJ2NF5g43_gA=/fit-in/200x150/filters:strip_icc()/pic3536616.jpg",
+   "In the 2400s, mankind begins to terraform the planet Mars."],
+
+  [169786, "Scythe", 2016, 1, 5, 115, 115, 8.1, 3.45, 7.94,
+   "https://cf.geekdo-images.com/7k_nOxpO9OGIjhLq2BUZdA__small/img/eQ69OEDdjYjfKg6q5Navee87skU=/fit-in/200x150/filters:strip_icc()/pic3163924.jpg",
+   "It is a time of unrest in 1920s Europa. The ashes from the first great war still darken the snow."],
+
+  [266192, "Wingspan", 2019, 1, 5, 40, 70, 8.0, 2.48, 7.84,
+   "https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__small/img/VNToqgS2-pOGU6MuvIkMPKn_y-s=/fit-in/200x150/filters:strip_icc()/pic4458123.jpg",
+   "Wingspan is&nbsp;a competitive, medium-weight, card-driven, engine-building board game from Stonemaier Games."],
+
+  [230802, "Azul", 2017, 2, 4, 30, 45, 7.71, 1.77, 7.6,
+   "https://cf.geekdo-images.com/aPSHJO0d0XOpQR5X-wJonw__small/img/ccsXKrdGJw-YSClWwzVUwk5Nh9Y=/fit-in/200x150/filters:strip_icc()/pic6973671.png",
+   "Introduced by the Moors, azulejos (originally white and blue ceramic tiles) were fully embraced by the Portuguese when their king Manuel I, on a visit to the Alhambra palace in Sou…"],
+
+  [162886, "Spirit Island", 2017, 1, 4, 90, 120, 8.34, 4.07, 8.14,
+   "https://cf.geekdo-images.com/kjCm4ZvPjIZxS-mYgSPy1g__small/img/aUlIih2_R7P8IYKeyNl2heLQbu8=/fit-in/200x150/filters:strip_icc()/pic7013651.jpg",
+   "In the most distant reaches of the world, magic still exists, embodied by spirits of the land, of the sky, and of every natural thing."],
+
+  [174430, "Gloomhaven", 2017, 1, 4, 60, 120, 8.53, 3.92, 8.29,
+   "https://cf.geekdo-images.com/sZYp_3BTDGjh2unaZfZmuA__small/img/veqFeP4d_3zNhFc3GNBkV95rBEQ=/fit-in/200x150/filters:strip_icc()/pic2437871.jpg",
    "Gloomhaven is a game of Euro-inspired tactical combat in a persistent world of shifting motives."],
 
-  [193738, "Pandemic", 2008, 2, 4, 45, 60, 7.6, 2.43, 7.37,
-   "https://cf.geekdo-images.com/x3zxjr-Vw5iU4yDPg70Jgw__imagepage/img/iTfSGFh98M08H2F8bZUc5FJz2kI=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1534148.jpg",
-   "In Pandemic, several virulent diseases have broken out simultaneously all over the world! The players are disease-fighting specialists."],
+  [224517, "Brass: Birmingham", 2018, 2, 4, 60, 120, 8.56, 3.86, 8.39,
+   "https://cf.geekdo-images.com/x3zxjr-Vw5iU4yDPg70Jgw__small/img/o18rjEemoWaVru9Y2TyPwuIaRfE=/fit-in/200x150/filters:strip_icc()/pic3490053.jpg",
+   "Brass: Birmingham is an economic strategy game sequel to Martin Wallace's 2007 masterpiece, Brass."],
 
-  [266192, "Wingspan", 2019, 1, 5, 40, 70, 7.9, 2.43, 7.64,
-   "https://cf.geekdo-images.com/yLZJCVLlIx4c7eJEWUNJ7w__imagepage/img/3M08d2qCIsiD99av3Vz72jnzj-0=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4458125.jpg",
-   "Wingspan is a competitive, medium-weight, card-driven, engine-building board game from Stonemaier Games."],
+  [342942, "Ark Nova", 2021, 1, 4, 90, 150, 8.54, 3.8, 8.35,
+   "https://cf.geekdo-images.com/SoU8p28Sk1s8MSvoM4N8pQ__small/img/4KuHNTWSMPf8vTNDKSRMMI3oOv8=/fit-in/200x150/filters:strip_icc()/pic6293412.jpg",
+   "In Ark Nova, you will plan and design a modern, scientifically managed zoo."],
 
-  [2651, "Power Grid", 2004, 2, 6, 120, 180, 7.6, 3.31, 7.26,
-   "https://cf.geekdo-images.com/Bg3H-EPQIBnN4C6h20Srvw__imagepage/img/c-ypqVG53W8i24GpE8MjD5p8w0c=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2604393.jpg",
-   "The players build power plants, buy resources, and supply electricity to cities."],
+  [199792, "Everdell", 2018, 1, 4, 40, 80, 7.98, 2.83, 7.8,
+   "https://cf.geekdo-images.com/fjE7V5LNq31yVEW_yuqI-Q__small/img/Cf_mYxR_VvdjTEPXseSurni2JNI=/fit-in/200x150/filters:strip_icc()/pic3918905.png",
+   "Within the charming valley of Everdell, beneath the boughs of towering trees, among meandering streams and mossy hollows, a civilization of forest critters is thriving and expandin…"],
 
-  [225694, "Twilight Struggle", 2005, 2, 2, 150, 180, 8.2, 3.53, 7.83,
-   "https://cf.geekdo-images.com/2547Yh3K86Xr84Lq6NkFjg__imagepage/img/0VGj6Dv9KmFjRYfZB7Dfhb-dlBk=/fit-in/900x600/filters:no_upscale():strip_icc()/pic7013943.jpg",
-   "Twilight Struggle puts players in charge of the USA or USSR during the Cold War."],
+  [124361, "Concordia", 2013, 2, 5, 100, 100, 8.07, 2.99, 7.92,
+   "https://cf.geekdo-images.com/CzwSm8i7tkLz6cBnrILZBg__small/img/ESPSltYYSFK-aJw6jOTdQrJGpOc=/fit-in/200x150/filters:strip_icc()/pic3453267.jpg",
+   "Two thousand years ago, the Roman Empire ruled the lands around the Mediterranean Sea."],
 
-  [30549, "7 Wonders", 2010, 2, 7, 30, 30, 7.7, 2.33, 7.47,
-   "https://cf.geekdo-images.com/mDcfo3hA8Tu0f76QkZQy_g__imagepage/img/8wJxYH9C7r6G7F3G3C2HhK6f4vQ=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4549454.jpg",
-   "7 Wonders is a card drafting game where players develop their civilization over three ages."],
+  [220308, "Gaia Project", 2017, 1, 4, 60, 150, 8.35, 4.4, 8.08,
+   "https://cf.geekdo-images.com/hGWFm3hbMlCDsfCsauOQ4g__small/img/NNG7Ijyx4evp5gcVReis9i0koas=/fit-in/200x150/filters:strip_icc()/pic5375625.png",
+   "Gaia Project is a new game in the line of Terra Mystica."],
 
-  [17334, "Puerto Rico", 2002, 2, 5, 90, 150, 8.1, 3.29, 7.67,
-   "https://cf.geekdo-images.com/n-q4l34P9GQpSvtmDqrBqg__imagepage/img/xXl3c3MxQKcv7B4mH4VJGz4vz6M=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4577746.jpg",
-   "The players are role-owners in Puerto Rico, producing and shipping goods to Europe."],
+  [12333, "Twilight Struggle", 2005, 2, 2, 120, 180, 8.23, 3.61, 8.04,
+   "https://cf.geekdo-images.com/pNCiUUphnoeWOYfsWq0kng__small/img/p7alNkNy8Avm8UISmhYHCiMz5bE=/fit-in/200x150/filters:strip_icc()/pic3530661.jpg",
+   "Now the trumpet summons us again, not as a call to bear arms, though arms we need; not as a call to battle, though embattled we are &ndash; but a call to bear the burden of a long…"],
 
-  [822, "Carcassonne", 2000, 2, 5, 30, 45, 7.4, 1.90, 7.22,
-   "https://cf.geekdo-images.com/E9KgY9Lp59y6hV2x9N3D0g__imagepage/img/mE8jR4qWD62GmM8jWgb2IjBwL8w=/fit-in/900x600/filters:no_upscale():strip_icc()/pic403477.jpg",
-   "In Carcassonne, players draw and place a tile to expand a medieval landscape, claiming features with their followers."],
+  [193738, "Great Western Trail", 2016, 2, 4, 75, 150, 8.14, 3.7, 7.97,
+   "https://cf.geekdo-images.com/u1l0gH7sb_vnvDvoO_QHqA__small/img/9lxFidyDb8j6D1vobx4e3UwZ-FI=/fit-in/200x150/filters:strip_icc()/pic4887376.jpg",
+   "America in the 19th century: You are a rancher and repeatedly herd your cattle from Texas to Kansas City, where you send them off by train."],
 
-  [128882, "Dominion", 2008, 2, 4, 30, 30, 7.7, 2.23, 7.44,
-   "https://cf.geekdo-images.com/A2w68VfVNe781e5kUgMzMA__imagepage/img/bSbL8b2zKfKdC0d1W3PcJ2zJlZs=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3490053.jpg",
-   "In Dominion, you are a monarch building your domain by acquiring useful cards from a shared supply."],
+  [204583, "Kingdomino", 2016, 2, 4, 15, 25, 7.29, 1.24, 7.17,
+   "https://cf.geekdo-images.com/c0m3gwZTcfKoLI63ASio8g__small/img/4p4Xydg0tze9UFcd6oUbCnVyxCw=/fit-in/200x150/filters:strip_icc()/pic8443569.png",
+   "Kingdomino is a tile-laying game in which players take the role of monarchs expanding their kingdoms by claiming and arranging lands."],
 
-  [68448, "Agricola", 2007, 1, 4, 30, 150, 8.0, 3.64, 7.62,
-   "https://cf.geekdo-images.com/F9Vh9TVw0OVhMsVxNzCysg__imagepage/img/dlT45o8N-yZBf6BPLVrZJjg6eO8=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1625017.jpg",
-   "In Agricola, you're a farmer trying to expand your farm while feeding your family."],
+  [237182, "Root", 2018, 2, 4, 60, 90, 8.07, 3.84, 7.88,
+   "https://cf.geekdo-images.com/JUAUWaVUzeBgzirhZNmHHw__small/img/ACovMZzGGIsBRyEQXFnsT8282NM=/fit-in/200x150/filters:strip_icc()/pic4254509.jpg",
+   "Root is a game of adventure and war in which 2 to 4 (1 to 6 with the 'Riverfolk' expansion, 2-6 with the 'Underworld', or 'Marauder' expansions) players battle for control of a vas…"],
 
-  [40692, "Small World", 2009, 2, 5, 40, 80, 7.2, 2.33, 6.93,
-   "https://cf.geekdo-images.com/b0tP4Vdwi9W2714dH8iVtA__imagepage/img/c5N8kEJ6JmLsUz2B4pB3p5l1G6Q=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3513763.jpg",
-   "Small World is a fun and light-hearted civilization game where civilizations overlap on a shrinking world."],
+  [295947, "Cascadia", 2021, 1, 4, 30, 45, 7.88, 1.84, 7.73,
+   "https://cf.geekdo-images.com/MjeJZfulbsM1DSV3DrGJYA__small/img/tVSFjSxYEcw7sKj3unIIQV8kxoc=/fit-in/200x150/filters:strip_icc()/pic5100691.jpg",
+   "Cascadia is a puzzly tile-laying and token-drafting game featuring the habitats and wildlife of the Pacific Northwest."],
 
-  [2452, "Ticket to Ride", 2004, 2, 5, 30, 60, 7.4, 1.90, 7.17,
-   "https://cf.geekdo-images.com/4V0Z19SI0N4gPn3Nv9Nzqg__imagepage/img/KIgmj1M5Iqj196Y1fBQH2rMnK0M=/fit-in/900x600/filters:no_upscale():strip_icc()/pic38668.jpg",
-   "In Ticket to Ride, players build train routes across North America to claim destination tickets."],
+  [173346, "7 Wonders Duel", 2015, 2, 2, 30, 30, 8.07, 2.23, 7.95,
+   "https://cf.geekdo-images.com/zdagMskTF7wJBPjX74XsRw__small/img/gV1-ckZSIC-dCxxpq1Y7GmPITzQ=/fit-in/200x150/filters:strip_icc()/pic2576399.jpg",
+   "In many ways 7 Wonders Duel resembles its parent game 7 Wonders."],
 
-  [13, "Catan", 1995, 3, 4, 60, 120, 7.1, 2.32, 6.89,
-   "https://cf.geekdo-images.com/S3ybV1LAp-8SnHIXLLjVqA__imagepage/img/leVGlz6A-83CvNmbq0FfR2jLbmg=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2419375.jpg",
-   "In The Settlers of Catan, players try to be the dominant force on the island of Catan."],
+  [161936, "Pandemic Legacy: Season 1", 2015, 2, 4, 60, 60, 8.5, 2.83, 8.34,
+   "https://cf.geekdo-images.com/-Qer2BBPG7qGGDu6KcVDIw__small/img/NQQcjS31TO0DE246N9rpt0hd9eo=/fit-in/200x150/filters:strip_icc()/pic2452831.png",
+   "Pandemic Legacy is a co-operative campaign game, with an overarching story arc played through 12-24 sessions, depending on how well your group does at the game."],
 
-  [148228, "Splendor", 2014, 2, 4, 30, 30, 7.4, 1.79, 7.07,
-   "https://cf.geekdo-images.com/rw_OM8aD5AVL5gCDbH88qQ__imagepage/img/LKqoqE0Lx4sT0gC9sH8hM7Y1r9M=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1904079.jpg",
-   "Splendor is a game of chip-collecting and card development for 2–4 players."],
+  [102794, "Caverna: The Cave Farmers", 2013, 1, 7, 30, 210, 7.92, 3.78, 7.73,
+   "https://cf.geekdo-images.com/EAqbd46lFxo-7GumlO8U4w__small/img/g-qxFyjgqn7kwH3erf3jhmgYaIU=/fit-in/200x150/filters:strip_icc()/pic5598833.jpg",
+   "Following along the same lines as its predecessor (Agricola), Caverna: The Cave Farmers is a worker-placement game at heart, with a focus on farming."],
 
-  [172828, "King of Tokyo", 2011, 2, 6, 30, 30, 7.1, 1.50, 6.79,
-   "https://cf.geekdo-images.com/jjGf0A2bMqFz1O1jM8Lzjg__imagepage/img/0b5YXk4n08IzjOQ8m4v2u6m0QYk=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1726291.jpg",
-   "In King of Tokyo, you play as one of several giant monsters fighting to become the King of Tokyo."],
+  [284083, "The Crew: The Quest for Planet Nine", 2019, 2, 5, 20, 20, 7.75, 1.97, 7.61,
+   "https://cf.geekdo-images.com/98LnQShydr11OBKS46xY-Q__small/img/et-fnuozyOdBOVL-5kSS3_7I8fw=/fit-in/200x150/filters:strip_icc()/pic5687013.jpg",
+   "In the co-operative trick-taking game The Crew: The Quest for Planet Nine, the players set out as astronauts on an uncertain space adventure."],
 
-  [169786, "Scythe", 2016, 1, 5, 90, 115, 8.2, 3.42, 7.83,
-   "https://cf.geekdo-images.com/7k_nOxpO9OGIjhLq2Dz8pA__imagepage/img/Jx3M6s397bX7dJAG3s0DnxKdIg0=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3163924.jpg",
-   "Scythe is set in an alternate-history 1920s Eastern Europe where mechs are used to fight wars."],
-
-  [12333, "Ticket to Ride: Europe", 2005, 2, 5, 30, 60, 7.6, 1.94, 7.36,
-   "https://cf.geekdo-images.com/npbHLmxv5b8Il0591VwJLg__imagepage/img/JRf0cBFvC3b6CPEKf3g3z6J8C2M=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3953183.jpg",
-   "Ticket to Ride: Europe takes you on a train ride through 1900s Europe."],
-
-  [36218, "Dominant Species", 2010, 2, 6, 120, 240, 8.1, 4.04, 7.62,
-   "https://cf.geekdo-images.com/VLugmkKw7b1kSfql3Lz5qg__imagepage/img/gk1BqN2F1M82y2Cj4N6c7x9K3jE=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3396538.jpg",
-   "Dominant Species is a game that recreates the struggle among animal species for dominance."],
-
-  [350194, "Everdell", 2018, 1, 4, 40, 80, 8.1, 2.83, 7.62,
-   "https://cf.geekdo-images.com/PhjygpWSo-0labGrPBMyyg__imagepage/img/VjQGM06sH-8p3l0DK0xB7y5Jy3o=/fit-in/900x600/filters:no_upscale():strip_icc()/pic5837894.jpg",
-   "Everdell is a game of dynamic tableau building and worker placement."],
-
-  [2897, "Ra", 1999, 2, 5, 30, 45, 7.5, 2.27, 7.11,
-   "https://cf.geekdo-images.com/FMg9Jb3M9Z0jJ12E5cE1Ig__imagepage/img/6E4z3vB9H2tJhW0Hm9W4CzN0F3I=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4111161.jpg",
-   "Ra is a auction game where players bid on tiles depicting gods, pharaohs, and monuments from ancient Egypt."],
-
-  [102794, "Star Realms", 2014, 2, 2, 20, 20, 7.6, 1.87, 7.30,
-   "https://cf.geekdo-images.com/x3zxjr-Vw5iU4yDPg70Jgw__imagepage/img/iTfSGFh98M08H2F8bZUc5FJz2kI=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1534148.jpg",
-   "Star Realms is a fast-paced deckbuilding game set in a space-faring sci-fi universe."],
-
-  [15987, "Hive", 2001, 2, 2, 20, 30, 7.3, 2.35, 6.96,
-   "https://cf.geekdo-images.com/X3Njd0RjWfRp80rPY1qohg__imagepage/img/GY8K3pE30dC4s8IjPpq0yW6jH3A=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4061487.jpg",
-   "Hive is an abstract strategy game where players attempt to surround their opponent's queen bee."],
-
-  [3076, "Survive: Escape from Atlantis!", 1982, 2, 4, 60, 90, 7.2, 2.01, 6.87,
-   "https://cf.geekdo-images.com/F4n6vJU7wC7y7C7jYJgB1g__imagepage/img/B1l67F45dX6s7r6VhM8s7b7I7uI=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1215633.jpg",
-   "Survive: Escape from Atlantis! is a game where players try to evacuate their people from a sinking island."],
-
-  [184921, "Concordia", 2013, 2, 5, 100, 100, 8.1, 3.01, 7.70,
-   "https://cf.geekdo-images.com/6tB70Bn63CfQm0sI1I5g0g__imagepage/img/1B793JfVjM_22YD3VwJH81v3pX0=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1556007.jpg",
-   "Concordia is a strategic economic game of trade and territory building in the Roman Empire."],
-
-  [220308, "Five Tribes", 2014, 2, 4, 40, 80, 7.9, 2.94, 7.50,
-   "https://cf.geekdo-images.com/kjCm4ZvPjIZxS-mYgSPN1g__imagepage/img/48bG3Pz6gG3S3I6j4X7g5J4J3yE=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2022524.jpg",
-   "Five Tribes is a worker placement game where players use meeples to claim areas in the Sultanate of Naqala."],
-
-  [204583, "Istanbul", 2014, 2, 5, 40, 60, 7.8, 2.88, 7.44,
-   "https://cf.geekdo-images.com/PCk3VZjS2Pd70sY1V1bP0g__imagepage/img/D3W2kCtTJr4fJ5kVJ6kq6jQ0aGw=/fit-in/900x600/filters:no_upscale():strip_icc()/pic1876306.jpg",
-   "Istanbul is a fast-paced strategy game where you lead a merchant through the bazaars of Istanbul."],
-
-  [199042, "Century: Spice Road", 2017, 2, 5, 30, 45, 7.5, 2.01, 7.06,
-   "https://cf.geekdo-images.com/mE0R3Ckq_NP1WnN0yL3f3g__imagepage/img/0tF1cEFQs6g0Gn9Ck0pF4wqO0kY=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3635171.jpg",
-   "Century: Spice Road is the first game in the Century series, where players are merchants on the Silk Road."],
-
-  [2625, "El Grande", 1995, 2, 5, 60, 120, 8.1, 3.61, 7.62,
-   "https://cf.geekdo-images.com/mbBcfZoT23M-87b0l05pPg__imagepage/img/lIuM38d4oY0Pd78g7qf0j3Ld1Dw=/fit-in/900x600/filters:no_upscale():strip_icc()/pic29319.jpg",
-   "El Grande is a game of area control and influence in medieval Spain."],
-
-  [291457, "Gloomhaven", 2017, 1, 4, 60, 150, 8.5, 3.90, 8.06,
-   "https://cf.geekdo-images.com/sZYp_3BTDGjh2unaZfZmuA__imagepage/img/7d-lj5Gd1e8PFnD97LYFah2Y-l0=/fit-in/900x600/filters:no_upscale():strip_icc()/pic2437871.jpg",
-   "Gloomhaven is a game of Euro-inspired tactical combat in a persistent world of shifting motives."],
-
-  [199792, "Clank! A Deck-Building Adventure", 2016, 2, 4, 30, 60, 7.6, 2.30, 7.22,
-   "https://cf.geekdo-images.com/4di2bCRPAdbk4ZwH9pZvzg__imagepage/img/bFbpW16sJF5YDzH0jCjbPwBqg2I=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4706147.jpg",
-   "Clank! is a deck-building adventure game where you explore a dungeon to steal treasure."],
-
-  [34635, "Race for the Galaxy", 2007, 2, 4, 30, 60, 7.6, 2.97, 7.23,
-   "https://cf.geekdo-images.com/dq3pHTzGCJgBt10RfC1bRg__imagepage/img/2J8z3oM136Z7Zj2Y7N1b7g1b7g4=/fit-in/900x600/filters:no_upscale():strip_icc()/pic466600.jpg",
-   "Race for the Galaxy is a card game where players build galactic civilizations through card combinations."],
-
-  [246675, "Imhotep", 2016, 2, 4, 40, 70, 7.4, 2.30, 6.94,
-   "https://cf.geekdo-images.com/8YcIYU65N0j4U35k6m067g__imagepage/img/rD4eH1b3Rb9KdC5J6R4d4L4b3j0=/fit-in/900x600/filters:no_upscale():strip_icc()/pic3157483.jpg",
-   "Imhotep is a game of ancient Egyptian building and trading."],
-
-  [233867, "Viticulture Essential Edition", 2015, 1, 6, 45, 90, 8.1, 2.90, 7.67,
-   "https://cf.geekdo-images.com/tz194q-axA3Z9M6SvHqjJA__imagepage/img/4Kx0cWxJ5G98h5tEh0d6a5n7p3Y=/fit-in/900x600/filters:no_upscale():strip_icc()/pic4907598.jpg",
-   "Viticulture is a game where players make wine in Tuscany."],
+  [312484, "Lost Ruins of Arnak", 2020, 1, 4, 30, 120, 8.08, 2.93, 7.92,
+   "https://cf.geekdo-images.com/6GqH14TJJhza86BX5HCLEQ__small/img/J8SVmGOJXZGxNjkT3xYNQU7Haxg=/fit-in/200x150/filters:strip_icc()/pic5674958.jpg",
+   "On an uninhabited island in uncharted seas, explorers have found traces of a great civilization."],
 ]
 
-# De-duplicate by objectid (the last entry for Gloomhaven is a duplicate)
+# De-duplicate by objectid (defensive; the curated list is already unique)
 games_data.uniq! { |g| g[0] }
 
 bgg_things = {}
@@ -247,24 +226,24 @@ end
 
 # Add polls for a selection of games at their most common player counts
 poll_games = {
-  174430  => { 3 => [80, 50, 10], 4 => [100, 80, 20] },          # Catan
-  193738  => { 2 => [30, 60, 10], 3 => [60, 80, 20], 4 => [50, 70, 30] }, # Pandemic
+  13      => { 3 => [80, 50, 10], 4 => [100, 80, 20] },                    # Catan
+  30549   => { 2 => [30, 60, 10], 3 => [60, 80, 20], 4 => [50, 70, 30] },  # Pandemic
   266192  => { 1 => [60, 30, 10], 2 => [90, 60, 10], 3 => [80, 70, 15], 4 => [70, 60, 20], 5 => [40, 50, 30] }, # Wingspan
-  167791  => { 1 => [40, 50, 20], 2 => [80, 60, 10], 3 => [90, 70, 10], 4 => [70, 60, 20] }, # Terraforming Mars
+  167791  => { 1 => [40, 50, 20], 2 => [80, 60, 10], 3 => [90, 70, 10], 4 => [70, 60, 20], 5 => [50, 50, 25] }, # Terraforming Mars
   342942  => { 1 => [50, 40, 10], 2 => [90, 70, 10], 3 => [80, 60, 15], 4 => [60, 50, 20] }, # Ark Nova
-  233078  => { 1 => [100, 40, 5],  2 => [90, 50, 10], 3 => [70, 60, 15], 4 => [50, 50, 20] }, # Spirit Island
-  161936  => { 1 => [30, 40, 20], 2 => [60, 70, 15], 3 => [80, 70, 10], 4 => [70, 60, 15] }, # Caverna
-  224517  => { 2 => [100, 50, 5], 3 => [80, 60, 10], 4 => [60, 50, 20] }, # Brass Birmingham
-  291457  => { 1 => [60, 40, 10], 2 => [90, 60, 10], 3 => [70, 50, 20], 4 => [50, 40, 30] }, # Gloomhaven
-  246675  => { 2 => [40, 60, 10], 3 => [90, 70, 10], 4 => [80, 60, 15] }, # Ticket to Ride
-  30549   => { 3 => [50, 80, 20], 4 => [70, 80, 15], 5 => [60, 70, 20], 6 => [40, 50, 30] }, # 7 Wonders
-  225694  => { 2 => [100, 40, 5] },                                        # Twilight Struggle
-  199042  => { 2 => [30, 60, 15], 3 => [80, 70, 10], 4 => [70, 60, 15], 5 => [50, 50, 20] }, # Century Spice Road
-  199792  => { 2 => [40, 60, 10], 3 => [80, 70, 10], 4 => [70, 60, 15] }, # Clank!
-  233867  => { 1 => [40, 50, 15], 2 => [70, 70, 10], 3 => [90, 70, 10], 4 => [80, 60, 15], 5 => [60, 50, 20], 6 => [40, 40, 30] }, # Viticulture
-  350194  => { 1 => [50, 50, 10], 2 => [80, 60, 10], 3 => [70, 60, 15], 4 => [50, 50, 20] }, # Everdell
-  204583  => { 2 => [40, 60, 15], 3 => [80, 70, 10], 4 => [70, 60, 15], 5 => [50, 50, 20] }, # Istanbul
-  220308  => { 2 => [40, 60, 10], 3 => [80, 70, 10], 4 => [70, 60, 15] }, # Five Tribes
+  162886  => { 1 => [100, 40, 5],  2 => [90, 50, 10], 3 => [70, 60, 15], 4 => [50, 50, 20] }, # Spirit Island
+  102794  => { 1 => [30, 40, 20], 2 => [60, 70, 15], 3 => [80, 70, 10], 4 => [70, 60, 15] }, # Caverna
+  224517  => { 2 => [100, 50, 5], 3 => [80, 60, 10], 4 => [60, 50, 20] }, # Brass: Birmingham
+  174430  => { 1 => [60, 40, 10], 2 => [90, 60, 10], 3 => [70, 50, 20], 4 => [50, 40, 30] }, # Gloomhaven
+  9209    => { 2 => [40, 60, 10], 3 => [90, 70, 10], 4 => [80, 60, 15], 5 => [60, 60, 25] }, # Ticket to Ride
+  68448   => { 3 => [50, 80, 20], 4 => [70, 80, 15], 5 => [60, 70, 20], 6 => [40, 50, 30], 7 => [30, 40, 40] }, # 7 Wonders
+  12333   => { 2 => [100, 40, 5] },                                       # Twilight Struggle
+  173346  => { 2 => [95, 30, 5] },                                        # 7 Wonders Duel (2-player only)
+  199792  => { 1 => [50, 50, 10], 2 => [80, 60, 10], 3 => [70, 60, 15], 4 => [50, 50, 20] }, # Everdell
+  230802  => { 2 => [90, 50, 10], 3 => [70, 60, 15], 4 => [60, 55, 20] }, # Azul
+  295947  => { 1 => [50, 40, 15], 2 => [80, 60, 10], 3 => [70, 60, 15], 4 => [55, 50, 20] }, # Cascadia
+  204583  => { 2 => [40, 60, 15], 3 => [80, 70, 10], 4 => [70, 60, 15] }, # Kingdomino
+  220308  => { 1 => [40, 50, 20], 2 => [80, 60, 10], 3 => [70, 60, 15], 4 => [55, 50, 25] }, # Gaia Project
 }
 
 poll_games.each do |oid, counts|
@@ -281,18 +260,18 @@ puts "  Created/verified player-count polls"
 # Collections — what each user owns
 # ---------------------------------------------------------------------------
 
-# stevmachine: heavier games, more eclectic
+# stevmachine: heavier, more eclectic strategy shelf
 stev_items = [
-  224517, 233078, 167791, 342942, 291457, 161936, 266192,
-  225694, 2651, 220308, 204583, 199042, 199792, 233867,
-  184921, 36218, 17334, 34635, 199042, 30549
+  224517, 162886, 167791, 342942, 174430, 102794, 169786,
+  220308, 12333, 193738, 124361, 199792, 237182, 312484,
+  2651, 31260, 3076, 161936, 266192
 ]
 
 # donutgamer: family-friendly, gateway + midweight
 donut_items = [
-  174430, 266192, 193738, 246675, 30549, 822, 148228,
-  172828, 12333, 199042, 199792, 350194, 204583, 15987,
-  3076, 220308, 246675, 128882, 2897, 68448
+  13, 822, 30549, 68448, 9209, 36218, 40692,
+  148228, 70323, 230802, 204583, 295947, 173346, 284083,
+  266192, 34635, 199792, 167791, 162886
 ]
 
 stev_items.uniq.each do |oid|
@@ -349,7 +328,7 @@ if completed2.new_record?
     capacity: 4,
     time_budget_minutes: 120,
     complexity_preference: "Medium-Heavy",
-    picked_game_id: bgg_things[233078].id # Spirit Island
+    picked_game_id: bgg_things[162886].id # Spirit Island
   )
   completed2.save!
 end

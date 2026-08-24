@@ -1,10 +1,10 @@
-import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
-import { teardownGuard } from './fixture-guard'
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+import { teardownGuard } from "./fixture-guard";
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
-const fixturesDir = resolve(__dirname, 'fixtures')
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const fixturesDir = resolve(__dirname, "fixtures");
 
 /**
  * Repository-owned global teardown for Playwright.
@@ -22,14 +22,14 @@ const fixturesDir = resolve(__dirname, 'fixtures')
  * best-effort fallback for interrupted runs.
  */
 export default function globalTeardown(): void {
-  const ok = teardownGuard(fixturesDir)
-  if (!ok) {
-    throw new Error(
-      'fixture-guard teardown failed: could not restore and verify fixture bytes. ' +
-      'This may mean no guard state existed (already cleaned up, or setup never ran), ' +
-      'or that restored bytes did not match the original backup hashes. ' +
-      'Check test-results/ for diagnostic screenshots/traces and the guard backup ' +
-      'directory under os.tmpdir()/opencode/ for recovery evidence.'
-    )
-  }
+	const ok = teardownGuard(fixturesDir);
+	if (!ok) {
+		throw new Error(
+			"fixture-guard teardown failed: could not restore and verify fixture bytes. " +
+				"This may mean no guard state existed (already cleaned up, or setup never ran), " +
+				"or that restored bytes did not match the original backup hashes. " +
+				"Check test-results/ for diagnostic screenshots/traces and the guard backup " +
+				"directory under os.tmpdir()/opencode/ for recovery evidence.",
+		);
+	}
 }

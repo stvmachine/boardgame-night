@@ -1,200 +1,201 @@
-import { Search } from 'lucide-react'
-import { MemberAvatar } from '@/components/primitives'
+import { Search } from "lucide-react";
 import {
-  complexityLabels,
-  inTimeBucket,
-  timeLabels,
-  type Complexity,
-  type Filters,
-  type PlayerRange,
-  type TimeBucket,
-} from '@/lib/collection'
-import type { Game, Member } from '@/lib/data'
-import { cn } from '@/lib/utils'
+	complexityLabels,
+	inTimeBucket,
+	timeLabels,
+	type Complexity,
+	type Filters,
+	type PlayerRange,
+	type TimeBucket,
+} from "@/lib/collection";
+import type { Game, Member } from "@/lib/data";
+import { cn } from "@/lib/utils";
+import { Card } from "@/components/atoms/card";
+import { Eyebrow } from "@/components/atoms/eyebrow";
+import { Chip } from "@/components/atoms/chip";
+import { Avatar } from "@/components/atoms/avatar";
+import { SegmentedControl } from "@/components/atoms/segmented-control";
+import { FilterGroup } from "@/components/molecules/filter-group";
 
-const timeOptions: TimeBucket[] = [1, 2, 3, 4]
-const complexityOptions: Array<{ value: Complexity | null; label: string }> = [
-  { value: null, label: 'Any' },
-  ...([1, 2, 3] as Complexity[]).map((value) => ({
-    value,
-    label: complexityLabels[value],
-  })),
-]
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <fieldset className="border-t border-line py-5 first:border-t-0 first:pt-4">
-      <legend className="text-sm font-semibold text-ink">{title}</legend>
-      <div className="mt-3">{children}</div>
-    </fieldset>
-  )
-}
+const timeOptions: TimeBucket[] = [1, 2, 3, 4];
+const complexityOptions: Array<{ value: string; label: string }> = [
+	{ value: "0", label: "Any" },
+	...([1, 2, 3] as Complexity[]).map((value) => ({
+		value: String(value),
+		label: complexityLabels[value],
+	})),
+];
 
 function normalizedRange(range: PlayerRange | null) {
-  return range ?? { min: 1, max: 10 }
+	return range ?? { min: 1, max: 10 };
 }
 
 function nextRange(min: number, max: number): PlayerRange | null {
-  return min === 1 && max === 10 ? null : { min, max }
+	return min === 1 && max === 10 ? null : { min, max };
 }
 
+/**
+ * FilterPanel — the collection's control panel. A single dark "instrument"
+ * card: search, owners with live counts, a player-range slider, play-time
+ * chips, and a complexity segmented control. Powerful, not a plain form.
+ */
 export function FilterPanel({
-  filters,
-  setFilters,
-  games,
-  members,
+	filters,
+	setFilters,
+	games,
+	members,
+	activeCount = 0,
+	onClear,
 }: {
-  filters: Filters
-  setFilters: (next: Partial<Filters>) => void
-  games: Game[]
-  members: Member[]
+	filters: Filters;
+	setFilters: (next: Partial<Filters>) => void;
+	games: Game[];
+	members: Member[];
+	activeCount?: number;
+	onClear?: () => void;
 }) {
-  const range = normalizedRange(filters.players)
-  const allOwnerIds = members.map((member) => member.id)
-  const selectedOwners = filters.owners.length === 0 ? allOwnerIds : filters.owners
+	const range = normalizedRange(filters.players);
+	const allOwnerIds = members.map((m) => m.id);
+	const selectedOwners = filters.owners.length === 0 ? allOwnerIds : filters.owners;
 
-  function toggleOwner(ownerId: string) {
-    const next = selectedOwners.includes(ownerId)
-      ? selectedOwners.filter((id) => id !== ownerId)
-      : [...selectedOwners, ownerId]
-    setFilters({ owners: next.length === allOwnerIds.length ? [] : next })
-  }
+	function toggleOwner(ownerId: string) {
+		const next = selectedOwners.includes(ownerId)
+			? selectedOwners.filter((id) => id !== ownerId)
+			: [...selectedOwners, ownerId];
+		setFilters({ owners: next.length === allOwnerIds.length ? [] : next });
+	}
 
-  function toggleTime(bucket: TimeBucket) {
-    const times = filters.times.includes(bucket)
-      ? filters.times.filter((value) => value !== bucket)
-      : [...filters.times, bucket]
-    setFilters({ times })
-  }
+	function toggleTime(bucket: TimeBucket) {
+		const times = filters.times.includes(bucket)
+			? filters.times.filter((v) => v !== bucket)
+			: [...filters.times, bucket];
+		setFilters({ times });
+	}
 
-  return (
-    <div className="flex flex-col">
-      <Section title="Search">
-        <label className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 py-2 focus-within:border-primary">
-          <span className="sr-only">Search</span>
-          <Search className="size-4 shrink-0 text-ink-muted" aria-hidden="true" />
-          <input
-            type="search"
-            value={filters.q}
-            onChange={(event) => setFilters({ q: event.target.value })}
-            placeholder="Search"
-            aria-label="Search"
-            className="min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-muted focus:outline-none"
-          />
-        </label>
-      </Section>
+	return (
+		<Card tone="contrast" className="flex flex-col gap-4 p-4">
+			<div className="flex items-center justify-between">
+				<Eyebrow className="text-on-contrast-faint">Filters</Eyebrow>
+				{activeCount > 0 && onClear && (
+					<button
+						type="button"
+						onClick={onClear}
+						className="numeric text-[11px] text-on-contrast-good hover:underline"
+					>
+						{activeCount} active · reset
+					</button>
+				)}
+			</div>
 
-      <Section title="Owners">
-        <ul className="flex flex-col gap-1">
-          {members.map((member) => {
-            const selected = selectedOwners.includes(member.id)
-            const count = games.filter((game) => game.owners.includes(member.id)).length
-            return (
-              <li key={member.id}>
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-ink-secondary hover:bg-surface-raised">
-                  <input
-                    type="checkbox"
-                    checked={selected}
-                    onChange={() => toggleOwner(member.id)}
-                    aria-label={member.bgg}
-                    className="size-4 accent-primary"
-                  />
-                  <MemberAvatar member={{ ...member, online: false }} size="sm" />
-                  <span className="min-w-0 flex-1 truncate">{member.bgg}</span>
-                  <span className="text-ink-muted">({count})</span>
-                </label>
-              </li>
-            )
-          })}
-        </ul>
-      </Section>
+			{/* Search */}
+			<label className="flex h-9 items-center gap-2 rounded-md border border-contrast-line bg-contrast-2 px-2.5">
+				<Search className="size-4 shrink-0 text-on-contrast-faint" aria-hidden="true" />
+				<span className="sr-only">Search</span>
+				<input
+					type="search"
+					value={filters.q}
+					onChange={(e) => setFilters({ q: e.target.value })}
+					placeholder={`Search ${games.length} games`}
+					aria-label="Search games"
+					className="min-w-0 flex-1 bg-transparent text-[13px] text-on-contrast placeholder:text-on-contrast-faint focus:outline-none"
+				/>
+			</label>
 
-      <Section title="Players">
-        <p className="mb-3 text-xs text-ink-secondary">
-          {range.min}–{range.max === 10 ? '10+' : range.max} players
-        </p>
-        <div className="grid gap-3">
-          <input
-            type="range"
-            min={1}
-            max={10}
-            step={1}
-            value={range.min}
-            aria-label="Minimum players"
-            aria-valuemin={1}
-            aria-valuemax={10}
-            aria-valuenow={range.min}
-            onChange={(event) => {
-              const min = Math.min(Number(event.target.value), range.max)
-              setFilters({ players: nextRange(min, range.max) })
-            }}
-            className="w-full accent-primary"
-          />
-          <input
-            type="range"
-            min={1}
-            max={10}
-            step={1}
-            value={range.max}
-            aria-label="Maximum players"
-            aria-valuemin={1}
-            aria-valuemax={10}
-            aria-valuenow={range.max}
-            onChange={(event) => {
-              const max = Math.max(Number(event.target.value), range.min)
-              setFilters({ players: nextRange(range.min, max) })
-            }}
-            className="w-full accent-primary"
-          />
-        </div>
-      </Section>
+			{/* Owners */}
+			<FilterGroup label="Owners">
+				<ul className="flex flex-col gap-2">
+					{members.map((member) => {
+						const selected = selectedOwners.includes(member.id);
+						const count = games.filter((g) => g.owners.includes(member.id)).length;
+						return (
+							<li key={member.id}>
+								<button
+									type="button"
+									aria-pressed={selected}
+									onClick={() => toggleOwner(member.id)}
+									className={cn(
+										"flex w-full items-center gap-2.5 rounded-md border px-2.5 py-1.5 text-left",
+										selected
+											? "border-primary/50 bg-contrast-2"
+											: "border-transparent bg-contrast-2/40 opacity-60 hover:opacity-100",
+									)}
+								>
+									<Avatar name={member.bgg} seed={member.id} size="sm" />
+									<span className="min-w-0 flex-1 truncate text-[13px] text-on-contrast">
+										{member.bgg}
+									</span>
+									<span className="numeric text-[11px] text-on-contrast-good">{count}</span>
+								</button>
+							</li>
+						);
+					})}
+				</ul>
+			</FilterGroup>
 
-      <Section title="Play time">
-        <ul className="grid gap-2">
-          {timeOptions.map((bucket) => {
-            const count = games.filter((game) => inTimeBucket(game.minutes, bucket)).length
-            return (
-              <li key={bucket}>
-                <label className="flex cursor-pointer items-center gap-2 text-xs text-ink-secondary">
-                  <input
-                    type="checkbox"
-                    checked={filters.times.includes(bucket)}
-                    onChange={() => toggleTime(bucket)}
-                    aria-label={timeLabels[bucket]}
-                    className="size-4 accent-primary"
-                  />
-                  <span className="flex-1">{timeLabels[bucket]}</span>
-                  <span className="text-ink-muted">({count})</span>
-                </label>
-              </li>
-            )
-          })}
-        </ul>
-      </Section>
+			{/* Players */}
+			<FilterGroup label="Players" value={`${range.min}–${range.max === 10 ? "10+" : range.max}`}>
+				<div className="flex flex-col gap-2">
+					<input
+						type="range"
+						min={1}
+						max={10}
+						step={1}
+						value={range.min}
+						aria-label="Minimum players"
+						onChange={(e) =>
+							setFilters({
+								players: nextRange(Math.min(Number(e.target.value), range.max), range.max),
+							})
+						}
+						className="w-full accent-on-contrast-good"
+					/>
+					<input
+						type="range"
+						min={1}
+						max={10}
+						step={1}
+						value={range.max}
+						aria-label="Maximum players"
+						onChange={(e) =>
+							setFilters({
+								players: nextRange(range.min, Math.max(Number(e.target.value), range.min)),
+							})
+						}
+						className="w-full accent-on-contrast-good"
+					/>
+				</div>
+			</FilterGroup>
 
-      <Section title="Complexity">
-        <div className="grid grid-cols-2 gap-1 rounded-lg border border-line bg-surface p-1">
-          {complexityOptions.map((option) => {
-            const selected = filters.complexity === option.value
-            return (
-              <button
-                key={option.label}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => setFilters({ complexity: option.value })}
-                className={cn(
-                  'rounded-md px-2 py-2 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                  selected
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-ink-secondary hover:bg-surface-raised hover:text-ink',
-                )}
-              >
-                {option.label}
-              </button>
-            )
-          })}
-        </div>
-      </Section>
-    </div>
-  )
+			{/* Play time */}
+			<FilterGroup label="Play time">
+				<div className="flex flex-wrap gap-1.5">
+					{timeOptions.map((bucket) => {
+						const count = games.filter((g) => inTimeBucket(g.minutes, bucket)).length;
+						return (
+							<Chip
+								key={bucket}
+								tone="contrast"
+								active={filters.times.includes(bucket)}
+								count={count}
+								onClick={() => toggleTime(bucket)}
+							>
+								{timeLabels[bucket]}
+							</Chip>
+						);
+					})}
+				</div>
+			</FilterGroup>
+
+			{/* Complexity */}
+			<FilterGroup label="Complexity">
+				<SegmentedControl
+					tone="ink"
+					size="sm"
+					value={String(filters.complexity ?? 0)}
+					options={complexityOptions}
+					onChange={(v) => setFilters({ complexity: v === "0" ? null : (Number(v) as Complexity) })}
+				/>
+			</FilterGroup>
+		</Card>
+	);
 }
