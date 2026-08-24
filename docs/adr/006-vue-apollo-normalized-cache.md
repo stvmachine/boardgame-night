@@ -1,4 +1,4 @@
-# ADR-006: Apollo Client 3.x with Normalized Cache in Vue
+# ADR-006: Apollo Client 3.x with Normalized Cache (React — see ADR-016)
 
 ## Status
 

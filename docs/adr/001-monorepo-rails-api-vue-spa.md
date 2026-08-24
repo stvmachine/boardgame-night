@@ -1,4 +1,4 @@
-# ADR-001: Monorepo with Rails 8 API-only and Vue 3 Vite SPA
+# ADR-001: Monorepo with Rails 8 API-only and Vite SPA (frontend is React — see ADR-016)
 
 ## Status
 

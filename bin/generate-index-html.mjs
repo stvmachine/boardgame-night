@@ -9,9 +9,9 @@ import { readFileSync, writeFileSync } from "fs";
 const manifestPath = "public/vite/.vite/manifest.json";
 const manifest = JSON.parse(readFileSync(manifestPath, "utf-8"));
 
-const entry = manifest["entrypoints/application.ts"];
+const entry = manifest["entrypoints/main.tsx"];
 if (!entry) {
-  console.error("ERROR: entrypoints/application.ts not found in manifest");
+  console.error("ERROR: entrypoints/main.tsx not found in manifest");
   process.exit(1);
 }
 
