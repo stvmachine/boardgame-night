@@ -192,7 +192,7 @@ GEM
       activesupport (>= 6.1)
     graphiql-rails (1.10.5)
       railties
-    graphql (2.6.7)
+    graphql (2.6.9)
       base64
       fiber-storage
       logger
@@ -518,7 +518,7 @@ DEPENDENCIES
   faraday-retry (~> 2.4)
   foreman
   graphiql-rails (~> 1.10)
-  graphql (~> 2.6, >= 2.6.6)
+  graphql (~> 2.6)
   image_processing (~> 1.2)
   kamal
   kramdown (~> 2.5)
