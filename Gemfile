@@ -64,7 +64,7 @@ end
 
 gem "vite_rails", "~> 3.11"
 
-gem "graphql", "~> 2.6", ">= 2.6.6"
+gem "graphql", "~> 2.6"
 
 gem "bcrypt", "~> 3.1"
 
